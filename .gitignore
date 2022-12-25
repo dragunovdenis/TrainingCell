@@ -48,3 +48,10 @@ Thumbs.db
 *.mov
 *.wmv
 
+TCMonitor/.vs/
+TCMonitor/Debug/
+TCMonitor/TCMonitor/Debug/
+TCMonitor/TCMonitor/x64/
+TCMonitor/x64/Debug/TCMonitor.exe.metagen
+TCMonitor/TCMonitor/Release/
+TCMonitor/x64/
