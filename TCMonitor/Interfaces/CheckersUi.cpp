@@ -160,6 +160,8 @@ namespace Interfaces
 	void CheckersUi::draw_state(const Checkers::State& state,
 		const TrainingCell::Checkers::Move& move_to_articulate, Graphics^ gr)
 	{
+		const auto size_correction_rate = static_cast<int>(5.0 / 50 * _fieldSize);
+
 		for (auto item_id = 0ull; item_id < state.size(); item_id++)
 		{
 			const auto piece = state[item_id];
@@ -174,20 +176,20 @@ namespace Interfaces
 
 			if (Checkers::Utils::is_alive(piece))
 			{
-				field_rectangle.Inflate(-5, -5);
+				field_rectangle.Inflate(-size_correction_rate, - size_correction_rate);
 				gr->FillEllipse(Checkers::Utils::is_allay_piece(piece) ? Brushes::WhiteSmoke : Brushes::Black, field_rectangle);
 
 				gr->DrawEllipse(gcnew Pen(Color::BlueViolet, 3), field_rectangle);
 
-				field_rectangle.Inflate(-10, -10);
+				field_rectangle.Inflate(- 2 * size_correction_rate, - 2 * size_correction_rate);
 				gr->FillEllipse(Checkers::Utils::is_king(piece) ? Brushes::Red : Brushes::Green, field_rectangle);
 			} else if (Checkers::Utils::is_dead(piece))
 			{
-				field_rectangle.Inflate(-10, -10);
+				field_rectangle.Inflate(-2 * size_correction_rate, -2 * size_correction_rate);
 				gr->FillEllipse(Brushes::Gray, field_rectangle);
 			} else if (Checkers::Utils::is_trace_marker(piece))
 			{
-				field_rectangle.Inflate(-10, -10);
+				field_rectangle.Inflate(-2 * size_correction_rate, -2 * size_correction_rate);
 				gr->FillEllipse(Brushes::Yellow, field_rectangle);
 			}
 		}
