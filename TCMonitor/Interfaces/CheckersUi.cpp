@@ -121,17 +121,21 @@ namespace Interfaces
 		if (_current_move_id >= 0)
 		{
 			auto state_preview = state();
-			state_preview.make_move(moves()[_current_move_id], false, true);
+			auto move = moves()[_current_move_id];
+			state_preview.make_move(move, false, true);
 
 			if (_inverted)
-				state_preview = state_preview.invert();
+			{
+				state_preview = state_preview.get_inverted();
+				move.invert();
+			}
 
-			DrawState(state_preview, gr);
+			draw_state(state_preview, move, gr);
 		}
 		else
 		{
-			const auto state_to_draw = _inverted ? state().invert() : state();
-			DrawState(state_to_draw, gr);
+			const auto state_to_draw = _inverted ? state().get_inverted() : state();
+			draw_state(state_to_draw, Checkers::Move(), gr);
 		}
 
 		delete gr;
@@ -140,40 +144,67 @@ namespace Interfaces
 	/// <summary>
 	///	Splits the given "single value" onto x (column) and y (row) components
 	/// </summary>
-	Point SplitFieldId(const int fieldId)
+	Point split_field_id(const int fieldId)
 	{
 		return Point(fieldId % 8, fieldId / 8);
 	}
 
-	void CheckersUi::DrawState(const Checkers::State& state, Graphics^ gr)
+	/// <summary>
+	///	Returns center point of the given rectangle
+	/// </summary>
+	Point calc_center(Rectangle rec)
 	{
-		for (auto itemId = 0ull; itemId < state.size(); itemId++)
+		return Point( rec.X + rec.Width / 2, rec.Y + rec.Height / 2 );
+	}
+
+	void CheckersUi::draw_state(const Checkers::State& state,
+		const TrainingCell::Checkers::Move& move_to_articulate, Graphics^ gr)
+	{
+		for (auto item_id = 0ull; item_id < state.size(); item_id++)
 		{
-			const auto piece = state[itemId];
+			const auto piece = state[item_id];
 			if (piece == Checkers::Piece::Space)
 				continue;
 
-			const auto fieldCoords = Checkers::State::plain_id_to_piece_position(itemId);
+			const auto field_coords = Checkers::State::plain_id_to_piece_position(item_id);
 
-			auto fieldRectangle = GetFieldRectangle(
-				static_cast<int>(fieldCoords.col), 
-				static_cast<int>(fieldCoords.row));
+			auto field_rectangle = GetFieldRectangle(
+				static_cast<int>(field_coords.col), 
+				static_cast<int>(field_coords.row));
 
 			if (Checkers::Utils::is_alive(piece))
 			{
-				fieldRectangle.Inflate(-5, -5);
-				gr->FillEllipse(Checkers::Utils::is_allay_piece(piece) ? Brushes::WhiteSmoke : Brushes::Black, fieldRectangle);
+				field_rectangle.Inflate(-5, -5);
+				gr->FillEllipse(Checkers::Utils::is_allay_piece(piece) ? Brushes::WhiteSmoke : Brushes::Black, field_rectangle);
 
-				fieldRectangle.Inflate(-10, -10);
-				gr->FillEllipse(Checkers::Utils::is_king(piece) ? Brushes::Red : Brushes::Green, fieldRectangle);
+				gr->DrawEllipse(gcnew Pen(Color::BlueViolet, 3), field_rectangle);
+
+				field_rectangle.Inflate(-10, -10);
+				gr->FillEllipse(Checkers::Utils::is_king(piece) ? Brushes::Red : Brushes::Green, field_rectangle);
 			} else if (Checkers::Utils::is_dead(piece))
 			{
-				fieldRectangle.Inflate(-10, -10);
-				gr->FillEllipse(Brushes::Gray, fieldRectangle);
+				field_rectangle.Inflate(-10, -10);
+				gr->FillEllipse(Brushes::Gray, field_rectangle);
 			} else if (Checkers::Utils::is_trace_marker(piece))
 			{
-				fieldRectangle.Inflate(-10, -10);
-				gr->FillEllipse(Brushes::Yellow, fieldRectangle);
+				field_rectangle.Inflate(-10, -10);
+				gr->FillEllipse(Brushes::Yellow, field_rectangle);
+			}
+		}
+
+		if (move_to_articulate.is_valid())
+		{
+			for (const auto& sub_move : move_to_articulate.sub_moves)
+			{
+				const auto field_rectangle_start = GetFieldRectangle(
+					static_cast<int>(sub_move.start.col),
+					static_cast<int>(sub_move.start.row));
+				
+				const auto field_rectangle_end = GetFieldRectangle(
+					static_cast<int>(sub_move.end.col),
+					static_cast<int>(sub_move.end.row));
+
+				gr->DrawLine(gcnew Pen(Color::Black, 5), calc_center(field_rectangle_start), calc_center(field_rectangle_end));
 			}
 		}
 	}
@@ -215,7 +246,6 @@ namespace Interfaces
 			return;
 
 		_current_move_id = (_current_move_id + 1) % m.size();
-
 		Draw();
 	}
 
@@ -226,11 +256,7 @@ namespace Interfaces
 
 		_inverted =! _inverted;
 		dispose_moves();
-
-		state() = state().invert();
-
+		state().invert();
 		Draw();
 	}
-
-
 }

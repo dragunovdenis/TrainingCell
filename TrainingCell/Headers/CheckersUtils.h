@@ -100,6 +100,16 @@ namespace TrainingCell::Checkers
 		///	Returns "true" if the move passes validation checks
 		/// </summary>
 		[[nodiscard]] bool is_valid() const;
+
+		/// <summary>
+		///	"Inverts" the sub-move, i.e. aligns the sub-move with "inverted" state
+		/// </summary>
+		void invert();
+
+		/// <summary>
+		///	Returns "inverted" sub-move
+		/// </summary>
+		[[nodiscard]] SubMove get_inverted() const;
 	};
 
 	/// <summary>
@@ -132,6 +142,16 @@ namespace TrainingCell::Checkers
 		///	Constructs "move" from a single "sub-move"
 		/// </summary>
 		Move(const SubMove& sub_move);
+
+		/// <summary>
+		///	"Inverts" the move, i.e. aligns the sub-move with "inverted" state
+		/// </summary>
+		void invert();
+
+		/// <summary>
+		///	Returns "inverted" move
+		/// </summary>
+		[[nodiscard]] Move get_inverted() const;
 	};
 
 	constexpr int BoardRows = 8;
@@ -196,7 +216,12 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
 		/// </summary>
-		State invert() const;
+		[[nodiscard]] State get_inverted() const;
+
+		/// <summary>
+		///	"Inverts" the state
+		/// </summary>
+		void invert();
 	};
 
 	/// <summary>
@@ -257,6 +282,12 @@ namespace TrainingCell::Checkers
 		///	Returns "anti"-piece for the given one
 		/// </summary>
 		static Piece get_anti_piece(const Piece& piece);
+
+		/// <summary>
+		///	Returns the "inverted" position with respect to the given one
+		///	In the other words, this operation aligns the given position with the "inverted" state (see, State::invert())
+		/// </summary>
+		static PiecePosition invert(const PiecePosition& pos);
 
 		/// <summary>
 		///	Returns collection of all the possible non-capturing moves starting from the given position along the given diagonal

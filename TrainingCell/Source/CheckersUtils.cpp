@@ -72,6 +72,20 @@ namespace TrainingCell::Checkers
 			(!capture.is_valid() || start.is_same_diagonal(capture) && end.is_same_diagonal(capture));
 	}
 
+	void SubMove::invert()
+	{
+		start = Utils::invert(start);
+		end = Utils::invert(end);
+		capture = Utils::invert(capture);
+	}
+
+	SubMove SubMove::get_inverted() const
+	{
+		auto result = *this;
+		result.invert();
+		return result;
+	}
+
 	bool Move::is_valid() const
 	{
 		if (sub_moves.empty() || std::ranges::any_of(sub_moves, [](const auto& x) { return !x.is_valid(); }))
@@ -105,6 +119,22 @@ namespace TrainingCell::Checkers
 	Move::Move(const SubMove& sub_move)
 	{
 		sub_moves.push_back(sub_move);
+	}
+
+	void Move::invert()
+	{
+		for (auto& sub_move : sub_moves)
+			sub_move.invert();
+	}
+
+	/// <summary>
+	///	Returns "inverted" move
+	/// </summary>
+	Move Move::get_inverted() const
+	{
+		auto result = *this;
+		result.invert();
+		return result;
 	}
 
 	void State::remove_captured_pieces()
@@ -163,15 +193,22 @@ namespace TrainingCell::Checkers
 		return position.row * FieldsInRow + temp / 2;
 	}
 
-	State State::invert() const
+	void State::invert()
+	{
+		const auto sz = size();
+		const auto half_size = sz / 2;
+		for (auto field_id = 0ull; field_id < half_size; field_id++)
+		{
+			const auto temp = (*this)[field_id];
+			(*this)[field_id] = Utils::get_anti_piece((*this)[sz - 1 - field_id]);
+			(*this)[sz - 1 - field_id] = Utils::get_anti_piece(temp);
+		}
+	}
+
+	State State::get_inverted() const
 	{
 		auto result = *this;
-
-		std::ranges::reverse(result);
-
-		for (auto field_id = 0ull; field_id < result.size(); field_id++)
-			result[field_id] = Utils::get_anti_piece(result[field_id]);
-
+		result.invert();
 		return result;
 	}
 
@@ -277,6 +314,11 @@ namespace TrainingCell::Checkers
 	Piece Utils::get_anti_piece(const Piece& piece)
 	{
 		return static_cast<Piece>(-static_cast<int>(piece));
+	}
+
+	PiecePosition Utils::invert(const PiecePosition& pos)
+	{
+		return PiecePosition{ BoardRows - 1 - pos.row,  BoardColumns - 1 - pos.col };
 	}
 
 	std::vector<SubMove> Utils::get_capturing_moves(const State& current_state, const PiecePosition& pos,

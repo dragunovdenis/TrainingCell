@@ -1,6 +1,4 @@
 #pragma once
-#include <exception>
-#include <memory>
 #include <vector>
 #include "../../TrainingCell/Headers/CheckersUtils.h"
 
@@ -87,7 +85,8 @@ namespace Interfaces
 		///	Each item takes value from {-2, -1, 0, 1, 2}, representing "king piece" (+/-2), "regular piece" (+/-1),
 		///	"empty field" (0)
 		/// </summary>
-		void DrawState(const TrainingCell::Checkers::State& state, System::Drawing::Graphics^ gr);
+		void draw_state(const TrainingCell::Checkers::State& state,
+			const TrainingCell::Checkers::Move& move_to_articulate, System::Drawing::Graphics^ gr);
 
 		/// <summary>
 		///	Returns collection of rectangles that correspond to black or white fields of the checkers board
