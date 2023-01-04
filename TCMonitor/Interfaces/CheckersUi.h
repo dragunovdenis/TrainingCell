@@ -32,6 +32,10 @@ namespace Interfaces
 		/// </summary>
 		int _current_move_id = -1;
 
+		int _whiteWonCounter = 0;
+
+		int _blackWonCounter = 0;
+
 		/// <summary>
 		///	Dereferences state pointer
 		/// </summary>
@@ -128,12 +132,33 @@ namespace Interfaces
 
 		/// <summary>
 		///	Callback method for interaction with UI
+		///	Return "false" if there is no action to do, otherwise returns true
 		/// </summary>
-		void NextActionCallBack();
+		bool NextActionCallBack();
 
 		/// <summary>
 		///	Callback method for interaction with UI
 		/// </summary>
 		void MakeMoveCallBack();
+
+		/// <summary>
+		///	Makes a random move out of the collection of available ones and returns true if the collection is not empty
+		/// </summary>
+		bool MakeRandomMoveCallBack();
+
+		/// <summary>
+		///	Resets game from the beginning
+		/// </summary>
+		void ResetCallBack();
+
+		/// <summary>
+		///	Returns "won counter" for the "white"
+		/// </summary>
+		int GetWhiteWonCounter();
+
+		/// <summary>
+		///	Returns "won counter" for the "black"
+		/// </summary>
+		int GetBlackWonCounter();
 	};
 }

@@ -1,6 +1,7 @@
 #include "CheckersUi.h"
 #include <vector>
 #include <algorithm>
+#include <random>
 
 namespace Interfaces
 {
@@ -160,7 +161,7 @@ namespace Interfaces
 	void CheckersUi::draw_state(const Checkers::State& state,
 		const TrainingCell::Checkers::Move& move_to_articulate, Graphics^ gr)
 	{
-		const auto size_correction_rate = static_cast<int>(5.0 / 50 * _fieldSize);
+		const auto size_correction_rate = static_cast<int>(0.1 * _fieldSize);
 
 		for (auto item_id = 0ull; item_id < state.size(); item_id++)
 		{
@@ -240,15 +241,17 @@ namespace Interfaces
 		Draw();
 	}
 
-	void CheckersUi::NextActionCallBack()
+	bool CheckersUi::NextActionCallBack()
 	{
 		const auto& m = moves();
 
 		if (_current_move_id < 0)
-			return;
+			return false;
 
 		_current_move_id = (_current_move_id + 1) % m.size();
 		Draw();
+
+		return true;
 	}
 
 	void CheckersUi::MakeMoveCallBack()
@@ -260,5 +263,46 @@ namespace Interfaces
 		dispose_moves();
 		state().invert();
 		Draw();
+	}
+
+	bool CheckersUi::MakeRandomMoveCallBack()
+	{
+		const auto& m = moves();
+
+		if (m.empty())
+		{
+			if (_inverted)
+				_whiteWonCounter++;
+			else
+				_blackWonCounter++;
+
+			return false;
+		}
+
+		std::random_device rd;
+		const std::uniform_int_distribution dist(0, static_cast<int>(m.size() - 1));
+
+		_current_move_id = dist(rd);
+
+		MakeMoveCallBack();
+		return true;
+	}
+
+	void CheckersUi::ResetCallBack()
+	{
+		dispose_moves();
+		state() = Checkers::State::set_start_state();
+		_inverted = false;
+		Draw();
+	}
+
+	int CheckersUi::GetWhiteWonCounter()
+	{
+		return _whiteWonCounter;
+	}
+
+	int CheckersUi::GetBlackWonCounter()
+	{
+		return _blackWonCounter;
 	}
 }

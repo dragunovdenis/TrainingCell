@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 #include "Interfaces/CheckersUi.h"
 
 namespace TCMonotor {
@@ -42,6 +44,14 @@ namespace TCMonotor {
 	private: System::Windows::Forms::Panel^ infoPanel;
 	private: System::Windows::Forms::Button^ moveButton;
 	private: System::Windows::Forms::Button^ nextActionButton;
+	private: System::Windows::Forms::Button^ randomMoveButton;
+	private: System::Windows::Forms::Button^ resetButton;
+	private: System::Windows::Forms::Button^ playButton;
+	private: System::Windows::Forms::Label^ whiteScoreLabel;
+
+	private: System::Windows::Forms::Label^ movesCountLabel;
+	private: System::Windows::Forms::Label^ blackScoreLabel;
+
 	protected:
 
 	private:
@@ -55,6 +65,12 @@ namespace TCMonotor {
 		{
 			this->_mainPanel = (gcnew System::Windows::Forms::Panel());
 			this->infoPanel = (gcnew System::Windows::Forms::Panel());
+			this->blackScoreLabel = (gcnew System::Windows::Forms::Label());
+			this->whiteScoreLabel = (gcnew System::Windows::Forms::Label());
+			this->movesCountLabel = (gcnew System::Windows::Forms::Label());
+			this->playButton = (gcnew System::Windows::Forms::Button());
+			this->resetButton = (gcnew System::Windows::Forms::Button());
+			this->randomMoveButton = (gcnew System::Windows::Forms::Button());
 			this->moveButton = (gcnew System::Windows::Forms::Button());
 			this->nextActionButton = (gcnew System::Windows::Forms::Button());
 			this->infoPanel->SuspendLayout();
@@ -73,6 +89,12 @@ namespace TCMonotor {
 			// infoPanel
 			// 
 			this->infoPanel->BackColor = System::Drawing::Color::SlateGray;
+			this->infoPanel->Controls->Add(this->blackScoreLabel);
+			this->infoPanel->Controls->Add(this->whiteScoreLabel);
+			this->infoPanel->Controls->Add(this->movesCountLabel);
+			this->infoPanel->Controls->Add(this->playButton);
+			this->infoPanel->Controls->Add(this->resetButton);
+			this->infoPanel->Controls->Add(this->randomMoveButton);
 			this->infoPanel->Controls->Add(this->moveButton);
 			this->infoPanel->Controls->Add(this->nextActionButton);
 			this->infoPanel->Dock = System::Windows::Forms::DockStyle::Right;
@@ -81,11 +103,68 @@ namespace TCMonotor {
 			this->infoPanel->Size = System::Drawing::Size(125, 614);
 			this->infoPanel->TabIndex = 1;
 			// 
+			// blackScoreLabel
+			// 
+			this->blackScoreLabel->AutoSize = true;
+			this->blackScoreLabel->Location = System::Drawing::Point(5, 588);
+			this->blackScoreLabel->Name = L"blackScoreLabel";
+			this->blackScoreLabel->Size = System::Drawing::Size(87, 17);
+			this->blackScoreLabel->TabIndex = 7;
+			this->blackScoreLabel->Text = L"Black Score:";
+			// 
+			// whiteScoreLabel
+			// 
+			this->whiteScoreLabel->AutoSize = true;
+			this->whiteScoreLabel->Location = System::Drawing::Point(5, 554);
+			this->whiteScoreLabel->Name = L"whiteScoreLabel";
+			this->whiteScoreLabel->Size = System::Drawing::Size(89, 17);
+			this->whiteScoreLabel->TabIndex = 6;
+			this->whiteScoreLabel->Text = L"White Score:";
+			// 
+			// movesCountLabel
+			// 
+			this->movesCountLabel->AutoSize = true;
+			this->movesCountLabel->Location = System::Drawing::Point(5, 520);
+			this->movesCountLabel->Name = L"movesCountLabel";
+			this->movesCountLabel->Size = System::Drawing::Size(93, 17);
+			this->movesCountLabel->TabIndex = 5;
+			this->movesCountLabel->Text = L"Total Moves: ";
+			// 
+			// playButton
+			// 
+			this->playButton->Location = System::Drawing::Point(3, 167);
+			this->playButton->Name = L"playButton";
+			this->playButton->Size = System::Drawing::Size(120, 35);
+			this->playButton->TabIndex = 4;
+			this->playButton->Text = L"Play";
+			this->playButton->UseVisualStyleBackColor = true;
+			this->playButton->Click += gcnew System::EventHandler(this, &TCMonitorForm::playButton_Click);
+			// 
+			// resetButton
+			// 
+			this->resetButton->Location = System::Drawing::Point(3, 126);
+			this->resetButton->Name = L"resetButton";
+			this->resetButton->Size = System::Drawing::Size(120, 35);
+			this->resetButton->TabIndex = 3;
+			this->resetButton->Text = L"Reset";
+			this->resetButton->UseVisualStyleBackColor = true;
+			this->resetButton->Click += gcnew System::EventHandler(this, &TCMonitorForm::resetButton_Click);
+			// 
+			// randomMoveButton
+			// 
+			this->randomMoveButton->Location = System::Drawing::Point(3, 85);
+			this->randomMoveButton->Name = L"randomMoveButton";
+			this->randomMoveButton->Size = System::Drawing::Size(120, 35);
+			this->randomMoveButton->TabIndex = 2;
+			this->randomMoveButton->Text = L"Random move";
+			this->randomMoveButton->UseVisualStyleBackColor = true;
+			this->randomMoveButton->Click += gcnew System::EventHandler(this, &TCMonitorForm::randomMoveButton_Click);
+			// 
 			// moveButton
 			// 
 			this->moveButton->Location = System::Drawing::Point(3, 44);
 			this->moveButton->Name = L"moveButton";
-			this->moveButton->Size = System::Drawing::Size(119, 40);
+			this->moveButton->Size = System::Drawing::Size(120, 35);
 			this->moveButton->TabIndex = 1;
 			this->moveButton->Text = L"Move";
 			this->moveButton->UseVisualStyleBackColor = true;
@@ -95,7 +174,7 @@ namespace TCMonotor {
 			// 
 			this->nextActionButton->Location = System::Drawing::Point(3, 3);
 			this->nextActionButton->Name = L"nextActionButton";
-			this->nextActionButton->Size = System::Drawing::Size(119, 35);
+			this->nextActionButton->Size = System::Drawing::Size(120, 35);
 			this->nextActionButton->TabIndex = 0;
 			this->nextActionButton->Text = L"Preview next";
 			this->nextActionButton->UseVisualStyleBackColor = true;
@@ -111,6 +190,7 @@ namespace TCMonotor {
 			this->Name = L"TCMonitorForm";
 			this->Text = L"TCMonitor";
 			this->infoPanel->ResumeLayout(false);
+			this->infoPanel->PerformLayout();
 			this->ResumeLayout(false);
 
 		}
@@ -120,6 +200,20 @@ namespace TCMonotor {
 	}
 	private: System::Void moveButton_Click(System::Object^ sender, System::EventArgs^ e) {
 		_checkers->MakeMoveCallBack();
+	}
+	private: System::Void randomMoveButton_Click(System::Object^ sender, System::EventArgs^ e) {
+		_checkers->MakeRandomMoveCallBack();
+	}
+	private: System::Void resetButton_Click(System::Object^ sender, System::EventArgs^ e) {
+		_checkers->ResetCallBack();
+	}
+	private: System::Void playButton_Click(System::Object^ sender, System::EventArgs^ e) {
+		_checkers->ResetCallBack();
+		int moves_count = 0;
+		while (_checkers->MakeRandomMoveCallBack()) { moves_count++; }
+		this->movesCountLabel->Text = gcnew String("Total Moves: ") + moves_count;
+		this->whiteScoreLabel->Text = gcnew String("White: ") + _checkers->GetWhiteWonCounter();
+		this->blackScoreLabel->Text = gcnew String("Black: ") + _checkers->GetBlackWonCounter();
 	}
 };
 }
