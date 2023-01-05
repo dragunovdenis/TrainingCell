@@ -7,10 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrainingCell", "TrainingCel
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TCMonitor", "TCMonitor\TCMonitor.vcxproj", "{B991A346-3274-4210-814D-CAB221A19169}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeepLearning", "DeepLearning\DeepLearning\DeepLearning.vcxproj", "{50160B3B-7FF2-43C0-B650-54332EF4FA75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		IntelCompiler2022|x64 = IntelCompiler2022|x64
+		IntelCompiler2022|x86 = IntelCompiler2022|x86
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
@@ -19,6 +23,10 @@ Global
 		{83C92853-27D9-411E-B057-637DE58492C2}.Debug|x64.Build.0 = Debug|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.Debug|x86.ActiveCfg = Debug|Win32
 		{83C92853-27D9-411E-B057-637DE58492C2}.Debug|x86.Build.0 = Debug|Win32
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022|x64.ActiveCfg = Release|x64
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022|x64.Build.0 = Release|x64
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022|x86.ActiveCfg = Release|Win32
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022|x86.Build.0 = Release|Win32
 		{83C92853-27D9-411E-B057-637DE58492C2}.Release|x64.ActiveCfg = Release|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.Release|x64.Build.0 = Release|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.Release|x86.ActiveCfg = Release|Win32
@@ -27,10 +35,23 @@ Global
 		{B991A346-3274-4210-814D-CAB221A19169}.Debug|x64.Build.0 = Debug|x64
 		{B991A346-3274-4210-814D-CAB221A19169}.Debug|x86.ActiveCfg = Debug|Win32
 		{B991A346-3274-4210-814D-CAB221A19169}.Debug|x86.Build.0 = Debug|Win32
+		{B991A346-3274-4210-814D-CAB221A19169}.IntelCompiler2022|x64.ActiveCfg = Release|x64
+		{B991A346-3274-4210-814D-CAB221A19169}.IntelCompiler2022|x64.Build.0 = Release|x64
+		{B991A346-3274-4210-814D-CAB221A19169}.IntelCompiler2022|x86.ActiveCfg = Release|Win32
+		{B991A346-3274-4210-814D-CAB221A19169}.IntelCompiler2022|x86.Build.0 = Release|Win32
 		{B991A346-3274-4210-814D-CAB221A19169}.Release|x64.ActiveCfg = Release|x64
 		{B991A346-3274-4210-814D-CAB221A19169}.Release|x64.Build.0 = Release|x64
 		{B991A346-3274-4210-814D-CAB221A19169}.Release|x86.ActiveCfg = Release|Win32
 		{B991A346-3274-4210-814D-CAB221A19169}.Release|x86.Build.0 = Release|Win32
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.Debug|x64.ActiveCfg = Debug|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.Debug|x64.Build.0 = Debug|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.Debug|x86.ActiveCfg = Debug|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.IntelCompiler2022|x64.ActiveCfg = IntelCompiler2022|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.IntelCompiler2022|x64.Build.0 = IntelCompiler2022|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.IntelCompiler2022|x86.ActiveCfg = IntelCompiler2022|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.Release|x64.ActiveCfg = Release|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.Release|x64.Build.0 = Release|x64
+		{50160B3B-7FF2-43C0-B650-54332EF4FA75}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
