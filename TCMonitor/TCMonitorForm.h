@@ -207,13 +207,34 @@ namespace TCMonotor {
 	private: System::Void resetButton_Click(System::Object^ sender, System::EventArgs^ e) {
 		_checkers->ResetCallBack();
 	}
-	private: System::Void playButton_Click(System::Object^ sender, System::EventArgs^ e) {
-		_checkers->ResetCallBack();
-		int moves_count = 0;
-		while (_checkers->MakeRandomMoveCallBack()) { moves_count++; }
-		this->movesCountLabel->Text = gcnew String("Total Moves: ") + moves_count;
+
+	private: System::Void UpdateInfo()
+	{
+		this->movesCountLabel->Text = gcnew String("Total Moves: ") + static_cast<int>(_checkers->GetWhiteWonCounter() + _checkers->GetBlackWonCounter());
 		this->whiteScoreLabel->Text = gcnew String("White: ") + _checkers->GetWhiteWonCounter();
 		this->blackScoreLabel->Text = gcnew String("Black: ") + _checkers->GetBlackWonCounter();
+	}
+
+	private: System::Void PlayMultiple()
+	{
+		for (auto i = 0; i < 4000; i++)
+		{
+			_checkers->ResetCallBack();
+			while (_checkers->MakeRandomMoveCallBack()) { }
+			Invoke(gcnew System::Action(this, &TCMonitorForm::UpdateInfo));
+		}
+	}
+
+	private: System::Void playButton_Click(System::Object^ sender, System::EventArgs^ e) {
+
+		Threading::ThreadStart^ playMethod = gcnew Threading::ThreadStart(this, &TCMonitorForm::PlayMultiple);
+		Threading::Thread^ playThread = gcnew Threading::Thread(playMethod);
+		playThread->Start();
+
+		//_checkers->ResetCallBack();
+		//int moves_count = 0;
+		//while (_checkers->MakeRandomMoveCallBack()) { moves_count++; }
+		//UpdateInfo()
 	}
 };
 }

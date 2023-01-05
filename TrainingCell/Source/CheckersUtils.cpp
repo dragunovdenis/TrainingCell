@@ -217,7 +217,8 @@ namespace TrainingCell::Checkers
 		if (!move.is_valid())
 			return false;
 
-		if (!Utils::is_allay_piece(get_piece(move.sub_moves[0].start)))
+		const auto piece = get_piece(move.sub_moves[0].start);
+		if (!Utils::is_allay_piece(piece))
 			return false;
 
 		for (auto subMoveId = 0ull; subMoveId < move.sub_moves.size(); subMoveId++)
@@ -230,12 +231,31 @@ namespace TrainingCell::Checkers
 			auto temp = move.sub_moves[subMoveId].start;
 			const auto end = move.sub_moves[subMoveId].end;
 
+			if (piece == Piece::Man)
+			{
+				if (capture.is_valid())
+				{
+					if (std::abs(temp.row - end.row) != 2 || std::abs(temp.col - end.col) != 2)
+						return false;
+				}
+				else
+				{
+					if (std::abs(temp.row - end.row) != 1 || std::abs(temp.col - end.col) != 1)
+						return false;
+				}
+			}
+
 			do
 			{
 				temp = temp.move(1, end);
 				const auto currentPiece = get_piece(temp);
-				if (currentPiece != Piece::Space && (!Utils::is_opponent_piece(currentPiece) ||
-					move.sub_moves[subMoveId].capture != temp))
+				//if it is an "opponent" piece then it must be the one captured
+				if (Utils::is_opponent_piece(currentPiece) && move.sub_moves[subMoveId].capture != temp ||
+					//if it is the "ally" piece then it must be the one that "moving", because, in principle,
+					//moving piece can cross its initial position during the move (even multiple times)
+					Utils::is_allay_piece(currentPiece) && temp != move.sub_moves[0].start ||
+					//we also assume that the "board" is free of "diagnostics stuff"
+					currentPiece != Piece::Space && !Utils::is_opponent_piece(currentPiece) && !Utils::is_allay_piece(currentPiece))
 					return false;
 			} while (temp != end || !temp.is_valid());
 
@@ -399,7 +419,9 @@ namespace TrainingCell::Checkers
 		if (!start_pos.is_valid())
 			throw std::exception("Invalid start position");
 
-		if (!is_allay_piece(current_state.get_piece(start_pos)))
+		const auto piece = current_state.get_piece(start_pos);
+
+		if (!is_allay_piece(piece))
 			throw std::exception("Invalid input data");
 
 		std::vector<Move> result{};
@@ -408,10 +430,24 @@ namespace TrainingCell::Checkers
 		{
 			for (const auto positive_direction : {false, true})
 			{
-				auto capturing_sub_moves = get_capturing_moves(current_state, start_pos, 	right_diagonal, positive_direction);
+				auto capturing_sub_moves = get_capturing_moves(current_state, start_pos, right_diagonal, positive_direction);
 
 				if (capturing_sub_moves.empty())
 					continue;
+
+				if (piece == Piece::Man)
+				{
+					if (capturing_sub_moves.size() != 1)
+						throw std::exception("Unexpected number of sub-moves for a Man piece in a single direction");
+
+					if (capturing_sub_moves[0].end.row == (BoardRows - 1))
+					{
+						//We reached the last row and became a King
+						//According to the rules, we must stop and let the opponent to make a move
+						result.emplace_back(capturing_sub_moves[0]);
+						continue;
+					}
+				}
 
 				for (const auto& sub_move : capturing_sub_moves)
 				{
