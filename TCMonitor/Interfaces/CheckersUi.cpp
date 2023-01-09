@@ -89,14 +89,14 @@ namespace Interfaces
 	/// <summary>
 	///	Returns rectangle that corresponds to the field with the given id
 	/// </summary>
-	Rectangle CheckersUi::GetFieldRectangle(const int fieldXId, const int fieldYId)
+	System::Drawing::Rectangle CheckersUi::GetFieldRectangle(const int fieldXId, const int fieldYId)
 	{
-		return Rectangle(_xStart + fieldXId * _fieldSize, _yStart + fieldYId * _fieldSize, _fieldSize, _fieldSize);
+		return System::Drawing::Rectangle(_xStart + fieldXId * _fieldSize, _yStart + fieldYId * _fieldSize, _fieldSize, _fieldSize);
 	}
 
-	array<Rectangle>^ CheckersUi::GetFields(const bool black)
+	array<System::Drawing::Rectangle>^ CheckersUi::GetFields(const bool black)
 	{
-		auto result = gcnew List<Rectangle>();
+		auto result = gcnew List<System::Drawing::Rectangle>();
 
 		_fieldSize = _boardSize / Checkers::BoardRows;
 
@@ -153,7 +153,7 @@ namespace Interfaces
 	/// <summary>
 	///	Returns center point of the given rectangle
 	/// </summary>
-	Point calc_center(Rectangle rec)
+	Point calc_center(System::Drawing::Rectangle rec)
 	{
 		return Point( rec.X + rec.Width / 2, rec.Y + rec.Height / 2 );
 	}
@@ -220,10 +220,10 @@ namespace Interfaces
 		return Point((x - _xStart) / _fieldSize, (y - _yStart) / _fieldSize);
 	}
 
-	Rectangle CheckersUi::GetSelectedField()
+	System::Drawing::Rectangle CheckersUi::GetSelectedField()
 	{
 		if (_selectedFieldId.X < 0 || _selectedFieldId.Y < 0)
-			return Rectangle(0, 0, 0, 0);//Empty rectangle
+			return System::Drawing::Rectangle(0, 0, 0, 0);//Empty rectangle
 
 		return GetFieldRectangle(_selectedFieldId.X, _selectedFieldId.Y);
 	}
@@ -242,7 +242,7 @@ namespace Interfaces
 	}
 
 	bool CheckersUi::NextActionCallBack()
-	{
+	{ 
 		const auto& m = moves();
 
 		if (_current_move_id < 0)

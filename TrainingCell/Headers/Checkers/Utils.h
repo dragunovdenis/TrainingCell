@@ -16,7 +16,48 @@ namespace TrainingCell::Checkers
 		Captured = 3,
 		AntiCaptured = -3,
 		TraceMarker = 4,
-		AntiTraceMarker = -4, };
+		AntiTraceMarker = -4,
+		MinValue = -4,
+		MaxValue = 4,
+	};
+
+	/// <summary>
+	///	Span of different integer values that Piece enumerable can take (must be in sync with the latter)
+	/// </summary>
+	constexpr int PieceValueSpan = static_cast<int>(Piece::MaxValue) - static_cast<int>(Piece::MinValue);
+
+	/// <summary>
+	///	Data structure to count number of pieces of different type in a state
+	/// </summary>
+	class StateScore
+	{
+		int _scores[PieceValueSpan]{};
+	public:
+
+		/// <summary>
+		///	Subscript operator (constant version)
+		/// </summary>
+		int operator [](const Piece& pc) const;
+
+		/// <summary>
+		///	Subscript operator (constant version)
+		/// </summary>
+		int& operator [](const Piece& pc);
+
+		/// <summary>Returns difference between the current and given scores</summary>
+		/// <param name="score_to_subtract">Score that should be subtracted from the current one</param>
+		StateScore diff(const StateScore& score_to_subtract) const;
+	};
+
+
+	/// <summary>
+	///	Representation of possible game statuses
+	/// </summary>
+	enum class GameResult : int {
+		Victory = 1,
+		Loss = -1,
+		Draw = 0,
+	};
 
 	/// <summary>
 	/// A data structure representing row and column occupied by a piece on the board
@@ -222,6 +263,11 @@ namespace TrainingCell::Checkers
 		///	"Inverts" the state
 		/// </summary>
 		void invert();
+
+		/// <summary>
+		///	Calculates score of the state
+		/// </summary>
+		[[nodiscard]] StateScore calc_score() const;
 	};
 
 	/// <summary>

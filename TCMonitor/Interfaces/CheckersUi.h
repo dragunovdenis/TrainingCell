@@ -1,14 +1,6 @@
 #pragma once
 #include <vector>
-#include "../../TrainingCell/Headers/CheckersUtils.h"
-
-namespace TrainingCell
-{
-	namespace Checkers
-	{
-		class State;
-	}
-}
+#include "../../TrainingCell/Headers/Checkers/Utils.h"
 
 namespace Interfaces
 {

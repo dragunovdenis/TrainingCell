@@ -13,15 +13,36 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Checkers">
+      <UniqueIdentifier>{e54f1b11-ce14-44df-84f1-3614a831cdac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Checkers">
+      <UniqueIdentifier>{753f16b3-380a-4bae-a7c2-a105d6c3e84a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\CheckersUtils.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Headers\Checkers\Agent.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\Utils.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\Board.h">
+      <Filter>Header Files\Checkers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\CheckersUtils.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Source\Checkers\Utils.cpp">
+      <Filter>Source Files\Checkers</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Checkers\Agent.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\Board.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

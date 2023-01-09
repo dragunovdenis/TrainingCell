@@ -1,8 +1,29 @@
-#include "../Headers/CheckersUtils.h"
+#include "../../Headers/Checkers/Utils.h"
 #include <algorithm>
 
 namespace TrainingCell::Checkers
 {
+	int StateScore::operator [](const Piece& pc) const
+	{
+		return _scores[static_cast<int>(pc) - static_cast<int>(Piece::MinValue)];
+	}
+
+	int& StateScore::operator [](const Piece& pc)
+	{
+		return _scores[static_cast<int>(pc) - static_cast<int>(Piece::MinValue)];
+	}
+
+	StateScore StateScore::diff(const StateScore& score_to_subtract) const
+	{
+		StateScore result{};
+
+		for (auto piece = Piece::MinValue; piece <= Piece::MaxValue; 
+			piece = static_cast<Piece>(static_cast<int>(piece) + 1))
+			result[piece] = (*this)[piece] - score_to_subtract[piece];
+
+		return result;
+	}
+
 	bool PiecePosition::is_valid() const
 	{
 		return col >= 0 && col < BoardColumns && row >= 0 && row < BoardRows && 
@@ -203,6 +224,17 @@ namespace TrainingCell::Checkers
 			(*this)[field_id] = Utils::get_anti_piece((*this)[sz - 1 - field_id]);
 			(*this)[sz - 1 - field_id] = Utils::get_anti_piece(temp);
 		}
+	}
+
+	StateScore State::calc_score() const
+	{
+		StateScore result{};
+		std::ranges::for_each(*this, [&result](const auto& piece)
+			{
+				++result[piece];
+			});
+
+		return result;
 	}
 
 	State State::get_inverted() const
