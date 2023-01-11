@@ -1,5 +1,6 @@
 #include "../../Headers/Checkers/Utils.h"
 #include <algorithm>
+#include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
 
 namespace TrainingCell::Checkers
 {
@@ -237,6 +238,19 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
+	DeepLearning::Tensor State::to_tensor() const
+	{
+		DeepLearning::Tensor result(1, 1, size(), false);
+		std::ranges::transform(*this, result.begin(), 
+			[](const auto& piece) { return static_cast<double>(piece); });
+		return result;
+	}
+
+	std::vector<Move> State::get_moves() const
+	{
+		return Utils::get_moves(*this);
+	}
+
 	State State::get_inverted() const
 	{
 		auto result = *this;
@@ -308,7 +322,7 @@ namespace TrainingCell::Checkers
 			const auto capturePos = move.sub_moves[subMoveId].capture;
 
 			if (capturePos.is_valid())
-				get_piece(capturePos) = remove_captured ? Piece::Space : Piece::Captured;
+				get_piece(capturePos) = remove_captured ? Piece::Space : Piece::AntiCaptured;
 		}
 
 		auto piece_to_move = get_piece(move.sub_moves[0].start);

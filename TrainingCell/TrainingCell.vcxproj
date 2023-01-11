@@ -31,6 +31,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DeepLearning\DeepLearning\DeepLearning.vcxproj">
+      <Project>{50160b3b-7ff2-43c0-b650-54332ef4fa75}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

@@ -1,12 +1,12 @@
 #include "../../Headers/Checkers/Agent.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
-#include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
+#include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 
 namespace TrainingCell::Checkers
 {
 	int RandomAgent::make_move(const State& current_state, const std::vector<Move>& moves)
 	{
-		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()));
+		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
 	}
 
 	void RandomAgent::game_over(const State& final_state, const GameResult& result)
@@ -14,18 +14,11 @@ namespace TrainingCell::Checkers
 		//Just do nothing because this agent can't improve its performance
 	}
 
-	DeepLearning::Tensor state_to_tensor(const State& state)
-	{
-		DeepLearning::Tensor result(state.size(), false);
-		std::ranges::transform(state, result.begin(), [](const auto& piece) { return static_cast<double>(piece); });
-		return result;
-	}
-
 	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result)
 	{
 		update_z();
-		const auto prev_state_with_move_value = _net.act(state_to_tensor(_prev_state_with_move))(0, 0, 0);
-		const auto reward = 100.0 * static_cast<int>(result);
+		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
+		const auto reward = static_cast<int>(result);
 		const auto delta = reward + prev_state_with_move_value;
 		_net.update(_z, _alpha * delta, 0.0);
 
@@ -42,17 +35,20 @@ namespace TrainingCell::Checkers
 		const auto final_score = final_state.calc_score();
 		const auto diff_score = final_score.diff(init_score);
 
-		return (diff_score[Piece::King] + diff_score[Piece::Man] + diff_score[Piece::AntiMan] + diff_score[Piece::AntiKing]) / 50.0;
+		return (2.0 * diff_score[Piece::King] +
+			diff_score[Piece::Man] +
+			diff_score[Piece::AntiMan] +
+			2.0 * diff_score[Piece::AntiKing]) / 50.0;
 	}
 
 	 void TdLambdaAgent::update_z()
 	{
 		if (_z.empty())
-			_z = _net.calc_gradient(state_to_tensor(_prev_state_with_move),
+			_z = _net.calc_gradient(_prev_state_with_move.to_tensor(),
 				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::IDENTITY);
 		else
 		{
-			auto gradients = _net.calc_gradient(state_to_tensor(_prev_state_with_move),
+			auto gradients = _net.calc_gradient(_prev_state_with_move.to_tensor(),
 				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::IDENTITY);
 			if (gradients.size() != _z.size())
 				throw std::exception("Incompatible data");
@@ -86,8 +82,8 @@ namespace TrainingCell::Checkers
 		auto current_state_with_move = current_state;
 		current_state_with_move.make_move(moves[move_to_take], true, false);
 
-		const auto current_state_with_move_value = _net.act(state_to_tensor(current_state_with_move))(0, 0, 0);
-		const auto prev_state_with_move_value = _net.act(state_to_tensor(_prev_state_with_move))(0, 0, 0);
+		const auto current_state_with_move_value = _net.act(current_state_with_move.to_tensor())(0, 0, 0);
+		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
 		const auto reward = calculate_reward(_prev_state, current_state);
 
 		const auto delta = reward + _gamma * current_state_with_move_value - prev_state_with_move_value;
@@ -102,6 +98,9 @@ namespace TrainingCell::Checkers
 
 	int TdLambdaAgent::pick_move_id(const State state, const std::vector<Move>& moves) const
 	{
+		if (moves.size() == 1)
+			return 0;
+
 		if (DeepLearning::Utils::get_random(0, 1.0) <= _epsilon)
 			//Exploration move
 			return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1);
@@ -114,11 +113,11 @@ namespace TrainingCell::Checkers
 		{
 			auto state_copy = state;
 			state_copy.make_move(moves[move_id], true, false);
-			const auto eval_result = _net.act(state_to_tensor(state_copy));
+			const auto eval_result = _net.act(state_copy.to_tensor())(0, 0, 0);
 
-			if (eval_result(0, 0, 0) > best_value)
+			if (eval_result > best_value)
 			{
-				best_value = eval_result(0, 0, 0);
+				best_value = eval_result;
 				best_move_id = static_cast<int>(move_id);
 			}
 		}
@@ -127,10 +126,15 @@ namespace TrainingCell::Checkers
 	}
 
 	TdLambdaAgent::TdLambdaAgent(
-		const std::vector<std::size_t>& layer_dimensions,
-		const std::vector<DeepLearning::ActivationFunctionId>& activ_func_ids, const double epsilon) :
-	_new_game(true), _epsilon(epsilon)
+		const std::vector<std::size_t>& layer_dimensions, const double epsilon) :
+		_new_game(true), _epsilon(epsilon)
 	{
+		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
+			throw std::exception("Invalid Net configuration");
+
+		std::vector activ_func_ids(layer_dimensions.size() - 1, DeepLearning::ActivationFunctionId::RELU);
+		activ_func_ids.rbegin()[0] = DeepLearning::ActivationFunctionId::TANH;
+
 		_net = DeepLearning::Net(layer_dimensions, activ_func_ids);
 	}
 

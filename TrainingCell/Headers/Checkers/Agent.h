@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Utils.h"
 #include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 
@@ -60,7 +59,7 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		bool _new_game{};
 
-		std::vector<typename DeepLearning::ALayer<DeepLearning::CpuDC>::LayerGradient> _z{};
+		std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _z{};
 
 		/// <summary>
 		///	Copy of the previous state, that is either the initial state of the game or a result of latest opponent move
@@ -104,11 +103,9 @@ namespace TrainingCell::Checkers
 	public:
 		/// <summary>Constructor</summary>
 		/// <param name="layer_dimensions">Dimensions of the fully connected layers that constitute the underlying neural network</param>
-		/// <param name="activ_func_ids">Identifiers of the activation functions of the neural layers</param>
 		/// <param name="epsilon">Parameter defining the probability of the agent taking a
 		/// random action instead of the one having highest predicted value </param>
-		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions,
-			const std::vector<DeepLearning::ActivationFunctionId>& activ_func_ids, const double epsilon);
+		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions, const double epsilon);
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
@@ -122,5 +119,4 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		void game_over(const State& final_state, const GameResult& result) override;
 	};
-	
 }

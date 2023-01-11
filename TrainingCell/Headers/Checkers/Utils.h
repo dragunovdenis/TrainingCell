@@ -2,6 +2,11 @@
 #include <array>
 #include <vector>
 
+namespace DeepLearning
+{
+	class Tensor;
+}
+
 namespace TrainingCell::Checkers
 {
 	/// <summary>
@@ -24,7 +29,7 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	///	Span of different integer values that Piece enumerable can take (must be in sync with the latter)
 	/// </summary>
-	constexpr int PieceValueSpan = static_cast<int>(Piece::MaxValue) - static_cast<int>(Piece::MinValue);
+	constexpr int PieceValueSpan = static_cast<int>(Piece::MaxValue) - static_cast<int>(Piece::MinValue) + 1;
 
 	/// <summary>
 	///	Data structure to count number of pieces of different type in a state
@@ -268,6 +273,16 @@ namespace TrainingCell::Checkers
 		///	Calculates score of the state
 		/// </summary>
 		[[nodiscard]] StateScore calc_score() const;
+
+		/// <summary>
+		///	Converts the current state to tensor representation
+		/// </summary>
+		DeepLearning::Tensor to_tensor() const;
+
+		/// <summary>
+		///	Returns collection of available moves for the current state
+		/// </summary>
+		std::vector<Move> get_moves() const;
 	};
 
 	/// <summary>
