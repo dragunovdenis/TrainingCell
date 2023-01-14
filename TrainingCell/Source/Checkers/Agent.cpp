@@ -19,8 +19,8 @@ namespace TrainingCell::Checkers
 		update_z();
 		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
 		const auto reward = static_cast<int>(result);
-		const auto delta = reward + prev_state_with_move_value;
-		_net.update(_z, _alpha * delta, 0.0);
+		const auto delta = reward - prev_state_with_move_value;
+		_net.update(_z, -_alpha * delta, 0.0);
 
 		_new_game = true;
 		_z.clear();
@@ -36,20 +36,20 @@ namespace TrainingCell::Checkers
 		const auto diff_score = final_score.diff(init_score);
 
 		return (2.0 * diff_score[Piece::King] +
-			diff_score[Piece::Man] +
-			diff_score[Piece::AntiMan] +
+			diff_score[Piece::Man] -
+			diff_score[Piece::AntiMan] -
 			2.0 * diff_score[Piece::AntiKing]) / 50.0;
 	}
 
-	 void TdLambdaAgent::update_z()
+	void TdLambdaAgent::update_z()
 	{
 		if (_z.empty())
 			_z = _net.calc_gradient(_prev_state_with_move.to_tensor(),
-				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::IDENTITY);
+				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
 		else
 		{
 			auto gradients = _net.calc_gradient(_prev_state_with_move.to_tensor(),
-				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::IDENTITY);
+				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
 			if (gradients.size() != _z.size())
 				throw std::exception("Incompatible data");
 
@@ -88,7 +88,7 @@ namespace TrainingCell::Checkers
 
 		const auto delta = reward + _gamma * current_state_with_move_value - prev_state_with_move_value;
 
-		_net.update(_z, _alpha * delta, 0.0);
+		_net.update(_z, -_alpha * delta, 0.0);
 
 		_prev_state_with_move = current_state_with_move;
 		_prev_state = current_state;
@@ -133,7 +133,7 @@ namespace TrainingCell::Checkers
 			throw std::exception("Invalid Net configuration");
 
 		std::vector activ_func_ids(layer_dimensions.size() - 1, DeepLearning::ActivationFunctionId::RELU);
-		activ_func_ids.rbegin()[0] = DeepLearning::ActivationFunctionId::TANH;
+		activ_func_ids.rbegin()[0] = DeepLearning::ActivationFunctionId::LINEAR;
 
 		_net = DeepLearning::Net(layer_dimensions, activ_func_ids);
 	}

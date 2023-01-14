@@ -5,7 +5,7 @@ void RunCheckersTraining(int epochs, TrainingCell::Checkers::PublishCheckersStat
 {
 	TrainingCell::Checkers::RandomAgent agent0{};
 	//TrainingCell::Checkers::RandomAgent agent1{};
-	TrainingCell::Checkers::TdLambdaAgent agent1({ 32, 64, 128, 128, 1 }, 0.1);
+	TrainingCell::Checkers::TdLambdaAgent agent1({ 32, 64, 32, 16, 8, 1 }, 0.1);
 	TrainingCell::Checkers::Board board(&agent0, &agent1);
 
 	board.play(epochs, 200, publishStateCallBack, publishStatsCallBack);

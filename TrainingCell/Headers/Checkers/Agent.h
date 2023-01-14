@@ -79,7 +79,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	The "Lambda" parameter of TD("lambda") approach
 		/// </summary>
-		double _lambda = 0.8;
+		double _lambda = 0.0;
 
 		/// <summary>
 		///	Reward discount parameter
@@ -89,7 +89,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	Learning rate
 		/// </summary>
-		double _alpha = 0.1;
+		double _alpha = 0.01;
 
 		/// <summary>
 		///	Returns id of a move to take

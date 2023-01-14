@@ -65,8 +65,8 @@ namespace TrainingCell::Checkers
 				else
 					blacksWin++;
 
-				agent_to_move()->game_over(_state, GameResult::Victory);
-				agent_to_wait()->game_over(_state, GameResult::Loss);
+				agent_to_move()->game_over(_state, GameResult::Loss);
+				agent_to_wait()->game_over(_state, GameResult::Victory);
 
 			} else //draw case
 			{
