@@ -20,10 +20,14 @@ namespace TrainingCell::Checkers
 		return _agents[next_agent_id()];
 	}
 
+	bool Board::is_inverted() const
+	{
+		return _agent_to_move_id == 1;
+	}
+
 	void Board::take_turn()
 	{
 		_state.invert();//invert state because next time it will be given to the "opponent" agent
-		_is_inverted = !_is_inverted;
 		_agent_to_move_id = next_agent_id();
 	}
 
@@ -34,17 +38,20 @@ namespace TrainingCell::Checkers
 
 	void Board::reset_state()
 	{
-		_is_inverted = false;
 		_agent_to_move_id = 0;
 		_state = State::set_start_state();
+	}
+
+	void Board::reset_wins()
+	{
+		_whitesWin = 0;
+		_blacksWin = 0;
 	}
 
 	void Board::play(const int episodes, const int max_moves_without_capture,
 		PublishCheckersStateCallBack publishState,
 		PublishTrainingStatsCallBack publishStats)
 	{
-		int whitesWin = 0;
-		int blacksWin = 0;
 		for (auto episode_id = 0; episode_id < episodes; episode_id++)
 		{
 			auto moves_without_capture = 0;
@@ -61,9 +68,9 @@ namespace TrainingCell::Checkers
 			if (!last_move.is_valid()) //win case
 			{
 				if (_agent_to_move_id == 1)
-					whitesWin++;
+					_whitesWin++;
 				else
-					blacksWin++;
+					_blacksWin++;
 
 				agent_to_move()->game_over(_state, GameResult::Loss);
 				agent_to_wait()->game_over(_state, GameResult::Victory);
@@ -75,7 +82,7 @@ namespace TrainingCell::Checkers
 			}
 
 			if (publishStats != nullptr)
-				publishStats(whitesWin, blacksWin, episode_id + 1);
+				publishStats(_whitesWin, _blacksWin, episode_id + 1);
 		}
 	}
 
@@ -97,10 +104,10 @@ namespace TrainingCell::Checkers
 		{
 			auto state_copy = _state;
 			state_copy.make_move(move, false, true);
-			if (_is_inverted)
+			if (is_inverted())
 				state_copy.invert();
 
-			const auto move_copy = _is_inverted ? move : move.get_inverted();
+			const auto move_copy = is_inverted() ? move : move.get_inverted();
 
 			publish(reinterpret_cast<int*>(state_copy.data()),
 				static_cast<int>(state_copy.size()),
@@ -111,5 +118,15 @@ namespace TrainingCell::Checkers
 		take_turn();
 
 		return move;
+	}
+
+	int Board::get_whites_wins() const
+	{
+		return _whitesWin;
+	}
+
+	int Board::get_blacks_wins() const
+	{
+		return _blacksWin;
 	}
 }

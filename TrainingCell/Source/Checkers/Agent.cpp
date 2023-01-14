@@ -16,6 +16,9 @@ namespace TrainingCell::Checkers
 
 	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result)
 	{
+		if (!_training_mode)
+			return;//if we are not training, we do not care about the result, that is the bitter truth of the life
+
 		update_z();
 		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
 		const auto reward = static_cast<int>(result);
@@ -24,6 +27,16 @@ namespace TrainingCell::Checkers
 
 		_new_game = true;
 		_z.clear();
+	}
+
+	void TdLambdaAgent::set_exploration_probability(double epsilon)
+	{
+		_exploration_epsilon = epsilon;
+	}
+
+	void TdLambdaAgent::set_training_mode(const bool training_mode)
+	{
+		_training_mode = training_mode;
 	}
 
 	/// <summary>
@@ -66,6 +79,9 @@ namespace TrainingCell::Checkers
 
 	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves)
 	{
+		if (!_training_mode)
+			return pick_move_id(current_state, moves);
+
 		if (_new_game)
 		{
 			_prev_state_with_move = _prev_state = current_state;
@@ -98,10 +114,13 @@ namespace TrainingCell::Checkers
 
 	int TdLambdaAgent::pick_move_id(const State state, const std::vector<Move>& moves) const
 	{
+		if (moves.empty())
+			return -1;
+
 		if (moves.size() == 1)
 			return 0;
 
-		if (DeepLearning::Utils::get_random(0, 1.0) <= _epsilon)
+		if (DeepLearning::Utils::get_random(0, 1.0) <= _exploration_epsilon)
 			//Exploration move
 			return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1);
 
@@ -126,8 +145,9 @@ namespace TrainingCell::Checkers
 	}
 
 	TdLambdaAgent::TdLambdaAgent(
-		const std::vector<std::size_t>& layer_dimensions, const double epsilon) :
-		_new_game(true), _epsilon(epsilon)
+		const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
+		const double lambda, const double gamma, const double alpha) :
+		_new_game(true), _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha)
 	{
 		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
 			throw std::exception("Invalid Net configuration");

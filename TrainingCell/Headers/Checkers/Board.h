@@ -49,7 +49,17 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	A flag that indicates whether the state is "inverted" or not
 		/// </summary>
-		bool _is_inverted{};
+		bool is_inverted() const;
+
+		/// <summary>
+		/// Number of times "whites" (agent with index "0") won during the training
+		/// </summary>
+		int _whitesWin{};
+
+		/// <summary>
+		/// Number of times "blacks" (agent with index "1") won during the training
+		/// </summary>
+		int _blacksWin{};
 	public:
 		/// <summary>
 		///	Constructor
@@ -63,13 +73,28 @@ namespace TrainingCell::Checkers
 			PublishTrainingStatsCallBack publishStats = nullptr);
 
 		/// <summary>
-		///	Resets state of the board to the "initial one" (beginning of the game)
+		/// Resets state of the board to the "initial one" (beginning of the game)
 		/// </summary>
 		void reset_state();
+
+		/// <summary>
+		/// Reset winning statistics
+		/// </summary>
+		void reset_wins();
 
 		/// <summary>
 		/// The agent whose turn is makes a move and the tunr switches to another agent.
 		/// </summary>
 		Move make_move(PublishCheckersStateCallBack publish);
+
+		/// <summary>
+		/// Returns number of times "whites" (agent with index "0") won during the training
+		/// </summary>
+		int get_whites_wins() const;
+
+		/// <summary>
+		/// Returns number of times "blacks" (agent with index "1") won during the training
+		/// </summary>
+		int get_blacks_wins() const;
 	};
 }
