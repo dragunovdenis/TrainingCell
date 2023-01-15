@@ -39,7 +39,7 @@ namespace TrainingCell::Checkers
 	void Board::reset_state()
 	{
 		_agent_to_move_id = 0;
-		_state = State::set_start_state();
+		_state = State::get_start_state();
 	}
 
 	void Board::reset_wins()

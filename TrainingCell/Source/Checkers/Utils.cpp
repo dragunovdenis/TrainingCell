@@ -168,7 +168,7 @@ namespace TrainingCell::Checkers
 		}
 	}
 
-	State State::set_start_state()
+	State State::get_start_state()
 	{
 		return {
 			     Piece::Man, Piece::Man, Piece::Man, Piece::Man,

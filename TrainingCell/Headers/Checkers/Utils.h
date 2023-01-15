@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <vector>
+#include <msgpack.hpp>
 
 namespace DeepLearning
 {
@@ -204,17 +205,24 @@ namespace TrainingCell::Checkers
 	constexpr int BoardColumns = 8;
 	constexpr int FieldsInRow = BoardColumns / 2;
 	constexpr int StateSize = BoardRows * FieldsInRow;
+	
+	/// <summary>
+	///	Alias to make the messge-pack macros below happy
+	/// </summary>
+	using State_array = std::array<Piece, StateSize>;
 
 	/// <summary>
 	/// A data structure to represent state of the checkers game
 	/// </summary>
-	class State : public std::array<Piece, StateSize>
+	class State : public State_array
 	{
 	public:
+		MSGPACK_DEFINE(MSGPACK_BASE(State_array));
+
 		/// <summary>
 		///	Returns state that corresponds to the beginning of the game
 		/// </summary>
-		static State set_start_state();
+		static State get_start_state();
 
 		/// <summary>
 		/// Method to remove captured pieces from the state (board)
@@ -378,3 +386,5 @@ namespace TrainingCell::Checkers
 		static std::vector<Move> get_moves(const State& current_state);
 	};
 }
+
+MSGPACK_ADD_ENUM(TrainingCell::Checkers::Piece)

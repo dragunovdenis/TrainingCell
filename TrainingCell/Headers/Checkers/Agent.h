@@ -1,6 +1,8 @@
 #pragma once
 #include "Utils.h"
 #include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include <msgpack.hpp>
+#include <filesystem>
 
 namespace TrainingCell::Checkers
 {
@@ -52,6 +54,9 @@ namespace TrainingCell::Checkers
 	/// </summary>
 	class TdLambdaAgent : public Agent
 	{
+		/// <summary>
+		///	The neural net to approximate state value function
+		/// </summary>
 		DeepLearning::Net<DeepLearning::CpuDC> _net{};
 
 		/// <summary>
@@ -59,6 +64,9 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		bool _new_game{};
 
+		/// <summary>
+		///	Auxiliary data structure that is used during training process
+		/// </summary>
 		std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _z{};
 
 		/// <summary>
@@ -108,6 +116,10 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		void update_z();
 	public:
+
+		MSGPACK_DEFINE(_net, _z, _prev_state, _prev_state_with_move, _new_game,
+			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha);
+
 		/// <summary>Constructor</summary>
 		/// <param name="layer_dimensions">Dimensions of the fully connected layers that constitute the underlying neural network</param>
 		/// <param name="exploration_epsilon">Parameter defining the probability of the agent taking a
@@ -117,6 +129,11 @@ namespace TrainingCell::Checkers
 		/// random action instead of the one having highest predicted value </param>
 		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
 			const double lambda, const double gamma, const double alpha);
+
+		/// <summary>
+		///	Default constructor
+		/// </summary>
+		TdLambdaAgent() = default;
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
@@ -139,5 +156,27 @@ namespace TrainingCell::Checkers
 		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing
 		/// </summary>
 		void set_training_mode(const bool training_mode);
+
+		/// <summary>
+		///	Equality operator
+		/// </summary>
+		bool operator == (const TdLambdaAgent & anotherAgent) const;
+
+		/// <summary>
+		///	Inequality operator
+		/// </summary>
+		bool operator != (const TdLambdaAgent& anotherAgent) const;
+
+		/// <summary>
+		///	Serializes the current instance of the agent into the "message-pack" format and saves it
+		///	to the given file. Trows exception if fails.
+		/// </summary>
+		void save_to_file(const std::filesystem::path & file_path) const;
+
+		/// <summary>
+		///	Instantiates agent from the given "message-pack" file.
+		///	Trows exception if fails.
+		/// </summary>
+		static TdLambdaAgent load_from_file(const std::filesystem::path & file_path);
 	};
 }

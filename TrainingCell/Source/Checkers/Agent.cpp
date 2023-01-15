@@ -1,6 +1,7 @@
 #include "../../Headers/Checkers/Agent.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
 #include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
 
 namespace TrainingCell::Checkers
 {
@@ -68,10 +69,7 @@ namespace TrainingCell::Checkers
 
 			for (auto layer_id = 0ull; layer_id < gradients.size(); ++layer_id)
 			{
-				gradients[layer_id].Biases_grad += _z[layer_id].Biases_grad * _lambda * _gamma;
-
-				_z[layer_id].Weights_grad *= _lambda * _gamma;
-				gradients[layer_id].Weights_grad += _z[layer_id].Weights_grad;
+				gradients[layer_id] += _z[layer_id] * _lambda * _gamma;
 				_z[layer_id] = std::move(gradients[layer_id]);
 			}
 		}
@@ -158,4 +156,33 @@ namespace TrainingCell::Checkers
 		_net = DeepLearning::Net(layer_dimensions, activ_func_ids);
 	}
 
+	bool TdLambdaAgent::operator ==(const TdLambdaAgent& anotherAgent) const
+	{
+		return _net.equal(anotherAgent._net) &&
+			_z == anotherAgent._z &&
+			_prev_state == anotherAgent._prev_state &&
+			_prev_state_with_move == anotherAgent._prev_state_with_move &&
+			_new_game == anotherAgent._new_game &&
+			_exploration_epsilon == anotherAgent._exploration_epsilon &&
+			_training_mode == anotherAgent._training_mode &&
+			_lambda == anotherAgent._lambda &&
+			_gamma == anotherAgent._gamma &&
+			_alpha == anotherAgent._alpha;
+
+}
+
+	bool TdLambdaAgent::operator !=(const TdLambdaAgent& anotherAgent) const
+	{
+		return !(*this == anotherAgent);
+	}
+
+	void TdLambdaAgent::save_to_file(const std::filesystem::path& file_path) const
+	{
+		DeepLearning::MsgPack::save_to_file(*this, file_path);
+	}
+
+	TdLambdaAgent TdLambdaAgent::load_from_file(const std::filesystem::path& file_path)
+	{
+		return DeepLearning::MsgPack::load_from_file<TdLambdaAgent>(file_path);
+	}
 }
