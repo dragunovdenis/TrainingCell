@@ -15,10 +15,19 @@ namespace TrainingCell::Checkers
 		//Just do nothing because this agent can't improve its performance
 	}
 
+	void TdLambdaAgent::reset()
+	{
+		_new_game = true;
+		_z.clear();
+	}
+
 	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result)
 	{
-		if (!_training_mode)
+		if (!_training_mode || result == GameResult::Canceled)
+		{
+			reset();
 			return;//if we are not training, we do not care about the result, that is the bitter truth of the life
+		}
 
 		update_z();
 		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
@@ -26,8 +35,7 @@ namespace TrainingCell::Checkers
 		const auto delta = reward - prev_state_with_move_value;
 		_net.update(_z, -_alpha * delta, 0.0);
 
-		_new_game = true;
-		_z.clear();
+		reset();
 	}
 
 	void TdLambdaAgent::set_exploration_probability(double epsilon)
@@ -35,9 +43,49 @@ namespace TrainingCell::Checkers
 		_exploration_epsilon = epsilon;
 	}
 
+	double TdLambdaAgent::get_exploratory_probability() const
+	{
+		return _exploration_epsilon;
+	}
+
+	void TdLambdaAgent::set_discount(double gamma)
+	{
+		_gamma = gamma;
+	}
+
+	double TdLambdaAgent::get_discount() const
+	{
+		return _gamma;
+	}
+
 	void TdLambdaAgent::set_training_mode(const bool training_mode)
 	{
 		_training_mode = training_mode;
+	}
+
+	bool TdLambdaAgent::get_training_mode() const
+	{
+		return _training_mode;
+	}
+
+	void TdLambdaAgent::set_lambda(const double lambda)
+	{
+		_lambda = lambda;
+	}
+
+	double TdLambdaAgent::get_lambda() const
+	{
+		return _lambda;
+	}
+
+	void TdLambdaAgent::set_learning_rate(const double alpha)
+	{
+		_alpha = alpha;
+	}
+
+	double TdLambdaAgent::get_learning_rate() const
+	{
+		return _alpha;
 	}
 
 	/// <summary>

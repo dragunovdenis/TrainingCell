@@ -3,10 +3,21 @@
 
 namespace TrainingCell::Checkers
 {
+	/// <summary>
+	///	Callback to publish current state and move
+	/// </summary>
 	typedef void (*PublishCheckersStateCallBack)(const int* state, const int state_size,
-		const SubMove* sub_moves, const int sub_moves_count);
+	                                             const SubMove* sub_moves, const int sub_moves_count);
 
+	/// <summary>
+	///	Callback to publish training statistics
+	/// </summary>
 	typedef void (*PublishTrainingStatsCallBack)(const int white_wins, const int black_wins, const int total_games);
+
+	/// <summary>
+	///	Callback to cancel ongoing operation
+	/// </summary>
+	typedef bool (*CancelCallBack)();
 
 	/// <summary>
 	///	Environment to train checkers-agents
@@ -64,13 +75,13 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	Constructor
 		/// </summary>
-		Board(Agent* agentA, Agent* agentB);
+		Board(Agent* const agentA, Agent* const agentB);
 
 		/// <summary>
 		///	Runs the given number of episodes (games)
 		/// </summary>
 		void play(const int episodes, const int max_moves_without_capture = 200, PublishCheckersStateCallBack publishState = nullptr,
-			PublishTrainingStatsCallBack publishStats = nullptr);
+			PublishTrainingStatsCallBack publishStats = nullptr, CancelCallBack cancel = nullptr);
 
 		/// <summary>
 		/// Resets state of the board to the "initial one" (beginning of the game)

@@ -55,6 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Checkers\Agent.cs" />
+    <Compile Include="Checkers\DllWrapper.cs" />
+    <Compile Include="Checkers\RandomAgent.cs" />
+    <Compile Include="Checkers\TdLambdaAgent.cs" />
     <Compile Include="TrainingCellInterface.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

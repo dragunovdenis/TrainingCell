@@ -2,7 +2,7 @@
 
 namespace TrainingCell::Checkers
 {
-	Board::Board(Agent* agentA, Agent* agentB)
+	Board::Board(Agent* const agentA, Agent* const agentB)
 	{
 		if (agentA == nullptr || agentB == nullptr)
 			throw std::exception("Invalid agents");
@@ -50,10 +50,14 @@ namespace TrainingCell::Checkers
 
 	void Board::play(const int episodes, const int max_moves_without_capture,
 		PublishCheckersStateCallBack publishState,
-		PublishTrainingStatsCallBack publishStats)
+		PublishTrainingStatsCallBack publishStats,
+		CancelCallBack cancel)
 	{
 		for (auto episode_id = 0; episode_id < episodes; episode_id++)
 		{
+			if (cancel != nullptr && cancel())
+				return;
+
 			auto moves_without_capture = 0;
 			reset_state();
 			Move last_move {};

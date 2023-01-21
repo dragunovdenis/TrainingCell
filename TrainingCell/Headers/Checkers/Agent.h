@@ -115,6 +115,11 @@ namespace TrainingCell::Checkers
 		/// Updates "z" field
 		/// </summary>
 		void update_z();
+
+		/// <summary>
+		///	Resets training state of the object which is an obligatory procedure to start new episode
+		/// </summary>
+		void reset();
 	public:
 
 		MSGPACK_DEFINE(_net, _z, _prev_state, _prev_state_with_move, _new_game,
@@ -153,9 +158,49 @@ namespace TrainingCell::Checkers
 		void set_exploration_probability(double epsilon);
 
 		/// <summary>
+		///	Returns actual value of exploration probability
+		/// </summary>
+		double get_exploratory_probability() const;
+
+		/// <summary>
+		///	Updates parameter gamma with the given value;
+		/// </summary>
+		void set_discount(double gamma);
+
+		/// <summary>
+		///	Returns actual value of parameter gamma (reward discount)
+		/// </summary>
+		double get_discount() const;
+
+		/// <summary>
 		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing
 		/// </summary>
 		void set_training_mode(const bool training_mode);
+
+		/// <summary>
+		///	Returns actual value of training mode
+		/// </summary>
+		bool get_training_mode() const;
+
+		/// <summary>
+		///	Updates "lambda" parameter with the given value
+		/// </summary>
+		void set_lambda(const double lambda);
+
+		/// <summary>
+		///	Returns actual value of "lambda" parameter
+		/// </summary>
+		double get_lambda() const;
+
+		/// <summary>
+		///	Updates learning rate with the given value
+		/// </summary>
+		void set_learning_rate(const double alpha);
+
+		/// <summary>
+		///	Returns acutal value of the learning rate parameter ("alpha")
+		/// </summary>
+		double get_learning_rate() const;
 
 		/// <summary>
 		///	Equality operator
