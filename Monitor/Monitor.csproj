@@ -23,6 +23,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>$(SolutionDir)\$(Platform)\$(Configuration)\</OutputPath>
@@ -33,6 +34,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -57,6 +59,7 @@
     </ApplicationDefinition>
     <Compile Include="Checkers\Agent.cs" />
     <Compile Include="Checkers\DllWrapper.cs" />
+    <Compile Include="Checkers\InteractiveAgent.cs" />
     <Compile Include="Checkers\RandomAgent.cs" />
     <Compile Include="Checkers\TdLambdaAgent.cs" />
     <Compile Include="TrainingCellInterface.cs" />

@@ -124,7 +124,7 @@ char CheckersTdLambdaAgentGetTrainingMode(const TrainingCell::Checkers::TdLambda
 	if (agent_ptr == nullptr)
 		return static_cast<char>(2);
 
-	return static_cast<char>(agent_ptr->get_training_mode());
+	return agent_ptr->get_training_mode();
 }
 
 void* CheckersTdLambdaAgentLoadFromFile(const char* path)
@@ -174,3 +174,41 @@ bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agen
 	delete agent_ptr;
 	return true;
 }
+
+void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool _play_for_whites)
+{
+	try
+	{
+		if (make_move_callback == nullptr || game_over_callback == nullptr)
+			return nullptr;
+
+		return new TrainingCell::Checkers::InteractiveAgent(
+			[=](const TrainingCell::Checkers::State& state, std::vector<TrainingCell::Checkers::Move> moves)
+			{
+				std::vector<CheckersMoveDto> moves_dto;
+				for (auto& move : moves)
+					moves_dto.emplace_back(move.sub_moves.data(), static_cast<int>(move.sub_moves.size()));
+
+				return make_move_callback(reinterpret_cast<const int*>(state.data()), static_cast<int>(state.size()), moves_dto.data(), static_cast<int>(moves_dto.size()));
+			},
+			[=](const TrainingCell::Checkers::State& state, const TrainingCell::Checkers::GameResult& result)
+			{
+				game_over_callback(reinterpret_cast<const int*>(state.data()), static_cast<int>(state.size()), static_cast<int>(result));
+				
+			}, _play_for_whites);
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
+}
+
+bool FreeCheckersInteractiveAgent(const TrainingCell::Checkers::InteractiveAgent* agent_ptr)
+{
+	if (agent_ptr == nullptr)
+		return false;
+
+	delete agent_ptr;
+	return true;
+}
+

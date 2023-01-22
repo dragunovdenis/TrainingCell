@@ -6,10 +6,8 @@ namespace Monitor.Checkers
     /// <summary>
     /// Wrapper for the corresponding native class
     /// </summary>
-    class TdLambdaAgent : IAgent
+    class TdLambdaAgent : Agent
     {
-        private IntPtr _ptr;
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -35,7 +33,7 @@ namespace Monitor.Checkers
         /// <summary>
         /// Releases native resources
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             if (_ptr == IntPtr.Zero)
                 return;
@@ -54,11 +52,6 @@ namespace Monitor.Checkers
         {
             Dispose();
         }
-
-        /// <summary>
-        /// Pointer to the underlying unmanaged agent
-        /// </summary>
-        public IntPtr Ptr => _ptr;
 
         /// <summary>
         /// Saves agent to disk

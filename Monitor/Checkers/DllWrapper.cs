@@ -6,7 +6,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Wrapping functionality to communicate with the code inside native dll
     /// </summary>
-    static class DllWrapper
+    internal static class DllWrapper
     {
         /// <summary>
         /// Byte to boolean conversion
@@ -151,5 +151,56 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "FreeCheckersTdLambdaAgent")]
         public static extern bool FreeTdLambdaAgent(IntPtr agentPtr);
+
+        /// <summary>
+        ///	Data transferring object to pass checker moves
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct CheckersMoveDto
+        {
+            /// <summary>
+            ///	Pointer to the array of sub_moves
+            /// </summary>
+            public IntPtr SubMoves;
+
+            /// <summary>
+            ///	Number of sub-moves in the array
+            /// </summary>
+            public int SubMovesCnt;
+        };
+
+        /// <summary>
+        /// Checkers "make move" delegate
+        /// </summary>
+        public delegate int CheckersMakeMoveCallBack(
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
+            int[] state, int stateSize,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
+            CheckersMoveDto[] moves, int movesSize);
+
+        /// <summary>
+        /// Checkers "game over" delegate
+        /// </summary>
+        public delegate void CheckersGameOverCallBack(
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
+            int[] state, int stateSize, int gameResult);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "ConstructCheckersInteractiveAgent")]
+        public static extern IntPtr ConstructInteractiveAgent(
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            CheckersMakeMoveCallBack makeMoveCallBack,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            CheckersGameOverCallBack gameOverCallBack,
+            [MarshalAs(UnmanagedType.U1)]
+            bool playForWhites);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "FreeCheckersInteractiveAgent")]
+        public static extern bool FreeInteractiveAgent(IntPtr agentPtr);
     }
 }

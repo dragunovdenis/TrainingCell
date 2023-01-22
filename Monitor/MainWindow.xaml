@@ -16,11 +16,12 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Column="1" Background="LightGray">
             <Button  Click="Button_Click" Name="PlayButton" >Play</Button>
+            <Button Click="CancelButton_OnClick"  Name="CancelButton" >Cancel</Button>
             <ComboBox Name="ScoreCombo" StaysOpenOnEdit="True">
             </ComboBox>
         </StackPanel>
         <DockPanel Grid.Column="0" Name="MainPanel" SizeChanged="MainPanel_OnSizeChanged">
-            <Canvas Name="MainCanvas"></Canvas>
+            <Canvas Name="MainCanvas" Background="White"></Canvas>
         </DockPanel>
     </Grid>
 </Window>

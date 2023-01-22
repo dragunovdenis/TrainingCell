@@ -1,8 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Monitor.Checkers
 {
@@ -22,6 +29,31 @@ namespace Monitor.Checkers
         /// Index of a column
         /// </summary>
         public long Col;
+
+        /// <summary>
+        /// Returns invalid position
+        /// </summary>
+        /// <returns></returns>
+        public static CheckersPiecePosition Invalid()
+        {
+            return new CheckersPiecePosition() { Row = -1, Col = -1 };
+        }
+
+        /// <summary>
+        /// Returns true if the current instance represents a valid checkers piece position
+        /// </summary>
+        public bool IsValid()
+        {
+            return Row >= 0 && Row < Ui.CheckerRows && Col >= 0 && Col < Ui.CheckerRows;
+        }
+
+        /// <summary>
+        /// Returns "true" if the current position is equal to the given one
+        /// </summary>
+        public bool IsEqualTo(CheckersPiecePosition pos)
+        {
+            return Row == pos.Row && Col == pos.Col;
+        }
     }
 
     /// <summary>
@@ -48,12 +80,28 @@ namespace Monitor.Checkers
     }
 
     /// <summary>
+    /// Representation of a checkers move (collection of sub-moves)
+    /// </summary>
+    internal struct CheckersMove
+    {
+        /// <summary>
+        /// Collection of sub-moves
+        /// </summary>
+        public CheckersSubMove[] SubMoves;
+
+        /// <summary>
+        /// Index of the move
+        /// </summary>
+        public int Index;
+    };
+
+    /// <summary>
     /// Functionality to handle user interface of the checkers game
     /// </summary>
     class Ui
     {
-        private const int CheckerRows = 8;
-        private const int CheckerColumns = 8;
+        public const int CheckerRows = 8;
+        public const int CheckerColumns = 8;
         private const int BlackFieldsInRow = 4;
         private const int StateSize = CheckerRows * BlackFieldsInRow;
 
@@ -62,16 +110,186 @@ namespace Monitor.Checkers
         double _topLeftX;
         double _topLeftY;
 
+        /// <summary>
+        /// Types of agents
+        /// </summary>
+        public enum AgentType : int
+        {
+            Random,
+            TdLambda,
+            Interactive
+        };
+
+        /// <summary>
+        /// Dispatcher of the UI thread
+        /// </summary>
+        private readonly Dispatcher _uiThreadDispatcher;
+
+        /// <summary>
+        /// Provides means to cancel ongoing playing
+        /// </summary>
+        private CancellationTokenSource _playTaskCancellation;
+
+        private Task _playTask;
+
+        /// <summary>
+        /// The current state
+        /// </summary>
+        private int[] _state;
+
+        /// <summary>
+        /// Data structure that facilitates user move processing
+        /// </summary>
+        private class MoveRequest
+        {
+            /// <summary>
+            /// Set of possible moves in the current state
+            /// </summary>
+            public readonly CheckersMove[] PossibleMoves;
+            /// <summary>
+            /// Channel to provide user input to the thread that is running training
+            /// </summary>
+            public readonly TaskCompletionSource<int> UserMoveResult = new TaskCompletionSource<int>();
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public MoveRequest(CheckersMove[] possibleMoves)
+            {
+                PossibleMoves = possibleMoves;
+            }
+        }
+
+        /// <summary>
+        /// Data structure that facilitates user move selection mechanism
+        /// </summary>
+        private MoveRequest _userMoveRequest;
+
+        /// <summary>
+        /// Initializes a state when we wait until used make a move
+        /// </summary>
+        private Task<int> RequestUserMove(int[] state, CheckersMove[] possibleMoves)
+        {
+            //_state = state;
+            _userMoveRequest = new MoveRequest(possibleMoves);
+            Draw();
+            return _userMoveRequest.UserMoveResult.Task;
+        }
+
+        /// <summary>
+        /// Factory method to create agent
+        /// </summary>
+        IAgent CreateAgent(AgentType agentType, bool playWhites)
+        {
+            switch (agentType)
+            {
+                case AgentType.Random: return new RandomAgent();
+                case AgentType.TdLambda:
+                    return new TdLambdaAgent(
+                        new uint[] { 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
+                case AgentType.Interactive:
+                    return new InteractiveAgent((state, moves) =>
+                    {
+                        var movePromise = _uiThreadDispatcher.Invoke(() => RequestUserMove(state, moves));
+                        return movePromise.Result;
+                    }, (state, result) => { }, playWhites);
+                default: throw new Exception("Unknown agent type");
+            }
+        }
+
+        /// <summary>
+        /// Event that is invoked each time we want to update training information on UI
+        /// </summary>
+        public event Action<IList<string>> InfoEvent;
+
+        /// <summary>
+        /// Returns "true" if playing session is ongoing
+        /// </summary>
+        public bool IsPlaying()
+        {
+            return _playTask != null && !_playTask.IsCompleted;
+        }
+
+        /// <summary>
+        /// Method to cancel playing. Returns after playing task is canceled
+        /// </summary>
+        public void CancelPlaying()
+        {
+            if (IsPlaying())
+            {
+                if (_playTaskCancellation == null)
+                    throw new Exception("The task can't be canceled: invalid cancellation token source");
+
+                _playTaskCancellation.Cancel();
+                _playTask.Wait();
+            }
+        }
+
+        /// <summary>
+        /// Starts checkers game with the agents of the two given types (asynchronously) and returns immediately
+        /// Returns true if the previous playing task is complete and the current one is successfully started
+        /// </summary>
+        /// <param name="agentTypeWhite"></param>
+        /// <param name="agentTypeBlack"></param>
+        /// <param name="episodes">Number of episodes to play</param>
+        public bool Play(AgentType agentTypeWhite, AgentType agentTypeBlack, int episodes)
+        {
+            if (IsPlaying())
+                return false;
+
+            _playTaskCancellation = new CancellationTokenSource();
+            _playTask = new Task(() =>
+            {
+                using (var agentWhite = CreateAgent(agentTypeWhite, true))
+                {
+                    using (var agentBlack = CreateAgent(agentTypeBlack, false))
+                    {
+                        DllWrapper.RunCheckersTraining(
+                            agentWhite.Ptr, agentBlack.Ptr, episodes,
+                            (state, size, subMoves, subMovesCount) =>
+                            {
+                                Thread.Sleep(10);
+                                _uiThreadDispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    _state = state;
+                                    Draw();
+                                }));
+                            },
+                            (whiteWins, blackWins, totalGamers) =>
+                            {
+                                Thread.Sleep(10);
+                                _uiThreadDispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    InfoEvent?.Invoke(new List<string>()
+                                    {
+                                        "Whites Won: " + whiteWins,
+                                        "Blacks Won: " + blackWins,
+                                        "Total Games: " + totalGamers,
+                                    });
+                                }));
+                            }, () => _playTaskCancellation.IsCancellationRequested);
+                    }
+                }
+            });
+            _playTask.ContinueWith((task) =>
+            {
+                _playTask = null;
+                _playTaskCancellation = null;
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+            _playTask.Start();
+
+            return true;
+        }
+
         private readonly Canvas _canvas = null;
 
         /// <summary>
         /// Draws a "shape" (ellipse, rectangle...) with the given position and radius on the given canvas
         /// </summary>
-        public static void DrawShape<S>(double x, double y, double width, double height,
+        private static void DrawShape<S>(double x, double y, double width, double height,
             Brush borderColor, Brush fillColor, Canvas cv)
             where S : Shape, new()
         {
-
             var shape = new S()
             {
                 Width = width,
@@ -136,9 +354,72 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// For the given mouse position on the canvas returns coordinates of the corresponding checkers field
+        /// or (-1, -1), if the given point does not belong to any valid field
+        /// </summary>
+        CheckersPiecePosition CanvasCoordinateToFieldPosition(Point pt)
+        {
+            var result = new CheckersPiecePosition() { Col = -1, Row = -1 };
+
+            var colIdFloat = (pt.X - _topLeftX) / _fieldSide;
+            if (colIdFloat < 0 || colIdFloat > CheckerColumns)
+                return result;
+
+            var rowIdFloat = (pt.Y - _topLeftY) / _fieldSide;
+            if (rowIdFloat < 0 || rowIdFloat > CheckerRows)
+                return result;
+
+            return new CheckersPiecePosition() { Row = (int)rowIdFloat, Col = (int)colIdFloat };
+        }
+
+        private CheckersPiecePosition _selectedField = CheckersPiecePosition.Invalid();
+
+        /// <summary>
+        /// Returns sub-set of possible moves that start from the given position
+        /// </summary>
+        private CheckersMove[] GetPossibleMovesStartingFrom(CheckersPiecePosition startPos)
+        {
+            return GetPossibleMovesStartingFrom(_userMoveRequest?.PossibleMoves, startPos);
+        }
+
+        /// <summary>
+        /// Returns sub-set of possible moves that start from the given position
+        /// </summary>
+        private static CheckersMove[] GetPossibleMovesStartingFrom(CheckersMove[]  possibleMoves, CheckersPiecePosition startPos)
+        {
+            if (possibleMoves == null || possibleMoves.Length == 0)
+                return Array.Empty<CheckersMove>();
+
+            return possibleMoves.Where(x => x.SubMoves[0].Start.IsEqualTo(startPos)).ToArray();
+        }
+
+        /// <summary>
+        /// Returns sub-set of possible moves that end at the given position
+        /// </summary>
+        private static CheckersMove[] GetPossibleMovesEndingAt(CheckersMove[] possibleMoves, CheckersPiecePosition endPos)
+        {
+            if (possibleMoves == null || possibleMoves.Length == 0)
+                return Array.Empty<CheckersMove>();
+
+            return possibleMoves.Where(x => x.SubMoves.Last().End.IsEqualTo(endPos)).ToArray();
+        }
+
+        /// <summary>
+        /// Returns coordinates of the top left corner of the corresponding field on the canvas
+        /// </summary>
+        /// <param name="colId">Field column</param>
+        /// <param name="rowId">Field row</param>
+        /// <param name="offset">Offset that should added to booth coordinates of the returned corner</param>
+        /// <returns></returns>
+        Point GetTopLeftCorner(long colId, long rowId, double offset)
+        {
+            return new Point(colId * _fieldSide + _topLeftX + offset, rowId * _fieldSide + _topLeftY + offset);
+        }
+
+        /// <summary>
         /// Draws the given state
         /// </summary>
-        public void DrawState(int[] state)
+        private void DrawState(int[] state)
         {
             if (state == null || state.Length != StateSize)
                 throw new Exception("Invalid state parameter");
@@ -156,11 +437,9 @@ namespace Monitor.Checkers
                     continue;
 
                 StateItemIdToRowAndCol(stateItemId, out var rowId, out var colId);
+                var topLeft = GetTopLeftCorner(colId, rowId, shrink);
 
-                var fieldTopLeftX = colId * _fieldSide + _topLeftX + shrink;
-                var fieldTopLeftY = rowId * _fieldSide + _topLeftY + shrink;
-
-                DrawShape<Ellipse>(fieldTopLeftX, fieldTopLeftY, fieldSizeShrunk, fieldSizeShrunk,
+                DrawShape<Ellipse>(topLeft.X, topLeft.Y, fieldSizeShrunk, fieldSizeShrunk,
                     Brushes.BlueViolet, PieceIdToColor(pieceId), _canvas);
 
                 if (!IsKingPiece(pieceId) && ! IsManPiece(pieceId))
@@ -168,9 +447,25 @@ namespace Monitor.Checkers
 
                 var shift = fieldSizeShrunk / 4;
 
-                DrawShape<Ellipse>(fieldTopLeftX + shift, fieldTopLeftY + shift,
+                DrawShape<Ellipse>(topLeft.X + shift, topLeft.Y + shift,
                     fieldSizeShrunk / 2, fieldSizeShrunk / 2,
                     Brushes.BlueViolet, IsKingPiece(pieceId) ? Brushes.Red : Brushes.Green, _canvas);
+            }
+
+            if (_userMoveRequest != null)
+            {
+                var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(_selectedField);
+                foreach (var move in possibleMovesForCurrentPosition)
+                {
+                    foreach (var subMove in move.SubMoves)
+                    {
+                        var start = GetTopLeftCorner(subMove.Start.Col, subMove.Start.Row, _fieldSide / 2);
+                        var end = GetTopLeftCorner(subMove.End.Col, subMove.End.Row, _fieldSide / 2);
+
+                        var line = new Line() { X1 = start.X, Y1 = start.Y, X2 = end.X, Y2 = end.Y, Stroke = Brushes.Black, StrokeThickness = 1 };
+                        _canvas.Children.Add(line);
+                    }
+                }
             }
         }
 
@@ -188,7 +483,7 @@ namespace Monitor.Checkers
         /// <summary>
         /// Draws checkers board
         /// </summary>
-        public void DrawBoard()
+        private void DrawBoard()
         {
             _canvas.Children.Clear();
 
@@ -197,23 +492,72 @@ namespace Monitor.Checkers
             for (var rowId = 0; rowId < CheckerRows; rowId++)
             for (var colId = 0; colId < CheckerColumns; colId++)
             {
-                var fieldTopLeftX = colId * _fieldSide + _topLeftX;
-                var fieldTopLeftY = rowId * _fieldSide + _topLeftY;
-
+                var topLeft = GetTopLeftCorner(colId, rowId, 0);
                 var isDarkField = (rowId % 2 == 0) ? (colId % 2 == 1) : (colId % 2 == 0);
-                DrawShape<Rectangle>(fieldTopLeftX, fieldTopLeftY, _fieldSide, _fieldSide,
+                DrawShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
                     Brushes.Black, isDarkField ? Brushes.SaddleBrown : Brushes.BurlyWood, _canvas);
             }
 
+            if (_userMoveRequest != null)
+            {
+                foreach (var move in _userMoveRequest.PossibleMoves)
+                {
+                    var start = move.SubMoves[0].Start;
+                    var topLeft = GetTopLeftCorner(start.Col, start.Row, 0);
+                    DrawShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
+                        _selectedField.IsEqualTo(start) ? Brushes.Red : Brushes.Yellow, null, _canvas);
+                }
+            }
+        }
+
+        /// <summary>
+        /// General method to update UI
+        /// </summary>
+        public void Draw()
+        {
+            DrawBoard();
+            if (_state != null)
+                DrawState(_state);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Ui(Canvas canvas)
+        public Ui(Canvas canvas, Dispatcher uiThreadDispatcher)
         {
+            _uiThreadDispatcher = uiThreadDispatcher ?? throw new Exception("Dispatcher must be not null");
             _canvas = canvas ?? throw new Exception("Invalid input");
-            DrawBoard();
+            _canvas.MouseDown += CanvasOnMouseDown;
+            Draw();
+        }
+
+        /// <summary>
+        /// Event handler
+        /// </summary>
+        private void CanvasOnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+
+            if (_userMoveRequest != null)
+            {
+                var oldSelectedField = _selectedField;
+                _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
+                var possibleMoves = GetPossibleMovesEndingAt(GetPossibleMovesStartingFrom(oldSelectedField), _selectedField);
+
+                if (possibleMoves.Length > 0)
+                {
+                    //TODO: 
+                    //in principle there can be a couple of moves that have the same start and end position but this is only for the case of capturing moves
+                    //For now we go for a simplified solution of the problem we choose index of the move that captures the most
+                    //It would be nice to come up with a mechanism that would allow user to deliberately choose between the possible moves in such a (rare) cases
+                    var moveId =  possibleMoves.OrderByDescending(x => x.SubMoves.Length).First().Index;
+                    _userMoveRequest.UserMoveResult.SetResult(moveId);
+                    _userMoveRequest = null;
+                }
+            }
+            else
+                _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
+
+            Draw();
         }
     }
 }

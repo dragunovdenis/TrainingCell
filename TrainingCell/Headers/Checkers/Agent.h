@@ -49,6 +49,43 @@ namespace TrainingCell::Checkers
 		void game_over(const State& final_state, const GameResult& result) override;
 	};
 
+	using MakeMoveCallback = std::function<int(const State&, const std::vector<Move>&)>;
+	using GameOverCallback = std::function<void(const State&, const GameResult&)>;
+
+	/// <summary>
+	///	Interface for a human player
+	/// </summary>
+	class InteractiveAgent : public Agent
+	{
+		const MakeMoveCallback _make_move_callback{};
+		const GameOverCallback _game_over_callback{};
+		const bool _play_for_whites{};
+	public:
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		/// <param name="make_move_callback">Pointer to a method that
+		/// will be called when "make_move" method of the agent is called</param>
+		/// <param name="game_over_callback">Pointer to a method that
+		/// will be called when "game_over" method of the agent is called</param>
+		/// <param name="play_for_whites">Determines whether state and move parameters of the callback methods
+		/// should be inverted (if "false") or not (if "true")</param>
+		InteractiveAgent(const MakeMoveCallback& make_move_callback, const GameOverCallback& game_over_callback,
+		                 const bool play_for_whites);
+
+		/// <summary>
+		/// Returns index of a move from the given collection of available moves
+		/// that the agent wants to take given the current state
+		/// </summary>
+		int make_move(const State& current_state, const std::vector<Move>& moves) override;
+
+		/// <summary>
+		/// The method is supposed to be called by the "training environment" when the current training episode is over
+		/// to notify the agent about the "final" state and the result of entire game (episode)
+		/// </summary>
+		void game_over(const State& final_state, const GameResult& result) override;
+	};
+
 	/// <summary>
 	///	Agent implementing TD("lambda") ("eligibility traces"-based) learning strategy
 	/// </summary>

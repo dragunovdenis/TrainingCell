@@ -117,4 +117,40 @@ extern "C"
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
 	TRAINING_CELL_API bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	///	Data transferring object to pass checker moves
+	/// </summary>
+	struct CheckersMoveDto
+	{
+		/// <summary>
+		///	Pointer to the array of sub_moves
+		/// </summary>
+		TrainingCell::Checkers::SubMove* sub_moves{};
+
+		/// <summary>
+		///	Number of sub-moves in the array
+		/// </summary>
+		int sub_moves_cnt{};
+	};
+
+	/// <summary>
+	///	"Make move" delegate
+	/// </summary>
+	typedef int (*CheckersMakeMoveCallBack)(const int* state, const int state_size, const CheckersMoveDto* moves, const int moves_size);
+
+	/// <summary>
+	///	"Game over" delegate
+	/// </summary>
+	typedef void (*CheckersGameOverCallBack)(const int* state, const int state_size, const int game_result);
+
+	/// <summary>
+	/// Constructs "interactive" checkers agent on the heap and returns pointer to it
+	/// </summary>
+	TRAINING_CELL_API void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool _play_for_whites);
+
+	/// <summary>
+	/// Disposes the agent pointed by the given pointer
+	/// </summary>
+	TRAINING_CELL_API bool FreeCheckersInteractiveAgent(const TrainingCell::Checkers::InteractiveAgent* agent_ptr);
 }

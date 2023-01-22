@@ -233,4 +233,34 @@ namespace TrainingCell::Checkers
 	{
 		return DeepLearning::MsgPack::load_from_file<TdLambdaAgent>(file_path);
 	}
+
+	InteractiveAgent::InteractiveAgent(const MakeMoveCallback& make_move_callback, const GameOverCallback& game_over_callback,
+		const bool play_for_whites): _make_move_callback(make_move_callback), _game_over_callback(game_over_callback), _play_for_whites(play_for_whites)
+	{
+		if (_make_move_callback == nullptr || _game_over_callback == nullptr)
+			throw std::exception("Invalid callback pointers");
+	}
+
+	int InteractiveAgent::make_move(const State& current_state, const std::vector<Move>& moves)
+	{
+		if (_play_for_whites)
+			return _make_move_callback(current_state, moves);
+
+		std::vector<Move> moves_inverted(moves.size());
+
+		std::ranges::transform(moves, moves_inverted.begin(), [](const auto m)
+			{
+				return m.get_inverted();
+			});
+
+		return _make_move_callback(current_state.get_inverted(), moves_inverted);
+	}
+
+	void InteractiveAgent::game_over(const State& final_state, const GameResult& result)
+	{
+		if (_play_for_whites)
+			_game_over_callback(final_state, result);
+
+		_game_over_callback(final_state.get_inverted(), result);
+	}
 }
