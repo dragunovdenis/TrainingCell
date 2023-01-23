@@ -451,22 +451,6 @@ namespace Monitor.Checkers
                     fieldSizeShrunk / 2, fieldSizeShrunk / 2,
                     Brushes.BlueViolet, IsKingPiece(pieceId) ? Brushes.Red : Brushes.Green, _canvas);
             }
-
-            if (_userMoveRequest != null)
-            {
-                var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(_selectedField);
-                foreach (var move in possibleMovesForCurrentPosition)
-                {
-                    foreach (var subMove in move.SubMoves)
-                    {
-                        var start = GetTopLeftCorner(subMove.Start.Col, subMove.Start.Row, _fieldSide / 2);
-                        var end = GetTopLeftCorner(subMove.End.Col, subMove.End.Row, _fieldSide / 2);
-
-                        var line = new Line() { X1 = start.X, Y1 = start.Y, X2 = end.X, Y2 = end.Y, Stroke = Brushes.Black, StrokeThickness = 1 };
-                        _canvas.Children.Add(line);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -503,9 +487,28 @@ namespace Monitor.Checkers
                 foreach (var move in _userMoveRequest.PossibleMoves)
                 {
                     var start = move.SubMoves[0].Start;
-                    var topLeft = GetTopLeftCorner(start.Col, start.Row, 0);
-                    DrawShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
+                    var topLeftStart = GetTopLeftCorner(start.Col, start.Row, 0);
+                    DrawShape<Rectangle>(topLeftStart.X, topLeftStart.Y, _fieldSide, _fieldSide,
                         _selectedField.IsEqualTo(start) ? Brushes.Red : Brushes.Yellow, null, _canvas);
+                }
+
+                var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(_selectedField);
+                foreach (var move in possibleMovesForCurrentPosition)
+                {
+                    foreach (var subMove in move.SubMoves)
+                    {
+                        var startCenter = GetTopLeftCorner(subMove.Start.Col, subMove.Start.Row, _fieldSide / 2);
+                        var endCenter = GetTopLeftCorner(subMove.End.Col, subMove.End.Row, _fieldSide / 2);
+
+                        var line = new Line() { X1 = startCenter.X, Y1 = startCenter.Y,
+                            X2 = endCenter.X, Y2 = endCenter.Y, Stroke = Brushes.Black, StrokeThickness = 1 };
+                        _canvas.Children.Add(line);
+                    }
+
+                    var end = move.SubMoves.Last().End;
+                    var topLeftEnd = GetTopLeftCorner(end.Col, end.Row, 0);
+                    DrawShape<Rectangle>(topLeftEnd.X, topLeftEnd.Y, _fieldSide, _fieldSide,
+                        Brushes.GreenYellow, null, _canvas);
                 }
             }
         }
