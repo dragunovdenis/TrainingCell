@@ -56,11 +56,7 @@ namespace TrainingCell::Checkers
 		for (auto episode_id = 0; episode_id < episodes; episode_id++)
 		{
 			if (cancel != nullptr && cancel())
-			{
-				agent_to_move()->game_over(_state, GameResult::Canceled);
-				agent_to_wait()->game_over(_state, GameResult::Canceled);
 				return;
-			}
 
 			auto moves_without_capture = 0;
 			reset_state();
@@ -71,6 +67,9 @@ namespace TrainingCell::Checkers
 					moves_without_capture = 0;
 				else
 					moves_without_capture++;
+
+				if (cancel != nullptr && cancel())
+					break;//this will be qualified as a "draw"
 			}
 
 			if (!last_move.is_valid()) //win case

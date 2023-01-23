@@ -23,12 +23,6 @@ namespace TrainingCell::Checkers
 
 	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result)
 	{
-		if (!_training_mode || result == GameResult::Canceled)
-		{
-			reset();
-			return;//if we are not training, we do not care about the result, that is the bitter truth of the life
-		}
-
 		update_z();
 		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
 		const auto reward = static_cast<int>(result);

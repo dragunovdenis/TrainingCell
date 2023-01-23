@@ -63,7 +63,6 @@ namespace TrainingCell::Checkers
 		Victory = 1,
 		Loss = -1,
 		Draw = 0,
-		Canceled = 2,
 	};
 
 	/// <summary>

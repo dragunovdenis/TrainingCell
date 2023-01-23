@@ -170,7 +170,7 @@ namespace Monitor.Checkers
         /// </summary>
         private Task<int> RequestUserMove(int[] state, CheckersMove[] possibleMoves)
         {
-            //_state = state;
+            if (_state == null) _state = state;
             _userMoveRequest = new MoveRequest(possibleMoves);
             Draw();
             return _userMoveRequest.UserMoveResult.Task;
@@ -221,7 +221,6 @@ namespace Monitor.Checkers
                     throw new Exception("The task can't be canceled: invalid cancellation token source");
 
                 _playTaskCancellation.Cancel();
-                _playTask.Wait();
             }
         }
 
@@ -232,7 +231,8 @@ namespace Monitor.Checkers
         /// <param name="agentTypeWhite"></param>
         /// <param name="agentTypeBlack"></param>
         /// <param name="episodes">Number of episodes to play</param>
-        public bool Play(AgentType agentTypeWhite, AgentType agentTypeBlack, int episodes)
+        /// <param name="movePause">Number of milliseconds to wait between two successive moves</param>
+        public bool Play(AgentType agentTypeWhite, AgentType agentTypeBlack, int episodes, int movePause = 100)
         {
             if (IsPlaying())
                 return false;
@@ -248,25 +248,27 @@ namespace Monitor.Checkers
                             agentWhite.Ptr, agentBlack.Ptr, episodes,
                             (state, size, subMoves, subMovesCount) =>
                             {
-                                Thread.Sleep(10);
-                                _uiThreadDispatcher.BeginInvoke(new Action(() =>
+                                if (movePause > 0) Thread.Sleep(movePause);
+
+                                _uiThreadDispatcher.Invoke(() =>
                                 {
                                     _state = state;
                                     Draw();
-                                }));
+                                });
                             },
                             (whiteWins, blackWins, totalGamers) =>
                             {
-                                Thread.Sleep(10);
-                                _uiThreadDispatcher.BeginInvoke(new Action(() =>
+                                _uiThreadDispatcher.Invoke(() =>
                                 {
+                                    _state = null;
                                     InfoEvent?.Invoke(new List<string>()
                                     {
                                         "Whites Won: " + whiteWins,
                                         "Blacks Won: " + blackWins,
                                         "Total Games: " + totalGamers,
                                     });
-                                }));
+                                    Draw();
+                                });
                             }, () => _playTaskCancellation.IsCancellationRequested);
                     }
                 }
