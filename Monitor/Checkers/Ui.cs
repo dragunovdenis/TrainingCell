@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Microsoft.Win32;
 
 namespace Monitor.Checkers
 {
@@ -185,8 +186,14 @@ namespace Monitor.Checkers
             {
                 case AgentType.Random: return new RandomAgent();
                 case AgentType.TdLambda:
+                {
+                    var openFileDialog = new OpenFileDialog();
+                    if (openFileDialog.ShowDialog() == true)
+                        return TdLambdaAgent.LoadFromFile(openFileDialog.FileName);
+
                     return new TdLambdaAgent(
                         new uint[] { 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
+                }
                 case AgentType.Interactive:
                     return new InteractiveAgent((state, moves) =>
                     {

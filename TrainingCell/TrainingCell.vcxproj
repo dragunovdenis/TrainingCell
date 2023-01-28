@@ -12,11 +12,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Checkers\Agent.h" />
+    <ClInclude Include="Headers\Checkers\AgentPack.h" />
     <ClInclude Include="Headers\Checkers\Board.h" />
     <ClInclude Include="Headers\Checkers\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\Agent.cpp" />
+    <ClCompile Include="Source\Checkers\AgentPack.cpp" />
     <ClCompile Include="Source\Checkers\Board.cpp" />
     <ClCompile Include="Source\Checkers\Utils.cpp" />
   </ItemGroup>

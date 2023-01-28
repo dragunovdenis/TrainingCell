@@ -5,6 +5,10 @@
 
 namespace TrainingCell::Checkers
 {
+	void Agent::set_training_mode(const bool training_mode) { throw std::exception("Not implemented"); }
+
+	bool Agent::get_training_mode() const { throw std::exception("Not implemented"); }
+
 	int RandomAgent::make_move(const State& current_state, const std::vector<Move>& moves)
 	{
 		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
@@ -13,6 +17,26 @@ namespace TrainingCell::Checkers
 	void RandomAgent::game_over(const State& final_state, const GameResult& result)
 	{
 		//Just do nothing because this agent can't improve its performance
+	}
+
+	AgentTypeId RandomAgent::ID()
+	{
+		return AgentTypeId::RANDOM;
+	}
+
+	AgentTypeId RandomAgent::get_type_id() const
+	{
+		return ID();
+	}
+
+	bool RandomAgent::can_train() const
+	{
+		return false;
+	}
+
+	bool RandomAgent::equal(const Agent& agent) const
+	{
+		return false; //Random agent can't be equal to another agent by definition
 	}
 
 	void TdLambdaAgent::reset()
@@ -152,7 +176,7 @@ namespace TrainingCell::Checkers
 		return move_to_take;
 	}
 
-	int TdLambdaAgent::pick_move_id(const State state, const std::vector<Move>& moves) const
+	int TdLambdaAgent::pick_move_id(const State& state, const std::vector<Move>& moves) const
 	{
 		if (moves.empty())
 			return -1;
@@ -228,6 +252,27 @@ namespace TrainingCell::Checkers
 		return DeepLearning::MsgPack::load_from_file<TdLambdaAgent>(file_path);
 	}
 
+	AgentTypeId TdLambdaAgent::ID()
+	{
+		return AgentTypeId::TDL;
+	}
+
+	AgentTypeId TdLambdaAgent::get_type_id() const
+	{
+		return ID();
+	}
+
+	bool TdLambdaAgent::can_train() const
+	{
+		return true;
+	}
+
+	bool TdLambdaAgent::equal(const Agent& agent) const
+	{
+		const auto other_tdl_agent_ptr = dynamic_cast<const TdLambdaAgent*>(&agent);
+		return other_tdl_agent_ptr != nullptr && (*other_tdl_agent_ptr) == *this;
+	}
+
 	InteractiveAgent::InteractiveAgent(const MakeMoveCallback& make_move_callback, const GameOverCallback& game_over_callback,
 		const bool play_for_whites): _make_move_callback(make_move_callback), _game_over_callback(game_over_callback), _play_for_whites(play_for_whites)
 	{
@@ -256,5 +301,109 @@ namespace TrainingCell::Checkers
 			_game_over_callback(final_state, result);
 
 		_game_over_callback(final_state.get_inverted(), result);
+	}
+
+	AgentTypeId InteractiveAgent::ID()
+	{
+		return AgentTypeId::INTERACTIVE;
+	}
+
+	AgentTypeId InteractiveAgent::get_type_id() const
+	{
+		return ID();
+	}
+
+	bool InteractiveAgent::can_train() const
+	{
+		return false;
+	}
+
+	bool InteractiveAgent::equal(const Agent& agent) const
+	{
+		//Can't be equal to any other agent by definition.
+		//It is almost impossible to define what it means
+		//to be equal for an agent that is supposed to represent an "external" player 
+		return false; 
+	}
+
+	TdlEnsembleAgent::TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble)
+	{
+		std::ranges::for_each(ensemble, [&](const auto& a)
+			{
+				_ensemble.emplace_back(a);
+				_ensemble.rbegin()->set_training_mode(false);
+			});
+	}
+
+	void TdlEnsembleAgent::Add(const TdLambdaAgent& agent)
+	{
+		_ensemble.emplace_back(agent);
+	}
+
+	int TdlEnsembleAgent::make_move(const State& current_state, const std::vector<Move>& moves)
+	{
+		if (moves.empty())
+			return -1;
+
+		if (moves.size() == 1)
+			return 0; // the choice is obvious
+
+		std::vector<int> votes(moves.size(), 0);
+
+		for (const auto& a : _ensemble)
+			++votes[a.pick_move_id(current_state, moves)];
+
+		return static_cast<int>(std::distance(votes.begin(), std::ranges::max_element(votes)));
+	}
+
+	void TdlEnsembleAgent::game_over(const State& final_state, const GameResult& result)
+	{
+		/*do nothing*/
+	}
+
+	AgentTypeId TdlEnsembleAgent::ID()
+	{
+		return AgentTypeId::TDL_ENSEMBLE;
+	}
+
+	AgentTypeId TdlEnsembleAgent::get_type_id() const
+	{
+		return ID();
+	}
+
+	void TdlEnsembleAgent::save_to_file(const std::filesystem::path& file_path) const
+	{
+		DeepLearning::MsgPack::save_to_file(*this, file_path);
+	}
+
+	TdlEnsembleAgent TdlEnsembleAgent::load_from_file(const std::filesystem::path& file_path)
+	{
+		return DeepLearning::MsgPack::load_from_file<TdlEnsembleAgent>(file_path);
+	}
+
+	bool TdlEnsembleAgent::operator == (const TdlEnsembleAgent& anotherAgent) const
+	{
+		return this->_ensemble == anotherAgent._ensemble;
+	}
+
+	bool TdlEnsembleAgent::operator != (const TdlEnsembleAgent& anotherAgent) const
+	{
+		return !(*this == anotherAgent);
+	}
+
+	std::size_t TdlEnsembleAgent::size() const
+	{
+		return _ensemble.size();
+	}
+
+	bool TdlEnsembleAgent::can_train() const
+	{
+		return false;
+	}
+
+	bool TdlEnsembleAgent::equal(const Agent& agent) const
+	{
+		const auto other_ensemble_ptr = dynamic_cast<const TdlEnsembleAgent*>(&agent);
+		return other_ensemble_ptr != nullptr && (*other_ensemble_ptr) == *this;
 	}
 }

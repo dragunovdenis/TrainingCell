@@ -7,6 +7,19 @@
 namespace TrainingCell::Checkers
 {
 	/// <summary>
+	///	Enumerates different agent types
+	///	Used to handle message-pack serialization of agents through their base class (class Agent)
+	/// </summary>
+	enum class AgentTypeId : int
+	{
+		UNKNOWN = 0,
+		RANDOM = 1,
+		INTERACTIVE = 2,
+		TDL = 3,
+		TDL_ENSEMBLE = 4,
+	};
+
+	/// <summary>
 	///	Abstract checkers agent (interface)
 	/// </summary>
 	class Agent
@@ -24,10 +37,37 @@ namespace TrainingCell::Checkers
 		virtual int make_move(const State& current_state, const std::vector<Move>& moves) = 0;
 
 		/// <summary>
-		///	The method is supposed to be called by the "training environment" when the current training episode is over
-		///	to notify the agent about the "final" state and the result of entire game (episode)
+		/// The method is supposed to be called by the "training environment" when the current training episode is over
+		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
 		virtual void game_over(const State& final_state, const GameResult& result) = 0;
+
+		/// <summary>
+		/// Returns type identifier of the current instance
+		/// </summary>
+		[[nodiscard]] virtual AgentTypeId get_type_id() const = 0;
+
+		/// <summary>
+		/// Returns "true" if the agent can be trained otherwise returns "false"
+		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
+		/// property because the later can throw exception (as not applicable)
+		/// </summary>
+		[[nodiscard]] virtual bool can_train() const = 0;
+
+		/// <summary>
+		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing
+		/// </summary>
+		virtual void set_training_mode(const bool training_mode);
+
+		/// <summary>
+		/// Returns actual value of training mode
+		/// </summary>
+		[[nodiscard]] virtual bool get_training_mode() const;
+
+		/// <summary>
+		/// Returns true if the current agent is equal to the given one
+		/// </summary>
+		virtual bool equal(const Agent& agent) const = 0;
 	};
 
 	/// <summary>
@@ -43,10 +83,32 @@ namespace TrainingCell::Checkers
 		int make_move(const State& current_state, const std::vector<Move>& moves) override;
 
 		/// <summary>
-		///	The method is supposed to be called by the "training environment" when the current training episode is over
-		///	to notify the agent about the "final" state and the result of entire game (episode)
+		/// The method is supposed to be called by the "training environment" when the current training episode is over
+		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
 		void game_over(const State& final_state, const GameResult& result) override;
+
+		/// <summary>
+		/// Returns type ID
+		/// </summary>
+		static AgentTypeId ID();
+
+		/// <summary>
+		/// Returns type identifier of the current instance
+		/// </summary>
+		[[nodiscard]] AgentTypeId get_type_id() const override;
+
+		/// <summary>
+		/// Returns "true" if the agent can be trained otherwise returns "false"
+		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
+		/// property because the later can throw exception (as not applicable)
+		/// </summary>
+		[[nodiscard]] bool can_train() const override;
+
+		/// <summary>
+		/// Returns true if the current agent is equal to the given one
+		/// </summary>
+		bool equal(const Agent& agent) const override;
 	};
 
 	using MakeMoveCallback = std::function<int(const State&, const std::vector<Move>&)>;
@@ -84,6 +146,28 @@ namespace TrainingCell::Checkers
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
 		void game_over(const State& final_state, const GameResult& result) override;
+
+		/// <summary>
+		/// Returns type ID
+		/// </summary>
+		static AgentTypeId ID();
+
+		/// <summary>
+		/// Returns type identifier of the current instance
+		/// </summary>
+		[[nodiscard]] AgentTypeId get_type_id() const override;
+
+		/// <summary>
+		/// Returns "true" if the agent can be trained otherwise returns "false"
+		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
+		/// property because the later can throw exception (as not applicable)
+		/// </summary>
+		[[nodiscard]] bool can_train() const override;
+
+		/// <summary>
+		/// Returns true if the current agent is equal to the given one
+		/// </summary>
+		bool equal(const Agent& agent) const override;
 	};
 
 	/// <summary>
@@ -91,6 +175,7 @@ namespace TrainingCell::Checkers
 	/// </summary>
 	class TdLambdaAgent : public Agent
 	{
+		friend class TdlEnsembleAgent;
 		/// <summary>
 		///	The neural net to approximate state value function
 		/// </summary>
@@ -146,7 +231,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns id of a move to take
 		/// </summary>
-		[[nodiscard]] int pick_move_id(const State state, const std::vector<Move>& moves) const;
+		[[nodiscard]] int pick_move_id(const State& state, const std::vector<Move>& moves) const;
 
 		/// <summary>
 		/// Updates "z" field
@@ -173,7 +258,7 @@ namespace TrainingCell::Checkers
 			const double lambda, const double gamma, const double alpha);
 
 		/// <summary>
-		///	Default constructor
+		/// Default constructor
 		/// </summary>
 		TdLambdaAgent() = default;
 
@@ -195,70 +280,185 @@ namespace TrainingCell::Checkers
 		void set_exploration_probability(double epsilon);
 
 		/// <summary>
-		///	Returns actual value of exploration probability
+		/// Returns actual value of exploration probability
 		/// </summary>
-		double get_exploratory_probability() const;
+		[[nodiscard]] double get_exploratory_probability() const;
 
 		/// <summary>
-		///	Updates parameter gamma with the given value;
+		/// Updates parameter gamma with the given value;
 		/// </summary>
 		void set_discount(double gamma);
 
 		/// <summary>
-		///	Returns actual value of parameter gamma (reward discount)
+		/// Returns actual value of parameter gamma (reward discount)
 		/// </summary>
-		double get_discount() const;
+		[[nodiscard]] double get_discount() const;
 
 		/// <summary>
 		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing
 		/// </summary>
-		void set_training_mode(const bool training_mode);
+		void set_training_mode(const bool training_mode) override;
 
 		/// <summary>
-		///	Returns actual value of training mode
+		/// Returns actual value of training mode
 		/// </summary>
-		bool get_training_mode() const;
+		[[nodiscard]] bool get_training_mode() const override;
 
 		/// <summary>
-		///	Updates "lambda" parameter with the given value
+		/// Updates "lambda" parameter with the given value
 		/// </summary>
 		void set_lambda(const double lambda);
 
 		/// <summary>
-		///	Returns actual value of "lambda" parameter
+		/// Returns actual value of "lambda" parameter
 		/// </summary>
-		double get_lambda() const;
+		[[nodiscard]] double get_lambda() const;
 
 		/// <summary>
-		///	Updates learning rate with the given value
+		/// Updates learning rate with the given value
 		/// </summary>
 		void set_learning_rate(const double alpha);
 
 		/// <summary>
-		///	Returns acutal value of the learning rate parameter ("alpha")
+		/// Returns acutal value of the learning rate parameter ("alpha")
 		/// </summary>
-		double get_learning_rate() const;
+		[[nodiscard]] double get_learning_rate() const;
 
 		/// <summary>
-		///	Equality operator
+		/// Equality operator
 		/// </summary>
 		bool operator == (const TdLambdaAgent & anotherAgent) const;
 
 		/// <summary>
-		///	Inequality operator
+		/// Inequality operator
 		/// </summary>
 		bool operator != (const TdLambdaAgent& anotherAgent) const;
 
 		/// <summary>
-		///	Serializes the current instance of the agent into the "message-pack" format and saves it
-		///	to the given file. Trows exception if fails.
+		/// Serializes the current instance of the agent into the "message-pack" format and saves it
+		/// to the given file. Trows exception if fails.
 		/// </summary>
 		void save_to_file(const std::filesystem::path & file_path) const;
 
 		/// <summary>
-		///	Instantiates agent from the given "message-pack" file.
-		///	Trows exception if fails.
+		/// Instantiates agent from the given "message-pack" file.
+		/// Throws exception if fails.
 		/// </summary>
 		static TdLambdaAgent load_from_file(const std::filesystem::path & file_path);
+
+		/// <summary>
+		/// Returns type ID
+		/// </summary>
+		static AgentTypeId ID();
+
+		/// <summary>
+		/// Returns type identifier of the current instance
+		/// </summary>
+		[[nodiscard]] AgentTypeId get_type_id() const override;
+
+		/// <summary>
+		/// Returns "true" if the agent can train otherwise returns "false"
+		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
+		/// property because the later can throw exception (as not applicable)
+		/// </summary>
+		[[nodiscard]] bool can_train() const override;
+
+		/// <summary>
+		/// Returns true if the current agent is equal to the given one
+		/// </summary>
+		[[nodiscard]] bool equal(const Agent& agent) const override;
+	};
+
+	/// <summary>
+	/// An ensemble of TdLambdaAgent-s
+	/// Can't be trained, i.e., works in the "inferring" mode only (at least, in the current implementation) 
+	/// </summary>
+	class TdlEnsembleAgent : public Agent
+	{
+		/// <summary>
+		/// The ensemble
+		/// </summary>
+		std::vector<TdLambdaAgent> _ensemble{};
+	public:
+		MSGPACK_DEFINE(_ensemble);
+
+		/// <summary>
+		/// Default constructor
+		/// </summary>
+		TdlEnsembleAgent() = default;
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble);
+
+		/// <summary>
+		/// Adds a copy of the given agent to the ensemble
+		/// </summary>
+		void Add(const TdLambdaAgent& agent);
+
+		/// <summary>
+		/// Returns index of a move from the given collection of available moves
+		/// that the agent wants to take given the current state
+		/// </summary>
+		int make_move(const State& current_state, const std::vector<Move>& moves) override;
+
+		/// <summary>
+		/// The method is supposed to be called by the "training environment" when the current training episode is over
+		/// to notify the agent about the "final" state and the result of entire game (episode)
+		/// </summary>
+		void game_over(const State& final_state, const GameResult& result) override;
+
+		/// <summary>
+		/// ID of the class
+		/// </summary>
+		static AgentTypeId ID();
+
+		/// <summary>
+		/// Returns type identifier of the current instance
+		/// </summary>
+		[[nodiscard]] AgentTypeId get_type_id() const override;
+
+		/// <summary>
+		/// Serializes the current instance of the agent into the "message-pack" format and saves it
+		/// to the given file. Trows exception if fails.
+		/// </summary>
+		void save_to_file(const std::filesystem::path& file_path) const;
+
+		/// <summary>
+		/// Instantiates agent from the given "message-pack" file.
+		/// Throws exception if fails.
+		/// </summary>
+		static TdlEnsembleAgent load_from_file(const std::filesystem::path& file_path);
+
+		/// <summary>
+		/// Equality operator
+		/// </summary>
+		bool operator == (const TdlEnsembleAgent& anotherAgent) const;
+
+		/// <summary>
+		/// Inequality operator
+		/// </summary>
+		bool operator != (const TdlEnsembleAgent& anotherAgent) const;
+
+		/// <summary>
+		/// Returns number of agents in the ensemble
+		/// </summary>
+		[[nodiscard]] std::size_t size() const;
+
+		/// <summary>
+		/// Returns "true" if the agent can train otherwise returns "false"
+		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
+		/// property because the later can throw exception (as not applicable)
+		/// </summary>
+		[[nodiscard]] bool can_train() const override;
+
+		/// <summary>
+		/// Returns true if the current agent is equal to the given one
+		/// </summary>
+		[[nodiscard]] bool equal(const Agent& agent) const override;
 	};
 }
+
+MSGPACK_ADD_ENUM(TrainingCell::Checkers::AgentTypeId)
+

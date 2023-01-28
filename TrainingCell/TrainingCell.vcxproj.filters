@@ -30,6 +30,9 @@
     <ClInclude Include="Headers\Checkers\Board.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Checkers\AgentPack.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\Utils.cpp">
@@ -39,6 +42,9 @@
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\Board.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\AgentPack.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
   </ItemGroup>
