@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -99,7 +100,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Functionality to handle user interface of the checkers game
     /// </summary>
-    class Ui
+    class Ui : INotifyPropertyChanged
     {
         public const int CheckerRows = 8;
         public const int CheckerColumns = 8;
@@ -118,7 +119,8 @@ namespace Monitor.Checkers
         {
             Random,
             TdLambda,
-            Interactive
+            Interactive,
+            AgentPack,
         };
 
         /// <summary>
@@ -194,6 +196,17 @@ namespace Monitor.Checkers
                     return new TdLambdaAgent(
                         new uint[] { 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
                 }
+                case AgentType.AgentPack:
+                {
+                    var openFileDialog = new OpenFileDialog();
+                    openFileDialog.Filter = "Agent Pack (*.apack)|*.apack|All files (*.*)|*.*";
+                    openFileDialog.FilterIndex = 1;
+                    if (openFileDialog.ShowDialog() == true)
+                        return new AgentPack(openFileDialog.FileName);
+
+                    return new TdLambdaAgent(
+                        new uint[] { 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
+                }
                 case AgentType.Interactive:
                     return new InteractiveAgent((state, moves) =>
                     {
@@ -209,12 +222,20 @@ namespace Monitor.Checkers
         /// </summary>
         public event Action<IList<string>> InfoEvent;
 
+        private bool _isPlaying;
+
         /// <summary>
         /// Returns "true" if playing session is ongoing
         /// </summary>
-        public bool IsPlaying()
+        public bool IsPlaying
         {
-            return _playTask != null && !_playTask.IsCompleted;
+            get => _isPlaying;
+
+            private set
+            {
+                _isPlaying = value;
+                OnPropertyChanged(nameof(IsPlaying));
+            }
         }
 
         /// <summary>
@@ -222,12 +243,19 @@ namespace Monitor.Checkers
         /// </summary>
         public void CancelPlaying()
         {
-            if (IsPlaying())
+            if (IsPlaying)
             {
                 if (_playTaskCancellation == null)
                     throw new Exception("The task can't be canceled: invalid cancellation token source");
 
                 _playTaskCancellation.Cancel();
+
+                if (_userMoveRequest != null)
+                {
+                    //set any result just to let the thread terminate
+                    _userMoveRequest.UserMoveResult.SetResult(0);
+                    _userMoveRequest = null;
+                }
             }
         }
 
@@ -241,9 +269,10 @@ namespace Monitor.Checkers
         /// <param name="movePause">Number of milliseconds to wait between two successive moves</param>
         public bool Play(AgentType agentTypeWhite, AgentType agentTypeBlack, int episodes, int movePause = 100)
         {
-            if (IsPlaying())
+            if (IsPlaying)
                 return false;
 
+            IsPlaying = true;
             _playTaskCancellation = new CancellationTokenSource();
             _playTask = new Task(() =>
             {
@@ -284,6 +313,8 @@ namespace Monitor.Checkers
             {
                 _playTask = null;
                 _playTaskCancellation = null;
+                IsPlaying = false;
+                InfoEvent ?.Invoke(null);
             }, TaskScheduler.FromCurrentSynchronizationContext());
             _playTask.Start();
 
@@ -570,6 +601,22 @@ namespace Monitor.Checkers
                 _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
 
             Draw();
+        }
+
+        /// <summary>
+        /// Property changed event
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Notifies about change of the corresponding property
+        /// </summary>
+        protected void OnPropertyChanged(string name)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            }
         }
     }
 }

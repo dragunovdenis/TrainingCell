@@ -58,10 +58,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Checkers\Agent.cs" />
+    <Compile Include="Checkers\AgentPack.cs" />
     <Compile Include="Checkers\DllWrapper.cs" />
     <Compile Include="Checkers\InteractiveAgent.cs" />
     <Compile Include="Checkers\RandomAgent.cs" />
     <Compile Include="Checkers\TdLambdaAgent.cs" />
+    <Compile Include="InvertBoolConverter.cs" />
     <Compile Include="TrainingCellInterface.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -99,6 +101,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="TrainedAgents\TrainedEnsemble.apack" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

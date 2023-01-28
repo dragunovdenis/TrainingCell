@@ -132,15 +132,15 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
-        /// Discount (gamma) parameter
+        /// Training mode parameter
         /// </summary>
         public bool TrainingMode
         {
-            get => DllWrapper.TdLambdaAgentGetTrainingMode(_ptr).ToBool();
+            get => DllWrapper.AgentGetTrainingMode(_ptr).ToBool();
 
             set
             {
-                if (!DllWrapper.TdLambdaAgentSetTrainingMode(_ptr, value))
+                if (!DllWrapper.AgentSetTrainingMode(_ptr, value))
                     throw new Exception("Failed to set parameter");
             }
         }

@@ -1,4 +1,5 @@
 #include "Interface.h"
+#include "../TrainingCell/Headers/Checkers/AgentPack.h"
 
 namespace
 {
@@ -21,7 +22,7 @@ void RunCheckersTraining(TrainingCell::Checkers::Agent* const agent1,
 	TrainingCell::Checkers::Board board(agent1, agent2);
 	board.play(episodes, 200, publishStateCallBack, publishStatsCallBack, cancellationCallBack);
 }
-
+#pragma region Random Agent
 void* ConstructCheckersRandomAgent()
 {
 	return new TrainingCell::Checkers::RandomAgent();
@@ -35,7 +36,8 @@ bool FreeCheckersRandomAgent(const TrainingCell::Checkers::RandomAgent* agent_pt
 	delete agent_ptr;
 	return true;
 }
-
+#pragma endregion Random Agent
+#pragma region Td(Lammbda)-Agent
 void* ConstructCheckersTdLambdaAgent(const unsigned int* layer_dims,
 	const int dims_count, const double exploration_epsilon, const double lambda, const double gamma, const double alpha)
 {
@@ -110,36 +112,15 @@ double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLamb
 	return agent_ptr->get_learning_rate();
 }
 
-bool CheckersTdLambdaAgentSetTrainingMode(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const bool training_mode)
-{
-	if (agent_ptr == nullptr)
-		return false;
-
-	agent_ptr->set_training_mode(training_mode);
-	return true;
-}
-
-char CheckersTdLambdaAgentGetTrainingMode(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
-{
-	if (agent_ptr == nullptr)
-		return static_cast<char>(2);
-
-	return agent_ptr->get_training_mode();
-}
-
 void* CheckersTdLambdaAgentLoadFromFile(const char* path)
 {
-	const auto agent_ptr = new TrainingCell::Checkers::TdLambdaAgent();
 	try
 	{
-		*agent_ptr = TrainingCell::Checkers::TdLambdaAgent::load_from_file(path);
+		return new TrainingCell::Checkers::TdLambdaAgent(TrainingCell::Checkers::TdLambdaAgent::load_from_file(path));
 	} catch (...)
 	{
-		delete agent_ptr;
 		return nullptr;
 	}
-
-	return agent_ptr;
 }
 
 bool CheckersTdLambdaAgentSaveToFile(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const char* path)
@@ -174,7 +155,8 @@ bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agen
 	delete agent_ptr;
 	return true;
 }
-
+#pragma endregion Td(Lammbda)-Agent
+#pragma region Interactive Agent
 void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool _play_for_whites)
 {
 	try
@@ -211,4 +193,78 @@ bool FreeCheckersInteractiveAgent(const TrainingCell::Checkers::InteractiveAgent
 	delete agent_ptr;
 	return true;
 }
+#pragma endregion Interactive Agent
+#pragma region Agent
+bool CheckersAgentSetTrainingMode(TrainingCell::Checkers::Agent* agent_ptr, const bool training_mode)
+{
+	if (agent_ptr == nullptr)
+		return false;
+
+	agent_ptr->set_training_mode(training_mode);
+	return true;
+}
+
+char CheckersAgentGetTrainingMode(const TrainingCell::Checkers::Agent* agent_ptr)
+{
+	if (agent_ptr == nullptr)
+		return static_cast<char>(2);
+
+	return agent_ptr->get_training_mode();
+}
+
+char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr)
+{
+	if (agent_ptr == nullptr)
+		return static_cast<char>(2);
+
+	return agent_ptr->can_train();
+}
+#pragma endregion Agent
+#pragma region AgentPack
+void* CheckersAgentPackLoadFromFile(const char* path)
+{
+	try
+	{
+		return new TrainingCell::Checkers::AgentPack(TrainingCell::Checkers::AgentPack::load_from_file(path));
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
+}
+
+bool CheckersAgentPackSaveToFile(const TrainingCell::Checkers::AgentPack* agent_pack_ptr, const char* path)
+{
+	if (agent_pack_ptr == nullptr)
+		return false;
+
+	try
+	{
+		agent_pack_ptr->save_to_file(path);
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool CheckersAgentPackFree(const TrainingCell::Checkers::AgentPack* agent_pack_ptr)
+{
+	if (agent_pack_ptr == nullptr)
+		return false;
+
+	delete agent_pack_ptr;
+	return true;
+}
+
+void* CheckersAgentPackGetAgentPtr(TrainingCell::Checkers::AgentPack* agent_pack_ptr)
+{
+	if (agent_pack_ptr == nullptr)
+		return nullptr;
+
+	return  &(agent_pack_ptr->agent());
+}
+#pragma endregion AgentPack
 

@@ -45,6 +45,7 @@ namespace Monitor.Checkers
             [MarshalAs(UnmanagedType.FunctionPtr)]
             CancelCallBack cancel);
 
+        #region Random Agent
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
@@ -56,7 +57,9 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "FreeCheckersRandomAgent")]
         public static extern bool FreeRandomAgent(IntPtr agentPtr);
+        #endregion
 
+        #region TD(Lambda)-Agent
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
@@ -129,20 +132,6 @@ namespace Monitor.Checkers
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
-        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentSetTrainingMode")]
-        public static extern bool TdLambdaAgentSetTrainingMode(IntPtr agentPtr,
-            [MarshalAs(UnmanagedType.U1)]
-            bool trainingMode);
-
-        /// <summary>
-        /// Wrapper for the corresponding method
-        /// </summary>
-        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentGetTrainingMode")]
-        public static extern byte TdLambdaAgentGetTrainingMode(IntPtr agentPtr);
-
-        /// <summary>
-        /// Wrapper for the corresponding method
-        /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentEqual")]
         public static extern bool TdLambdaAgentEqual(IntPtr agentPtr1, IntPtr agentPtr2);
 
@@ -151,6 +140,9 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "FreeCheckersTdLambdaAgent")]
         public static extern bool FreeTdLambdaAgent(IntPtr agentPtr);
+        #endregion
+
+        #region Interactive Agent
 
         /// <summary>
         ///	Data transferring object to pass checker moves
@@ -202,5 +194,54 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "FreeCheckersInteractiveAgent")]
         public static extern bool FreeInteractiveAgent(IntPtr agentPtr);
+        #endregion
+
+        #region Agent
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentSetTrainingMode")]
+        public static extern bool AgentSetTrainingMode(IntPtr agentPtr,
+            [MarshalAs(UnmanagedType.U1)]
+            bool trainingMode);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentGetTrainingMode")]
+        public static extern byte AgentGetTrainingMode(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentGetCanTrainFlag")]
+        public static extern byte AgentGetCanTrainFlag(IntPtr agentPtr);
+        #endregion
+
+        #region AgentPack
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentPackLoadFromFile", CharSet = CharSet.Ansi)]
+        public static extern IntPtr AgentPackLoadFromFile(string path);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentPackSaveToFile", CharSet = CharSet.Ansi)]
+        public static extern bool AgentPackSaveToFile(IntPtr agentPackPtr, string path);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentPackFree")]
+        public static extern bool AgentPackFree(IntPtr agentPackPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentPackGetAgentPtr")]
+        public static extern IntPtr AgentPackGetAgentPtr(IntPtr agentPackPtr);
+        #endregion
     }
 }

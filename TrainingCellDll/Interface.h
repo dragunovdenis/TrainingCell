@@ -7,6 +7,14 @@
 #define TRAINING_CELL_API __declspec(dllexport)
 #endif
 
+namespace TrainingCell
+{
+	namespace Checkers
+	{
+		class AgentPack;
+	}
+}
+
 extern "C"
 {
 	/// <summary>
@@ -18,6 +26,7 @@ extern "C"
 		int episodes,  TrainingCell::Checkers::PublishCheckersStateCallBack publishStateCallBack,
 		TrainingCell::Checkers::PublishTrainingStatsCallBack publishStatsCallBack, TrainingCell::Checkers::CancelCallBack cancellationCallBack);
 
+#pragma region Random agent
 	/// <summary>
 	/// Constructs a random checkers agent on the heap and returns pointer to it
 	/// </summary>
@@ -27,7 +36,8 @@ extern "C"
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
 	TRAINING_CELL_API bool FreeCheckersRandomAgent(const TrainingCell::Checkers::RandomAgent* agent_ptr);
-
+#pragma endregion Random Agent
+#pragma region Td(Lammbda)-Agent
 	/// <summary>
 	/// Constructs a TD(lambda) checkers agent on the heap and returns pointer to it
 	/// </summary>
@@ -86,17 +96,6 @@ extern "C"
 	TRAINING_CELL_API double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
-	/// Updates training mode parameter of TD(lambda) agent represented with its pointer
-	///	Returns "true" if succeeded
-	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetTrainingMode(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const bool training_mode);
-
-	/// <summary>
-	/// Returns training mode parameter of TD(lambda) agent represented with its pointer
-	/// </summary>
-	TRAINING_CELL_API char CheckersTdLambdaAgentGetTrainingMode(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
-
-	/// <summary>
 	/// Tries to load TD(lambda) agent from the given file on disk and returns pointer to it in case of success
 	///	(otherwise null pointer is returned)
 	/// </summary>
@@ -117,7 +116,8 @@ extern "C"
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
 	TRAINING_CELL_API bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
-
+#pragma endregion Td(Lammbda)-Agent
+#pragma region Interactive Agent
 	/// <summary>
 	///	Data transferring object to pass checker moves
 	/// </summary>
@@ -153,4 +153,46 @@ extern "C"
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
 	TRAINING_CELL_API bool FreeCheckersInteractiveAgent(const TrainingCell::Checkers::InteractiveAgent* agent_ptr);
+
+#pragma endregion Interactive Agent
+#pragma region Agent
+	/// <summary>
+	/// Updates training mode parameter of an agent represented with its pointer
+	/// Returns "true" if succeeded
+	/// </summary>
+	TRAINING_CELL_API bool CheckersAgentSetTrainingMode(TrainingCell::Checkers::Agent* agent_ptr, const bool training_mode);
+
+	/// <summary>
+	/// Returns training mode parameter of an agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API char CheckersAgentGetTrainingMode(const TrainingCell::Checkers::Agent* agent_ptr);
+
+	/// <summary>
+	/// Returns "can train" flag of an agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr);
+#pragma endregion Agent
+#pragma region AgentPack
+	/// <summary>
+	/// Loads agent-pack from the given file on disk and returns pointer to it
+	/// </summary>
+	TRAINING_CELL_API void* CheckersAgentPackLoadFromFile(const char* path);
+
+	/// <summary>
+	/// Saves agent-pack pointed by the given pointer to the given file on disk
+	/// </summary>
+	TRAINING_CELL_API bool CheckersAgentPackSaveToFile(const TrainingCell::Checkers::AgentPack* agent_pack_ptr, const char* path);
+
+	/// <summary>
+	/// Frees instance of the agent-pack pointed by the given pointer
+	/// </summary>
+	TRAINING_CELL_API bool CheckersAgentPackFree(const TrainingCell::Checkers::AgentPack* agent_pack_ptr);
+
+	/// <summary>
+	/// Returns pointer to the "packed" agent (TrainingCell::Checkers::Agent*)
+	/// </summary>
+	/// <param name="agent_pack_ptr"></param>
+	/// <returns></returns>
+	TRAINING_CELL_API void* CheckersAgentPackGetAgentPtr(TrainingCell::Checkers::AgentPack* agent_pack_ptr);
+#pragma endregion AgentPAck
 }
