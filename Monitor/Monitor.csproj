@@ -65,6 +65,7 @@
     <Compile Include="Checkers\TdLambdaAgent.cs" />
     <Compile Include="InvertBoolConverter.cs" />
     <Compile Include="TrainingCellInterface.cs" />
+    <Compile Include="TwoPlayerGameUI.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

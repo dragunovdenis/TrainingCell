@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:Monitor"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <local:InvertBoolConverter
+            x:Key="InvertBoolConverter"
+        /> 
     </Application.Resources>
 </Application>

@@ -117,7 +117,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Functionality to handle user interface of the checkers game
     /// </summary>
-    class Ui : INotifyPropertyChanged
+    class Ui : ITwoPlayerGameUi
     {
         public const int CheckerRows = 8;
         public const int CheckerColumns = 8;
@@ -256,9 +256,27 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Handles loading of an agent to play for "whites" (so that user will play for "blacks")
+        /// and starts the game
+        /// </summary>
+        public void LoadWhiteAgent()
+        {
+            Play(Ui.AgentType.AgentPack, Ui.AgentType.Interactive, 100);
+        }
+
+        /// <summary>
+        /// Handles loading of an agent to play for "blacks" (so that user will play for "whites")
+        /// and starts the game
+        /// </summary>
+        public void LoadBlackAgent()
+        {
+            Play(Ui.AgentType.Interactive, Ui.AgentType.AgentPack, 100);
+        }
+
+        /// <summary>
         /// Method to cancel playing. Returns after playing task is canceled
         /// </summary>
-        public void CancelPlaying()
+        public void TerminateGame()
         {
             if (IsPlaying)
             {

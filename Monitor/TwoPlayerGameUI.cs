@@ -15,75 +15,47 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
-using System.Windows;
-using Monitor.Checkers;
+using System.ComponentModel;
 
 namespace Monitor
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// General user interface for 2 players games
     /// </summary>
-    public partial class MainWindow : Window
+    interface ITwoPlayerGameUi : INotifyPropertyChanged
     {
-        private readonly ITwoPlayerGameUi _checkersUi;
+        /// <summary>
+        /// Flag to check if the game is ongoing
+        /// </summary>
+        bool IsPlaying { get; }
 
         /// <summary>
-        /// Constructor
+        /// Handles loading of an agent to play for "whites" (so that user will play for "blacks")
+        /// and starts the game
         /// </summary>
-        public MainWindow()
-        {
-            InitializeComponent();
-            _checkersUi = new Ui(MainCanvas, this.Dispatcher);
-
-            DataContext = _checkersUi;
-            _checkersUi.InfoEvent += UpdateInfoTextBox;
-        }
+        void LoadWhiteAgent();
 
         /// <summary>
-        /// Updates info text box with the given info strings
+        /// Handles loading of an agent to play for "blacks" (so that user will play for "whites")
+        /// and starts the game
         /// </summary>
-        private void UpdateInfoTextBox(IList<string> info)
-        {
-            InfoTextBox.Text = "";
-
-            if (info == null)
-                return;
-
-            foreach (var infoString in info)
-                InfoTextBox.Text += infoString + "\n";
-        }
+        void LoadBlackAgent();
 
         /// <summary>
-        /// Event handler
+        /// Terminates the current game session
         /// </summary>
-        private void MainPanel_OnSizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            _checkersUi.Draw();
-        }
+        void TerminateGame();
 
         /// <summary>
-        /// Event handler
+        /// Event that is invoked each time we want to update training information on UI
         /// </summary>
-        private void CancelButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            _checkersUi.TerminateGame();
-        }
+        event Action<IList<string>> InfoEvent;
 
         /// <summary>
-        /// Event handler
+        /// Method to redraw UI
         /// </summary>
-        private void LoadWhiteAgentButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            _checkersUi.LoadWhiteAgent();
-        }
-
-        /// <summary>
-        /// Event handler
-        /// </summary>
-        private void LoadBlackAgentButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            _checkersUi.LoadBlackAgent();
-        }
+        void Draw();
     }
 }

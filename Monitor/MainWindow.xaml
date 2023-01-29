@@ -15,9 +15,9 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <StackPanel Grid.Column="1" Background="LightGray">
-            <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" >Load White</Button>
-            <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" >Load Black</Button>
-            <Button Click="CancelButton_OnClick"  Name="CancelButton">Cancel</Button>
+            <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load White</Button>
+            <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load Black</Button>
+            <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding IsPlaying}">Cancel</Button>
             <TextBox Name = "InfoTextBox" IsReadOnly="True"></TextBox>
         </StackPanel>
         <DockPanel Grid.Column="0" Name="MainPanel" SizeChanged="MainPanel_OnSizeChanged">
