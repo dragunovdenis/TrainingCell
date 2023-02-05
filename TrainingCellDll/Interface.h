@@ -32,6 +32,11 @@ namespace TrainingCell
 	}
 }
 
+/// <summary>
+/// Delegate to acquire array from the caller side
+/// </summary>
+typedef void (*GetArrayCallBack)(const int size, const unsigned int* arr);
+
 extern "C"
 {
 	/// <summary>
@@ -113,6 +118,12 @@ extern "C"
 	TRAINING_CELL_API double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
+	/// Returns neural net dimensions of TD(lambda) agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API bool CheckersTdLambdaAgentGetNetDimensions(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr,
+		const GetArrayCallBack acquireDimensionsCallBack);
+
+	/// <summary>
 	/// Tries to load TD(lambda) agent from the given file on disk and returns pointer to it in case of success
 	///	(otherwise null pointer is returned)
 	/// </summary>
@@ -133,6 +144,11 @@ extern "C"
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
 	TRAINING_CELL_API bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Allocates agent-pack for the given TD(lambda) agent and returns pointer to it (or null-pointer if something went wrong)
+	/// </summary>
+	TRAINING_CELL_API void* PackCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 	/// <summary>
@@ -188,6 +204,16 @@ extern "C"
 	/// Returns "can train" flag of an agent represented with its pointer
 	/// </summary>
 	TRAINING_CELL_API char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr);
+
+	/// <summary>
+	/// Returns string identifier of the agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr);
+
+	/// <summary>
+	/// Sets string identifier to the agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API bool CheckersAgentSetId(TrainingCell::Checkers::Agent* agent_ptr, const char* id);
 #pragma endregion Agent
 #pragma region AgentPack
 	/// <summary>

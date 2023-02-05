@@ -85,6 +85,24 @@ namespace TrainingCell::Checkers
 		/// Returns true if the current agent is equal to the given one
 		/// </summary>
 		virtual bool equal(const Agent& agent) const = 0;
+
+	protected:
+
+		std::string _id;
+
+	public:
+
+		MSGPACK_DEFINE(_id);
+
+		/// <summary>
+		/// Getter for a string identifier of the agent
+		/// </summary>
+		[[nodiscard]] const std::string& get_id() const;
+
+		/// <summary>
+		/// Getter for a string identifier of the agent
+		/// </summary>
+		void set_id(const std::string& id);
 	};
 
 	/// <summary>
@@ -108,7 +126,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns type ID
 		/// </summary>
-		static AgentTypeId ID();
+		static AgentTypeId TYPE_ID();
 
 		/// <summary>
 		/// Returns type identifier of the current instance
@@ -167,7 +185,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns type ID
 		/// </summary>
-		static AgentTypeId ID();
+		static AgentTypeId TYPE_ID();
 
 		/// <summary>
 		/// Returns type identifier of the current instance
@@ -261,7 +279,7 @@ namespace TrainingCell::Checkers
 		void reset();
 	public:
 
-		MSGPACK_DEFINE(_net, _z, _prev_state, _prev_state_with_move, _new_game,
+		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_state_with_move, _new_game,
 			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha);
 
 		/// <summary>Constructor</summary>
@@ -272,7 +290,7 @@ namespace TrainingCell::Checkers
 		/// <param name="lambda">The "lambda parameter of TD(lambda) approach"</param>
 		/// random action instead of the one having highest predicted value </param>
 		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-			const double lambda, const double gamma, const double alpha);
+			const double lambda, const double gamma, const double alpha, const std::string& id = "TdlAgent");
 
 		/// <summary>
 		/// Default constructor
@@ -366,7 +384,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns type ID
 		/// </summary>
-		static AgentTypeId ID();
+		static AgentTypeId TYPE_ID();
 
 		/// <summary>
 		/// Returns type identifier of the current instance
@@ -384,6 +402,11 @@ namespace TrainingCell::Checkers
 		/// Returns true if the current agent is equal to the given one
 		/// </summary>
 		[[nodiscard]] bool equal(const Agent& agent) const override;
+
+		/// <summary>
+		/// Returns dimensions of the layers of the underlying neural network
+		/// </summary>
+		[[nodiscard]] std::vector<unsigned int> get_net_dimensions() const;
 	};
 
 	/// <summary>
@@ -397,7 +420,7 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		std::vector<TdLambdaAgent> _ensemble{};
 	public:
-		MSGPACK_DEFINE(_ensemble);
+		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _ensemble);
 
 		/// <summary>
 		/// Default constructor
@@ -407,7 +430,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble);
+		TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& id = "Ensemble");
 
 		/// <summary>
 		/// Adds a copy of the given agent to the ensemble
@@ -429,7 +452,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// ID of the class
 		/// </summary>
-		static AgentTypeId ID();
+		static AgentTypeId TYPE_ID();
 
 		/// <summary>
 		/// Returns type identifier of the current instance

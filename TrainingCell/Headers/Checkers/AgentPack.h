@@ -61,13 +61,13 @@ namespace TrainingCell::Checkers
 		template <typename Packer>
 		void msgpack_pack(Packer& msgpack_pk) const
 		{
-			if (_agent_id == TdLambdaAgent::ID())
+			if (_agent_id == TdLambdaAgent::TYPE_ID())
 			{
 				const auto& layer_ref_casted = dynamic_cast<const TdLambdaAgent&>(agent());
 				msgpack::type::make_define_array(_agent_id, layer_ref_casted).msgpack_pack(msgpack_pk);
 				return;
 			}
-			if (_agent_id == TdlEnsembleAgent::ID())
+			if (_agent_id == TdlEnsembleAgent::TYPE_ID())
 			{
 				const auto& layer_ref_casted = dynamic_cast<const TdlEnsembleAgent&>(agent());
 				msgpack::type::make_define_array(_agent_id, layer_ref_casted).msgpack_pack(msgpack_pk);
@@ -88,7 +88,7 @@ namespace TrainingCell::Checkers
 		template <class L, class... Types>
 		static AgentPack make(Types&&... args)
 		{
-			return AgentPack(L::ID(), std::make_unique<L>(std::forward<Types>(args)...));
+			return AgentPack(L::TYPE_ID(), std::make_unique<L>(std::forward<Types>(args)...));
 		}
 
 		/// <summary>

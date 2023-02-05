@@ -65,10 +65,35 @@
     <Compile Include="Checkers\DllWrapper.cs" />
     <Compile Include="Checkers\InteractiveAgent.cs" />
     <Compile Include="Checkers\RandomAgent.cs" />
+    <Compile Include="Checkers\UI\AgentFileSystemManager.cs" />
+    <Compile Include="Checkers\UI\TdlAgentControl.xaml.cs">
+      <DependentUpon>TdlAgentControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Checkers\UI\TdlAgentDialog.xaml.cs">
+      <DependentUpon>TdlAgentDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Checkers\TdLambdaAgent.cs" />
-    <Compile Include="InvertBoolConverter.cs" />
+    <Compile Include="Checkers\TdlParameters.cs" />
+    <Compile Include="Checkers\UI\TrainControl.xaml.cs">
+      <DependentUpon>TrainControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\DoublePropertyValidator.cs" />
+    <Compile Include="Utils\InvertBoolConverter.cs" />
     <Compile Include="TrainingCellInterface.cs" />
     <Compile Include="TwoPlayerGameUI.cs" />
+    <Compile Include="Utils\StringToUintArrayConverter.cs" />
+    <Page Include="Checkers\UI\TdlAgentControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Checkers\UI\TdlAgentDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Checkers\UI\TrainControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -77,7 +102,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Checkers\Ui.cs" />
+    <Compile Include="Checkers\UI\BoardUi.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -113,5 +138,6 @@
   <ItemGroup>
     <Resource Include="TrainingCell.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

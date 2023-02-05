@@ -18,6 +18,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using Monitor.Checkers;
+using Monitor.Checkers.UI;
 
 namespace Monitor
 {
@@ -34,7 +35,7 @@ namespace Monitor
         public MainWindow()
         {
             InitializeComponent();
-            _checkersUi = new Ui(MainCanvas, this.Dispatcher);
+            _checkersUi = new BoardUi(MainCanvas, this.Dispatcher);
 
             DataContext = _checkersUi;
             _checkersUi.InfoEvent += UpdateInfoTextBox;

@@ -15,27 +15,43 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System;
 using System.Globalization;
-using System.Windows.Data;
+using System.Windows.Controls;
 
-namespace Monitor
+namespace Monitor.Utils
 {
     /// <summary>
-    /// Boolean inverter for property binding
+    /// Validator for double precision property
     /// </summary>
-    class InvertBoolConverter : IValueConverter
+    class DoublePropertyValidator : ValidationRule
     {
         /// <summary>
-        /// Forward conversion
+        /// Minimal acceptable value for the property
         /// </summary>
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-            => !(bool?)value ?? true;
+        public double MinVal { get; set; }
 
         /// <summary>
-        /// Backward conversion
+        /// Maximal acceptable value for the property
         /// </summary>
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => !(value as bool?);
+        public double MaxVal { get; set; }
+
+        /// <summary>
+        /// Error message to show in case of failed validation
+        /// </summary>
+        public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Validation method
+        /// </summary>
+        public override ValidationResult Validate(object value,
+            CultureInfo cultureInfo)
+        {
+            var input = (double)(value ?? double.NaN);
+
+            if (input <= MaxVal && input >= MinVal)
+                return new ValidationResult(true, null);
+
+            return new ValidationResult(false, this.ErrorMessage);
+        }
     }
 }

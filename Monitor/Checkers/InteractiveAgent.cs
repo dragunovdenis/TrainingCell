@@ -17,13 +17,14 @@
 
 using System;
 using System.Linq;
+using Monitor.Checkers.UI;
 
 namespace Monitor.Checkers
 {
     /// <summary>
     /// Wrapper of the "native interactive agent"
     /// </summary>
-    class InteractiveAgent : Agent
+    sealed class InteractiveAgent : Agent
     {
         /// <summary>
         /// "Make move" delegate
@@ -39,6 +40,13 @@ namespace Monitor.Checkers
         private readonly DllWrapper.CheckersMakeMoveCallBack _makeMoveAdapter;
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private readonly DllWrapper.CheckersGameOverCallBack _gameOverAdapter;
+
+        private IntPtr _ptr;
+
+        /// <summary>
+        /// Pointer to the native agent
+        /// </summary>
+        public override IntPtr Ptr => _ptr;
 
         /// <summary>
         /// Constructor
@@ -75,10 +83,10 @@ namespace Monitor.Checkers
         /// </summary>
         public override void Dispose()
         {
-            if (_ptr == IntPtr.Zero)
+            if (Ptr == IntPtr.Zero)
                 return;
 
-            if (!DllWrapper.FreeInteractiveAgent(_ptr))
+            if (!DllWrapper.FreeInteractiveAgent(Ptr))
                 throw new Exception("Failed to release agent pointer");
 
             _ptr = IntPtr.Zero;

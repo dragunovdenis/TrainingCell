@@ -30,7 +30,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Win32;
 
-namespace Monitor.Checkers
+namespace Monitor.Checkers.UI
 {
     /// <summary>
     /// Data transferring structure to contain checkers piece position
@@ -63,7 +63,7 @@ namespace Monitor.Checkers
         /// </summary>
         public bool IsValid()
         {
-            return Row >= 0 && Row < Ui.CheckerRows && Col >= 0 && Col < Ui.CheckerRows;
+            return Row >= 0 && Row < BoardUi.CheckerRows && Col >= 0 && Col < BoardUi.CheckerRows;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Functionality to handle user interface of the checkers game
     /// </summary>
-    class Ui : ITwoPlayerGameUi
+    class BoardUi : ITwoPlayerGameUi
     {
         public const int CheckerRows = 8;
         public const int CheckerColumns = 8;
@@ -205,24 +205,9 @@ namespace Monitor.Checkers
             {
                 case AgentType.Random: return new RandomAgent();
                 case AgentType.TdLambda:
-                {
-                    var openFileDialog = new OpenFileDialog();
-                    if (openFileDialog.ShowDialog() == true)
-                        return TdLambdaAgent.LoadFromFile(openFileDialog.FileName);
-
-                    return new TdLambdaAgent(
-                        new uint[] { 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
-                }
                 case AgentType.AgentPack:
                 {
-                    var openFileDialog = new OpenFileDialog();
-                    openFileDialog.Filter = "Agent Pack (*.apack)|*.apack|All files (*.*)|*.*";
-                    openFileDialog.FilterIndex = 1;
-                    if (openFileDialog.ShowDialog() == true)
-                        return new AgentPack(openFileDialog.FileName);
-
-                    return new TdLambdaAgent(
-                        new uint[] { 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
+                        return AgentFileSystemManager.LoadAgent();
                 }
                 case AgentType.Interactive:
                     return new InteractiveAgent((state, moves) =>
@@ -261,7 +246,7 @@ namespace Monitor.Checkers
         /// </summary>
         public void LoadWhiteAgent()
         {
-            Play(Ui.AgentType.AgentPack, Ui.AgentType.Interactive, 100);
+            Play(BoardUi.AgentType.AgentPack, BoardUi.AgentType.Interactive, 100);
         }
 
         /// <summary>
@@ -270,7 +255,7 @@ namespace Monitor.Checkers
         /// </summary>
         public void LoadBlackAgent()
         {
-            Play(Ui.AgentType.Interactive, Ui.AgentType.AgentPack, 100);
+            Play(BoardUi.AgentType.Interactive, BoardUi.AgentType.AgentPack, 100);
         }
 
         /// <summary>
@@ -315,6 +300,9 @@ namespace Monitor.Checkers
                 {
                     using (var agentBlack = CreateAgent(agentTypeBlack, false))
                     {
+                        if (agentWhite == null || agentBlack == null)
+                            return;
+
                         DllWrapper.RunCheckersTraining(
                             agentWhite.Ptr, agentBlack.Ptr, episodes,
                             (state, size, subMoves, subMovesCount) =>
@@ -601,7 +589,7 @@ namespace Monitor.Checkers
         /// <summary>
         /// Constructor
         /// </summary>
-        public Ui(Canvas canvas, Dispatcher uiThreadDispatcher)
+        public BoardUi(Canvas canvas, Dispatcher uiThreadDispatcher)
         {
             _uiThreadDispatcher = uiThreadDispatcher ?? throw new Exception("Dispatcher must be not null");
             _canvas = canvas ?? throw new Exception("Invalid input");

@@ -26,6 +26,16 @@ namespace TrainingCell::Checkers
 
 	bool Agent::get_training_mode() const { throw std::exception("Not implemented"); }
 
+	const std::string& Agent::get_id() const
+	{
+		return _id;
+	}
+
+	void Agent::set_id(const std::string& id)
+	{
+		_id = id;
+	}
+
 	int RandomAgent::make_move(const State& current_state, const std::vector<Move>& moves)
 	{
 		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
@@ -36,14 +46,14 @@ namespace TrainingCell::Checkers
 		//Just do nothing because this agent can't improve its performance
 	}
 
-	AgentTypeId RandomAgent::ID()
+	AgentTypeId RandomAgent::TYPE_ID()
 	{
 		return AgentTypeId::RANDOM;
 	}
 
 	AgentTypeId RandomAgent::get_type_id() const
 	{
-		return ID();
+		return TYPE_ID();
 	}
 
 	bool RandomAgent::can_train() const
@@ -227,9 +237,10 @@ namespace TrainingCell::Checkers
 
 	TdLambdaAgent::TdLambdaAgent(
 		const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-		const double lambda, const double gamma, const double alpha) :
+		const double lambda, const double gamma, const double alpha, const std::string& id) :
 		_new_game(true), _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha)
 	{
+		set_id(id);
 		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
 			throw std::exception("Invalid Net configuration");
 
@@ -250,7 +261,8 @@ namespace TrainingCell::Checkers
 			_training_mode == anotherAgent._training_mode &&
 			_lambda == anotherAgent._lambda &&
 			_gamma == anotherAgent._gamma &&
-			_alpha == anotherAgent._alpha;
+			_alpha == anotherAgent._alpha &&
+			_id == anotherAgent._id;
 
 }
 
@@ -269,14 +281,14 @@ namespace TrainingCell::Checkers
 		return DeepLearning::MsgPack::load_from_file<TdLambdaAgent>(file_path);
 	}
 
-	AgentTypeId TdLambdaAgent::ID()
+	AgentTypeId TdLambdaAgent::TYPE_ID()
 	{
 		return AgentTypeId::TDL;
 	}
 
 	AgentTypeId TdLambdaAgent::get_type_id() const
 	{
-		return ID();
+		return TYPE_ID();
 	}
 
 	bool TdLambdaAgent::can_train() const
@@ -288,6 +300,19 @@ namespace TrainingCell::Checkers
 	{
 		const auto other_tdl_agent_ptr = dynamic_cast<const TdLambdaAgent*>(&agent);
 		return other_tdl_agent_ptr != nullptr && (*other_tdl_agent_ptr) == *this;
+	}
+
+	std::vector<unsigned int> TdLambdaAgent::get_net_dimensions() const
+	{
+		const auto dims = _net.get_dimensions();
+		std::vector<unsigned int> result(dims.size());
+
+		std::ranges::transform(dims, result.begin(), [](const auto& dim)
+			{
+				return static_cast<unsigned int>(dim.coord_prod());
+			});
+
+		return result;
 	}
 
 	InteractiveAgent::InteractiveAgent(const MakeMoveCallback& make_move_callback, const GameOverCallback& game_over_callback,
@@ -320,14 +345,14 @@ namespace TrainingCell::Checkers
 		_game_over_callback(final_state.get_inverted(), result);
 	}
 
-	AgentTypeId InteractiveAgent::ID()
+	AgentTypeId InteractiveAgent::TYPE_ID()
 	{
 		return AgentTypeId::INTERACTIVE;
 	}
 
 	AgentTypeId InteractiveAgent::get_type_id() const
 	{
-		return ID();
+		return TYPE_ID();
 	}
 
 	bool InteractiveAgent::can_train() const
@@ -343,13 +368,15 @@ namespace TrainingCell::Checkers
 		return false; 
 	}
 
-	TdlEnsembleAgent::TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble)
+	TdlEnsembleAgent::TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& id)
 	{
 		std::ranges::for_each(ensemble, [&](const auto& a)
 			{
 				_ensemble.emplace_back(a);
 				_ensemble.rbegin()->set_training_mode(false);
 			});
+
+		set_id(id);
 	}
 
 	void TdlEnsembleAgent::Add(const TdLambdaAgent& agent)
@@ -378,14 +405,14 @@ namespace TrainingCell::Checkers
 		/*do nothing*/
 	}
 
-	AgentTypeId TdlEnsembleAgent::ID()
+	AgentTypeId TdlEnsembleAgent::TYPE_ID()
 	{
 		return AgentTypeId::TDL_ENSEMBLE;
 	}
 
 	AgentTypeId TdlEnsembleAgent::get_type_id() const
 	{
-		return ID();
+		return TYPE_ID();
 	}
 
 	void TdlEnsembleAgent::save_to_file(const std::filesystem::path& file_path) const
@@ -400,7 +427,7 @@ namespace TrainingCell::Checkers
 
 	bool TdlEnsembleAgent::operator == (const TdlEnsembleAgent& anotherAgent) const
 	{
-		return this->_ensemble == anotherAgent._ensemble;
+		return this->_ensemble == anotherAgent._ensemble && _id == anotherAgent._id;
 	}
 
 	bool TdlEnsembleAgent::operator != (const TdlEnsembleAgent& anotherAgent) const

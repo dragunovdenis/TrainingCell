@@ -4,24 +4,43 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Monitor"
+        xmlns:checkers="clr-namespace:Monitor.Checkers"
+        xmlns:ui="clr-namespace:Monitor.Checkers.UI"
         mc:Ignorable="d"
         Title="TrainingCell" Height="450" Width="800" Icon="TrainingCell.ico">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width= "*" />
-            <ColumnDefinition Width= "100" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Column="1" Background="LightGray">
-            <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load White</Button>
-            <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load Black</Button>
-            <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding IsPlaying}">Cancel</Button>
-            <TextBox Name = "InfoTextBox" IsReadOnly="True"></TextBox>
-        </StackPanel>
-        <DockPanel Grid.Column="0" Name="MainPanel" SizeChanged="MainPanel_OnSizeChanged">
-            <Canvas Name="MainCanvas" Background="White"></Canvas>
-        </DockPanel>
+        <TabControl>
+            <TabItem>
+                <TabItem.Header>
+                    Play
+                </TabItem.Header>
+                <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width= "*" />
+                    <ColumnDefinition Width= "100" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="1" Background="LightGray">
+                    <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load White Agent</Button>
+                    <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load Black Agent</Button>
+                    <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding IsPlaying}">Cancel</Button>
+                    <TextBox Name = "InfoTextBox" IsReadOnly="True"></TextBox>
+                </StackPanel>
+                <DockPanel Grid.Column="0" Name="MainPanel" SizeChanged="MainPanel_OnSizeChanged">
+                    <Canvas Name="MainCanvas" Background="White"></Canvas>
+                </DockPanel>
+            </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    Train
+                </TabItem.Header>
+                <DockPanel>
+                    <ui:TrainControl></ui:TrainControl>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

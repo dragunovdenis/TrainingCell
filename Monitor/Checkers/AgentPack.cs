@@ -22,7 +22,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Wrapper class for the naive AgentPack structure
     /// </summary>
-    class AgentPack : IAgent
+    class AgentPack : Agent
     {
         /// <summary>
         /// Pointer to an instance of native object
@@ -41,9 +41,20 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Packs the given agent
+        /// </summary>
+        public AgentPack(TdLambdaAgent agent)
+        {
+            if (agent == null)
+                throw new Exception("Invalid input");
+
+            _packPtr = DllWrapper.PackTdLambdaAgent(agent.Ptr);
+        }
+
+        /// <summary>
         /// Releases native resources
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             if (_packPtr == IntPtr.Zero)
                 return;
@@ -66,7 +77,7 @@ namespace Monitor.Checkers
         /// <summary>
         /// Saves native resource to the given file on disk
         /// </summary>
-        void SaveToFile(string filePath)
+        public void SaveToFile(string filePath)
         {
             if (!DllWrapper.AgentPackSaveToFile(_packPtr, filePath))
                 throw new Exception("Saving failed");
@@ -75,7 +86,7 @@ namespace Monitor.Checkers
         /// <summary>
         /// Read-only access to the packed agent
         /// </summary>
-        public IntPtr Ptr => DllWrapper.AgentPackGetAgentPtr(_packPtr);
+        public override IntPtr Ptr => DllWrapper.AgentPackGetAgentPtr(_packPtr);
 
         /// <summary>
         /// Training mode parameter of the packed agent

@@ -129,6 +129,18 @@ double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLamb
 	return agent_ptr->get_learning_rate();
 }
 
+bool CheckersTdLambdaAgentGetNetDimensions(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const GetArrayCallBack acquireDimensionsCallBack)
+{
+	if (agent_ptr == nullptr || acquireDimensionsCallBack == nullptr)
+		return false;
+
+	const auto dims = agent_ptr->get_net_dimensions();
+	acquireDimensionsCallBack(static_cast<int>(dims.size()), dims.data());
+
+	return true;
+}
+
+
 void* CheckersTdLambdaAgentLoadFromFile(const char* path)
 {
 	try
@@ -172,6 +184,22 @@ bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agen
 	delete agent_ptr;
 	return true;
 }
+
+void* PackCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
+{
+	if (agent_ptr == nullptr)
+		return nullptr;
+
+	try
+	{
+		return new TrainingCell::Checkers::AgentPack(TrainingCell::Checkers::AgentPack::make<TrainingCell::Checkers::TdLambdaAgent>(*agent_ptr));
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
+}
+
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool _play_for_whites)
@@ -236,6 +264,25 @@ char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr
 
 	return agent_ptr->can_train();
 }
+
+const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr)
+{
+	if (agent_ptr == nullptr)
+		return nullptr;
+
+	return agent_ptr->get_id().c_str();
+}
+
+bool CheckersAgentSetId(TrainingCell::Checkers::Agent* agent_ptr, const char* id)
+{
+	if (agent_ptr == nullptr)
+		return false;
+
+	agent_ptr->set_id(id);
+
+	return true;
+}
+
 #pragma endregion Agent
 #pragma region AgentPack
 void* CheckersAgentPackLoadFromFile(const char* path)

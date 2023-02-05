@@ -16,38 +16,80 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Monitor.Checkers
 {
     /// <summary>
     /// General interface for checkers agents
     /// </summary>
-    interface IAgent : IDisposable
+    public interface IAgent : IDisposable
     {
         /// <summary>
         /// Pointer to the underlying unmanaged agent
         /// </summary>
         IntPtr Ptr { get; }
+
+        /// <summary>
+        /// Identifier of the agent
+        /// </summary>
+        string Id { get; }
     }
 
     /// <summary>
     /// Abstract agent
     /// </summary>
-    abstract class Agent : IAgent
+    abstract class Agent : IAgent, INotifyPropertyChanged
     {
-        /// <summary>
-        /// Pointer to the unmanaged resource
-        /// </summary>
-        protected IntPtr _ptr;
-
         /// <summary>
         /// Pointer to the underlying unmanaged agent
         /// </summary>
-        public IntPtr Ptr => _ptr;
+        public abstract IntPtr Ptr { get; }
 
         /// <summary>
         /// Releases unmanaged resources
         /// </summary>
         public abstract void Dispose();
+
+        /// <summary>
+        /// Identifier of the agent
+        /// </summary>
+        public virtual string Id
+        {
+            get => DllWrapper.AgentGetId(Ptr);
+            protected set
+            {
+                if (Id == value)
+                    return;
+
+                if (!DllWrapper.AgentSetId(Ptr, value))
+                    throw new Exception("Failed to set agent ID");
+
+                OnPropertyChanged();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Calls property-changed notification for the property with the given name
+        /// </summary>
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Field setter with property-changed notification
+        /// </summary>
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
     }
 }

@@ -15,56 +15,55 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System;
+using System.Windows;
 
-namespace Monitor.Checkers
+namespace Monitor.Checkers.UI
 {
     /// <summary>
-    /// Wrapper for the corresponding native class
+    /// Interaction logic for TdlAgentDialog.xaml
     /// </summary>
-    sealed class RandomAgent : Agent
+    public partial class TdlAgentDialog : Window
     {
-        private IntPtr _ptr;
-
-        /// <summary>
-        /// Pointer to the native agent
-        /// </summary>
-        public override IntPtr Ptr => _ptr;
-
         /// <summary>
         /// Constructor
         /// </summary>
-        public RandomAgent()
+        internal TdlAgentDialog(TdLambdaAgent agent = null)
         {
-            _ptr = DllWrapper.ConstructRandomAgent();
+            InitializeComponent();
 
-            if (Ptr == IntPtr.Zero)
-                throw new Exception("Failed to construct agent");
-
-            Id = $"Random ({Guid.NewGuid()})";
+            if (agent != null)
+            {
+                Agent = agent;
+                AgentControl.SetEdit(agent);
+            }
         }
 
         /// <summary>
-        /// Method to dispose native resources
+        /// Read access to the agent (constructed or edited)
         /// </summary>
-        public override void Dispose()
+        internal TdLambdaAgent Agent { get; private set; }
+
+        /// <summary>
+        /// "OK" button click handler
+        /// </summary>
+        private void OkButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (Ptr == IntPtr.Zero)
-                return;
-
-            if (!DllWrapper.FreeRandomAgent(Ptr))
-                throw new Exception("Failed to release agent pointer");
-
-            _ptr = IntPtr.Zero;
-            GC.SuppressFinalize(this);
+            if (Agent != null)
+                //Edit mode
+                Agent.SetTrainingParameters(AgentControl.Params);
+            else
+                //Construction mode
+                Agent = AgentControl.CreateAgent();
+                
+            DialogResult = true;
         }
 
         /// <summary>
-        /// Finalizer, just in case we forgot to call dispose
+        /// "Cancel" button click handler
         /// </summary>
-        ~RandomAgent()
+        private void CancelButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Dispose();
+            DialogResult = false;
         }
     }
 }

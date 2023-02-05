@@ -25,17 +25,17 @@ namespace TrainingCell::Checkers
 
 	AgentPack::AgentPack(const AgentPack& anotherPack): _agent_id(anotherPack._agent_id)
 	{
-		if (_agent_id == TdLambdaAgent::ID())
+		if (_agent_id == TdLambdaAgent::TYPE_ID())
 		{
 			_agent_ptr = std::make_unique<TdLambdaAgent>(dynamic_cast<const TdLambdaAgent&>(anotherPack.agent()));
 			return;
 		}
-		if (_agent_id == TdlEnsembleAgent::ID())
+		if (_agent_id == TdlEnsembleAgent::TYPE_ID())
 		{
 			_agent_ptr = std::make_unique<TdlEnsembleAgent>(dynamic_cast<const TdlEnsembleAgent&>(anotherPack.agent()));
 			return;
 		}
-		if (_agent_id == RandomAgent::ID())
+		if (_agent_id == RandomAgent::TYPE_ID())
 		{
 			_agent_ptr = std::make_unique<RandomAgent>(dynamic_cast<const RandomAgent&>(anotherPack.agent()));
 			return;
@@ -49,7 +49,7 @@ namespace TrainingCell::Checkers
 		//Read identifier only
 		msgpack::type::make_define_array(_agent_id).msgpack_unpack(msgpack_o);
 		//Instantiate an agent based on the identifier
-		if (_agent_id == TdLambdaAgent::ID())
+		if (_agent_id == TdLambdaAgent::TYPE_ID())
 		{
 			auto proxy = TdLambdaAgent();
 			//Read once again, but this time we read the instance of the agent as well
@@ -57,7 +57,7 @@ namespace TrainingCell::Checkers
 			_agent_ptr = std::make_unique<decltype(proxy)>(std::move(proxy));
 			return;
 		}
-		if (_agent_id == TdlEnsembleAgent::ID())
+		if (_agent_id == TdlEnsembleAgent::TYPE_ID())
 		{
 			auto proxy = TdlEnsembleAgent();
 			//Read once again, but this time we read the instance of the agent as well

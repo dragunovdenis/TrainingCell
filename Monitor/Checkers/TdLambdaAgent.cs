@@ -23,8 +23,15 @@ namespace Monitor.Checkers
     /// <summary>
     /// Wrapper for the corresponding native class
     /// </summary>
-    class TdLambdaAgent : Agent
+    internal sealed class TdLambdaAgent : Agent
     {
+        private IntPtr _ptr;
+
+        /// <summary>
+        /// Pointer to the native agent
+        /// </summary>
+        public override IntPtr Ptr => _ptr;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -38,8 +45,16 @@ namespace Monitor.Checkers
             _ptr = DllWrapper.ConstructTdLambdaAgent(layerDims, layerDims.Length,
                 explorationEpsilon, lambda, gamma, alpha);
 
-            if (_ptr == null)
+            if (Ptr == null)
                 throw new Exception("Failed to construct agent");
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public TdLambdaAgent(uint[] layerDims, ITdlParameters parameters) : this(layerDims, 0, 0, 0, 0)
+        {
+            SetTrainingParameters(parameters);
         }
 
         private TdLambdaAgent(IntPtr ptr)
@@ -52,10 +67,10 @@ namespace Monitor.Checkers
         /// </summary>
         public override void Dispose()
         {
-            if (_ptr == IntPtr.Zero)
+            if (Ptr == IntPtr.Zero)
                 return;
 
-            if (!DllWrapper.FreeTdLambdaAgent(_ptr))
+            if (!DllWrapper.FreeTdLambdaAgent(Ptr))
                 throw new Exception("Failed to release agent pointer");
 
             _ptr = IntPtr.Zero;
@@ -75,7 +90,7 @@ namespace Monitor.Checkers
         /// </summary>
         public void SaveToFile(string filePath)
         {
-            if (!DllWrapper.SaveTdLambdaAgent(_ptr, filePath))
+            if (!DllWrapper.SaveTdLambdaAgent(Ptr, filePath))
                 throw new Exception("Failed to save");
         }
 
@@ -97,12 +112,16 @@ namespace Monitor.Checkers
         /// </summary>
         public double Epsilon
         {
-            get => DllWrapper.TdLambdaAgentGetEpsilon(_ptr);
+            get => DllWrapper.TdLambdaAgentGetEpsilon(Ptr);
 
             set
             {
-                if (!DllWrapper.TdLambdaAgentSetEpsilon(_ptr, value))
-                    throw new Exception("Failed to set parameter");
+                if (!Epsilon.Equals(value))
+                {
+                    if (!DllWrapper.TdLambdaAgentSetEpsilon(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -111,12 +130,16 @@ namespace Monitor.Checkers
         /// </summary>
         public double Lambda
         {
-            get => DllWrapper.TdLambdaAgentGetLambda(_ptr);
+            get => DllWrapper.TdLambdaAgentGetLambda(Ptr);
 
             set
             {
-                if (!DllWrapper.TdLambdaAgentSetLambda(_ptr, value))
-                    throw new Exception("Failed to set parameter");
+                if (!Lambda.Equals(value))
+                {
+                    if (!DllWrapper.TdLambdaAgentSetLambda(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -125,12 +148,16 @@ namespace Monitor.Checkers
         /// </summary>
         public double Discount
         {
-            get => DllWrapper.TdLambdaAgentGetGamma(_ptr);
+            get => DllWrapper.TdLambdaAgentGetGamma(Ptr);
 
             set
             {
-                if (!DllWrapper.TdLambdaAgentSetGamma(_ptr, value))
-                    throw new Exception("Failed to set parameter");
+                if (!Discount.Equals(value))
+                {
+                    if (!DllWrapper.TdLambdaAgentSetGamma(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -139,12 +166,16 @@ namespace Monitor.Checkers
         /// </summary>
         public double LearningRate
         {
-            get => DllWrapper.TdLambdaAgentGetLearningRate(_ptr);
+            get => DllWrapper.TdLambdaAgentGetLearningRate(Ptr);
 
             set
             {
-                if (!DllWrapper.TdLambdaAgentSetLearningRate(_ptr, value))
-                    throw new Exception("Failed to set parameter");
+                if (!LearningRate.Equals(value))
+                {
+                    if (!DllWrapper.TdLambdaAgentSetLearningRate(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -153,13 +184,69 @@ namespace Monitor.Checkers
         /// </summary>
         public bool TrainingMode
         {
-            get => DllWrapper.AgentGetTrainingMode(_ptr).ToBool();
+            get => DllWrapper.AgentGetTrainingMode(Ptr).ToBool();
 
             set
             {
-                if (!DllWrapper.AgentSetTrainingMode(_ptr, value))
-                    throw new Exception("Failed to set parameter");
+                if (!TrainingMode.Equals(value))
+                {
+                    if (!DllWrapper.AgentSetTrainingMode(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
             }
+        }
+
+        /// <summary>
+        /// Neural net dimensions of the agent
+        /// </summary>
+        public uint[] NetDimensions
+        {
+            get
+            {
+                uint[] result = null;
+                if (!DllWrapper.TdLambdaAgentGetNetDimensions(Ptr, (size, array) =>
+                    {
+                        result = array;
+                    }))
+                    throw new Exception("Failed to acquire network dimensions");
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Returns snapshot of training parameters (all but those related to the underlying neural net)
+        /// </summary>
+        public ITdlParameters GetTrainingParameters()
+        {
+            return new TdlParameters()
+            {
+                Epsilon = Epsilon,
+                Lambda = Lambda,
+                Discount = Discount,
+                LearningRate = LearningRate,
+                TrainingMode = TrainingMode,
+                Id = Id,
+            };
+        }
+
+        /// <summary>
+        /// Sets training parameters of the agent
+        /// </summary>
+        public bool SetTrainingParameters(ITdlParameters parameters)
+        {
+            if (parameters == null)
+                return false;
+
+            Epsilon = parameters.Epsilon;
+            Lambda = parameters.Lambda;
+            Discount = parameters.Discount;
+            LearningRate = parameters.LearningRate;
+            TrainingMode = parameters.TrainingMode;
+            Id = parameters.Id;
+
+            return true;
         }
     }
 }

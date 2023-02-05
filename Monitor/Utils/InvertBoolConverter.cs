@@ -16,55 +16,26 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Globalization;
+using System.Windows.Data;
 
-namespace Monitor.Checkers
+namespace Monitor.Utils
 {
     /// <summary>
-    /// Wrapper for the corresponding native class
+    /// Boolean inverter for property binding
     /// </summary>
-    sealed class RandomAgent : Agent
+    class InvertBoolConverter : IValueConverter
     {
-        private IntPtr _ptr;
+        /// <summary>
+        /// Forward conversion
+        /// </summary>
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            => !(value as bool?);
 
         /// <summary>
-        /// Pointer to the native agent
+        /// Backward conversion
         /// </summary>
-        public override IntPtr Ptr => _ptr;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public RandomAgent()
-        {
-            _ptr = DllWrapper.ConstructRandomAgent();
-
-            if (Ptr == IntPtr.Zero)
-                throw new Exception("Failed to construct agent");
-
-            Id = $"Random ({Guid.NewGuid()})";
-        }
-
-        /// <summary>
-        /// Method to dispose native resources
-        /// </summary>
-        public override void Dispose()
-        {
-            if (Ptr == IntPtr.Zero)
-                return;
-
-            if (!DllWrapper.FreeRandomAgent(Ptr))
-                throw new Exception("Failed to release agent pointer");
-
-            _ptr = IntPtr.Zero;
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Finalizer, just in case we forgot to call dispose
-        /// </summary>
-        ~RandomAgent()
-        {
-            Dispose();
-        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => !(value as bool?);
     }
 }

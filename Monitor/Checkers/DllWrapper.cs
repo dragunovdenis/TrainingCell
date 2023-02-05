@@ -17,6 +17,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Monitor.Checkers.UI;
 
 namespace Monitor.Checkers
 {
@@ -49,6 +50,14 @@ namespace Monitor.Checkers
 
         [return: MarshalAs(UnmanagedType.U1)]
         public delegate bool CancelCallBack();
+
+        /// <summary>
+        /// Delegate to acquire array of unsigned integers from the managed side
+        /// </summary>
+        public delegate void AcquireArrayCallBack(
+            int size, 
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
+            System.UInt32[] array);
 
         /// <summary>
         /// Wrapper for the corresponding method
@@ -149,6 +158,12 @@ namespace Monitor.Checkers
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentGetNetDimensions")]
+        public static extern bool TdLambdaAgentGetNetDimensions(IntPtr agentPtr, AcquireArrayCallBack catchArray);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentEqual")]
         public static extern bool TdLambdaAgentEqual(IntPtr agentPtr1, IntPtr agentPtr2);
 
@@ -157,6 +172,12 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "FreeCheckersTdLambdaAgent")]
         public static extern bool FreeTdLambdaAgent(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "PackCheckersTdLambdaAgent")]
+        public static extern IntPtr PackTdLambdaAgent(IntPtr agentPtr);
         #endregion
 
         #region Interactive Agent
@@ -233,6 +254,31 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentGetCanTrainFlag")]
         public static extern byte AgentGetCanTrainFlag(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentGetId")]
+        private static extern IntPtr AgentGetIdInternal(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        public static string AgentGetId(IntPtr agentPtr)
+        {
+            var strPtr = AgentGetIdInternal(agentPtr);
+
+            if (strPtr == IntPtr.Zero)
+                return null;
+
+            return Marshal.PtrToStringAnsi(strPtr);
+        }
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentSetId", CharSet = CharSet.Ansi)]
+        public static extern bool AgentSetId(IntPtr agentPtr, string id);
         #endregion
 
         #region AgentPack

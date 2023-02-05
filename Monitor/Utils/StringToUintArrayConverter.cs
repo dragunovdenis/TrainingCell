@@ -16,55 +16,51 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Windows.Data;
 
-namespace Monitor.Checkers
+namespace Monitor.Utils
 {
     /// <summary>
-    /// Wrapper for the corresponding native class
+    /// Converts string of comma separated positive integers to an array of unsigned integers
     /// </summary>
-    sealed class RandomAgent : Agent
+    class StringToUintArrayConverter : IValueConverter
     {
-        private IntPtr _ptr;
-
         /// <summary>
-        /// Pointer to the native agent
+        /// Forward conversion
         /// </summary>
-        public override IntPtr Ptr => _ptr;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public RandomAgent()
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            _ptr = DllWrapper.ConstructRandomAgent();
+            var arr = (uint[])value;
 
-            if (Ptr == IntPtr.Zero)
-                throw new Exception("Failed to construct agent");
+            if (arr == null)
+                return string.Empty;
 
-            Id = $"Random ({Guid.NewGuid()})";
+            return string.Join(", ", arr);
         }
 
         /// <summary>
-        /// Method to dispose native resources
+        /// Backward conversion
         /// </summary>
-        public override void Dispose()
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (Ptr == IntPtr.Zero)
-                return;
+            var str = (string)value;
 
-            if (!DllWrapper.FreeRandomAgent(Ptr))
-                throw new Exception("Failed to release agent pointer");
+            if (str == null)
+                return Array.Empty<double>();
 
-            _ptr = IntPtr.Zero;
-            GC.SuppressFinalize(this);
-        }
+            var resultList = new List<uint>();
 
-        /// <summary>
-        /// Finalizer, just in case we forgot to call dispose
-        /// </summary>
-        ~RandomAgent()
-        {
-            Dispose();
+            var words = str.Split(',');
+
+            foreach (var word in words)
+            {
+                if (uint.TryParse(word, out var num))
+                    resultList.Add(num);
+            }
+
+            return resultList.ToArray();
         }
     }
 }

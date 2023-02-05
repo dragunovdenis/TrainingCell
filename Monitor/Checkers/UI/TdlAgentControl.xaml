@@ -1,0 +1,44 @@
+﻿<UserControl x:Class="Monitor.Checkers.UI.TdlAgentControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Monitor.Checkers.UI"
+             xmlns:utils="clr-namespace:Monitor.Utils"
+             mc:Ignorable="d" d:DesignWidth="399.01" Name="UI" Height="197.43">
+    <Grid DataContext="{Binding ElementName=UI}" IsEnabled="{Binding IsEnabled}">
+        <StackPanel Margin="10" >
+            <Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width= "*" />
+                        <ColumnDefinition Width= "*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Column="0" Grid.Row="1">
+                        <TextBox Text="Agent ID" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                        <TextBox Text="Hidden layer dimensions" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                        <TextBox Text="Learning rate" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                        <TextBox Text="Lambda" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                        <TextBox Text="Reward discount [0, 1]" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                        <TextBox Text="Exploration probability [0, 1]" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                        <TextBox Text="Training Mode" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Grid.Row="1">
+                        <TextBox Text="{Binding Id, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
+                        <TextBox Text="{Binding HiddenLayerDimensions, Mode =TwoWay, Converter = {StaticResource StringToUintArrayConverter}}" Margin="3,3,3,0" 
+                             IsEnabled="{Binding EditMode, Converter = {StaticResource InvertBoolConverter}}" Height="20"/>
+                        <TextBox Text="{Binding LearningRate, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
+                        <TextBox Text="{Binding Lambda, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
+                        <TextBox Text="{Binding Discount, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
+                        <TextBox Text="{Binding Epsilon, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
+                        <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>
