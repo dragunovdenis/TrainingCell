@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Monitor.Checkers.UI"
         xmlns:ui="clr-namespace:Monitor.Checkers.UI"
         mc:Ignorable="d"
-        Title="Agent parameters" Height="263.95" Width="572.128" 
+        Title="Agent parameters" Height="272.063" Width="572.128" 
         ResizeMode="NoResize" WindowStyle="SingleBorderWindow" BorderThickness="3" BorderBrush="Gray"
         WindowStartupLocation="CenterOwner">
     <Grid>

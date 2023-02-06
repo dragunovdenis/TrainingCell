@@ -11,5 +11,11 @@
         <utils:StringToUintArrayConverter
             x:Key="StringToUintArrayConverter"
         />
+        <Style TargetType="Border" x:Key="LocalBorderStyle">
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="Background" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
     </Application.Resources>
 </Application>

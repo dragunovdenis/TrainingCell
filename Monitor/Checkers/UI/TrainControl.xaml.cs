@@ -108,8 +108,9 @@ namespace Monitor.Checkers.UI
                         if (episodeCounter % 100 == 0 || episodeCounter == (EpisodesToPlay - 1))
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
-                                InfoTExtBlock.Text +=
+                                InfoTextBlock.Text +=
                                     $"White Wins:{whiteWins}; Black Wins:{blackWins}; Total Games {totalGamers}" + "\n";
+                                InfoScroll.ScrollToBottom();
                             }));
                         episodeCounter++;
                     },

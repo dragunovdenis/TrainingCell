@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="399.01" Name="UI" Height="197.43">
     <Grid DataContext="{Binding ElementName=UI}" IsEnabled="{Binding IsEnabled}">
         <StackPanel Margin="10" >
-            <Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2">
+            <Border Style="{StaticResource LocalBorderStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width= "*" />
@@ -19,23 +19,38 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Column="0" Grid.Row="1">
-                        <TextBox Text="Agent ID" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
-                        <TextBox Text="Hidden layer dimensions" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
-                        <TextBox Text="Learning rate" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
-                        <TextBox Text="Lambda" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
-                        <TextBox Text="Reward discount [0, 1]" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
-                        <TextBox Text="Exploration probability [0, 1]" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
-                        <TextBox Text="Training Mode" Margin="3,3,3,0" IsReadOnly="True" BorderThickness="0" Background="Transparent" Height="20"/>
+                        <StackPanel.Resources>
+                            <Style TargetType="TextBox">
+                                <Setter Property="IsReadOnly" Value="True"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Height" Value="20"/>
+                                <Setter Property="Margin" Value="3,3,3,0"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <TextBox Text="Agent ID"/>
+                        <TextBox Text="Hidden layer dimensions"/>
+                        <TextBox Text="Learning rate"/>
+                        <TextBox Text="Lambda"/>
+                        <TextBox Text="Reward discount [0, 1]"/>
+                        <TextBox Text="Exploration probability [0, 1]"/>
+                        <TextBox Text="Training Mode"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="1">
-                        <TextBox Text="{Binding Id, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
-                        <TextBox Text="{Binding HiddenLayerDimensions, Mode =TwoWay, Converter = {StaticResource StringToUintArrayConverter}}" Margin="3,3,3,0" 
-                             IsEnabled="{Binding EditMode, Converter = {StaticResource InvertBoolConverter}}" Height="20"/>
-                        <TextBox Text="{Binding LearningRate, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
-                        <TextBox Text="{Binding Lambda, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
-                        <TextBox Text="{Binding Discount, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
-                        <TextBox Text="{Binding Epsilon, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
-                        <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}" Margin="3,3,3,0" Height="20"/>
+                        <StackPanel.Resources>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Height" Value="20"/>
+                                <Setter Property="Margin" Value="3,3,3,0"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <TextBox Text="{Binding Id, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding HiddenLayerDimensions, Mode =TwoWay, Converter = {StaticResource StringToUintArrayConverter}}"
+                             IsEnabled="{Binding EditMode, Converter = {StaticResource InvertBoolConverter}}"/>
+                        <TextBox Text="{Binding LearningRate, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding Lambda, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding Discount, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding Epsilon, Mode=TwoWay}"/>
+                        <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}"/>
                     </StackPanel>
                 </Grid>
             </Border>
