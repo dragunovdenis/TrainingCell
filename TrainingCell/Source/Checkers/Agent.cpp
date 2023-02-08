@@ -74,11 +74,14 @@ namespace TrainingCell::Checkers
 
 	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result)
 	{
-		update_z();
-		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
-		const auto reward = static_cast<int>(result);
-		const auto delta = reward - prev_state_with_move_value;
-		_net.update(_z, -_alpha * delta, 0.0);
+		if (_training_mode)
+		{
+			update_z();
+			const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
+			const auto reward = static_cast<int>(result);
+			const auto delta = reward - prev_state_with_move_value;
+			_net.update(_z, -_alpha * delta, 0.0);
+		}
 
 		reset();
 	}
@@ -211,7 +214,7 @@ namespace TrainingCell::Checkers
 		if (moves.size() == 1)
 			return 0;
 
-		if (DeepLearning::Utils::get_random(0, 1.0) <= _exploration_epsilon)
+		if (_training_mode && DeepLearning::Utils::get_random(0, 1.0) <= _exploration_epsilon)
 			//Exploration move
 			return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1);
 
