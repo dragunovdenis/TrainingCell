@@ -96,6 +96,10 @@ namespace Monitor.Checkers.UI
 
             IsPlaying = true;
 
+            int whiteWinsPrev = 0;
+            int blackWinsPrev = 0;
+            int totalGamersPrev = 0;
+            InfoTextBlock.Text = "";
             _playTaskCancellation = new CancellationTokenSource();
             var playTask = new Task(() =>
             {
@@ -105,11 +109,20 @@ namespace Monitor.Checkers.UI
                     null,
                     (whiteWins, blackWins, totalGamers) =>
                     {
-                        if (episodeCounter % 100 == 0 || episodeCounter == (EpisodesToPlay - 1))
+                        if (episodeCounter % 1000 == 0 || episodeCounter == (EpisodesToPlay - 1))
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
+                                var gamesPlayedSinceLastReport = totalGamers - totalGamersPrev;
+                                var whiteWinsPercentsSinceLastReport = (whiteWins - whiteWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
+                                var blackWinsPercentsSinceLastReport = (blackWins - blackWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
+                                var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
+                                                                         blackWinsPercentsSinceLastReport);
+
                                 InfoTextBlock.Text +=
-                                    $"White Wins:{whiteWins}; Black Wins:{blackWins}; Total Games {totalGamers}" + "\n";
+                                    $"White Wins total/inst. %:{whiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
+                                    $"Black Wins total/inst. %:{blackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
+                                    $"Draws total/inst. %{totalGamers - whiteWins - blackWins}/{drawsPercentsFromLastReport:F1}; " +
+                                    $"Total Games {totalGamers}" + "\n";
                                 InfoScroll.ScrollToBottom();
                             }));
                         episodeCounter++;

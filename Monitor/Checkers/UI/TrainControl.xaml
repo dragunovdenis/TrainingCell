@@ -92,7 +92,7 @@
                 <Button Name="SaveButton" IsEnabled="{Binding CanSave}" Click="SaveButton_Click">Save Selected Agent</Button>
             </StackPanel>
             <DockPanel  Margin="10" Grid.Column="0">
-                <ScrollViewer Name="InfoScroll">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="InfoScroll">
                     <TextBlock Name="InfoTextBlock"/>
                 </ScrollViewer>
             </DockPanel>
