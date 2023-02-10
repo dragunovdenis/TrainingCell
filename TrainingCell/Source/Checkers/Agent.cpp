@@ -78,7 +78,7 @@ namespace TrainingCell::Checkers
 		{
 			update_z();
 			const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
-			const auto reward = static_cast<int>(result);
+			const auto reward = 2 * static_cast<int>(result);
 			const auto delta = reward - prev_state_with_move_value;
 			_net.update(_z, -_alpha * delta, 0.0);
 		}
