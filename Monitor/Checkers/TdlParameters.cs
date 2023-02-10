@@ -105,6 +105,7 @@ namespace Monitor.Checkers
 
             Epsilon = source.Epsilon;
             Discount = source.Discount;
+            Lambda = source.Lambda;
             LearningRate = source.LearningRate;
             TrainingMode = source.TrainingMode;
             Id = source.Id;
