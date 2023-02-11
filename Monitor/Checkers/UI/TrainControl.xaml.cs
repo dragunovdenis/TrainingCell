@@ -99,6 +99,7 @@ namespace Monitor.Checkers.UI
             int whiteWinsPrev = 0;
             int blackWinsPrev = 0;
             int totalGamersPrev = 0;
+            var timePrev = DateTime.Now;
             InfoTextBlock.Text = "";
             _playTaskCancellation = new CancellationTokenSource();
             var playTask = new Task(() =>
@@ -117,12 +118,14 @@ namespace Monitor.Checkers.UI
                                 var blackWinsPercentsSinceLastReport = (blackWins - blackWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
                                 var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
                                                                          blackWinsPercentsSinceLastReport);
+                                var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
+                                timePrev = DateTime.Now;
 
                                 InfoTextBlock.Text +=
                                     $"White Wins total/inst. %:{whiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
                                     $"Black Wins total/inst. %:{blackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
                                     $"Draws total/inst. %{totalGamers - whiteWins - blackWins}/{drawsPercentsFromLastReport:F1}; " +
-                                    $"Total Games {totalGamers}" + "\n";
+                                    $"Total Games {totalGamers}; Elapsed time {elapsedTimeSec:F1} sec." + "\n";
                                 InfoScroll.ScrollToBottom();
                             }));
                         episodeCounter++;
@@ -346,6 +349,19 @@ namespace Monitor.Checkers.UI
                 throw new Exception("Can't save the given agent");
 
             AgentFileSystemManager.SaveAgent(GetSelectedAgent());
+        }
+
+        /// <summary>
+        /// Finish session event
+        /// </summary>
+        public event Action<TrainControl> OnFinishSession;
+
+        /// <summary>
+        /// Finish session button click handler
+        /// </summary>
+        private void FinishSession_OnClick(object sender, RoutedEventArgs e)
+        {
+            OnFinishSession?.Invoke(this);
         }
     }
 }

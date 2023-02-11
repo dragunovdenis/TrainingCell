@@ -7,9 +7,9 @@
         xmlns:checkers="clr-namespace:Monitor.Checkers"
         xmlns:ui="clr-namespace:Monitor.Checkers.UI"
         mc:Ignorable="d"
-        Title="TrainingCell" Height="450" Width="800" Icon="TrainingCell.ico">
+        Title="TrainingCell" Height="450" Width="800" Icon="TrainingCell.ico" Name="Ui">
     <Grid>
-        <TabControl>
+        <TabControl Name="MainTabControl" DataContext="{Binding ElementName = Ui}">
             <TabItem>
                 <TabItem.Header>
                     Play
@@ -25,7 +25,7 @@
                 <StackPanel Grid.Column="1" Background="LightGray">
                     <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load White Agent</Button>
                     <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load Black Agent</Button>
-                    <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding IsPlaying}">Cancel</Button>
+                    <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding CheckersUi.IsPlaying}">Cancel</Button>
                     <TextBox Name = "InfoTextBox" IsReadOnly="True"></TextBox>
                 </StackPanel>
                 <DockPanel Grid.Column="0" Name="MainPanel" SizeChanged="MainPanel_OnSizeChanged">
@@ -33,13 +33,9 @@
                 </DockPanel>
             </Grid>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    Train
-                </TabItem.Header>
-                <DockPanel>
-                    <ui:TrainControl></ui:TrainControl>
-                </DockPanel>
+            <TabItem PreviewMouseDown="AddTab_OnPreviewMouseDown" ToolTip="Add new train session" 
+                     IsEnabled="{Binding CanAddNewTraining}">
+                <TabItem.Header>+</TabItem.Header>
             </TabItem>
         </TabControl>
     </Grid>

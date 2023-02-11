@@ -15,19 +15,29 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
-using Monitor.Checkers;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Monitor.Checkers.UI;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Monitor
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private readonly ITwoPlayerGameUi _checkersUi;
+
+        /// <summary>
+        /// Read-only access to the checkers UI
+        /// </summary>
+        public ITwoPlayerGameUi CheckersUi => _checkersUi;
 
         /// <summary>
         /// Constructor
@@ -85,6 +95,88 @@ namespace Monitor
         private void LoadBlackAgentButton_OnClick(object sender, RoutedEventArgs e)
         {
             _checkersUi.LoadBlackAgent();
+        }
+
+        private int _trainTabCountTotal = 0;
+
+        /// <summary>
+        /// Flag defining if it is possible to add yet another training session tab
+        /// </summary>
+        public bool CanAddNewTraining
+        {
+            get
+            {
+                return MainTabControl.Items.Cast<TabItem>().
+                    Count(x => x.Content is TrainControl) < Environment.ProcessorCount;
+            }
+        }
+
+        /// <summary>
+        /// Handling click on the "add training tab" button
+        /// </summary>
+        private void AddTab_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!CanAddNewTraining)
+                throw new Exception("The corresponding button must be disabled");
+
+            var tabItem = new TabItem()
+            {
+                Header = "Train " + (_trainTabCountTotal == 0 ? "" : _trainTabCountTotal.ToString()),
+            };
+            _trainTabCountTotal++;
+
+            var trainControl = new TrainControl()
+            {
+                Tag = tabItem,
+            };
+
+            trainControl.OnFinishSession += TrainControlOnOnFinishSession;
+            tabItem.Content = trainControl;
+
+            var newItemId = MainTabControl.Items.Count - 1;
+            //Put the new item in a pre-last position (since the last position is occupied by "add button")
+            MainTabControl.Items.Insert(newItemId, tabItem);
+            MainTabControl.SelectedIndex = newItemId;
+            OnPropertyChanged(nameof(CanAddNewTraining));
+
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Finish of a training session handler
+        /// </summary>
+        private void TrainControlOnOnFinishSession(TrainControl obj)
+        {
+            var tabId = MainTabControl.Items.IndexOf(obj.Tag);
+
+            if (tabId < 0)
+                throw new Exception("Invalid tab control to remove");
+
+            MainTabControl.SelectedIndex = tabId == MainTabControl.Items.Count - 2 ? tabId - 1 : tabId + 1;
+
+            MainTabControl.Items.Remove(obj.Tag);
+            OnPropertyChanged(nameof(CanAddNewTraining));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Property changed invocation
+        /// </summary>
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Property setter with notification
+        /// </summary>
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }

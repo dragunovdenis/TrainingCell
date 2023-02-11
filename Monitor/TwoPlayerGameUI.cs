@@ -24,7 +24,7 @@ namespace Monitor
     /// <summary>
     /// General user interface for 2 players games
     /// </summary>
-    interface ITwoPlayerGameUi : INotifyPropertyChanged
+    public interface ITwoPlayerGameUi : INotifyPropertyChanged
     {
         /// <summary>
         /// Flag to check if the game is ongoing
