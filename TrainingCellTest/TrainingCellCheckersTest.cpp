@@ -18,6 +18,9 @@
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/Checkers/Board.h"
 #include "../TrainingCell/Headers/Checkers/Agent.h"
+#include "../TrainingCell/Headers/Checkers/RandomAgent.h"
+#include "../TrainingCell/Headers/Checkers/TdLambdaAgent.h"
+#include "../TrainingCell/Headers/Checkers/TdlEnsembleAgent.h"
 #include "../TrainingCell/Headers/Checkers/AgentPack.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include <ppl.h>

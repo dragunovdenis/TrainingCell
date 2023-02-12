@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../../Headers/Checkers/AgentPack.h"
+#include "../../Headers/Checkers/RandomAgent.h"
 #include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
 
 namespace TrainingCell::Checkers

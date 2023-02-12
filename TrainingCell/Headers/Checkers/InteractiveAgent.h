@@ -16,92 +16,69 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "Utils.h"
+#include <functional>
+#include "Agent.h"
 
 namespace TrainingCell::Checkers
 {
-	/// <summary>
-	///	Enumerates different agent types
-	///	Used to handle message-pack serialization of agents through their base class (class Agent)
-	/// </summary>
-	enum class AgentTypeId : int
-	{
-		UNKNOWN = 0,
-		RANDOM = 1,
-		INTERACTIVE = 2,
-		TDL = 3,
-		TDL_ENSEMBLE = 4,
-	};
+	using MakeMoveCallback = std::function<int(const State&, const std::vector<Move>&)>;
+	using GameOverCallback = std::function<void(const State&, const GameResult&)>;
 
 	/// <summary>
-	///	Abstract checkers agent (interface)
+	///	Interface for a human player
 	/// </summary>
-	class Agent
+	class InteractiveAgent : public Agent
 	{
+		const MakeMoveCallback _make_move_callback{};
+		const GameOverCallback _game_over_callback{};
+		const bool _play_for_whites{};
 	public:
 		/// <summary>
-		///	Virtual destructor
+		/// Constructor
 		/// </summary>
-		virtual ~Agent() = default;
+		/// <param name="make_move_callback">Pointer to a method that
+		/// will be called when "make_move" method of the agent is called</param>
+		/// <param name="game_over_callback">Pointer to a method that
+		/// will be called when "game_over" method of the agent is called</param>
+		/// <param name="play_for_whites">Determines whether state and move parameters of the callback methods
+		/// should be inverted (if "false") or not (if "true")</param>
+		InteractiveAgent(const MakeMoveCallback& make_move_callback, const GameOverCallback& game_over_callback,
+			const bool play_for_whites);
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
 		/// </summary>
-		virtual int make_move(const State& current_state, const std::vector<Move>& moves) = 0;
+		int make_move(const State& current_state, const std::vector<Move>& moves) override;
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
-		virtual void game_over(const State& final_state, const GameResult& result) = 0;
+		void game_over(const State& final_state, const GameResult& result) override;
+
+		/// <summary>
+		/// Returns type ID
+		/// </summary>
+		static AgentTypeId TYPE_ID();
 
 		/// <summary>
 		/// Returns type identifier of the current instance
 		/// </summary>
-		[[nodiscard]] virtual AgentTypeId get_type_id() const = 0;
+		[[nodiscard]] AgentTypeId get_type_id() const override;
 
 		/// <summary>
 		/// Returns "true" if the agent can be trained otherwise returns "false"
 		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
 		/// property because the later can throw exception (as not applicable)
 		/// </summary>
-		[[nodiscard]] virtual bool can_train() const = 0;
-
-		/// <summary>
-		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing
-		/// </summary>
-		virtual void set_training_mode(const bool training_mode);
-
-		/// <summary>
-		/// Returns actual value of training mode
-		/// </summary>
-		[[nodiscard]] virtual bool get_training_mode() const;
+		[[nodiscard]] bool can_train() const override;
 
 		/// <summary>
 		/// Returns true if the current agent is equal to the given one
 		/// </summary>
-		virtual bool equal(const Agent& agent) const = 0;
-
-	protected:
-
-		std::string _id;
-
-	public:
-
-		MSGPACK_DEFINE(_id);
-
-		/// <summary>
-		/// Getter for a string identifier of the agent
-		/// </summary>
-		[[nodiscard]] const std::string& get_id() const;
-
-		/// <summary>
-		/// Getter for a string identifier of the agent
-		/// </summary>
-		void set_id(const std::string& id);
+		bool equal(const Agent& agent) const override;
 	};
-}
 
-MSGPACK_ADD_ENUM(TrainingCell::Checkers::AgentTypeId)
+}
 

@@ -16,8 +16,10 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
+#include <filesystem>
 #include <memory>
-#include "Agent.h"
+#include "TdLambdaAgent.h"
+#include "TdlEnsembleAgent.h"
 #include <msgpack.hpp>
 
 namespace TrainingCell::Checkers

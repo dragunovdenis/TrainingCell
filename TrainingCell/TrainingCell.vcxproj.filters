@@ -33,6 +33,18 @@
     <ClInclude Include="Headers\Checkers\AgentPack.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Checkers\RandomAgent.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\InteractiveAgent.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\TdLambdaAgent.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\Utils.cpp">
@@ -45,6 +57,18 @@
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\AgentPack.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\RandomAgent.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\InteractiveAgent.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\TdLambdaAgent.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
   </ItemGroup>

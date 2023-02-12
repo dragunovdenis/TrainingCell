@@ -15,21 +15,39 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/Agent.h"
+#include "../../Headers/Checkers/RandomAgent.h"
+#include "../../../DeepLearning/DeepLearning/Utilities.h"
 
 namespace TrainingCell::Checkers
 {
-	void Agent::set_training_mode(const bool training_mode) { throw std::exception("Not implemented"); }
-
-	bool Agent::get_training_mode() const { throw std::exception("Not implemented"); }
-
-	const std::string& Agent::get_id() const
+	int RandomAgent::make_move(const State& current_state, const std::vector<Move>& moves)
 	{
-		return _id;
+		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
 	}
 
-	void Agent::set_id(const std::string& id)
+	void RandomAgent::game_over(const State& final_state, const GameResult& result)
 	{
-		_id = id;
+		//Just do nothing because this agent can't improve its performance
 	}
+
+	AgentTypeId RandomAgent::TYPE_ID()
+	{
+		return AgentTypeId::RANDOM;
+	}
+
+	AgentTypeId RandomAgent::get_type_id() const
+	{
+		return TYPE_ID();
+	}
+
+	bool RandomAgent::can_train() const
+	{
+		return false;
+	}
+
+	bool RandomAgent::equal(const Agent& agent) const
+	{
+		return false; //Random agent can't be equal to another agent by definition
+	}
+
 }
