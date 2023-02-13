@@ -47,7 +47,7 @@ void* ConstructCheckersRandomAgent()
 
 bool FreeCheckersRandomAgent(const TrainingCell::Checkers::RandomAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	delete agent_ptr;
@@ -63,7 +63,7 @@ void* ConstructCheckersTdLambdaAgent(const unsigned int* layer_dims,
 
 bool CheckersTdLambdaAgentSetEpsilon(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double exploration_epsilon)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	agent_ptr->set_exploration_probability(exploration_epsilon);
@@ -72,7 +72,7 @@ bool CheckersTdLambdaAgentSetEpsilon(TrainingCell::Checkers::TdLambdaAgent* agen
 
 double CheckersTdLambdaAgentGetEpsilon(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return std::numeric_limits<double>::quiet_NaN();
 
 	return agent_ptr->get_exploratory_probability();
@@ -80,7 +80,7 @@ double CheckersTdLambdaAgentGetEpsilon(const TrainingCell::Checkers::TdLambdaAge
 
 bool CheckersTdLambdaAgentSetLambda(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double lambda)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	agent_ptr->set_lambda(lambda);
@@ -89,7 +89,7 @@ bool CheckersTdLambdaAgentSetLambda(TrainingCell::Checkers::TdLambdaAgent* agent
 
 double CheckersTdLambdaAgentGetLambda(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return std::numeric_limits<double>::quiet_NaN();
 
 	return agent_ptr->get_lambda();
@@ -97,7 +97,7 @@ double CheckersTdLambdaAgentGetLambda(const TrainingCell::Checkers::TdLambdaAgen
 
 bool CheckersTdLambdaAgentSetGamma(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double gamma)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	agent_ptr->set_discount(gamma);
@@ -106,7 +106,7 @@ bool CheckersTdLambdaAgentSetGamma(TrainingCell::Checkers::TdLambdaAgent* agent_
 
 double CheckersTdLambdaAgentGetGamma(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return std::numeric_limits<double>::quiet_NaN();
 
 	return agent_ptr->get_discount();
@@ -114,7 +114,7 @@ double CheckersTdLambdaAgentGetGamma(const TrainingCell::Checkers::TdLambdaAgent
 
 bool CheckersTdLambdaAgentSetLearningRate(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double alpha)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	agent_ptr->set_learning_rate(alpha);
@@ -123,7 +123,7 @@ bool CheckersTdLambdaAgentSetLearningRate(TrainingCell::Checkers::TdLambdaAgent*
 
 double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return std::numeric_limits<double>::quiet_NaN();
 
 	return agent_ptr->get_learning_rate();
@@ -131,7 +131,7 @@ double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLamb
 
 bool CheckersTdLambdaAgentGetNetDimensions(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const GetArrayCallBack acquireDimensionsCallBack)
 {
-	if (agent_ptr == nullptr || acquireDimensionsCallBack == nullptr)
+	if (!agent_ptr || !acquireDimensionsCallBack)
 		return false;
 
 	const auto dims = agent_ptr->get_net_dimensions();
@@ -154,7 +154,7 @@ void* CheckersTdLambdaAgentLoadFromFile(const char* path)
 
 bool CheckersTdLambdaAgentSaveToFile(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const char* path)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	try
@@ -170,7 +170,7 @@ bool CheckersTdLambdaAgentSaveToFile(const TrainingCell::Checkers::TdLambdaAgent
 
 bool CheckersTdLambdaAgentEqual(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr1, const TrainingCell::Checkers::TdLambdaAgent* agent_ptr2)
 {
-	if (agent_ptr1 == nullptr || agent_ptr2 == nullptr)
+	if (!agent_ptr1 || !agent_ptr2)
 		return false;
 
 	return *agent_ptr1 == *agent_ptr2;
@@ -178,7 +178,7 @@ bool CheckersTdLambdaAgentEqual(const TrainingCell::Checkers::TdLambdaAgent* age
 
 bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	delete agent_ptr;
@@ -187,7 +187,7 @@ bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agen
 
 void* PackCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return nullptr;
 
 	try
@@ -206,7 +206,7 @@ void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move
 {
 	try
 	{
-		if (make_move_callback == nullptr || game_over_callback == nullptr)
+		if (!make_move_callback || !game_over_callback)
 			return nullptr;
 
 		return new TrainingCell::Checkers::InteractiveAgent(
@@ -232,7 +232,7 @@ void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move
 
 bool FreeCheckersInteractiveAgent(const TrainingCell::Checkers::InteractiveAgent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	delete agent_ptr;
@@ -242,7 +242,7 @@ bool FreeCheckersInteractiveAgent(const TrainingCell::Checkers::InteractiveAgent
 #pragma region Agent
 bool CheckersAgentSetTrainingMode(TrainingCell::Checkers::Agent* agent_ptr, const bool training_mode)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	agent_ptr->set_training_mode(training_mode);
@@ -251,7 +251,7 @@ bool CheckersAgentSetTrainingMode(TrainingCell::Checkers::Agent* agent_ptr, cons
 
 char CheckersAgentGetTrainingMode(const TrainingCell::Checkers::Agent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return static_cast<char>(2);
 
 	return agent_ptr->get_training_mode();
@@ -259,7 +259,7 @@ char CheckersAgentGetTrainingMode(const TrainingCell::Checkers::Agent* agent_ptr
 
 char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return static_cast<char>(2);
 
 	return agent_ptr->can_train();
@@ -267,7 +267,7 @@ char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr
 
 const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return nullptr;
 
 	return agent_ptr->get_id().c_str();
@@ -275,7 +275,7 @@ const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr)
 
 bool CheckersAgentSetId(TrainingCell::Checkers::Agent* agent_ptr, const char* id)
 {
-	if (agent_ptr == nullptr)
+	if (!agent_ptr)
 		return false;
 
 	agent_ptr->set_id(id);
@@ -299,7 +299,7 @@ void* CheckersAgentPackLoadFromFile(const char* path)
 
 bool CheckersAgentPackSaveToFile(const TrainingCell::Checkers::AgentPack* agent_pack_ptr, const char* path)
 {
-	if (agent_pack_ptr == nullptr)
+	if (!agent_pack_ptr)
 		return false;
 
 	try
@@ -316,7 +316,7 @@ bool CheckersAgentPackSaveToFile(const TrainingCell::Checkers::AgentPack* agent_
 
 bool CheckersAgentPackFree(const TrainingCell::Checkers::AgentPack* agent_pack_ptr)
 {
-	if (agent_pack_ptr == nullptr)
+	if (!agent_pack_ptr)
 		return false;
 
 	delete agent_pack_ptr;
@@ -325,10 +325,121 @@ bool CheckersAgentPackFree(const TrainingCell::Checkers::AgentPack* agent_pack_p
 
 void* CheckersAgentPackGetAgentPtr(TrainingCell::Checkers::AgentPack* agent_pack_ptr)
 {
-	if (agent_pack_ptr == nullptr)
+	if (!agent_pack_ptr)
 		return nullptr;
 
 	return  &(agent_pack_ptr->agent());
 }
 #pragma endregion AgentPack
+#pragma region TdlEnsembleAgent
+void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::Checkers::TdLambdaAgent* agent_collection)
+{
+	if (!agent_collection && agent_count != 0)
+		return nullptr;
+
+	const auto result = new TrainingCell::Checkers::TdlEnsembleAgent();
+
+	try
+	{
+		for (auto sub_agent_id = 0; sub_agent_id < agent_count; ++sub_agent_id)
+			result->add(agent_collection[sub_agent_id]);
+	} catch(...)
+	{
+		delete result;
+		return nullptr;
+	}
+
+	return result;
+}
+
+bool FreeCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return false;
+
+	delete agent_ptr;
+	return true;
+}
+
+bool SaveCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const char* file_path)
+{
+	if (!agent_ptr)
+		return false;
+
+	try
+	{
+		agent_ptr->save_to_file(file_path);
+	} catch (...)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void* LoadCheckersTdlEnsembleAgent(const char* file_path)
+{
+	try
+	{
+		return new TrainingCell::Checkers::TdlEnsembleAgent(
+			TrainingCell::Checkers::TdlEnsembleAgent::load_from_file(file_path));
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
+}
+
+int CheckersTdlEnsembleAgentGetSize(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return static_cast<int>(agent_ptr->size());
+}
+
+const char* CheckersTdlEnsembleAgentGetSubAgentId(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const int agent_id)
+{
+	if (!agent_ptr)
+		return nullptr;
+
+	return (*agent_ptr)[agent_id].get_id().c_str();
+}
+
+int CheckersTdlEnsembleAgentAdd(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+	const TrainingCell::Checkers::TdLambdaAgent* agent_to_add_ptr)
+{
+	if (!ensemble_agent_ptr || !agent_to_add_ptr)
+		return -1;
+
+	return static_cast<int>(ensemble_agent_ptr->add(*agent_to_add_ptr));
+}
+
+bool CheckersTdlEnsembleAgentRemove(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+	const int sub_agent_id)
+{
+	if (!ensemble_agent_ptr)
+		return false;
+
+	return ensemble_agent_ptr->remove_agent(sub_agent_id);
+}
+
+int CheckersTdlEnsembleAgentSetSingleAgentMode(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+	const bool set_single_agent_mode)
+{
+	if (!ensemble_agent_ptr)
+		return -1;
+
+	return static_cast<int>(ensemble_agent_ptr->set_single_agent_mode(set_single_agent_mode));
+}
+
+int CheckersTdlEnsembleAgentGetSingleAgentId(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr)
+{
+	if (!ensemble_agent_ptr)
+		return -2;
+
+	return static_cast<int>(ensemble_agent_ptr->get_current_random_agent_id());
+}
+#pragma endregion TdlEnsembleAgent
+
 

@@ -45,7 +45,7 @@ namespace Monitor.Checkers
             _ptr = DllWrapper.ConstructTdLambdaAgent(layerDims, layerDims.Length,
                 explorationEpsilon, lambda, gamma, alpha);
 
-            if (Ptr == null)
+            if (Ptr == IntPtr.Zero)
                 throw new Exception("Failed to construct agent");
         }
 
@@ -57,6 +57,9 @@ namespace Monitor.Checkers
             SetTrainingParameters(parameters);
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         private TdLambdaAgent(IntPtr ptr)
         {
             _ptr = ptr;
@@ -71,7 +74,7 @@ namespace Monitor.Checkers
                 return;
 
             if (!DllWrapper.FreeTdLambdaAgent(Ptr))
-                throw new Exception("Failed to release agent pointer");
+                throw new Exception("Failed to release pointed agent");
 
             _ptr = IntPtr.Zero;
             GC.SuppressFinalize(this);

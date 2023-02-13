@@ -63,6 +63,7 @@
     <Compile Include="Checkers\Agent.cs" />
     <Compile Include="Checkers\AgentPack.cs" />
     <Compile Include="Checkers\DllWrapper.cs" />
+    <Compile Include="Checkers\EnsembleAgent.cs" />
     <Compile Include="Checkers\InteractiveAgent.cs" />
     <Compile Include="Checkers\RandomAgent.cs" />
     <Compile Include="Checkers\UI\AgentFileSystemManager.cs" />

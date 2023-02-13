@@ -99,7 +99,7 @@ namespace TrainingCellTest
 						if (blacks_win_percentage > min_perf_of_agent && result.size() < number_of_agents_in_ensemble)
 						{
 							std::lock_guard lock(m);
-							result.Add(agent);
+							result.add(agent);
 						}
 					}
 				});

@@ -17,6 +17,7 @@
 
 #include "../../Headers/Checkers/TdlEnsembleAgent.h"
 #include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "../../../DeepLearning/DeepLearning/Utilities.h"
 
 namespace TrainingCell::Checkers
 {
@@ -31,9 +32,45 @@ namespace TrainingCell::Checkers
 		set_id(id);
 	}
 
-	void TdlEnsembleAgent::Add(const TdLambdaAgent& agent)
+	std::size_t TdlEnsembleAgent::add(const TdLambdaAgent& agent)
 	{
 		_ensemble.emplace_back(agent);
+
+		return _ensemble.size() - 1;
+	}
+
+	std::size_t TdlEnsembleAgent::set_single_agent_mode(const bool use_single_random_agent)
+	{
+		if (use_single_random_agent)
+			_chosen_agent_id = DeepLearning::Utils::get_random_int(0, static_cast<int>(_ensemble.size()) - 1);
+		else
+			_chosen_agent_id = -1;
+
+		return _chosen_agent_id;
+	}
+
+	bool TdlEnsembleAgent::is_single_agent_mode() const
+	{
+		return _chosen_agent_id >= 0 && _ensemble.size() > _chosen_agent_id;
+	}
+
+	std::size_t TdlEnsembleAgent::get_current_random_agent_id() const
+	{
+		return _chosen_agent_id;
+	}
+
+	bool TdlEnsembleAgent::remove_agent(const int id)
+	{
+		if (id < 0 || _ensemble.size() <= id)
+			return false;
+
+		_ensemble.erase(_ensemble.begin() + id);
+		return true;
+	}
+
+	const Agent& TdlEnsembleAgent::operator [](const int id) const
+	{
+		return _ensemble[id];
 	}
 
 	int TdlEnsembleAgent::make_move(const State& current_state, const std::vector<Move>& moves)
@@ -44,7 +81,10 @@ namespace TrainingCell::Checkers
 		if (moves.size() == 1)
 			return 0; // the choice is obvious
 
-		std::vector<int> votes(moves.size(), 0);
+		if (is_single_agent_mode())
+			return _ensemble[_chosen_agent_id].pick_move_id(current_state, moves);
+
+		std::vector votes(moves.size(), 0);
 
 		for (const auto& a : _ensemble)
 			++votes[a.pick_move_id(current_state, moves)];
@@ -54,7 +94,7 @@ namespace TrainingCell::Checkers
 
 	void TdlEnsembleAgent::game_over(const State& final_state, const GameResult& result)
 	{
-		/*do nothing*/
+		set_single_agent_mode(is_single_agent_mode());
 	}
 
 	AgentTypeId TdlEnsembleAgent::TYPE_ID()

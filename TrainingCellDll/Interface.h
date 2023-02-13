@@ -240,5 +240,75 @@ extern "C"
 	/// <param name="agent_pack_ptr"></param>
 	/// <returns></returns>
 	TRAINING_CELL_API void* CheckersAgentPackGetAgentPtr(TrainingCell::Checkers::AgentPack* agent_pack_ptr);
-#pragma endregion AgentPAck
+#pragma endregion AgentPack
+#pragma region TdlEnsembleAgent
+
+	/// <summary>
+	/// Returns pointer to an instance of TdlEnsembleAgent constructed fr4om the given collection of agents
+	/// </summary>
+	/// <param name="agent_count">Number of agents in the given collection</param>
+	/// <param name="agent_collection">Collection of pointers to TdLambdaInstances</param>
+	TRAINING_CELL_API void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::Checkers::TdLambdaAgent* agent_collection);
+
+	/// <summary>
+	/// Frees the instance of ensemble collection represented with the given pointer
+	///	Returns "true" if succeeded
+	/// </summary>
+	TRAINING_CELL_API bool FreeCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr);
+
+	/// <summary>
+	/// Saves the given instance of ensemble agent to the given file on disc (returns "true" if succeeded)
+	/// </summary>
+	TRAINING_CELL_API bool SaveCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const char* file_path);
+
+	/// <summary>
+	/// Loads ensemble agent from the given file on disk
+	/// </summary>
+	TRAINING_CELL_API void* LoadCheckersTdlEnsembleAgent(const char* file_path);
+
+	/// <summary>
+	/// Returns number of elements in the underlying collection of the given ensemble agent
+	///	or "-1" if something went wrong
+	/// </summary>
+	/// <param name="agent_ptr">Pointer to an instance of TdlEnsembleAgent</param>
+	/// <returns></returns>
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentGetSize(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr);
+
+	/// <summary>
+	/// Returns string identifier of a sub-agent of the given ensemble with the given index
+	/// </summary>
+	/// <param name="agent_ptr">Pointer to an ensemble agent</param>
+	/// <param name="agent_id">Index of sub-agent to infer identifier from</param>
+	TRAINING_CELL_API const char* CheckersTdlEnsembleAgentGetSubAgentId(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const int agent_id);
+
+	/// <summary>
+	/// Adds given agent to the given ensemble and returns index of the added agent in the underlying collection of agents
+	///	or "-1" of something went wrong
+	/// </summary>
+	/// <param name="ensemble_agent_ptr">Ensemble to add agent to</param>
+	/// <param name="agent_to_add_ptr">Agent, copy of which will be added to the ensemble</param>
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentAdd(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+		const TrainingCell::Checkers::TdLambdaAgent* agent_to_add_ptr);
+
+	/// <summary>
+	/// Removes a sub-agent with the given index (in the underlying collection of agents in the ensemble)
+	///	from the given ensemble
+	/// </summary>
+	/// <param name="ensemble_agent_ptr">Ensemble to be modified</param>
+	/// <param name="sub_agent_id">Index of the sub-agent to be removed from the ensemble</param>
+	TRAINING_CELL_API bool CheckersTdlEnsembleAgentRemove(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+		const int sub_agent_id);
+
+	/// <summary>
+	/// Sets "single agent model" for the given instance of ensemble agent
+	/// and returns actual index of a "chosen" sub-agent (or "-1" depending on the input parameter)
+	/// </summary>
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentSetSingleAgentMode(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+		const bool set_single_agent_mode);
+
+	/// <summary>
+	/// Returns index of the single agent in case "single agent mode" is on of "-2" otherwise
+	/// </summary>
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentGetSingleAgentId(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr);
+#pragma endregion TdlEnsembleAgent
 }
