@@ -25,8 +25,7 @@ namespace TrainingCell::Checkers
 	{
 		std::ranges::for_each(ensemble, [&](const auto& a)
 			{
-				_ensemble.emplace_back(a);
-				_ensemble.rbegin()->set_training_mode(false);
+				add(a);
 			});
 
 		set_id(id);
@@ -35,6 +34,7 @@ namespace TrainingCell::Checkers
 	std::size_t TdlEnsembleAgent::add(const TdLambdaAgent& agent)
 	{
 		_ensemble.emplace_back(agent);
+		_ensemble.rbegin()->set_training_mode(false);
 
 		return _ensemble.size() - 1;
 	}
@@ -119,7 +119,7 @@ namespace TrainingCell::Checkers
 
 	bool TdlEnsembleAgent::operator == (const TdlEnsembleAgent& anotherAgent) const
 	{
-		return this->_ensemble == anotherAgent._ensemble && _id == anotherAgent._id;
+		return _ensemble == anotherAgent._ensemble && _id == anotherAgent._id && _chosen_agent_id == anotherAgent._chosen_agent_id;
 	}
 
 	bool TdlEnsembleAgent::operator != (const TdlEnsembleAgent& anotherAgent) const
