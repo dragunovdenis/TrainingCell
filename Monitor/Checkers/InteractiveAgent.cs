@@ -71,14 +71,6 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
-        /// Finalizer
-        /// </summary>
-        ~InteractiveAgent()
-        {
-            Dispose();
-        }
-
-        /// <summary>
         /// Releases unmanaged resources
         /// </summary>
         public override void Dispose()

@@ -67,6 +67,12 @@
     <Compile Include="Checkers\InteractiveAgent.cs" />
     <Compile Include="Checkers\RandomAgent.cs" />
     <Compile Include="Checkers\UI\AgentFileSystemManager.cs" />
+    <Compile Include="Checkers\UI\EnsembleAgentControl.xaml.cs">
+      <DependentUpon>EnsembleAgentControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Checkers\UI\EnsembleAgentDialog.xaml.cs">
+      <DependentUpon>EnsembleAgentDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Checkers\UI\TdlAgentControl.xaml.cs">
       <DependentUpon>TdlAgentControl.xaml</DependentUpon>
     </Compile>
@@ -83,6 +89,14 @@
     <Compile Include="TrainingCellInterface.cs" />
     <Compile Include="TwoPlayerGameUI.cs" />
     <Compile Include="Utils\StringToUintArrayConverter.cs" />
+    <Page Include="Checkers\UI\EnsembleAgentControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Checkers\UI\EnsembleAgentDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Checkers\UI\TdlAgentControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -22,7 +22,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// General interface to access parameters of TD(lambda) agent
     /// </summary>
-    internal interface ITdlParameters
+    public interface ITdlParameters
     {
         /// <summary>
         /// Exploration probability

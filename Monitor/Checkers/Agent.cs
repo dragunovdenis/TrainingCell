@@ -41,7 +41,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Abstract agent
     /// </summary>
-    abstract class Agent : IAgent, INotifyPropertyChanged
+    public abstract class Agent : IAgent, INotifyPropertyChanged
     {
         /// <summary>
         /// Pointer to the underlying unmanaged agent
@@ -59,7 +59,7 @@ namespace Monitor.Checkers
         public virtual string Id
         {
             get => DllWrapper.AgentGetId(Ptr);
-            protected set
+            set
             {
                 if (Id == value)
                     return;
@@ -69,6 +69,14 @@ namespace Monitor.Checkers
 
                 OnPropertyChanged();
             }
+        }
+
+        /// <summary>
+        /// Finalizer
+        /// </summary>
+        ~Agent()
+        {
+            Dispose();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

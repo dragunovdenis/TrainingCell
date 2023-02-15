@@ -248,7 +248,7 @@ extern "C"
 	/// </summary>
 	/// <param name="agent_count">Number of agents in the given collection</param>
 	/// <param name="agent_collection">Collection of pointers to TdLambdaInstances</param>
-	TRAINING_CELL_API void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::Checkers::TdLambdaAgent* agent_collection);
+	TRAINING_CELL_API void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::Checkers::TdLambdaAgent** agent_collection);
 
 	/// <summary>
 	/// Frees the instance of ensemble collection represented with the given pointer
@@ -310,5 +310,10 @@ extern "C"
 	/// Returns index of the single agent in case "single agent mode" is on of "-2" otherwise
 	/// </summary>
 	TRAINING_CELL_API int CheckersTdlEnsembleAgentGetSingleAgentId(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr);
+
+	/// <summary>
+	/// Allocates agent-pack for the given TD(lambda)-ensemble agent and returns pointer to it (or null-pointer if something went wrong)
+	/// </summary>
+	TRAINING_CELL_API void* PackCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr);
 #pragma endregion TdlEnsembleAgent
 }

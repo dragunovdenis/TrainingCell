@@ -51,6 +51,14 @@ namespace Monitor.Checkers
             _packPtr = DllWrapper.PackTdLambdaAgent(agent.Ptr);
         }
 
+        public AgentPack(EnsembleAgent agent)
+        {
+            if (agent == null)
+                throw new Exception("Invalid input");
+
+            _packPtr = DllWrapper.PackTdlEnsembleAgent(agent.Ptr);
+        }
+
         /// <summary>
         /// Releases native resources
         /// </summary>
@@ -64,14 +72,6 @@ namespace Monitor.Checkers
 
             _packPtr = IntPtr.Zero;
             GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Finalizer, just in case we forgot to call dispose
-        /// </summary>
-        ~AgentPack()
-        {
-            Dispose();
         }
 
         /// <summary>

@@ -17,7 +17,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,31 +35,16 @@ namespace Monitor.Checkers.UI
     public partial class TrainControl : UserControl, INotifyPropertyChanged
     {
         /// <summary>
-        /// Adds given agent to the white and black agents pool somultaneously
+        /// Collection of agents
+        /// </summary>
+        public  ObservableCollection<IAgent> Agents { get; } = new ObservableCollection<IAgent>();
+
+        /// <summary>
+        /// Adds given agent to the pull of agents
         /// </summary>
         private void AddAgent(IAgent agent)
         {
-            var item = new ListViewItem()
-            {
-                Content = agent.Id,
-                Tag = agent
-            };
-
-            AgentPoolList.Items.Add(item);
-
-            //In case of TD(l) agent we bind its Id
-            //to the content of the list-view item,
-            //so that the latter gets automatically updated on edit
-            if (agent is TdLambdaAgent tdlAgent)
-            {
-                var idBinding = new Binding("Id")
-                {
-                    Source = tdlAgent,
-                    Mode = BindingMode.OneWay,
-                };
-
-                item.SetBinding(ContentProperty, idBinding);
-            }
+            Agents.Add(agent);
         }
 
         /// <summary>
@@ -200,7 +187,15 @@ namespace Monitor.Checkers.UI
             if (AgentPoolList.SelectedIndex < 0)
                 return null;
 
-            return (AgentPoolList.SelectedItem as ListViewItem)?.Tag as IAgent;
+            return Agents[AgentPoolList.SelectedIndex];
+        }
+
+        /// <summary>
+        /// Returns all the available TdLambda-agents
+        /// </summary>
+        private IList<TdLambdaAgent> GetTdlAgents()
+        {
+            return Agents.Where(x => x is TdLambdaAgent).Cast<TdLambdaAgent>().ToArray();
         }
 
         /// <summary>
@@ -362,6 +357,16 @@ namespace Monitor.Checkers.UI
         private void FinishSession_OnClick(object sender, RoutedEventArgs e)
         {
             OnFinishSession?.Invoke(this);
+        }
+
+        /// <summary>
+        /// Create ensemble button click handler
+        /// </summary>
+        private void CreateEnsemble_OnClick(object sender, RoutedEventArgs e)
+        {
+            var dialog = new EnsembleAgentDialog(GetTdlAgents());
+            if (dialog.ShowDialog() == true && dialog.Ensemble != null)
+                AddAgent(dialog.Ensemble);
         }
     }
 }

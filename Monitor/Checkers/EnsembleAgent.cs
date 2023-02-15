@@ -16,7 +16,6 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,7 +24,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Wrapper for the TdlEnsembleAgent on C++ side
     /// </summary>
-    internal class EnsembleAgent : Agent
+    public class EnsembleAgent : Agent
     {
         private IntPtr _ptr;
 
@@ -70,12 +69,9 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
-        /// Returns number of sub-agents in the underlying ensemble
+        /// Number of sub-agents in the underlying ensemble
         /// </summary>
-        public int Size()
-        {
-            return DllWrapper.TdlEnsembleAgentGetSize(_ptr);
-        }
+        public int Size => DllWrapper.TdlEnsembleAgentGetSize(_ptr);
 
         /// <summary>
         /// Returns string identifier of a sub-agent with the given index (taking values from zero to size minus one)
@@ -84,6 +80,11 @@ namespace Monitor.Checkers
         {
             return DllWrapper.TdlEnsembleAgentGetSubAgentId(_ptr, subAgentIndex);
         }
+
+        /// <summary>
+        /// Ids of all the sub-agents
+        /// </summary>
+        public IList<string> SubAgentIds => Enumerable.Range(0, Size).Select(GetSubAgentIdentifier).ToArray();
 
         /// <summary>
         /// Adds copy of the given agent to the given ensemble
@@ -104,9 +105,10 @@ namespace Monitor.Checkers
         /// <summary>
         /// Sets "single agent mode" for the pointed native agent
         /// </summary>
-        public int SetSingleAgentMode(bool setSingleAgentMode)
+        public bool SingleAgentMode
         {
-            return DllWrapper.TdlEnsembleAgentSetSingleAgentMode(_ptr, setSingleAgentMode);
+            get => GetSingleAgentId() >= 0;
+            set => DllWrapper.TdlEnsembleAgentSetSingleAgentMode(_ptr, value);
         }
 
         /// <summary>

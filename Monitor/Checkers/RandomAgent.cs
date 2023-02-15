@@ -58,13 +58,5 @@ namespace Monitor.Checkers
             _ptr = IntPtr.Zero;
             GC.SuppressFinalize(this);
         }
-
-        /// <summary>
-        /// Finalizer, just in case we forgot to call dispose
-        /// </summary>
-        ~RandomAgent()
-        {
-            Dispose();
-        }
     }
 }

@@ -23,7 +23,7 @@ namespace Monitor.Checkers
     /// <summary>
     /// Wrapper for the corresponding native class
     /// </summary>
-    internal sealed class TdLambdaAgent : Agent
+    public sealed class TdLambdaAgent : Agent
     {
         private IntPtr _ptr;
 
@@ -78,14 +78,6 @@ namespace Monitor.Checkers
 
             _ptr = IntPtr.Zero;
             GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Finalizer, just in case we forgot to call dispose
-        /// </summary>
-        ~TdLambdaAgent()
-        {
-            Dispose();
         }
 
         /// <summary>

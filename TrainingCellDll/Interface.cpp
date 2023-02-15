@@ -332,7 +332,7 @@ void* CheckersAgentPackGetAgentPtr(TrainingCell::Checkers::AgentPack* agent_pack
 }
 #pragma endregion AgentPack
 #pragma region TdlEnsembleAgent
-void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::Checkers::TdLambdaAgent* agent_collection)
+void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::Checkers::TdLambdaAgent** agent_collection)
 {
 	if (!agent_collection && agent_count != 0)
 		return nullptr;
@@ -342,7 +342,7 @@ void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCel
 	try
 	{
 		for (auto sub_agent_id = 0; sub_agent_id < agent_count; ++sub_agent_id)
-			result->add(agent_collection[sub_agent_id]);
+			result->add(*agent_collection[sub_agent_id]);
 	} catch(...)
 	{
 		delete result;
@@ -439,6 +439,22 @@ int CheckersTdlEnsembleAgentGetSingleAgentId(TrainingCell::Checkers::TdlEnsemble
 		return -2;
 
 	return static_cast<int>(ensemble_agent_ptr->get_current_random_agent_id());
+}
+
+void* PackCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return nullptr;
+
+	try
+	{
+		return new TrainingCell::Checkers::AgentPack(
+			TrainingCell::Checkers::AgentPack::make<TrainingCell::Checkers::TdlEnsembleAgent>(*agent_ptr));
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
 }
 #pragma endregion TdlEnsembleAgent
 

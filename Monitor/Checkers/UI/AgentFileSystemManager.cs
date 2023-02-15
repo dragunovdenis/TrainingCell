@@ -28,9 +28,11 @@ namespace Monitor.Checkers.UI
     internal class AgentFileSystemManager
     {
         private const string TdlAgentExtension = ".tda";
+        private const string EnsembleAgentExtension = ".ena";
         private const string AgentPackExtension = ".apack";
 
         private const string TdlAgentFilter = "TD-lambda Agent (*" + TdlAgentExtension + ")|*" + TdlAgentExtension;
+        private const string EnsembleAgentFilter = "Ensemble Agent (*" + EnsembleAgentExtension + ")|*" + EnsembleAgentExtension;
         private const string AgentPackFilter = "Agent Pack (*" + AgentPackExtension + ")|*" + AgentPackExtension;
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private static string GetLoadFilter()
         {
-            return $"{TdlAgentFilter}|{AgentPackFilter}";
+            return $"{TdlAgentFilter}|{AgentPackFilter}|{EnsembleAgentFilter}";
         }
 
         /// <summary>
@@ -56,6 +58,9 @@ namespace Monitor.Checkers.UI
         {
             if (agent is TdLambdaAgent)
                 return $"{TdlAgentFilter}|{AgentPackFilter}";
+
+            if (agent is EnsembleAgent)
+                return $"{EnsembleAgentFilter}|{AgentPackFilter}";
 
             if (agent is AgentPack)
                 return AgentPackFilter;
@@ -81,6 +86,9 @@ namespace Monitor.Checkers.UI
                     var ext = Path.GetExtension(openFileDialog.FileName)?.ToLower();
                     if (ext == TdlAgentExtension)
                         return TdLambdaAgent.LoadFromFile(openFileDialog.FileName);
+
+                    if (ext == EnsembleAgentExtension)
+                        return EnsembleAgent.LoadFromFile(openFileDialog.FileName);
 
                     if (ext == AgentPackExtension)
                         return new AgentPack(openFileDialog.FileName);
@@ -123,13 +131,23 @@ namespace Monitor.Checkers.UI
                         return;
                     }
 
+                    if (ext == EnsembleAgentExtension)
+                    {
+                        (agent as EnsembleAgent)?.SaveToFile(saveFileDialog.FileName);
+                        return;
+                    }
+
                     if (ext == AgentPackExtension)
                         if (agent is TdLambdaAgent tldAgent)
                         {
                             using (var pack = new AgentPack(tldAgent))
-                            {
                                 pack.SaveToFile(saveFileDialog.FileName);
-                            }
+
+                            return;
+                        } else if (agent is EnsembleAgent ensAgent)
+                        {
+                            using (var pack = new AgentPack(ensAgent))
+                                pack.SaveToFile(saveFileDialog.FileName);
 
                             return;
                         }
