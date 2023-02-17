@@ -29,7 +29,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
             <RowDefinition Height= "Auto" />
             <RowDefinition Height= "*" />
         </Grid.RowDefinitions>
-        <StackPanel Margin="10" Grid.Row="0">
+        <StackPanel Margin="10, 10, 10, 0" Grid.Row="0">
             <Border Style="{StaticResource LocalBorderStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -53,8 +53,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                 </Grid>
             </Border>
         </StackPanel>
-        <TextBox Grid.Row="1" Text="Select agents to add to ensemble:" Style="{StaticResource TextBoxReadOnlyStyle}"/>
-        <DockPanel Margin="10" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <TextBox Margin="10, 0, 10, 0" Grid.Row="1" Text="Select agents to add to ensemble:" Style="{StaticResource TextBoxReadOnlyStyle}"/>
+        <DockPanel Margin="10, 0, 10, 10" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Border Style="{StaticResource LocalBorderStyle}">
                 <ListBox ItemsSource="{Binding Agents}" SelectionMode="Multiple" Name="AgentsListBox">
                     <ListBox.ItemContainerStyle>

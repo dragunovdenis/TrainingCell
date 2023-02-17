@@ -315,5 +315,10 @@ extern "C"
 	/// Allocates agent-pack for the given TD(lambda)-ensemble agent and returns pointer to it (or null-pointer if something went wrong)
 	/// </summary>
 	TRAINING_CELL_API void* PackCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr);
+
+	/// <summary>
+	/// Returns pointer to constant instance of the sub-agent with the given id
+	/// </summary>
+	TRAINING_CELL_API const void* CheckersTdlEnsembleAgentGetSubAgentPtr(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const int sub_agent_id);
 #pragma endregion TdlEnsembleAgent
 }

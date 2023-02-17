@@ -389,6 +389,12 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "PackCheckersTdlEnsembleAgent")]
         public static extern IntPtr PackTdlEnsembleAgent(IntPtr ensembleAgentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdlEnsembleAgentGetSubAgentPtr")]
+        public static extern IntPtr TdlEnsembleAgentGetSubAgentPtr(IntPtr ensembleAgentPtr, int subAgentId);
         #endregion
     }
 }

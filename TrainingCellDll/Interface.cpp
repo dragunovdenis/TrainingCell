@@ -456,6 +456,15 @@ void* PackCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgen
 		return nullptr;
 	}
 }
+
+const void* CheckersTdlEnsembleAgentGetSubAgentPtr(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr,
+	const int sub_agent_id)
+{
+	if (agent_ptr == nullptr || sub_agent_id < 0 || sub_agent_id >= agent_ptr->size())
+		return nullptr;
+
+	return &(*agent_ptr)[sub_agent_id];
+}
 #pragma endregion TdlEnsembleAgent
 
 

@@ -108,7 +108,7 @@ namespace Monitor.Checkers.UI
             Lambda = 0.2,
             LearningRate = 0.05,
             TrainingMode = true,
-            Id = Guid.NewGuid().ToString(),
+            Id = "Agent-" + Guid.NewGuid().ToString(),
         };
 
         /// <summary>

@@ -23,19 +23,25 @@ using System.Runtime.CompilerServices;
 namespace Monitor.Checkers
 {
     /// <summary>
+    /// Read-only agent interface
+    /// </summary>
+    public interface IAgentReadOnly
+    {
+        /// <summary>
+        /// Identifier of the agent
+        /// </summary>
+        string Id { get; }
+    }
+
+    /// <summary>
     /// General interface for checkers agents
     /// </summary>
-    public interface IAgent : IDisposable
+    public interface IAgent : IDisposable, IAgentReadOnly
     {
         /// <summary>
         /// Pointer to the underlying unmanaged agent
         /// </summary>
         IntPtr Ptr { get; }
-
-        /// <summary>
-        /// Identifier of the agent
-        /// </summary>
-        string Id { get; }
     }
 
     /// <summary>

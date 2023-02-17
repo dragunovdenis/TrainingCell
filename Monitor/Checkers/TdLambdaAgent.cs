@@ -21,9 +21,50 @@ using System.Linq;
 namespace Monitor.Checkers
 {
     /// <summary>
+    /// Read-only interface of TD(lambda) agent
+    /// </summary>
+    public interface ITdLambdaAgentReadOnly : IAgentReadOnly
+    {
+        /// <summary>
+        /// Saves agent to disk
+        /// </summary>
+        void SaveToFile(string filePath);
+
+        /// <summary>
+        /// Exploration epsilon parameter
+        /// </summary>
+        double Epsilon { get; }
+
+        /// <summary>
+        /// Lambda parameter
+        /// </summary>
+        double Lambda { get; }
+
+        /// <summary>
+        /// Discount (gamma) parameter
+        /// </summary>
+        double Discount { get; }
+
+        /// <summary>
+        /// Discount (gamma) parameter
+        /// </summary>
+        double LearningRate { get; }
+
+        /// <summary>
+        /// Training mode parameter
+        /// </summary>
+        bool TrainingMode { get; }
+
+        /// <summary>
+        /// Neural net dimensions of the agent
+        /// </summary>
+        uint[] NetDimensions { get; }
+    }
+
+    /// <summary>
     /// Wrapper for the corresponding native class
     /// </summary>
-    public sealed class TdLambdaAgent : Agent
+    public sealed class TdLambdaAgent : Agent, ITdLambdaAgentReadOnly
     {
         private IntPtr _ptr;
 
@@ -31,6 +72,11 @@ namespace Monitor.Checkers
         /// Pointer to the native agent
         /// </summary>
         public override IntPtr Ptr => _ptr;
+
+        /// <summary>
+        /// Determines if the pointer should be disposed by the current instance of the agent
+        /// </summary>
+        private readonly bool _ownPointer = true; 
 
         /// <summary>
         /// Constructor
@@ -60,9 +106,10 @@ namespace Monitor.Checkers
         /// <summary>
         /// Constructor
         /// </summary>
-        private TdLambdaAgent(IntPtr ptr)
+        public TdLambdaAgent(IntPtr ptr, bool ownPointer = true)
         {
             _ptr = ptr;
+            _ownPointer = ownPointer;
         }
 
         /// <summary>
@@ -70,6 +117,9 @@ namespace Monitor.Checkers
         /// </summary>
         public override void Dispose()
         {
+            if (!_ownPointer)
+                return;
+
             if (Ptr == IntPtr.Zero)
                 return;
 

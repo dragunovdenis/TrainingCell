@@ -25,7 +25,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace Monitor.Checkers.UI
 {
@@ -207,6 +206,14 @@ namespace Monitor.Checkers.UI
             return GetSelectedAgent() as TdLambdaAgent;
         }
 
+        /// <summary>
+        /// Returns selected ensemble agent (or null if there is no such agent)
+        /// </summary>
+        private EnsembleAgent GetSelectedEnsembleAgent()
+        {
+            return GetSelectedAgent() as EnsembleAgent;
+        }
+
         void AssignAgent(bool white)
         {
             if (AgentPoolList.SelectedIndex < 0)
@@ -306,8 +313,16 @@ namespace Monitor.Checkers.UI
 
         private void EditButton_OnClick(object sender, RoutedEventArgs e)
         {
-            var dialog = new TdlAgentDialog(GetSelectedTdlAgent());
-            dialog.ShowDialog();
+            if (GetSelectedTdlAgent() != null)
+            {
+                var dialog = new TdlAgentDialog(GetSelectedTdlAgent());
+                dialog.ShowDialog();
+            } else if (GetSelectedEnsembleAgent() != null)
+            {
+                var dialog = new EnsembleAgentDialog(GetTdlAgents(), GetSelectedEnsembleAgent());
+                dialog.ShowDialog();
+            }
+            else throw new Exception("Can't edit");
         }
 
         /// <summary>
@@ -315,7 +330,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private void AgentPoolList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CanEdit = GetSelectedTdlAgent() != null;
+            CanEdit = GetSelectedTdlAgent() != null || GetSelectedEnsembleAgent() != null;
             OnPropertyChanged(nameof(CanSave));
         }
 
@@ -364,7 +379,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private void CreateEnsemble_OnClick(object sender, RoutedEventArgs e)
         {
-            var dialog = new EnsembleAgentDialog(GetTdlAgents());
+            var dialog = new EnsembleAgentDialog(GetTdlAgents(), null);
             if (dialog.ShowDialog() == true && dialog.Ensemble != null)
                 AddAgent(dialog.Ensemble);
         }

@@ -46,6 +46,23 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Returns read-only instance of the sub-agent with the given index.
+        /// The is supposed to be between 0 and "size of the ensemble" - 1
+        /// </summary>
+        public ITdLambdaAgentReadOnly GetSubAgent(int subAgentId)
+        {
+            return new TdLambdaAgent(DllWrapper.TdlEnsembleAgentGetSubAgentPtr(Ptr, subAgentId), ownPointer: false);
+        }
+
+        /// <summary>
+        /// Returns collection of the sub-agents in the order that corresponds to that of the native C++ agent
+        /// </summary>
+        public IList<ITdLambdaAgentReadOnly> GetSubAgents()
+        {
+            return Enumerable.Range(0, Size).Select(GetSubAgent).ToArray();
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         private EnsembleAgent(IntPtr ptr)
@@ -92,6 +109,26 @@ namespace Monitor.Checkers
         public int AddSubAgent(TdLambdaAgent agentToAdd)
         {
             return DllWrapper.TdlEnsembleAgentAdd(_ptr, agentToAdd.Ptr);
+        }
+
+        /// <summary>
+        /// Adds given collection of agents to the ensemble
+        /// </summary>
+        public void AddSubAgents(IList<TdLambdaAgent> subAgents)
+        {
+            foreach (var agent in subAgents)
+                AddSubAgent(agent);
+        }
+
+        /// <summary>
+        /// Removes sub-agents with the given indices
+        /// </summary>
+        public void RemoveSubAgents(IList<int> subAgentIds)
+        {
+            //remove sub-agents starting from the end of collection
+            //so that indices do not get invalid after each removal
+            foreach (var id in subAgentIds.OrderByDescending(i => i))
+                RemoveSubAgent(id);
         }
 
         /// <summary>
