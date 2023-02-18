@@ -223,6 +223,8 @@ namespace Monitor.Checkers.UI
                 WhiteAgent = GetSelectedAgent();
             else
                 BlackAgent = GetSelectedAgent();
+
+            OnPropertyChanged(nameof(CanRemove));
         }
 
         /// <summary>
@@ -241,7 +243,10 @@ namespace Monitor.Checkers.UI
             set
             {
                 if (SetField(ref _isPlaying, value))
+                {
                     OnPropertyChanged(nameof(CanPlay));
+                    OnPropertyChanged(nameof(CanEdit));
+                }
             }
         }
 
@@ -295,17 +300,18 @@ namespace Monitor.Checkers.UI
             return true;
         }
 
-        private bool _canEdit;
-
         /// <summary>
         /// Indicates whether there is an item to edit
         /// </summary>
-        public bool CanEdit
-        {
-            get => _canEdit;
-            set => SetField(ref _canEdit, value);
+        public bool CanEdit =>
+            (GetSelectedTdlAgent() != null || GetSelectedEnsembleAgent() != null) &&
+            (!IsPlaying || GetSelectedAgent() != BlackAgent && GetSelectedAgent() != WhiteAgent);
 
-        }
+        /// <summary>
+        /// Indicates whether the selected agent can be removed
+        /// </summary>
+        public bool CanRemove => (GetSelectedTdlAgent() != null || GetSelectedEnsembleAgent() != null) &&
+                                 GetSelectedAgent() != BlackAgent && GetSelectedAgent() != WhiteAgent;
 
         /// <summary>
         /// Inspect or edit selected agent
@@ -330,8 +336,9 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private void AgentPoolList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CanEdit = GetSelectedTdlAgent() != null || GetSelectedEnsembleAgent() != null;
             OnPropertyChanged(nameof(CanSave));
+            OnPropertyChanged(nameof(CanEdit));
+            OnPropertyChanged(nameof(CanRemove));
         }
 
         /// <summary>
@@ -382,6 +389,19 @@ namespace Monitor.Checkers.UI
             var dialog = new EnsembleAgentDialog(GetTdlAgents(), null);
             if (dialog.ShowDialog() == true && dialog.Ensemble != null)
                 AddAgent(dialog.Ensemble);
+        }
+
+        /// <summary>
+        /// Remove button click handler
+        /// </summary>
+        private void RemoveButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (!CanEdit || GetSelectedAgent() == null)
+                throw new Exception("The button bust be disabled");
+
+            var agentToRemove = GetSelectedAgent();
+            Agents.Remove(agentToRemove);
+            agentToRemove.Dispose();
         }
     }
 }
