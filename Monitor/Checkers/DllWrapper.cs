@@ -39,17 +39,33 @@ namespace Monitor.Checkers
             }
         }
 
+        /// <summary>
+        /// Checkers move report delegate
+        /// </summary>
         public delegate void PublishCheckersStateCallBack(
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
             int[] state, int stateSize,
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
             CheckersSubMove[] subMoves, int subMovesCount);
 
+        /// <summary>
+        /// Checkers statistics report delegate
+        /// </summary>
         public delegate void PublishCheckersGameStatsCallBack(
             int whiteWins, int blackWins, int totalGames);
 
+        /// <summary>
+        /// Cancellation delegate
+        /// </summary>
         [return: MarshalAs(UnmanagedType.U1)]
         public delegate bool CancelCallBack();
+
+        /// <summary>
+        /// Error message delegate
+        /// </summary>
+        public delegate void ErrorMessageCallBack(
+            [MarshalAs(UnmanagedType.LPStr)]
+            string message);
 
         /// <summary>
         /// Delegate to acquire array of unsigned integers from the managed side
@@ -69,7 +85,9 @@ namespace Monitor.Checkers
             [MarshalAs(UnmanagedType.FunctionPtr)]
             PublishCheckersGameStatsCallBack publishStats,
             [MarshalAs(UnmanagedType.FunctionPtr)]
-            CancelCallBack cancel);
+            CancelCallBack cancel,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            ErrorMessageCallBack error);
 
         #region Random Agent
         /// <summary>

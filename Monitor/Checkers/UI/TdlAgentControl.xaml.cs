@@ -106,7 +106,7 @@ namespace Monitor.Checkers.UI
             Epsilon = 0.05,
             Discount = 0.8,
             Lambda = 0.2,
-            LearningRate = 0.05,
+            LearningRate = 0.01,
             TrainingMode = true,
             Id = "Agent-" + Guid.NewGuid().ToString(),
         };

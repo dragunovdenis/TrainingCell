@@ -32,12 +32,16 @@ namespace Monitor
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private readonly ITwoPlayerGameUi _checkersUi;
+        private ITwoPlayerGameUi _checkersUi;
 
         /// <summary>
         /// Read-only access to the checkers UI
         /// </summary>
-        public ITwoPlayerGameUi CheckersUi => _checkersUi;
+        public ITwoPlayerGameUi CheckersUi
+        {
+            get => _checkersUi;
+            set => SetField(ref _checkersUi, value);
+        }
 
         /// <summary>
         /// Constructor
@@ -45,10 +49,8 @@ namespace Monitor
         public MainWindow()
         {
             InitializeComponent();
-            _checkersUi = new BoardUi(MainCanvas, this.Dispatcher);
-
-            DataContext = _checkersUi;
-            _checkersUi.InfoEvent += UpdateInfoTextBox;
+            CheckersUi = new BoardUi(MainCanvas, this.Dispatcher);
+            CheckersUi.InfoEvent += UpdateInfoTextBox;
         }
 
         /// <summary>

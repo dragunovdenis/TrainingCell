@@ -189,6 +189,9 @@ namespace TrainingCell::Checkers
 			}
 		}
 
+		if (best_move_id < 0)
+			throw std::exception((get_id() + ": neural network is NaN. Try decreasing learning rate parameter.").c_str());
+
 		return best_move_id;
 	}
 

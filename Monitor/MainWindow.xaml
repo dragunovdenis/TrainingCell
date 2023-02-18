@@ -40,9 +40,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Column="1" Background="LightGray">
-                    <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load White Agent</Button>
-                    <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" IsEnabled="{Binding IsPlaying, Converter={StaticResource InvertBoolConverter}}">Load Black Agent</Button>
-                    <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding CheckersUi.IsPlaying}">Cancel</Button>
+                        <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" IsEnabled="{Binding CheckersUi.IsPlaying,
+                            Converter={StaticResource InvertBoolConverter}}">Load White Agent</Button>
+                        <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" IsEnabled="{Binding CheckersUi.IsPlaying,
+                            Converter={StaticResource InvertBoolConverter}}">Load Black Agent</Button>
+                        <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding CheckersUi.IsPlaying}">Cancel</Button>
                     <TextBox Name = "InfoTextBox" IsReadOnly="True"></TextBox>
                 </StackPanel>
                 <DockPanel Grid.Column="0" Name="MainPanel" SizeChanged="MainPanel_OnSizeChanged">

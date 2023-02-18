@@ -34,10 +34,13 @@ namespace
 void RunCheckersTraining(TrainingCell::Checkers::Agent* const agent1,
 	TrainingCell::Checkers::Agent* const agent2,
 	int episodes, TrainingCell::Checkers::PublishCheckersStateCallBack publishStateCallBack,
-	TrainingCell::Checkers::PublishTrainingStatsCallBack publishStatsCallBack, TrainingCell::Checkers::CancelCallBack cancellationCallBack)
+	TrainingCell::Checkers::PublishTrainingStatsCallBack publishStatsCallBack,
+	TrainingCell::Checkers::CancelCallBack cancellationCallBack,
+	TrainingCell::Checkers::ErrorMessageCallBack errorCallBack)
 {
 	TrainingCell::Checkers::Board board(agent1, agent2);
-	board.play(episodes, 200, publishStateCallBack, publishStatsCallBack, cancellationCallBack);
+	board.play(episodes, 200, publishStateCallBack, publishStatsCallBack,
+		cancellationCallBack, errorCallBack);
 }
 #pragma region Random Agent
 void* ConstructCheckersRandomAgent()

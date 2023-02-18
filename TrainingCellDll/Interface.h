@@ -49,7 +49,8 @@ extern "C"
 		TrainingCell::Checkers::Agent* agent1,
 		TrainingCell::Checkers::Agent* agent2,
 		int episodes,  TrainingCell::Checkers::PublishCheckersStateCallBack publishStateCallBack,
-		TrainingCell::Checkers::PublishTrainingStatsCallBack publishStatsCallBack, TrainingCell::Checkers::CancelCallBack cancellationCallBack);
+		TrainingCell::Checkers::PublishTrainingStatsCallBack publishStatsCallBack, TrainingCell::Checkers::CancelCallBack cancellationCallBack,
+		TrainingCell::Checkers::ErrorMessageCallBack errorCallBack);
 
 #pragma region Random agent
 	/// <summary>

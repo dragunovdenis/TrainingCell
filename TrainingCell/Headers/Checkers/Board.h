@@ -32,6 +32,11 @@ namespace TrainingCell::Checkers
 	typedef void (*PublishTrainingStatsCallBack)(const int white_wins, const int black_wins, const int total_games);
 
 	/// <summary>
+	/// Callback to report error messages
+	/// </summary>
+	typedef void (*ErrorMessageCallBack)(const char* message);
+
+	/// <summary>
 	///	Callback to cancel ongoing operation
 	/// </summary>
 	typedef bool (*CancelCallBack)();
@@ -98,7 +103,8 @@ namespace TrainingCell::Checkers
 		///	Runs the given number of episodes (games)
 		/// </summary>
 		void play(const int episodes, const int max_moves_without_capture = 200, PublishCheckersStateCallBack publishState = nullptr,
-			PublishTrainingStatsCallBack publishStats = nullptr, CancelCallBack cancel = nullptr);
+			PublishTrainingStatsCallBack publishStats = nullptr, CancelCallBack cancel = nullptr,
+			ErrorMessageCallBack error = nullptr);
 
 		/// <summary>
 		/// Resets state of the board to the "initial one" (beginning of the game)

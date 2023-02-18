@@ -68,45 +68,55 @@ namespace TrainingCell::Checkers
 	void Board::play(const int episodes, const int max_moves_without_capture,
 		PublishCheckersStateCallBack publishState,
 		PublishTrainingStatsCallBack publishStats,
-		CancelCallBack cancel)
+		CancelCallBack cancel,
+		ErrorMessageCallBack error)
 	{
-		for (auto episode_id = 0; episode_id < episodes; episode_id++)
+		try
 		{
-			if (cancel != nullptr && cancel())
-				return;
-
-			auto moves_without_capture = 0;
-			reset_state();
-			Move last_move {};
-			while ((last_move = make_move(publishState)).is_valid() && moves_without_capture < max_moves_without_capture)
+			for (auto episode_id = 0; episode_id < episodes; episode_id++)
 			{
-				if (last_move.sub_moves[0].capture.is_valid())
-					moves_without_capture = 0;
-				else
-					moves_without_capture++;
-
 				if (cancel != nullptr && cancel())
-					break;//this will be qualified as a "draw"
+					return;
+
+				auto moves_without_capture = 0;
+				reset_state();
+				Move last_move{};
+				while ((last_move = make_move(publishState)).is_valid() && moves_without_capture < max_moves_without_capture)
+				{
+					if (last_move.sub_moves[0].capture.is_valid())
+						moves_without_capture = 0;
+					else
+						moves_without_capture++;
+
+					if (cancel != nullptr && cancel())
+						break;//this will be qualified as a "draw"
+				}
+
+				if (!last_move.is_valid()) //win case
+				{
+					if (_agent_to_move_id == 1)
+						_whitesWin++;
+					else
+						_blacksWin++;
+
+					agent_to_move()->game_over(_state, GameResult::Loss);
+					agent_to_wait()->game_over(_state, GameResult::Victory);
+
+				}
+				else //draw case
+				{
+					agent_to_move()->game_over(_state, GameResult::Draw);
+					agent_to_wait()->game_over(_state, GameResult::Draw);
+				}
+
+				if (publishStats != nullptr)
+					publishStats(_whitesWin, _blacksWin, episode_id + 1);
 			}
-
-			if (!last_move.is_valid()) //win case
-			{
-				if (_agent_to_move_id == 1)
-					_whitesWin++;
-				else
-					_blacksWin++;
-
-				agent_to_move()->game_over(_state, GameResult::Loss);
-				agent_to_wait()->game_over(_state, GameResult::Victory);
-
-			} else //draw case
-			{
-				agent_to_move()->game_over(_state, GameResult::Draw);
-				agent_to_wait()->game_over(_state, GameResult::Draw);
-			}
-
-			if (publishStats != nullptr)
-				publishStats(_whitesWin, _blacksWin, episode_id + 1);
+		}
+		catch (std::exception& e)
+		{
+			if (error != nullptr)
+				error(e.what());
 		}
 	}
 

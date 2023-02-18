@@ -327,7 +327,9 @@ namespace Monitor.Checkers.UI
                                     });
                                     Draw();
                                 });
-                            }, () => _playTaskCancellation.IsCancellationRequested);
+                            }, () => _playTaskCancellation.IsCancellationRequested, 
+                            (errorMessage) => _uiThreadDispatcher.Invoke(
+                                () => MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK)));
                     }
                 }
             });

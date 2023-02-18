@@ -108,15 +108,22 @@ namespace Monitor.Checkers.UI
                                 timePrev = DateTime.Now;
 
                                 InfoTextBlock.Text +=
-                                    $"White Wins total/inst. %:{whiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
-                                    $"Black Wins total/inst. %:{blackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
-                                    $"Draws total/inst. %{totalGamers - whiteWins - blackWins}/{drawsPercentsFromLastReport:F1}; " +
-                                    $"Total Games {totalGamers}; Elapsed time {elapsedTimeSec:F1} sec." + "\n";
+                                    $"White Wins total/inst. %: {whiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
+                                    $"Black Wins total/inst. %: {blackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
+                                    $"Draws total/inst. %: {totalGamers - whiteWins - blackWins}/{drawsPercentsFromLastReport:F1}; " +
+                                    $"Total Games: {totalGamers}; Elapsed time: {elapsedTimeSec:F1} sec." + "\n";
                                 InfoScroll.ScrollToBottom();
                             }));
                         episodeCounter++;
                     },
-                    () => _playTaskCancellation.IsCancellationRequested);
+                    () => _playTaskCancellation.IsCancellationRequested,
+                    (errorMessage) =>
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            InfoTextBlock.Text += "Error :" + errorMessage + "/n";
+                        });
+                    });
             });
             playTask.ContinueWith((task) =>
             {
