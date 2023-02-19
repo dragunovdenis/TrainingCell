@@ -58,15 +58,20 @@ namespace Monitor.Checkers.UI
             Agents.Add(agent);
         }
 
+        private readonly string _id;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public TrainControl()
+        public TrainControl(string id)
         {
             InitializeComponent();
 
+            _id = id;
             //Put the "random" agent to the list by default
             AddAgent(new RandomAgent());
+            AddAgent(new TdLambdaAgent("White-" + _id));
+            AddAgent(new TdLambdaAgent("Black-" + _id));
 
             AppDomain.CurrentDomain.ProcessExit += (o, e) =>
             {

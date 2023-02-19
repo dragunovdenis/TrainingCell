@@ -129,7 +129,8 @@ namespace Monitor
             };
             _trainTabCountTotal++;
 
-            var trainControl = new TrainControl()
+            var newItemId = MainTabControl.Items.Count - 1;
+            var trainControl = new TrainControl(newItemId.ToString())
             {
                 Tag = tabItem,
             };
@@ -138,7 +139,6 @@ namespace Monitor
             trainControl.OnEnquireExtraAgents += TrainControlOnOnEnquireExtraAgents;
             tabItem.Content = trainControl;
 
-            var newItemId = MainTabControl.Items.Count - 1;
             //Put the new item in a pre-last position (since the last position is occupied by "add button")
             MainTabControl.Items.Insert(newItemId, tabItem);
             MainTabControl.SelectedIndex = newItemId;

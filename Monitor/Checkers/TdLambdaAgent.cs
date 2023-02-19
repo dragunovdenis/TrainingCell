@@ -132,6 +132,15 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Agent with "standard" set of parameters
+        /// </summary>
+        public TdLambdaAgent(string id) : this(new uint[] {32, 64, 32, 16, 8, 1},
+            0.05, 0.2, 0.8, 0.01)
+        {
+            Id = id;
+        }
+
+        /// <summary>
         /// Releases native resources
         /// </summary>
         public override void Dispose()
