@@ -59,6 +59,14 @@ namespace Monitor.Checkers
         /// Neural net dimensions of the agent
         /// </summary>
         uint[] NetDimensions { get; }
+
+        /// <summary>
+        /// Adds current agent to the given ensemble. This approach
+        /// allows us not to expose native pointer through the "read-only"
+        /// interface yet still makes it possible to add the agent to an ensemble
+        /// Returns index of the added agent in the ensemble collection
+        /// </summary>
+        int AddToEnsemble(EnsembleAgent ensemble);
     }
 
     /// <summary>
@@ -76,7 +84,18 @@ namespace Monitor.Checkers
         /// <summary>
         /// Determines if the pointer should be disposed by the current instance of the agent
         /// </summary>
-        private readonly bool _ownPointer = true; 
+        private readonly bool _ownPointer = true;
+
+        /// <summary>
+        /// Adds current agent to the given ensemble.
+        /// </summary>
+        public int AddToEnsemble(EnsembleAgent ensemble)
+        {
+            if (ensemble == null)
+                return -1;
+
+            return ensemble.AddSubAgent(this);
+        }
 
         /// <summary>
         /// Constructor

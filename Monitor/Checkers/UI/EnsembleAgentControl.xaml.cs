@@ -31,54 +31,40 @@ namespace Monitor.Checkers.UI
     public partial class EnsembleAgentControl : UserControl, INotifyPropertyChanged
     {
         /// <summary>
-        /// Interface for an agent item
-        /// </summary>
-        public interface IAgentItem
-        {
-            /// <summary>
-            /// Id
-            /// </summary>
-            string Id { get; }
-
-            /// <summary>
-            /// Property representing if the agent is checked in the ListBox
-            /// </summary>
-            bool Checked { get; }
-        }
-
-        /// <summary>
         /// Representation of an agent in the ListBox
         /// </summary>
-        public class AgentItem<A> : IAgentItem
-            where A : ITdLambdaAgentReadOnly
+        public class AgentItem
         {
-            private readonly A _agent;
-
             /// <summary>
             /// Read-only access to the underlying agent
             /// </summary>
-            internal A Agent => _agent;
-
-            private readonly int _index;
+            internal ITdLambdaAgentReadOnly Agent { get; }
 
             /// <summary>
             /// Index of the agent 
             /// </summary>
-            internal int Index => _index;
+            internal int Index { get; }
+
+            /// <summary>
+            /// Indicates whether the agent associated with the item can be added
+            /// (or it is already in the ensemble and thus can be only removed)
+            /// </summary>
+            internal bool CanBeAdded { get; }
 
             /// <summary>
             /// Constructor
             /// </summary>
-            internal AgentItem(A agent, int index)
+            internal AgentItem(ITdLambdaAgentReadOnly agent, int index, bool canBeAdded)
             {
-                _agent = agent;
-                _index = index;
+                Agent = agent;
+                Index = index;
+                CanBeAdded = canBeAdded;
             }
 
             /// <summary>
             /// Id
             /// </summary>
-            public string Id => _agent.Id;
+            public string Id => Agent.Id;
 
             /// <summary>
             /// Property representing if the agent is checked in the ListBox
@@ -89,10 +75,9 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Depending collection of checked agents (those that need to be added to the corresponding ensemble)
         /// </summary>
-        public IList<TdLambdaAgent> GetCheckedAgents()
+        public IList<ITdLambdaAgentReadOnly> GetCheckedAgents()
         {
-            return Agents.Where(x => (x is AgentItem<TdLambdaAgent>) && x.Checked).
-                Cast<AgentItem<TdLambdaAgent>>().Select(x => x.Agent).ToList();
+            return Agents.Where(x => x.CanBeAdded && x.Checked).Select(x => x.Agent).ToList();
         }
 
         /// <summary>
@@ -100,8 +85,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         public IList<int> GetUnCheckedSubAgentIds()
         {
-            return Agents.Where(x => (x is AgentItem<ITdLambdaAgentReadOnly>) && !x.Checked).
-                Cast<AgentItem<ITdLambdaAgentReadOnly>>().Select(x => x.Index).ToList();
+            return Agents.Where(x => !x.CanBeAdded && !x.Checked).Select(x => x.Index).ToList();
         }
 
         /// <summary>
@@ -114,17 +98,20 @@ namespace Monitor.Checkers.UI
             if (checkedAgents.Count == 0)
                 return null;
 
-            return new EnsembleAgent(checkedAgents)
+            var result =  new EnsembleAgent(null)
             {
                 Id = Id,
                 SingleAgentMode = UseSingleAgent,
             };
+
+            result.AddSubAgents(checkedAgents);
+            return result;
         }
 
         /// <summary>
         /// Collection of agents
         /// </summary>
-        public ObservableCollection<IAgentItem> Agents { get; set; } = new ObservableCollection<IAgentItem>();
+        public ObservableCollection<AgentItem> Agents { get; set; } = new ObservableCollection<AgentItem>();
 
         /// <summary>
         /// Constructor
@@ -137,16 +124,16 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Method to assign collection of available agents
         /// </summary>
-        public void Assign(IEnumerable<TdLambdaAgent> agents, EnsembleAgent ensemble = null)
+        public void Assign(IEnumerable<ITdLambdaAgentReadOnly> agents, EnsembleAgent ensemble = null)
         {
-            Agents = new ObservableCollection<IAgentItem>(agents.Select((x, i) => new AgentItem<TdLambdaAgent>(x, i)));
+            Agents = new ObservableCollection<AgentItem>(agents.Select((x, i) => new AgentItem(x, i, canBeAdded:true)));
 
             if (ensemble != null)
             {
                 var subAgents = ensemble.GetSubAgents();
 
                 for (var subAgentId = 0; subAgentId < subAgents.Count; subAgentId++)
-                    Agents.Add(new AgentItem<ITdLambdaAgentReadOnly>(subAgents[subAgentId], subAgentId)
+                    Agents.Add(new AgentItem(subAgents[subAgentId], subAgentId, canBeAdded:false)
                     {
                         Checked = true,
                     });

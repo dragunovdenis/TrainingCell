@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -33,6 +34,17 @@ namespace Monitor.Checkers.UI
     /// </summary>
     public partial class TrainControl : UserControl, INotifyPropertyChanged
     {
+        /// <summary>
+        /// Delegate used to gather extra agents
+        /// </summary>
+        /// <returns></returns>
+        public delegate void EnquireExtraAgentsDelegate(TrainControl sender, ConcurrentBag<ITdLambdaAgentReadOnly> collectionToAddTo);
+
+        /// <summary>
+        /// An event that is used to gather extra agents (probably from other training sessions)
+        /// </summary>
+        public event EnquireExtraAgentsDelegate OnEnquireExtraAgents;
+
         /// <summary>
         /// Collection of agents
         /// </summary>
@@ -97,23 +109,23 @@ namespace Monitor.Checkers.UI
                     (whiteWins, blackWins, totalGamers) =>
                     {
                         if (episodeCounter % 1000 == 0 || episodeCounter == (EpisodesToPlay - 1))
-                            Dispatcher.BeginInvoke(new Action(() =>
-                            {
-                                var gamesPlayedSinceLastReport = totalGamers - totalGamersPrev;
-                                var whiteWinsPercentsSinceLastReport = (whiteWins - whiteWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
-                                var blackWinsPercentsSinceLastReport = (blackWins - blackWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
-                                var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
-                                                                         blackWinsPercentsSinceLastReport);
-                                var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
-                                timePrev = DateTime.Now;
+                            _ = Dispatcher.BeginInvoke(new Action(() =>
+                              {
+                                  var gamesPlayedSinceLastReport = totalGamers - totalGamersPrev;
+                                  var whiteWinsPercentsSinceLastReport = (whiteWins - whiteWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
+                                  var blackWinsPercentsSinceLastReport = (blackWins - blackWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
+                                  var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
+                                                                           blackWinsPercentsSinceLastReport);
+                                  var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
+                                  timePrev = DateTime.Now;
 
-                                InfoTextBlock.Text +=
-                                    $"White Wins total/inst. %: {whiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
-                                    $"Black Wins total/inst. %: {blackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
-                                    $"Draws total/inst. %: {totalGamers - whiteWins - blackWins}/{drawsPercentsFromLastReport:F1}; " +
-                                    $"Total Games: {totalGamers}; Elapsed time: {elapsedTimeSec:F1} sec." + "\n";
-                                InfoScroll.ScrollToBottom();
-                            }));
+                                  InfoTextBlock.Text +=
+                                      $"White Wins total/inst. %: {whiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
+                                      $"Black Wins total/inst. %: {blackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
+                                      $"Draws total/inst. %: {totalGamers - whiteWins - blackWins}/{drawsPercentsFromLastReport:F1}; " +
+                                      $"Total Games: {totalGamers}; Elapsed time: {elapsedTimeSec:F1} sec." + "\n";
+                                  InfoScroll.ScrollToBottom();
+                              }));
                         episodeCounter++;
                     },
                     () => _playTaskCancellation.IsCancellationRequested,
@@ -199,9 +211,25 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Returns all the available TdLambda-agents
         /// </summary>
-        private IList<TdLambdaAgent> GetTdlAgents()
+        private IList<ITdLambdaAgentReadOnly> GetTdlAgents()
         {
-            return Agents.Where(x => x is TdLambdaAgent).Cast<TdLambdaAgent>().ToArray();
+            return Agents.OfType<ITdLambdaAgentReadOnly>().ToArray();
+        }
+
+        /// <summary>
+        /// Collects all the TD(lambda) agents belonging to the current training control and adds
+        /// all the extra agents collected through the corresponding "enquire" event
+        /// </summary>
+        private IList<ITdLambdaAgentReadOnly> GetTdlAgentsExtra()
+        {
+            var result = new List<ITdLambdaAgentReadOnly>();
+            result.AddRange(GetTdlAgents());
+
+            var extraAgentsBag = new ConcurrentBag<ITdLambdaAgentReadOnly>();
+            OnEnquireExtraAgents?.Invoke(this, extraAgentsBag);
+            result.AddRange(extraAgentsBag);
+
+            return result;
         }
 
         /// <summary>
@@ -221,6 +249,9 @@ namespace Monitor.Checkers.UI
             return GetSelectedAgent() as EnsembleAgent;
         }
 
+        /// <summary>
+        /// Assigns white or black players
+        /// </summary>
         void AssignAgent(bool white)
         {
             if (AgentPoolList.SelectedIndex < 0)
@@ -279,7 +310,6 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Assignment of "black" agent
         /// </summary>
-
         private void AssignBlackAgentButton_OnClick(object sender, RoutedEventArgs e)
         {
             AssignAgent(white: false);
@@ -323,7 +353,6 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Inspect or edit selected agent
         /// </summary>
-
         private void EditButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (GetSelectedTdlAgent() != null)
@@ -332,7 +361,7 @@ namespace Monitor.Checkers.UI
                 dialog.ShowDialog();
             } else if (GetSelectedEnsembleAgent() != null)
             {
-                var dialog = new EnsembleAgentDialog(GetTdlAgents(), GetSelectedEnsembleAgent());
+                var dialog = new EnsembleAgentDialog(GetTdlAgentsExtra(), GetSelectedEnsembleAgent());
                 dialog.ShowDialog();
             }
             else throw new Exception("Can't edit");
@@ -393,7 +422,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private void CreateEnsemble_OnClick(object sender, RoutedEventArgs e)
         {
-            var dialog = new EnsembleAgentDialog(GetTdlAgents(), null);
+            var dialog = new EnsembleAgentDialog(GetTdlAgentsExtra(), null);
             if (dialog.ShowDialog() == true && dialog.Ensemble != null)
                 AddAgent(dialog.Ensemble);
         }

@@ -111,13 +111,14 @@ namespace Monitor.Checkers
             return DllWrapper.TdlEnsembleAgentAdd(_ptr, agentToAdd.Ptr);
         }
 
+
         /// <summary>
         /// Adds given collection of agents to the ensemble
         /// </summary>
-        public void AddSubAgents(IList<TdLambdaAgent> subAgents)
+        public void AddSubAgents(IList<ITdLambdaAgentReadOnly> subAgents)
         {
             foreach (var agent in subAgents)
-                AddSubAgent(agent);
+                agent.AddToEnsemble(this);
         }
 
         /// <summary>

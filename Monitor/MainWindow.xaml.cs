@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -24,6 +25,7 @@ using System.Windows.Input;
 using Monitor.Checkers.UI;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Monitor.Checkers;
 
 namespace Monitor
 {
@@ -133,6 +135,7 @@ namespace Monitor
             };
 
             trainControl.OnFinishSession += TrainControlOnOnFinishSession;
+            trainControl.OnEnquireExtraAgents += TrainControlOnOnEnquireExtraAgents;
             tabItem.Content = trainControl;
 
             var newItemId = MainTabControl.Items.Count - 1;
@@ -142,6 +145,27 @@ namespace Monitor
             OnPropertyChanged(nameof(CanAddNewTraining));
 
             e.Handled = true;
+        }
+
+        /// <summary>
+        /// Handler for the "enquire extra agent" event
+        /// </summary>
+        private void TrainControlOnOnEnquireExtraAgents(TrainControl sender, ConcurrentBag<ITdLambdaAgentReadOnly> collectionToAddTo)
+        {
+            if (collectionToAddTo == null || sender == null)
+                throw new Exception("Invalid input");
+
+            var trainControls = MainTabControl.Items.Cast<TabItem>().Select(x => x.Content).OfType<TrainControl>()
+                .ToArray();
+
+            foreach (var trainControl in trainControls)
+            {
+                if (trainControl == sender)
+                    continue;
+
+                foreach (var agent in trainControl.Agents.OfType<ITdLambdaAgentReadOnly>())
+                    collectionToAddTo.Add(agent);
+            }
         }
 
         /// <summary>

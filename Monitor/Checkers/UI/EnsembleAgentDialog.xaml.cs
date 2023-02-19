@@ -33,7 +33,7 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        public EnsembleAgentDialog(IList<TdLambdaAgent> agents, EnsembleAgent ensembleToEdit)
+        public EnsembleAgentDialog(IList<ITdLambdaAgentReadOnly> agents, EnsembleAgent ensembleToEdit)
         {
             InitializeComponent();
             Ensemble = ensembleToEdit;
