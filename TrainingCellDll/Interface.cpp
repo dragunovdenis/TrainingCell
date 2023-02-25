@@ -216,8 +216,9 @@ void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move
 			[=](const TrainingCell::Checkers::State& state, std::vector<TrainingCell::Checkers::Move> moves)
 			{
 				std::vector<CheckersMoveDto> moves_dto;
+				moves_dto.reserve(moves.size());
 				for (auto& move : moves)
-					moves_dto.emplace_back(move.sub_moves.data(), static_cast<int>(move.sub_moves.size()));
+					moves_dto.push_back(CheckersMoveDto{ move.sub_moves.data(), static_cast<int>(move.sub_moves.size()) });
 
 				return make_move_callback(reinterpret_cast<const int*>(state.data()), static_cast<int>(state.size()), moves_dto.data(), static_cast<int>(moves_dto.size()));
 			},
