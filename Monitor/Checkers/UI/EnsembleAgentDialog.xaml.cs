@@ -51,7 +51,7 @@ namespace Monitor.Checkers.UI
             {
                 Ensemble.RemoveSubAgents(AgentControl.GetUnCheckedSubAgentIds());
                 Ensemble.AddSubAgents(AgentControl.GetCheckedAgents());
-                Ensemble.Id = AgentControl.Id;
+                Ensemble.Name = AgentControl.AgentName;
                 Ensemble.SingleAgentMode = AgentControl.UseSingleAgent;
             }
 

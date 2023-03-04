@@ -269,22 +269,30 @@ char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr
 	return agent_ptr->can_train();
 }
 
+const char* CheckersAgentGetName(const TrainingCell::Checkers::Agent* agent_ptr)
+{
+	if (!agent_ptr)
+		return nullptr;
+
+	return agent_ptr->get_name().c_str();
+}
+
+bool CheckersAgentSetName(TrainingCell::Checkers::Agent* agent_ptr, const char* name)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_name(name);
+
+	return true;
+}
+
 const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr)
 {
 	if (!agent_ptr)
 		return nullptr;
 
 	return agent_ptr->get_id().c_str();
-}
-
-bool CheckersAgentSetId(TrainingCell::Checkers::Agent* agent_ptr, const char* id)
-{
-	if (!agent_ptr)
-		return false;
-
-	agent_ptr->set_id(id);
-
-	return true;
 }
 
 #pragma endregion Agent
@@ -407,7 +415,7 @@ const char* CheckersTdlEnsembleAgentGetSubAgentId(const TrainingCell::Checkers::
 	if (!agent_ptr)
 		return nullptr;
 
-	return (*agent_ptr)[agent_id].get_id().c_str();
+	return (*agent_ptr)[agent_id].get_name().c_str();
 }
 
 int CheckersTdlEnsembleAgentAdd(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,

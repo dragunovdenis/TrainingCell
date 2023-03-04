@@ -54,7 +54,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& id = "Ensemble");
+		TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& name = "Ensemble");
 
 		/// <summary>
 		/// Adds a copy of the given agent to the ensemble

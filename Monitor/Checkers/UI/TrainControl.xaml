@@ -55,7 +55,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     <ListBox ItemsSource="{Binding Agents}" Name="AgentPoolList" SelectionChanged="AgentPoolList_OnSelectionChanged">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
-                                <Setter Property="Content" Value="{Binding Id, Mode=OneWay}"/>
+                                <Setter Property="Content" Value="{Binding Name, Mode=OneWay}"/>
                             </Style>
                         </ListBox.ItemContainerStyle>
                     </ListBox>
@@ -70,7 +70,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         </Button>
                         <StackPanel Orientation="Horizontal">
                             <TextBox Text="White Agent:" Style="{StaticResource TransparentBackgroundStyle}" FontWeight="Bold"/>
-                            <TextBox Text="{Binding WhiteAgent.Id, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                            <TextBox Text="{Binding WhiteAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
                         </StackPanel>
                         <Button Name="AssignBlackAgentButton" Click="AssignBlackAgentButton_OnClick"
                                 IsEnabled="{Binding ElementName=AgentPoolList, Path=SelectedItems.Count}">
@@ -78,7 +78,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         </Button>
                         <StackPanel Orientation="Horizontal">
                             <TextBox Text="Black Agent:" FontWeight="Bold" Style="{StaticResource TransparentBackgroundStyle}"/>
-                            <TextBox Text="{Binding BlackAgent.Id, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                            <TextBox Text="{Binding BlackAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
                         </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>

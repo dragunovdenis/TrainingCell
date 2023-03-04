@@ -40,14 +40,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <StackPanel.Resources>
                             <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxReadOnlyStyle}"/>
                         </StackPanel.Resources>
+                        <TextBox Text="Agent Name"/>
                         <TextBox Text="Agent ID"/>
-                        <TextBox Text="Single agent mode"/>
+                        <TextBox Text="Single Agent Mode"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch">
                         <StackPanel.Resources>
                             <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxStyle}"/>
                         </StackPanel.Resources>
-                        <TextBox Text="{Binding Id, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding AgentName, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding AgentId, Mode=OneWay}" IsEnabled="False"/>
                         <CheckBox IsChecked="{Binding UseSingleAgent, Mode=TwoWay}" Margin="3,3,3,0"/>
                     </StackPanel>
                 </Grid>
@@ -64,7 +66,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding Checked, Mode=TwoWay}" Content="{Binding Id, Mode=OneWay}"/>
+                            <CheckBox IsChecked="{Binding Checked, Mode=TwoWay}" Content="{Binding AgentName, Mode=OneWay}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

@@ -23,7 +23,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
             xmlns:local="clr-namespace:Monitor.Checkers.UI"
             xmlns:ui="clr-namespace:Monitor.Checkers.UI"
             mc:Ignorable="d"
-            Title="Agent parameters" Height="270" Width="570" 
+            Title="Agent parameters" Height="300" Width="570" 
             ResizeMode="NoResize" WindowStyle="SingleBorderWindow" BorderThickness="3" BorderBrush="Gray"
             WindowStartupLocation="CenterOwner">
     <Grid>

@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../../Headers/Checkers/Agent.h"
+#include "../../../DeepLearning/DeepLearning/Utilities.h"
 
 namespace TrainingCell::Checkers
 {
@@ -23,13 +24,23 @@ namespace TrainingCell::Checkers
 
 	bool Agent::get_training_mode() const { throw std::exception("Not implemented"); }
 
+	const std::string& Agent::get_name() const
+	{
+		return _name;
+	}
+
+	void Agent::set_name(const std::string& name)
+	{
+		_name = name;
+	}
+
 	const std::string& Agent::get_id() const
 	{
 		return _id;
 	}
 
-	void Agent::set_id(const std::string& id)
+	Agent::Agent()
 	{
-		_id = id;
+		_id = DeepLearning::Utils::create_guid_string();
 	}
 }

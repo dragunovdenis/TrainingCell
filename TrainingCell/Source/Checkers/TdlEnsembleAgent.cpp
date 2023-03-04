@@ -21,14 +21,14 @@
 
 namespace TrainingCell::Checkers
 {
-	TdlEnsembleAgent::TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& id)
+	TdlEnsembleAgent::TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& name)
 	{
 		std::ranges::for_each(ensemble, [&](const auto& a)
 			{
 				add(a);
 			});
 
-		set_id(id);
+		set_name(name);
 	}
 
 	std::size_t TdlEnsembleAgent::add(const TdLambdaAgent& agent)

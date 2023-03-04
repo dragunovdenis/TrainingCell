@@ -134,10 +134,10 @@ namespace Monitor.Checkers
         /// <summary>
         /// Agent with "standard" set of parameters
         /// </summary>
-        public TdLambdaAgent(string id) : this(new uint[] {32, 64, 32, 16, 8, 1},
+        public TdLambdaAgent(string name) : this(new uint[] {32, 64, 32, 16, 8, 1},
             0.05, 0.2, 0.8, 0.01)
         {
-            Id = id;
+            Name = name;
         }
 
         /// <summary>
@@ -300,7 +300,7 @@ namespace Monitor.Checkers
                 Discount = Discount,
                 LearningRate = LearningRate,
                 TrainingMode = TrainingMode,
-                Id = Id,
+                Name = Name,
             };
         }
 
@@ -317,7 +317,7 @@ namespace Monitor.Checkers
             Discount = parameters.Discount;
             LearningRate = parameters.LearningRate;
             TrainingMode = parameters.TrainingMode;
-            Id = parameters.Id;
+            Name = parameters.Name;
 
             return true;
         }

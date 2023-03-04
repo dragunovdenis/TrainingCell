@@ -117,7 +117,7 @@ namespace Monitor.Checkers.UI
             {
                 Filter = GetSaveFilter(agent),
                 FilterIndex = 0,
-                FileName = agent.Id
+                FileName = agent.Name
             };
 
             if (saveFileDialog.ShowDialog() == true)

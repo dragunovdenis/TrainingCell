@@ -47,6 +47,7 @@ namespace Monitor.Checkers.UI
 
             Params = agent.GetTrainingParameters();
             HiddenLayerDimensions = agent.NetDimensions;
+            AgentId = agent.Id;
             EditMode = true;
         }
 
@@ -108,7 +109,7 @@ namespace Monitor.Checkers.UI
             Lambda = 0.2,
             LearningRate = 0.01,
             TrainingMode = true,
-            Id = "Agent-" + Guid.NewGuid().ToString(),
+            Name = "Agent-" + Guid.NewGuid(),
         };
 
         /// <summary>
@@ -128,7 +129,7 @@ namespace Monitor.Checkers.UI
                     OnPropertyChanged(nameof(Epsilon));
                     OnPropertyChanged(nameof(LearningRate));
                     OnPropertyChanged(nameof(TrainingMode));
-                    OnPropertyChanged(nameof(Id));
+                    OnPropertyChanged(nameof(AgentName));
                 }
             }
         }
@@ -216,17 +217,28 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Agent's identifier
         /// </summary>
-        public string Id
+        public string AgentName
         {
-            get => _params.Id;
+            get => _params.Name;
             set
             {
-                if (!_params.Id.Equals(value))
+                if (!_params.Name.Equals(value))
                 {
-                    _params.Id = value;
+                    _params.Name = value;
                     OnPropertyChanged();
                 }
             }
+        }
+
+        private string _agentId = "To be assigned upon construction";
+
+        /// <summary>
+        /// Unique identifier of the agent
+        /// </summary>
+        public string AgentId
+        {
+            get => _agentId;
+            private set => SetField(ref _agentId, value);
         }
     }
 }

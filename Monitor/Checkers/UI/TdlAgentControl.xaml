@@ -22,7 +22,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Monitor.Checkers.UI"
              xmlns:utils="clr-namespace:Monitor.Utils"
-             mc:Ignorable="d" d:DesignWidth="399.01" Name="UI" Height="197.43">
+             mc:Ignorable="d" d:DesignWidth="400" Name="UI" Height="220">
     <Grid DataContext="{Binding ElementName=UI}" IsEnabled="{Binding IsEnabled}">
         <StackPanel Margin="10">
             <Border Style="{StaticResource LocalBorderStyle}">
@@ -35,6 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <StackPanel.Resources>
                             <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxReadOnlyStyle}"/>
                         </StackPanel.Resources>
+                        <TextBox Text="Agent Name"/>
                         <TextBox Text="Agent ID"/>
                         <TextBox Text="Hidden layer dimensions"/>
                         <TextBox Text="Learning rate"/>
@@ -47,9 +48,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <StackPanel.Resources>
                             <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxStyle}"/>
                         </StackPanel.Resources>
-                        <TextBox Text="{Binding Id, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding AgentName, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding AgentId, Mode=OneWay}" IsEnabled="False"/>
                         <TextBox Text="{Binding HiddenLayerDimensions, Mode =TwoWay, Converter = {StaticResource StringToUintArrayConverter}}"
-                             IsEnabled="{Binding EditMode, Converter = {StaticResource InvertBoolConverter}}"/>
+                                 IsEnabled="{Binding EditMode, Converter = {StaticResource InvertBoolConverter}}"/>
                         <TextBox Text="{Binding LearningRate, Mode=TwoWay}"/>
                         <TextBox Text="{Binding Lambda, Mode=TwoWay}"/>
                         <TextBox Text="{Binding Discount, Mode=TwoWay}"/>

@@ -40,6 +40,11 @@ namespace TrainingCell::Checkers
 	{
 	public:
 		/// <summary>
+		/// Constructor
+		/// </summary>
+		Agent();
+
+		/// <summary>
 		///	Virtual destructor
 		/// </summary>
 		virtual ~Agent() = default;
@@ -83,23 +88,27 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		virtual bool equal(const Agent& agent) const = 0;
 
-	protected:
-
 		std::string _id;
+		std::string _name;
 
 	public:
 
-		MSGPACK_DEFINE(_id);
+		MSGPACK_DEFINE(_name, _id);
+
+		/// <summary>
+		/// Getter for a string name of the agent
+		/// </summary>
+		[[nodiscard]] const std::string& get_name() const;
 
 		/// <summary>
 		/// Getter for a string identifier of the agent
+		/// </summary>
+		void set_name(const std::string& name);
+
+		/// <summary>
+		/// Read-only access to the unique identifier of the object
 		/// </summary>
 		[[nodiscard]] const std::string& get_id() const;
-
-		/// <summary>
-		/// Getter for a string identifier of the agent
-		/// </summary>
-		void set_id(const std::string& id);
 	};
 }
 

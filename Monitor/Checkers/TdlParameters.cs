@@ -52,7 +52,7 @@ namespace Monitor.Checkers
         /// <summary>
         /// Identifier
         /// </summary>
-        string Id { get; }
+        string Name { get; }
     }
 
     /// <summary>
@@ -88,7 +88,7 @@ namespace Monitor.Checkers
         /// <summary>
         /// Identifier
         /// </summary>
-        public string Id { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Default constructor
@@ -108,7 +108,7 @@ namespace Monitor.Checkers
             Lambda = source.Lambda;
             LearningRate = source.LearningRate;
             TrainingMode = source.TrainingMode;
-            Id = source.Id;
+            Name = source.Name;
         }
     }
 }

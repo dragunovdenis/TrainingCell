@@ -210,14 +210,19 @@ extern "C"
 	TRAINING_CELL_API char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr);
 
 	/// <summary>
+	/// Returns name of the agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API const char* CheckersAgentGetName(const TrainingCell::Checkers::Agent* agent_ptr);
+
+	/// <summary>
+	/// Sets name to the agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API bool CheckersAgentSetName(TrainingCell::Checkers::Agent* agent_ptr, const char* name);
+
+	/// <summary>
 	/// Returns string identifier of the agent represented with its pointer
 	/// </summary>
 	TRAINING_CELL_API const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr);
-
-	/// <summary>
-	/// Sets string identifier to the agent represented with its pointer
-	/// </summary>
-	TRAINING_CELL_API bool CheckersAgentSetId(TrainingCell::Checkers::Agent* agent_ptr, const char* id);
 #pragma endregion Agent
 #pragma region AgentPack
 	/// <summary>

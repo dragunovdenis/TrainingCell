@@ -28,7 +28,12 @@ namespace Monitor.Checkers
     public interface IAgentReadOnly
     {
         /// <summary>
-        /// Identifier of the agent
+        /// Name of the agent
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Unique identifier of the agent
         /// </summary>
         string Id { get; }
     }
@@ -60,22 +65,27 @@ namespace Monitor.Checkers
         public abstract void Dispose();
 
         /// <summary>
-        /// Identifier of the agent
+        /// Name of the agent
         /// </summary>
-        public virtual string Id
+        public string Name
         {
-            get => DllWrapper.AgentGetId(Ptr);
+            get => DllWrapper.AgentGetName(Ptr);
             set
             {
-                if (Id == value)
+                if (Name == value)
                     return;
 
-                if (!DllWrapper.AgentSetId(Ptr, value))
+                if (!DllWrapper.AgentSetName(Ptr, value))
                     throw new Exception("Failed to set agent ID");
 
                 OnPropertyChanged();
             }
         }
+
+        /// <summary>
+        /// Unique identifier of the agent
+        /// </summary>
+        public string Id => DllWrapper.AgentGetId(Ptr);
 
         /// <summary>
         /// Finalizer

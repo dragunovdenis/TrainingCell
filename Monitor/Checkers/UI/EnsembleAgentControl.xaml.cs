@@ -64,7 +64,7 @@ namespace Monitor.Checkers.UI
             /// <summary>
             /// Id
             /// </summary>
-            public string Id => Agent.Id;
+            public string AgentName => Agent.Name;
 
             /// <summary>
             /// Property representing if the agent is checked in the ListBox
@@ -100,7 +100,7 @@ namespace Monitor.Checkers.UI
 
             var result =  new EnsembleAgent(null)
             {
-                Id = Id,
+                Name = AgentName,
                 SingleAgentMode = UseSingleAgent,
             };
 
@@ -138,22 +138,34 @@ namespace Monitor.Checkers.UI
                         Checked = true,
                     });
 
-                Id = ensemble.Id;
+                AgentName = ensemble.Name;
+                AgentId = ensemble.Id;
                 UseSingleAgent = ensemble.SingleAgentMode;
             }
 
             OnPropertyChanged(nameof(Agents));
         }
 
-        private string _agentId = "Ensemble-" + Guid.NewGuid();
+        private string _agentName = "Ensemble-" + Guid.NewGuid();
 
         /// <summary>
         /// Agent identifier
         /// </summary>
-        public string Id
+        public string AgentName
+        {
+            get => _agentName;
+            set => SetField(ref _agentName, value);
+        }
+
+        private string _agentId = "To be assigned upon construction";
+
+        /// <summary>
+        /// Unique identifier of the agent
+        /// </summary>
+        public string AgentId
         {
             get => _agentId;
-            set => SetField(ref _agentId, value);
+            private set => SetField(ref _agentId, value);
         }
 
         private bool _useSingleAgent;

@@ -190,17 +190,17 @@ namespace TrainingCell::Checkers
 		}
 
 		if (best_move_id < 0)
-			throw std::exception((get_id() + ": neural network is NaN. Try decreasing learning rate parameter.").c_str());
+			throw std::exception((get_name() + ": neural network is NaN. Try decreasing learning rate parameter.").c_str());
 
 		return best_move_id;
 	}
 
 	TdLambdaAgent::TdLambdaAgent(
 		const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-		const double lambda, const double gamma, const double alpha, const std::string& id) :
+		const double lambda, const double gamma, const double alpha, const std::string& name) :
 		_new_game(true), _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha)
 	{
-		set_id(id);
+		set_name(name);
 		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
 			throw std::exception("Invalid Net configuration");
 

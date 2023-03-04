@@ -282,6 +282,12 @@ namespace Monitor.Checkers
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentGetName")]
+        private static extern IntPtr AgentGetNameInternal(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
         public static string AgentGetId(IntPtr agentPtr)
         {
             var strPtr = AgentGetIdInternal(agentPtr);
@@ -295,8 +301,21 @@ namespace Monitor.Checkers
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
-        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentSetId", CharSet = CharSet.Ansi)]
-        public static extern bool AgentSetId(IntPtr agentPtr, string id);
+        public static string AgentGetName(IntPtr agentPtr)
+        {
+            var strPtr = AgentGetNameInternal(agentPtr);
+
+            if (strPtr == IntPtr.Zero)
+                return null;
+
+            return Marshal.PtrToStringAnsi(strPtr);
+        }
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentSetName", CharSet = CharSet.Ansi)]
+        public static extern bool AgentSetName(IntPtr agentPtr, string id);
         #endregion
 
         #region AgentPack

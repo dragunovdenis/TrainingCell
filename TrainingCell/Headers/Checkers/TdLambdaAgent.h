@@ -101,12 +101,13 @@ namespace TrainingCell::Checkers
 		/// <summary>Constructor</summary>
 		/// <param name="layer_dimensions">Dimensions of the fully connected layers that constitute the underlying neural network</param>
 		/// <param name="exploration_epsilon">Parameter defining the probability of the agent taking a
+		/// random action instead of the one having highest predicted value </param>
 		/// <param name="alpha">Gradient step</param>
 		/// <param name="gamma">Reward discount parameter</param>
 		/// <param name="lambda">The "lambda parameter of TD(lambda) approach"</param>
-		/// random action instead of the one having highest predicted value </param>
+		/// <param name="name">Name of the agent</param>
 		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-			const double lambda, const double gamma, const double alpha, const std::string& id = "TdlAgent");
+			const double lambda, const double gamma, const double alpha, const std::string& name = "TdlAgent");
 
 		/// <summary>
 		/// Default constructor
