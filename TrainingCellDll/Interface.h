@@ -223,6 +223,23 @@ extern "C"
 	/// Returns string identifier of the agent represented with its pointer
 	/// </summary>
 	TRAINING_CELL_API const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr);
+
+	/// <summary>
+	/// Returns number of records in the record-book of the agent
+	/// </summary>
+	TRAINING_CELL_API int CheckersAgentGetRecordsCount(const TrainingCell::Checkers::Agent* agent_ptr);
+
+	/// <summary>
+	/// Returns pointer to the string record (from the record book of the given agent) with the given id or null-pointer if
+	/// the id is invalid
+	/// </summary>
+	TRAINING_CELL_API const char* CheckersAgentGetRecordById(const TrainingCell::Checkers::Agent* agent_ptr, const int record_id);
+
+	/// <summary>
+	/// Adds given record to the record book of the given agent
+	/// </summary>
+	/// <returns>Index of the added record in the record book</returns>
+	TRAINING_CELL_API int CheckersAgentAddRecord(TrainingCell::Checkers::Agent* agent_ptr, const char* record);
 #pragma endregion Agent
 #pragma region AgentPack
 	/// <summary>

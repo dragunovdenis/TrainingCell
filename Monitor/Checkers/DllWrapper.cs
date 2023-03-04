@@ -286,16 +286,22 @@ namespace Monitor.Checkers
         private static extern IntPtr AgentGetNameInternal(IntPtr agentPtr);
 
         /// <summary>
+        /// Converts given pointer to ANSI atring
+        /// </summary>
+        private static string PtrToAnsiString(IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero)
+                return null;
+
+            return Marshal.PtrToStringAnsi(ptr);
+        }
+
+        /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
         public static string AgentGetId(IntPtr agentPtr)
         {
-            var strPtr = AgentGetIdInternal(agentPtr);
-
-            if (strPtr == IntPtr.Zero)
-                return null;
-
-            return Marshal.PtrToStringAnsi(strPtr);
+            return PtrToAnsiString(AgentGetIdInternal(agentPtr));
         }
 
         /// <summary>
@@ -303,12 +309,7 @@ namespace Monitor.Checkers
         /// </summary>
         public static string AgentGetName(IntPtr agentPtr)
         {
-            var strPtr = AgentGetNameInternal(agentPtr);
-
-            if (strPtr == IntPtr.Zero)
-                return null;
-
-            return Marshal.PtrToStringAnsi(strPtr);
+            return PtrToAnsiString(AgentGetNameInternal(agentPtr));
         }
 
         /// <summary>
@@ -316,6 +317,32 @@ namespace Monitor.Checkers
         /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentSetName", CharSet = CharSet.Ansi)]
         public static extern bool AgentSetName(IntPtr agentPtr, string id);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentGetRecordsCount")]
+        public static extern int AgentGetRecordsCount(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentGetRecordById")]
+        private static extern IntPtr AgentGetRecordByIdInternal(IntPtr agentPtr, int recordId);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        public static string AgentGetRecordById(IntPtr agentPtr, int recordId)
+        {
+            return PtrToAnsiString(AgentGetRecordByIdInternal(agentPtr, recordId));
+        }
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersAgentAddRecord", CharSet = CharSet.Ansi)]
+        public static extern int AgentAddRecord(IntPtr agentPtr, string record);
         #endregion
 
         #region AgentPack

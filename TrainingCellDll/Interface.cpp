@@ -295,6 +295,30 @@ const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr)
 	return agent_ptr->get_id().c_str();
 }
 
+int CheckersAgentGetRecordsCount(const TrainingCell::Checkers::Agent* agent_ptr)
+{
+	if (agent_ptr == nullptr)
+		return -1;
+
+	return static_cast<int>(agent_ptr->get_records_count());
+}
+
+const char* CheckersAgentGetRecordById(const TrainingCell::Checkers::Agent* agent_ptr, const int record_id)
+{
+	if (agent_ptr == nullptr || record_id < 0 || record_id >= agent_ptr->get_records_count())
+		return nullptr;
+
+	return agent_ptr->get_record(record_id).c_str();
+}
+
+int CheckersAgentAddRecord(TrainingCell::Checkers::Agent* agent_ptr, const char* record)
+{
+	if (agent_ptr == nullptr || record == nullptr)
+		return -1;
+
+	return static_cast<int>(agent_ptr->add_record(record));
+}
+
 #pragma endregion Agent
 #pragma region AgentPack
 void* CheckersAgentPackLoadFromFile(const char* path)

@@ -23,21 +23,21 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
             xmlns:local="clr-namespace:Monitor.Checkers.UI"
             xmlns:ui="clr-namespace:Monitor.Checkers.UI"
             mc:Ignorable="d"
-            Title="Agent parameters" Height="300" Width="570" 
+            Title="Agent parameters" Height="380" Width="570" 
             ResizeMode="NoResize" WindowStyle="SingleBorderWindow" BorderThickness="3" BorderBrush="Gray"
-            WindowStartupLocation="CenterOwner">
+            WindowStartupLocation="CenterOwner" SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width= "*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height= "50" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height= "Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
+        <DockPanel Grid.Row="0">
             <ui:TdlAgentControl x:Name="AgentControl"/>
-        </StackPanel>
+        </DockPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="OkButton" Click="OkButton_OnClick" Content="Ok" Margin="10" Width="70"/>
             <Button Name ="CancelButton" Click="CancelButton_OnClick" Content="Cancel" Margin="10" Width="70"/>

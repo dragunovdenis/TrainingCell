@@ -22,9 +22,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Monitor.Checkers.UI"
              xmlns:utils="clr-namespace:Monitor.Utils"
-             mc:Ignorable="d" d:DesignWidth="400" Name="UI" Height="220">
+             mc:Ignorable="d" d:DesignWidth="400" Name="UI" Height="Auto">
     <Grid DataContext="{Binding ElementName=UI}" IsEnabled="{Binding IsEnabled}">
-        <StackPanel Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height= "*" />
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="10">
             <Border Style="{StaticResource LocalBorderStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -60,6 +67,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     </StackPanel>
                 </Grid>
             </Border>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Margin="10, 0, 10, 0" Visibility="{Binding Records,
+                Converter={StaticResource ObjectToVisibilityConverter}}">
+            <TextBox Text="Training Records:" Style="{StaticResource TextBoxStyle}" FontWeight="Bold"/>
+            <ListBox  ItemsSource="{Binding Records}"
+                      MaxHeight="60" MaxWidth="400" BorderThickness="0"/>
         </StackPanel>
     </Grid>
 </UserControl>

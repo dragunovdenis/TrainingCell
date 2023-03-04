@@ -48,6 +48,7 @@ namespace Monitor.Checkers.UI
             Params = agent.GetTrainingParameters();
             HiddenLayerDimensions = agent.NetDimensions;
             AgentId = agent.Id;
+            Records = agent.Records;
             EditMode = true;
         }
 
@@ -239,6 +240,17 @@ namespace Monitor.Checkers.UI
         {
             get => _agentId;
             private set => SetField(ref _agentId, value);
+        }
+
+        private IList<string> _records;
+
+        /// <summary>
+        /// Agent's records
+        /// </summary>
+        public IList<string> Records
+        {
+            get => _records;
+            set => SetField(ref _records, value);
         }
     }
 }

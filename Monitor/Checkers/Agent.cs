@@ -36,6 +36,11 @@ namespace Monitor.Checkers
         /// Unique identifier of the agent
         /// </summary>
         string Id { get; }
+
+        /// <summary>
+        /// Collection of the agent's records
+        /// </summary>
+        IList<string> Records { get; }
     }
 
     /// <summary>
@@ -47,6 +52,21 @@ namespace Monitor.Checkers
         /// Pointer to the underlying unmanaged agent
         /// </summary>
         IntPtr Ptr { get; }
+
+        /// <summary>
+        /// Adds the given record to the record-book of the agent
+        /// </summary>
+        void AddRecord(string record);
+
+        /// <summary>
+        /// Adds record containing information about completed training
+        /// </summary>
+        void AddTrainingCompletionRecord(IAgentReadOnly opponent, int totalGames, int totalWis);
+
+        /// <summary>
+        /// Adds record about a training that was not completed for some reason
+        /// </summary>
+        void AddTrainingFailRecord(IAgentReadOnly opponent, string errorMessage);
     }
 
     /// <summary>
@@ -86,6 +106,49 @@ namespace Monitor.Checkers
         /// Unique identifier of the agent
         /// </summary>
         public string Id => DllWrapper.AgentGetId(Ptr);
+
+        /// <summary>
+        /// Collection of the agent's records
+        /// </summary>
+        public IList<string> Records
+        {
+            get
+            {
+                var recordsCount = DllWrapper.AgentGetRecordsCount(Ptr);
+                if (recordsCount <= 0)
+                    return null;
+
+                var result = new List<string>();
+                for (var recordId = 0; recordId < recordsCount; recordId++)
+                    result.Add(DllWrapper.AgentGetRecordById(Ptr, recordId));
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Adds the given record to the record-book of the agent
+        /// </summary>
+        public void AddRecord(string record)
+        {
+            DllWrapper.AgentAddRecord(Ptr, record);
+        }
+
+        /// <summary>
+        /// Adds record containing information about completed training
+        /// </summary>
+        public void AddTrainingCompletionRecord(IAgentReadOnly opponent, int totalGames, int totalWis)
+        {
+            AddRecord($"{DateTime.Now}; opponent: {opponent.Name}/{opponent.Id}; {totalGames} games; {totalWis} wins");
+        }
+
+        /// <summary>
+        /// Adds record about a training that was not completed for some reason
+        /// </summary>
+        public void AddTrainingFailRecord(IAgentReadOnly opponent, string errorMessage)
+        {
+            AddRecord($"{DateTime.Now}; opponent: {opponent.Name}/{opponent.Id}; failed : {errorMessage}");
+        }
 
         /// <summary>
         /// Finalizer

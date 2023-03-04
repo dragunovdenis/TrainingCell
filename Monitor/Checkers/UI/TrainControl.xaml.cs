@@ -107,31 +107,34 @@ namespace Monitor.Checkers.UI
             _playTaskCancellation = new CancellationTokenSource();
             var playTask = new Task(() =>
             {
-                var episodeCounter = 0;
                 DllWrapper.RunCheckersTraining(
                     WhiteAgent.Ptr, BlackAgent.Ptr, EpisodesToPlay,
                     null,
-                    (whiteWins, blackWins, totalGamers) =>
+                    (whiteWinsLocal, blackWinsLocal, totalGamesLocal) =>
                     {
-                        if (episodeCounter % 1000 == 0 || episodeCounter == (EpisodesToPlay - 1))
+                        if (totalGamesLocal % 1000 == 0 || totalGamesLocal == EpisodesToPlay)
                             _ = Dispatcher.BeginInvoke(new Action(() =>
                               {
-                                  var gamesPlayedSinceLastReport = totalGamers - totalGamersPrev;
-                                  var whiteWinsPercentsSinceLastReport = (whiteWins - whiteWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
-                                  var blackWinsPercentsSinceLastReport = (blackWins - blackWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
+                                  var gamesPlayedSinceLastReport = totalGamesLocal - totalGamersPrev;
+                                  var whiteWinsPercentsSinceLastReport = (whiteWinsLocal - whiteWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
+                                  var blackWinsPercentsSinceLastReport = (blackWinsLocal - blackWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
                                   var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
                                                                            blackWinsPercentsSinceLastReport);
+
+                                  totalGamersPrev = totalGamesLocal;
+                                  whiteWinsPrev = whiteWinsLocal;
+                                  blackWinsPrev = blackWinsLocal;
+
                                   var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
                                   timePrev = DateTime.Now;
 
                                   InfoTextBlock.Text +=
-                                      $"White Wins total/inst. %: {whiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
-                                      $"Black Wins total/inst. %: {blackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
-                                      $"Draws total/inst. %: {totalGamers - whiteWins - blackWins}/{drawsPercentsFromLastReport:F1}; " +
-                                      $"Total Games: {totalGamers}; Elapsed time: {elapsedTimeSec:F1} sec." + "\n";
+                                      $"White Wins total/inst. %: {whiteWinsLocal}/{whiteWinsPercentsSinceLastReport:F1}; " +
+                                      $"Black Wins total/inst. %: {blackWinsLocal}/{blackWinsPercentsSinceLastReport:F1}; " +
+                                      $"Draws total/inst. %: {totalGamesLocal - whiteWinsLocal - blackWinsLocal}/{drawsPercentsFromLastReport:F1}; " +
+                                      $"Total Games: {totalGamesLocal}; Elapsed time: {elapsedTimeSec:F1} sec." + "\n";
                                   InfoScroll.ScrollToBottom();
                               }));
-                        episodeCounter++;
                     },
                     () => _playTaskCancellation.IsCancellationRequested,
                     (errorMessage) =>
@@ -140,12 +143,16 @@ namespace Monitor.Checkers.UI
                         {
                             InfoTextBlock.Text += "Error :" + errorMessage + "/n";
                         });
+                        WhiteAgent.AddTrainingFailRecord(BlackAgent, errorMessage);
+                        BlackAgent.AddTrainingFailRecord(WhiteAgent, errorMessage);
                     });
             });
             playTask.ContinueWith((task) =>
             {
                 _playTaskCancellation = null;
                 IsPlaying = false;
+                WhiteAgent.AddTrainingCompletionRecord(BlackAgent, totalGamersPrev, blackWinsPrev);
+                BlackAgent.AddTrainingCompletionRecord(WhiteAgent, totalGamersPrev, whiteWinsPrev);
             }, TaskScheduler.FromCurrentSynchronizationContext());
             playTask.Start();
         }

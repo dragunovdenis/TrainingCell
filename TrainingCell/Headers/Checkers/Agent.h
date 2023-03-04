@@ -88,12 +88,13 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		virtual bool equal(const Agent& agent) const = 0;
 
-		std::string _id;
-		std::string _name;
+		std::string _id{};
+		std::string _name{};
+		std::vector<std::string> _record_book{};
 
 	public:
 
-		MSGPACK_DEFINE(_name, _id);
+		MSGPACK_DEFINE(_name, _id, _record_book);
 
 		/// <summary>
 		/// Getter for a string name of the agent
@@ -109,6 +110,22 @@ namespace TrainingCell::Checkers
 		/// Read-only access to the unique identifier of the object
 		/// </summary>
 		[[nodiscard]] const std::string& get_id() const;
+
+		/// <summary>
+		/// Adds the given record to the record book
+		/// Returns index of the added record in the record-book
+		/// </summary>
+		std::size_t add_record(const std::string& record);
+
+		/// <summary>
+		/// Returns number of records in the record book
+		/// </summary>
+		[[nodiscard]] std::size_t get_records_count() const;
+
+		/// <summary>
+		/// Read-only access to the record string with the given ID (throws exception if ID is invalid)
+		/// </summary>
+		[[nodiscard]] const std::string& get_record(const std::size_t record_id) const;
 	};
 }
 

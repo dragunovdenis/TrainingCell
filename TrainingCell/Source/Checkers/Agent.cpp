@@ -43,4 +43,23 @@ namespace TrainingCell::Checkers
 	{
 		_id = DeepLearning::Utils::create_guid_string();
 	}
+
+	std::size_t Agent::add_record(const std::string& record)
+	{
+		_record_book.push_back(record);
+		return _record_book.size() - 1;
+	}
+
+	std::size_t Agent::get_records_count() const
+	{
+		return _record_book.size();
+	}
+
+	const std::string& Agent::get_record(const std::size_t record_id) const
+	{
+		if (record_id >= _record_book.size())
+			throw std::exception("Invalid record ID");
+
+		return _record_book[record_id];
+	}
 }
