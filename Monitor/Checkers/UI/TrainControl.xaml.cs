@@ -90,6 +90,48 @@ namespace Monitor.Checkers.UI
         private CancellationTokenSource _playTaskCancellation;
 
         /// <summary>
+        /// Read-only interface of the result of training
+        /// </summary>
+        private interface ITrainingResult
+        {
+            /// <summary>
+            /// Total number of training episodes (games)
+            /// </summary>
+            int TotalEpisodes { get; }
+
+            /// <summary>
+            /// Number of times "Black" player won
+            /// </summary>
+            int BlackWins { get; }
+
+            /// <summary>
+            /// Number of times "White" player won
+            /// </summary>
+            int WhiteWins { get; }
+        }
+
+        /// <summary>
+        /// Data structure to contain result of a series of training episodes 
+        /// </summary>
+        private class TrainingResult : ITrainingResult
+        {
+            /// <summary>
+            /// Total number of training episodes (games)
+            /// </summary>
+            public int TotalEpisodes { get; set; }
+
+            /// <summary>
+            /// Number of times "Black" player won
+            /// </summary>
+            public int BlackWins { get; set; }
+
+            /// <summary>
+            /// Number of times "White" player won
+            /// </summary>
+            public int WhiteWins { get; set; }
+        }
+
+        /// <summary>
         /// Play button click handler
         /// </summary>
         private void PlayButton_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -99,19 +141,25 @@ namespace Monitor.Checkers.UI
 
             IsPlaying = true;
 
-            int whiteWinsPrev = 0;
-            int blackWinsPrev = 0;
-            int totalGamersPrev = 0;
             var timePrev = DateTime.Now;
             InfoTextBlock.Text = "";
             _playTaskCancellation = new CancellationTokenSource();
-            var playTask = new Task(() =>
+            var playTask = new Task<ITrainingResult>(() =>
             {
+                var result = new TrainingResult();
+                int whiteWinsPrev = 0;
+                int blackWinsPrev = 0;
+                int totalGamersPrev = 0;
+
                 DllWrapper.RunCheckersTraining(
                     WhiteAgent.Ptr, BlackAgent.Ptr, EpisodesToPlay,
                     null,
                     (whiteWinsLocal, blackWinsLocal, totalGamesLocal) =>
                     {
+                        result.TotalEpisodes = totalGamesLocal;
+                        result.BlackWins = blackWinsLocal;
+                        result.WhiteWins = whiteWinsLocal;
+
                         if (totalGamesLocal % 1000 == 0 || totalGamesLocal == EpisodesToPlay)
                             _ = Dispatcher.BeginInvoke(new Action(() =>
                               {
@@ -146,13 +194,17 @@ namespace Monitor.Checkers.UI
                         WhiteAgent.AddTrainingFailRecord(BlackAgent, errorMessage);
                         BlackAgent.AddTrainingFailRecord(WhiteAgent, errorMessage);
                     });
+
+                return result;
             });
             playTask.ContinueWith((task) =>
             {
+                var res = task.Result;
+
                 _playTaskCancellation = null;
                 IsPlaying = false;
-                WhiteAgent.AddTrainingCompletionRecord(BlackAgent, totalGamersPrev, blackWinsPrev);
-                BlackAgent.AddTrainingCompletionRecord(WhiteAgent, totalGamersPrev, whiteWinsPrev);
+                WhiteAgent.AddTrainingCompletionRecord(BlackAgent, res.TotalEpisodes, res.BlackWins);
+                BlackAgent.AddTrainingCompletionRecord(WhiteAgent, res.TotalEpisodes, res.WhiteWins);
             }, TaskScheduler.FromCurrentSynchronizationContext());
             playTask.Start();
         }

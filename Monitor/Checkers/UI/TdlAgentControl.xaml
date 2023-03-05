@@ -70,9 +70,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
         </StackPanel>
         <StackPanel Grid.Row="1" Margin="10, 0, 10, 0" Visibility="{Binding Records,
                 Converter={StaticResource ObjectToVisibilityConverter}}">
-            <TextBox Text="Training Records:" Style="{StaticResource TextBoxStyle}" FontWeight="Bold"/>
-            <ListBox  ItemsSource="{Binding Records}"
-                      MaxHeight="60" MaxWidth="400" BorderThickness="0"/>
+            <TextBox Text="Training Records:" Style="{StaticResource TextBoxReadOnlyStyle}"/>
+            <ListBox  ItemsSource="{Binding Records}" Height="100" MaxWidth="400"/>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -139,7 +139,7 @@ namespace Monitor.Checkers
         /// </summary>
         public void AddTrainingCompletionRecord(IAgentReadOnly opponent, int totalGames, int totalWis)
         {
-            AddRecord($"{DateTime.Now}; opponent: {opponent.Name}/{opponent.Id}; {totalGames} games; {totalWis} wins");
+            AddRecord($"{DateTime.Now}; opponent: {opponent.Name} ({opponent.Id}); {totalGames} games; {totalWis} wins");
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Monitor.Checkers
         /// </summary>
         public void AddTrainingFailRecord(IAgentReadOnly opponent, string errorMessage)
         {
-            AddRecord($"{DateTime.Now}; opponent: {opponent.Name}/{opponent.Id}; failed : {errorMessage}");
+            AddRecord($"{DateTime.Now}; opponent: {opponent.Name} ({opponent.Id}); failed : {errorMessage}");
         }
 
         /// <summary>
