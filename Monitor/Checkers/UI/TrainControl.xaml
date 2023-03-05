@@ -36,30 +36,29 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width= "*" />
+            <ColumnDefinition Width= "Auto" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width= "*" />
-                <ColumnDefinition Width= "*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
             <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="0" Grid.Row="0" Margin="5">
-                <DockPanel Margin="5" >
-                    <TextBox Text="Select Agent" Margin="10" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
-                    <ListBox ItemsSource="{Binding Agents}" Name="AgentPoolList" SelectionChanged="AgentPoolList_OnSelectionChanged">
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Content" Value="{Binding Name, Mode=OneWay}"/>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-                    </ListBox>
-                </DockPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBox Grid.Row="0" Text="Select Agent:" Margin="10, 5, 10, 0" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                    <DockPanel Grid.Row="1" Margin="5" >
+                        <ListBox ItemsSource="{Binding Agents}" Name="AgentPoolList" SelectionChanged="AgentPoolList_OnSelectionChanged">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Content" Value="{Binding Name, Mode=OneWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </DockPanel>
+                </Grid>
             </Border>
             <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="1" Grid.Row="0" Margin="5">
                 <StackPanel>
@@ -85,7 +84,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                                 <ColumnDefinition/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Button Name="PlayButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" Grid.Column="0">Play</Button>
+                            <Button Name="PlayButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" Grid.Column="0" Width="100">Play</Button>
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                 <TextBox Margin="5" Text="for"  Style="{StaticResource TransparentBackgroundStyle}"/>
                                 <TextBox Name="EpisodesTextBox" Text="{Binding EpisodesToPlay}" Margin="5"/>
@@ -98,17 +97,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     </StackPanel>
                 </StackPanel>
             </Border>
-        </Grid>
-        <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="0" Grid.Row="1" Margin="5">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width= "*" />
-                <ColumnDefinition Width= "*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <StackPanel Grid.Column="1">
+        <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="1" Grid.Row="1" Margin="5">
+            <StackPanel>
                 <Button  Click="CreateButton_Click">Create Agent</Button>
                 <Button  Click="EditButton_OnClick" IsEnabled="{Binding CanEdit}">Edit/Inspect Agent</Button>
                 <Button  Click="LoadButton_Click">Load Agent</Button>
@@ -117,12 +107,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                 <Button  IsEnabled="{Binding CanRemove}" Click="RemoveButton_OnClick">Remove Selected Agent</Button>
                 <Button  IsEnabled="{Binding IsPlaying, Converter= {StaticResource InvertBoolConverter}}" Click="FinishSession_OnClick">Finish Session</Button>
             </StackPanel>
-            <DockPanel  Margin="10" Grid.Column="0">
+        </Border>
+        <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="0" Grid.Row="1" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" Text="Training Progress:" Margin="10, 5, 10, 0" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                <DockPanel  Margin="10" Grid.Row="1">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="InfoScroll">
-                    <TextBlock Name="InfoTextBlock"/>
+                        <ListBox ItemsSource="{Binding InfoCollection}" Name="InfoList" IsEnabled="False"/>
                 </ScrollViewer>
-            </DockPanel>
-        </Grid>
+                </DockPanel>
+            </Grid>
         </Border>
 </Grid>
 </UserControl>

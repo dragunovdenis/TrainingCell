@@ -131,6 +131,8 @@ namespace Monitor.Checkers.UI
             public int WhiteWins { get; set; }
         }
 
+        public ObservableCollection<string> InfoCollection { get; } = new ObservableCollection<string>();
+
         /// <summary>
         /// Play button click handler
         /// </summary>
@@ -142,8 +144,9 @@ namespace Monitor.Checkers.UI
             IsPlaying = true;
 
             var timePrev = DateTime.Now;
-            InfoTextBlock.Text = "";
+            InfoCollection.Clear();
             _playTaskCancellation = new CancellationTokenSource();
+            var trainingStart = DateTime.Now;
             var playTask = new Task<ITrainingResult>(() =>
             {
                 var result = new TrainingResult();
@@ -161,35 +164,41 @@ namespace Monitor.Checkers.UI
                         result.WhiteWins = whiteWinsLocal;
 
                         if (totalGamesLocal % 1000 == 0 || totalGamesLocal == EpisodesToPlay)
+                        {
+                            var gamesPlayedSinceLastReport = totalGamesLocal - totalGamersPrev;
+                            var whiteWinsPercentsSinceLastReport = (whiteWinsLocal - whiteWinsPrev) * 100.0 /
+                                                                   gamesPlayedSinceLastReport;
+                            var blackWinsPercentsSinceLastReport = (blackWinsLocal - blackWinsPrev) * 100.0 /
+                                                                   gamesPlayedSinceLastReport;
+                            var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
+                                                                       blackWinsPercentsSinceLastReport);
+
+                            totalGamersPrev = totalGamesLocal;
+                            whiteWinsPrev = whiteWinsLocal;
+                            blackWinsPrev = blackWinsLocal;
+
+                            var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
+                            timePrev = DateTime.Now;
+
+                            var infoLine =
+                                $"White Wins total/inst. %: {whiteWinsLocal}/{whiteWinsPercentsSinceLastReport:F1}; " +
+                                $"Black Wins total/inst. %: {blackWinsLocal}/{blackWinsPercentsSinceLastReport:F1}; " +
+                                $"Draws total/inst. %: {totalGamesLocal - whiteWinsLocal - blackWinsLocal}/{drawsPercentsFromLastReport:F1}; " +
+                                $"Total Games: {totalGamesLocal}; Elapsed time: {elapsedTimeSec:F1} sec.";
+
                             _ = Dispatcher.BeginInvoke(new Action(() =>
-                              {
-                                  var gamesPlayedSinceLastReport = totalGamesLocal - totalGamersPrev;
-                                  var whiteWinsPercentsSinceLastReport = (whiteWinsLocal - whiteWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
-                                  var blackWinsPercentsSinceLastReport = (blackWinsLocal - blackWinsPrev) * 100.0 / gamesPlayedSinceLastReport;
-                                  var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
-                                                                           blackWinsPercentsSinceLastReport);
-
-                                  totalGamersPrev = totalGamesLocal;
-                                  whiteWinsPrev = whiteWinsLocal;
-                                  blackWinsPrev = blackWinsLocal;
-
-                                  var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
-                                  timePrev = DateTime.Now;
-
-                                  InfoTextBlock.Text +=
-                                      $"White Wins total/inst. %: {whiteWinsLocal}/{whiteWinsPercentsSinceLastReport:F1}; " +
-                                      $"Black Wins total/inst. %: {blackWinsLocal}/{blackWinsPercentsSinceLastReport:F1}; " +
-                                      $"Draws total/inst. %: {totalGamesLocal - whiteWinsLocal - blackWinsLocal}/{drawsPercentsFromLastReport:F1}; " +
-                                      $"Total Games: {totalGamesLocal}; Elapsed time: {elapsedTimeSec:F1} sec." + "\n";
-                                  InfoScroll.ScrollToBottom();
-                              }));
+                            {
+                                InfoCollection.Add(infoLine);
+                                InfoScroll.ScrollToBottom();
+                            }));
+                        }
                     },
                     () => _playTaskCancellation.IsCancellationRequested,
                     (errorMessage) =>
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            InfoTextBlock.Text += "Error :" + errorMessage + "/n";
+                            InfoCollection.Add("Error :" + errorMessage);
                         });
                         WhiteAgent.AddTrainingFailRecord(BlackAgent, errorMessage);
                         BlackAgent.AddTrainingFailRecord(WhiteAgent, errorMessage);
@@ -205,6 +214,7 @@ namespace Monitor.Checkers.UI
                 IsPlaying = false;
                 WhiteAgent.AddTrainingCompletionRecord(BlackAgent, res.TotalEpisodes, res.BlackWins);
                 BlackAgent.AddTrainingCompletionRecord(WhiteAgent, res.TotalEpisodes, res.WhiteWins);
+                InfoCollection.Add($"Total training time : {DateTime.Now - trainingStart}");
             }, TaskScheduler.FromCurrentSynchronizationContext());
             playTask.Start();
         }
