@@ -1,67 +1,39 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ProjectGuid>{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>Monitor</RootNamespace>
-    <AssemblyName>Monitor</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <TargetFramework>net48</TargetFramework>
+    <Platforms>x64</Platforms>
+    <Configurations>Debug;IntelCompiler2022;Release</Configurations>
+    <AssemblyTitle>Monitor</AssemblyTitle>
+    <Product>Monitor</Product>
+    <Copyright>Copyright ©  2023</Copyright>
+    <LangVersion>7.3</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>$(SolutionDir)\$(Platform)\$(Configuration)\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>$(SolutionDir)\$(Platform)\$(Configuration)\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>TrainingCell.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'IntelCompiler2022|x64'">
-    <OutputPath>..\x64\IntelCompiler2022\</OutputPath>
+    <OutputPath>..\$(Platform)\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -71,36 +43,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Checkers\Agent.cs" />
-    <Compile Include="Checkers\AgentPack.cs" />
-    <Compile Include="Checkers\DllWrapper.cs" />
-    <Compile Include="Checkers\EnsembleAgent.cs" />
-    <Compile Include="Checkers\InteractiveAgent.cs" />
-    <Compile Include="Checkers\RandomAgent.cs" />
-    <Compile Include="Checkers\UI\AgentFileSystemManager.cs" />
-    <Compile Include="Checkers\UI\EnsembleAgentControl.xaml.cs">
+    <Compile Update="Checkers\UI\EnsembleAgentControl.xaml.cs">
       <DependentUpon>EnsembleAgentControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Checkers\UI\EnsembleAgentDialog.xaml.cs">
+    <Compile Update="Checkers\UI\EnsembleAgentDialog.xaml.cs">
       <DependentUpon>EnsembleAgentDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Checkers\UI\TdlAgentControl.xaml.cs">
+    <Compile Update="Checkers\UI\TdlAgentControl.xaml.cs">
       <DependentUpon>TdlAgentControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Checkers\UI\TdlAgentDialog.xaml.cs">
+    <Compile Update="Checkers\UI\TdlAgentDialog.xaml.cs">
       <DependentUpon>TdlAgentDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Checkers\TdLambdaAgent.cs" />
-    <Compile Include="Checkers\TdlParameters.cs" />
-    <Compile Include="Checkers\UI\TrainControl.xaml.cs">
+    <Compile Update="Checkers\UI\TrainControl.xaml.cs">
       <DependentUpon>TrainControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utils\DoublePropertyValidator.cs" />
-    <Compile Include="Utils\InvertBoolConverter.cs" />
-    <Compile Include="TrainingCellInterface.cs" />
-    <Compile Include="TwoPlayerGameUI.cs" />
-    <Compile Include="Utils\ObjectToVisibilityConverter.cs" />
-    <Compile Include="Utils\StringToUintArrayConverter.cs" />
     <Page Include="Checkers\UI\EnsembleAgentControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -125,46 +82,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App.xaml.cs">
+    <Compile Update="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Checkers\UI\BoardUi.cs" />
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Update="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
     <None Include="TrainedAgents\TrainedEnsemble.apack" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="TrainingCell.ico" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

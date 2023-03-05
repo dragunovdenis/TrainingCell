@@ -64,3 +64,4 @@ x64/
 Debug/
 packages/
 *.user
+Monitor/obj/
