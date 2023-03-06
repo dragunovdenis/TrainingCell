@@ -189,6 +189,10 @@ namespace Monitor.Checkers.UI
                             _ = Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 InfoCollection.Add(infoLine);
+
+                                if (InfoCollection.Count > 100)
+                                    InfoCollection.RemoveAt(0);
+
                                 InfoScroll.ScrollToBottom();
                             }));
                         }
@@ -196,10 +200,10 @@ namespace Monitor.Checkers.UI
                     () => _playTaskCancellation.IsCancellationRequested,
                     (errorMessage) =>
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             InfoCollection.Add("Error :" + errorMessage);
-                        });
+                        }));
                         WhiteAgent.AddTrainingFailRecord(BlackAgent, errorMessage);
                         BlackAgent.AddTrainingFailRecord(WhiteAgent, errorMessage);
                     });

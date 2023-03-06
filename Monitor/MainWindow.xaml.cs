@@ -25,7 +25,10 @@ using System.Windows.Input;
 using Monitor.Checkers.UI;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Data;
 using Monitor.Checkers;
+using Monitor.Utils;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace Monitor
 {
@@ -134,6 +137,12 @@ namespace Monitor
             {
                 Tag = tabItem,
             };
+
+            tabItem.SetBinding(ForegroundProperty, new Binding(nameof(trainControl.IsPlaying))
+            {
+                Source = trainControl,
+                Converter = new BoolToColorConverter(Brushes.Red, Brushes.Black),
+            });
 
             trainControl.OnFinishSession += TrainControlOnOnFinishSession;
             trainControl.OnEnquireExtraAgents += TrainControlOnOnEnquireExtraAgents;
