@@ -321,5 +321,16 @@ namespace Monitor.Checkers
 
             return true;
         }
+
+        /// <summary>
+        /// Brief summary of the current agent instance
+        /// </summary>
+        public override string Summary =>
+            $"{Name} ({Id})\n" +
+            $"Learning Rate = {LearningRate}\n" +
+            $"Training Mode = {TrainingMode}\n" +
+            $"Exploration Probability = {Epsilon}\n" +
+            $"Lambda = {Lambda}\n" +
+            $"Discount = {Discount}" + (Records != null ?  "\n\n" +string.Join(";\n", Records) : "");
     }
 }

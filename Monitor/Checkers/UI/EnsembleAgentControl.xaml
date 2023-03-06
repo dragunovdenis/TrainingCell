@@ -66,7 +66,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding Checked, Mode=TwoWay}" Content="{Binding AgentName, Mode=OneWay}"/>
+                            <CheckBox IsChecked="{Binding Checked, Mode=TwoWay}" Content="{Binding Agent.Name, Mode=OneWay}"
+                                      ToolTip="{Binding Agent.Summary}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

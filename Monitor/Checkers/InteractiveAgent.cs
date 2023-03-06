@@ -84,5 +84,10 @@ namespace Monitor.Checkers
             _ptr = IntPtr.Zero;
             GC.SuppressFinalize(this);
         }
+
+        /// <summary>
+        /// Brief summary of the current agent instance
+        /// </summary>
+        public override string Summary => $"Interactive Agent: {Name} ({Id})";
     }
 }

@@ -178,5 +178,13 @@ namespace Monitor.Checkers
 
             return new EnsembleAgent(ptr);
         }
+
+        /// <summary>
+        /// Brief summary of the current agent instance
+        /// </summary>
+        public override string Summary =>
+            $"{Name} ({Id})\n" +
+            $"Ensemble with {Size} sub-agents\n" +
+            $"Single Agent Mode = {SingleAgentMode}\n";
     }
 }

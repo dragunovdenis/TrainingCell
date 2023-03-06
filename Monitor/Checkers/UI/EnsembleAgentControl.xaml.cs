@@ -38,7 +38,7 @@ namespace Monitor.Checkers.UI
             /// <summary>
             /// Read-only access to the underlying agent
             /// </summary>
-            internal ITdLambdaAgentReadOnly Agent { get; }
+            public ITdLambdaAgentReadOnly Agent { get; }
 
             /// <summary>
             /// Index of the agent 
@@ -60,11 +60,6 @@ namespace Monitor.Checkers.UI
                 Index = index;
                 CanBeAdded = canBeAdded;
             }
-
-            /// <summary>
-            /// Id
-            /// </summary>
-            public string AgentName => Agent.Name;
 
             /// <summary>
             /// Property representing if the agent is checked in the ListBox

@@ -103,6 +103,11 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Brief summary of the current agent instance
+        /// </summary>
+        public override string Summary => $"Agent Pack: {Name} ({Id})";
+
+        /// <summary>
         /// Can train flag of the packed agent
         /// </summary>
         public bool CanTrain => DllWrapper.AgentGetCanTrainFlag(Ptr).ToBool();

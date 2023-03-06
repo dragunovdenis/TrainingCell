@@ -41,6 +41,11 @@ namespace Monitor.Checkers
         /// Collection of the agent's records
         /// </summary>
         IList<string> Records { get; }
+
+        /// <summary>
+        /// Brief summary of the current agent instance
+        /// </summary>
+        string Summary { get; }
     }
 
     /// <summary>
@@ -83,6 +88,11 @@ namespace Monitor.Checkers
         /// Releases unmanaged resources
         /// </summary>
         public abstract void Dispose();
+
+        /// <summary>
+        /// Brief summary of the current agent instance
+        /// </summary>
+        public abstract string Summary { get; }
 
         /// <summary>
         /// Name of the agent
