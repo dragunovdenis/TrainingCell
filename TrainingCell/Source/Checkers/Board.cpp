@@ -163,4 +163,11 @@ namespace TrainingCell::Checkers
 	{
 		return _blacksWin;
 	}
+
+	void Board::swap_agents()
+	{
+		std::swap(_agents[0], _agents[1]);
+		reset_state();
+		reset_wins();
+	}
 }

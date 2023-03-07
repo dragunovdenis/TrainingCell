@@ -45,6 +45,9 @@
     <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Checkers\TrainingEngine.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\Utils.cpp">
@@ -69,6 +72,9 @@
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp">
+      <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\TrainingEngine.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
   </ItemGroup>
