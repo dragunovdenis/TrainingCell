@@ -9,12 +9,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeepLearning", "DeepLearnin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrainingCellDll", "TrainingCellDll\TrainingCellDll.vcxproj", "{8E74E456-8A10-431E-B578-C05AB0B76FCA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monitor", "Monitor\Monitor.csproj", "{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monitor", "Monitor\Monitor.csproj", "{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8E74E456-8A10-431E-B578-C05AB0B76FCA} = {8E74E456-8A10-431E-B578-C05AB0B76FCA}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrainingCellTest", "TrainingCellTest\TrainingCellTest.vcxproj", "{B8D56F91-D966-4C11-875D-E18A42E3098D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrainingEngineConsole", "TrainingEngineConsole\TrainingEngineConsole.vcxproj", "{2B69008B-4D28-424E-81FD-727FDF70C108}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,12 @@ Global
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.IntelCompiler2022|x64.ActiveCfg = Debug|x64
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.Release|x64.ActiveCfg = Release|x64
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.Release|x64.Build.0 = Release|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.Debug|x64.ActiveCfg = Debug|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.Debug|x64.Build.0 = Debug|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler2022|x64.ActiveCfg = IntelCompiler2022|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler2022|x64.Build.0 = IntelCompiler2022|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.Release|x64.ActiveCfg = Release|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

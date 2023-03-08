@@ -17,10 +17,11 @@
 
 #include "../../Headers/Checkers/TrainingEngine.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
+#include "../../../DeepLearning/DeepLearning/StopWatch.h"
 #include "../../Headers/Checkers/Board.h"
 #include <numeric>
 #include <ppl.h>
-#include <chrono>
+#include <format>
 
 namespace TrainingCell::Checkers
 {
@@ -58,7 +59,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<Agent*> TrainingEngine::GetFixedCollectionOfAgents()
+	std::vector<Agent*> TrainingEngine::get_fixed_collection_of_agents()
 	{
 		if (_agent_pointers.size() % 2 == 0)
 			return _agent_pointers;
@@ -85,13 +86,25 @@ namespace TrainingCell::Checkers
 		return { white_wins, black_wins };
 	}
 
-	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
-		const std::function<void(const std::string& time, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback)
+	/// <summary>
+	/// Adds training record for the given agent
+	/// </summary>
+	/// <param name="agent">Agent to add training record</param>
+	/// <param name="opponent">The "opponent" agent</param>
+	/// <param name="episodes_cnt">Number of training episodes</param>
+	void add_training_record(Agent& agent, const Agent& opponent, const int episodes_cnt)
 	{
-		const auto agents = GetFixedCollectionOfAgents();
+		agent.add_record(std::format("Opponent: {} ({}); episodes: {}", opponent.get_name(), opponent.get_id(), episodes_cnt));
+	}
+
+	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
+		const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback)
+	{
+		const auto agents = get_fixed_collection_of_agents();
 
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
 		{
+			DeepLearning::StopWatch sw;
 			const auto pairs = split_for_pairs(agents.size());
 			Concurrency::parallel_for(0ull, pairs.size(), [&agents, episodes_cnt, &pairs](const auto& pair_id)
 				{
@@ -100,6 +113,8 @@ namespace TrainingCell::Checkers
 
 					Board board(agent_white_ptr, agent_black_ptr);
 					board.play(episodes_cnt);
+					add_training_record(*agent_white_ptr, *agent_black_ptr, episodes_cnt);
+					add_training_record(*agent_black_ptr, *agent_white_ptr, episodes_cnt);
 				});
 
 			std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
@@ -108,7 +123,7 @@ namespace TrainingCell::Checkers
 					performance_scores[agent_id] = evaluate_performance(*_agent_pointers[agent_id]);
 				});
 
-			round_callback(std::string("Round ") + std::to_string(round_id), performance_scores);
+			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
 		}
 	}
 }

@@ -45,13 +45,13 @@ namespace TrainingCell::Checkers
 		///	Each index appears exactly once (in one of the pairs)
 		///	The number of agents must be even, otherwise exception will be thrown
 		/// </summary>
-		static [[nodiscard]] std::vector<std::array<int, 2>> split_for_pairs(const std::size_t agents_count);
+		static std::vector<std::array<int, 2>> split_for_pairs(const std::size_t agents_count);
 
 		/// <summary>
 		///	Returns collection of agent pointers with even number of elements. The collection is either equal to `_agent_pointers`
 		///	(if the latter has even number of elements) or to `_agent_pointers` + `_random_agent`
 		/// </summary>
-		std::vector<Agent*> GetFixedCollectionOfAgents();
+		std::vector<Agent*> get_fixed_collection_of_agents();
 
 		/// <summary>
 		/// Evaluates performance of the given agent by "running" them against "random" agents
@@ -84,6 +84,6 @@ namespace TrainingCell::Checkers
 		/// <param name="round_callback">Call-back function that is called after
 		/// each round to provide some intermediate information to the caller</param>
 		void run(const int rounds_cnt, const int episodes_cnt,
-		         const std::function<void(const std::string& time, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback);
+		         const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback);
 	};
 }
