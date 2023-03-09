@@ -120,12 +120,14 @@ int main(int argc, char** argv)
 	int rounds_counter = 0;
 	auto round_time_sum = 0ll; // to calculate average round time
 
-	engine.run(num_rounds, num_rounds, [&agents, &rounds_counter, num_rounds, &round_time_sum](long long round_time_ms, const auto& performance)
+	engine.run(num_rounds, num_episodes, [&agents, &rounds_counter, num_rounds, &round_time_sum](long long round_time_ms, const auto& performance)
 		{
 			++rounds_counter;
 			round_time_sum += round_time_ms;
 			std::cout << "Round " << rounds_counter << " time: " << milliseconds_to_hh_mm_ss_string(round_time_ms) << " ms." << std::endl;
-			std::cout << "Expected time to finish training : " << milliseconds_to_hh_mm_ss_string((num_rounds - rounds_counter) * round_time_sum / rounds_counter) << " ms." << std::endl;
+			if (num_rounds != rounds_counter)
+				std::cout << "Expected time to finish training : " <<
+				milliseconds_to_hh_mm_ss_string((num_rounds - rounds_counter) * round_time_sum / rounds_counter) << " ms." << std::endl;
 
 		   for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)
 		   {

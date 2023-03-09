@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../../Headers/Checkers/TrainingEngine.h"
+#include "../../Headers/Checkers/RandomAgent.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
 #include "../../../DeepLearning/DeepLearning/StopWatch.h"
 #include "../../Headers/Checkers/Board.h"
@@ -25,12 +26,14 @@
 
 namespace TrainingCell::Checkers
 {
-	void TrainingEngine::add_agent(Agent* agent_ptr)
+	std::size_t TrainingEngine::add_agent(Agent* agent_ptr)
 	{
 		if (agent_ptr == nullptr)
 			throw std::exception("Invalid agent pointer");
 
 		_agent_pointers.push_back(agent_ptr);
+
+		return _agent_pointers.size() - 1;
 	}
 
 	TrainingEngine::TrainingEngine(const std::vector<Agent*>& agent_pointers) : _agent_pointers(agent_pointers)
@@ -59,18 +62,10 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<Agent*> TrainingEngine::get_fixed_collection_of_agents()
-	{
-		if (_agent_pointers.size() % 2 == 0)
-			return _agent_pointers;
-
-		auto result = _agent_pointers;
-		result.push_back(&_random_agent);
-		return result;
-	}
-
 	std::array<double, 2> TrainingEngine::evaluate_performance(Agent& agent)
 	{
+		agent.set_training_mode(false);
+
 		constexpr int episodes_to_play = 1000;
 		constexpr auto factor = 1.0 / episodes_to_play;
 		RandomAgent random_agent{};
@@ -83,6 +78,8 @@ namespace TrainingCell::Checkers
 		board.play(episodes_to_play);
 		const auto black_wins = board.get_blacks_wins() * factor;
 
+		agent.set_training_mode(true);
+
 		return { white_wins, black_wins };
 	}
 
@@ -92,35 +89,40 @@ namespace TrainingCell::Checkers
 	/// <param name="agent">Agent to add training record</param>
 	/// <param name="opponent">The "opponent" agent</param>
 	/// <param name="episodes_cnt">Number of training episodes</param>
-	void add_training_record(Agent& agent, const Agent& opponent, const int episodes_cnt)
+	/// <param name="trained_as_white">Set "true" if the agent was playing for "whites" during the training</param>
+	void add_training_record(Agent& agent, const Agent& opponent, const int episodes_cnt, const bool trained_as_white)
 	{
-		agent.add_record(std::format("Opponent: {} ({}); episodes: {}", opponent.get_name(), opponent.get_id(), episodes_cnt));
+		agent.add_record(std::format("White : {}; Opponent: {} ({}); episodes: {}", trained_as_white,
+			opponent.get_name(), opponent.get_id(), episodes_cnt));
 	}
 
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback)
 	{
-		const auto agents = get_fixed_collection_of_agents();
+		if (_agent_pointers.empty() || _agent_pointers.size() % 2 == 1)
+			throw std::exception("Collection of agents must be nonempty and contain an even number of elements");
+
+		std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
 
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
 		{
 			DeepLearning::StopWatch sw;
-			const auto pairs = split_for_pairs(agents.size());
-			Concurrency::parallel_for(0ull, pairs.size(), [&agents, episodes_cnt, &pairs](const auto& pair_id)
+			const auto pairs = split_for_pairs(_agent_pointers.size());
+			Concurrency::parallel_for(0ull, pairs.size(), [this, &performance_scores, episodes_cnt, &pairs](const auto& pair_id)
 				{
-					auto agent_white_ptr = agents[pairs[pair_id][0]];
-					auto agent_black_ptr = agents[pairs[pair_id][1]];
+					const auto white_agent_id = pairs[pair_id][0];
+					auto agent_white_ptr = _agent_pointers[white_agent_id];
+
+					const auto black_agent_id = pairs[pair_id][1];
+					auto agent_black_ptr = _agent_pointers[black_agent_id];
 
 					Board board(agent_white_ptr, agent_black_ptr);
 					board.play(episodes_cnt);
-					add_training_record(*agent_white_ptr, *agent_black_ptr, episodes_cnt);
-					add_training_record(*agent_black_ptr, *agent_white_ptr, episodes_cnt);
-				});
+					add_training_record(*agent_white_ptr, *agent_black_ptr, episodes_cnt, true);
+					add_training_record(*agent_black_ptr, *agent_white_ptr, episodes_cnt, false);
 
-			std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
-			Concurrency::parallel_for(0ull, _agent_pointers.size(), [this, &performance_scores](const auto agent_id)
-				{
-					performance_scores[agent_id] = evaluate_performance(*_agent_pointers[agent_id]);
+					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id]);
+					performance_scores[black_agent_id] = evaluate_performance(*_agent_pointers[black_agent_id]);
 				});
 
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);

@@ -21,8 +21,6 @@
 #include "Agent.h"
 #include <functional>
 
-#include "RandomAgent.h"
-
 namespace TrainingCell::Checkers
 {
 	/// <summary>
@@ -36,22 +34,11 @@ namespace TrainingCell::Checkers
 		std::vector<Agent*> _agent_pointers{};
 
 		/// <summary>
-		/// A "random" agent
-		/// </summary>
-		RandomAgent _random_agent{};
-
-		/// <summary>
 		/// Returns collection of integer pairs representing indices of agents in the corresponding collection
 		///	Each index appears exactly once (in one of the pairs)
 		///	The number of agents must be even, otherwise exception will be thrown
 		/// </summary>
 		static std::vector<std::array<int, 2>> split_for_pairs(const std::size_t agents_count);
-
-		/// <summary>
-		///	Returns collection of agent pointers with even number of elements. The collection is either equal to `_agent_pointers`
-		///	(if the latter has even number of elements) or to `_agent_pointers` + `_random_agent`
-		/// </summary>
-		std::vector<Agent*> get_fixed_collection_of_agents();
 
 		/// <summary>
 		/// Evaluates performance of the given agent by "running" them against "random" agents
@@ -63,8 +50,9 @@ namespace TrainingCell::Checkers
 	public:
 		/// <summary>
 		/// Adds the given agent pointer to the collection of agent pointers
+		/// Returns index of the added agent in the collection of agents
 		/// </summary>
-		void add_agent(Agent* agent_ptr);
+		std::size_t add_agent(Agent* agent_ptr);
 
 		/// <summary>
 		/// Default constructor
