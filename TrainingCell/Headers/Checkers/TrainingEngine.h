@@ -20,6 +20,7 @@
 #include <array>
 #include "Agent.h"
 #include <functional>
+#include "TdlEnsembleAgent.h"
 
 namespace TrainingCell::Checkers
 {
@@ -73,5 +74,17 @@ namespace TrainingCell::Checkers
 		/// each round to provide some intermediate information to the caller</param>
 		void run(const int rounds_cnt, const int episodes_cnt,
 		         const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback);
+
+		/// <summary>
+		/// Method to run training
+		/// </summary>
+		/// <param name="ensemble">Ensemble agent to train with</param>
+		/// <param name="rounds_cnt">Number of rounds to run. After each round agents get re-grouped in pairs</param>
+		/// <param name="episodes_cnt">Number of episodes in a round to play</param>
+		/// <param name="round_callback">Call-back function that is called after
+		/// each round to provide some intermediate information to the caller</param>
+		void run(const TdlEnsembleAgent& ensemble, const int rounds_cnt, const int episodes_cnt,
+			const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback);
+
 	};
 }

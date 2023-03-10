@@ -118,6 +118,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Arguments.cpp" />
     <ClCompile Include="TrainingEngineConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +128,9 @@
     <ProjectReference Include="..\TrainingCell\TrainingCell.vcxproj">
       <Project>{83c92853-27d9-411e-b057-637de58492c2}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Arguments.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

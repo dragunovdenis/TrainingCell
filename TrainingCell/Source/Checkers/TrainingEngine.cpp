@@ -128,4 +128,38 @@ namespace TrainingCell::Checkers
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
 		}
 	}
+
+	void TrainingEngine::run(const TdlEnsembleAgent& ensemble, const int rounds_cnt, const int episodes_cnt,
+		const std::function<void(const long long& time_per_round_ms,
+			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback)
+	{
+		std::vector ensemble_copies(_agent_pointers.size(), ensemble);
+		std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
+
+		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
+		{
+			DeepLearning::StopWatch sw;
+			Concurrency::parallel_for(0ull, _agent_pointers.size(), 
+				[this, &performance_scores, &ensemble_copies, episodes_cnt](const auto& agent_id)
+				{
+					auto agent_white_ptr =  _agent_pointers[agent_id];
+					auto agent_black_ptr = static_cast<Agent*>(&ensemble_copies[agent_id]);
+					bool trained_as_white = true;
+
+					if (DeepLearning::Utils::get_random_int(0, 1) == 1)
+					{
+						std::swap(agent_white_ptr, agent_black_ptr);
+						trained_as_white = false;
+					}
+
+					Board board(agent_white_ptr, agent_black_ptr);
+					board.play(episodes_cnt);
+
+					add_training_record(*_agent_pointers[agent_id], ensemble_copies[agent_id], episodes_cnt, trained_as_white);
+					performance_scores[agent_id] = evaluate_performance(*_agent_pointers[agent_id]);
+				});
+
+			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
+		}
+	}
 }
