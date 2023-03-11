@@ -99,7 +99,7 @@ namespace TrainingCell::Checkers
 	bool AgentPack::operator == (const AgentPack& anotherPack) const
 	{
 		return _agent_id == anotherPack._agent_id &&
-			(_agent_ptr == nullptr && anotherPack._agent_ptr == nullptr ||
+			((_agent_ptr == nullptr && anotherPack._agent_ptr == nullptr) ||
 				agent().equal(anotherPack.agent()));
 	}
 

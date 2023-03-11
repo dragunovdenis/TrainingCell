@@ -108,7 +108,7 @@ namespace TrainingCell::Checkers
 	bool SubMove::is_valid() const
 	{
 		return start != end && start != capture && end != capture && start.is_same_diagonal(end) &&
-			(!capture.is_valid() || start.is_same_diagonal(capture) && end.is_same_diagonal(capture));
+			(!capture.is_valid() || (start.is_same_diagonal(capture) && end.is_same_diagonal(capture)));
 	}
 
 	void SubMove::invert()
@@ -313,12 +313,12 @@ namespace TrainingCell::Checkers
 				temp = temp.move(1, end);
 				const auto currentPiece = get_piece(temp);
 				//if it is an "opponent" piece then it must be the one captured
-				if (Utils::is_opponent_piece(currentPiece) && move.sub_moves[subMoveId].capture != temp ||
-					//if it is the "ally" piece then it must be the one that "moving", because, in principle,
+				if ((Utils::is_opponent_piece(currentPiece) && move.sub_moves[subMoveId].capture != temp) ||
+					//if it is the "ally" piece then it must be the one that is "moving", because, in principle,
 					//moving piece can cross its initial position during the move (even multiple times)
-					Utils::is_allay_piece(currentPiece) && temp != move.sub_moves[0].start ||
+					(Utils::is_allay_piece(currentPiece) && temp != move.sub_moves[0].start) ||
 					//we also assume that the "board" is free of "diagnostics stuff"
-					currentPiece != Piece::Space && !Utils::is_opponent_piece(currentPiece) && !Utils::is_allay_piece(currentPiece))
+					(currentPiece != Piece::Space && !Utils::is_opponent_piece(currentPiece) && !Utils::is_allay_piece(currentPiece)))
 					return false;
 			} while (temp != end || !temp.is_valid());
 

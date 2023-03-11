@@ -47,16 +47,6 @@ TdLambdaAgent create_agent(const std::string& name, const Arguments& args)
 }
 
 /// <summary>
-/// Returns hh:mm:ss string representation of the given time duration in milliseconds
-/// </summary>
-std::string milliseconds_to_hh_mm_ss_string(const long long& time_ms)
-{
-	std::stringstream ss;
-	ss << std::chrono::hh_mm_ss(std::chrono::duration<int64_t, std::ratio<1, 1000>>(time_ms));
-	return ss.str();
-}
-
-/// <summary>
 /// Tries to load ensemble from the given file on disk and returns it in case of success
 /// </summary>
 std::optional<TdlEnsembleAgent> try_load_ensemble(const std::filesystem::path& ensemble_path)
@@ -99,10 +89,11 @@ int main(int argc, char** argv)
 		{
 			++rounds_counter;
 			round_time_sum += round_time_ms;
-			std::cout << "Round " << rounds_counter << " time: " << milliseconds_to_hh_mm_ss_string(round_time_ms) << " ms." << std::endl;
+			std::cout << "Round " << rounds_counter << " time: " << 
+				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms) << " ms." << std::endl;
 			if (num_rounds != rounds_counter)
 				std::cout << "Expected time to finish training : " <<
-				milliseconds_to_hh_mm_ss_string((static_cast<long long>(num_rounds) -
+				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string((static_cast<long long>(num_rounds) -
 					rounds_counter) * round_time_sum / rounds_counter) << " ms." << std::endl;
 
 			for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)

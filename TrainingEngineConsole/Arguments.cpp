@@ -149,33 +149,9 @@ Arguments::Arguments(int argc, char** argv)
 		throw std::exception("Invalid path to the opponent ensemble agent");
 }
 
-/// <summary
-/// Returns string representation of the given vector
-/// </summary>
-template <class T>
-std::string vector_to_str(const std::vector<T>& vec)
-{
-	if (vec.empty())
-		return "{}";
-
-	std::stringstream ss;
-	ss << "{";
-
-	for (auto item_id = 0ull; item_id < vec.size(); ++item_id)
-	{
-		ss << vec[item_id];
-		if (item_id != vec.size() - 1)
-			ss << ", ";
-		else
-			ss << "}";
-	}
-
-	return ss.str();
-}
-
 std::string Arguments::to_string() const
 {
-	const auto dim_string = vector_to_str(_net_dimensions);
+	const auto dim_string = DeepLearning::Utils::vector_to_str(_net_dimensions);
 	return std::format(" Pairs to train: {}\n Rounds : {} \n Episodes per round: {}\n Output folder: {}\n Discount: {}\n\
  Lambda: {}\n Learning rate: {}\n Exploration probability: {}\n Net dimensions: {}\n Opponent ensemble path: {}", 
 		_num_pairs, _num_rounds, _num_episodes, _output_folder.string(), _discount,
