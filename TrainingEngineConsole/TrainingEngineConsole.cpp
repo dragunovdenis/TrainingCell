@@ -20,8 +20,8 @@
 #include "Headers/Checkers/TdLambdaAgent.h"
 #include "Headers/Checkers/TdlEnsembleAgent.h"
 #include <chrono>
-#include <sstream>
 #include <filesystem>
+#include <queue>
 #include "Arguments.h"
 
 using namespace TrainingCell::Checkers;
@@ -80,28 +80,52 @@ int main(int argc, char** argv)
 		TrainingEngine engine(agent_pointers);
 		int rounds_counter = 0;
 		auto round_time_sum = 0ll; // to calculate average round time
+		std::queue<long long> round_time_queue;
 
 		const auto num_rounds = static_cast<int>(args.get_num_rounds());
 
 		auto opponent_ensemble = try_load_ensemble(args.get_opponent_ensemble_path());
 
-		const auto reporter = [&agents, &rounds_counter, num_rounds, &round_time_sum](long long round_time_ms, const auto& performance)
+		const auto reporter = [&agents, &rounds_counter, num_rounds, &round_time_sum, &round_time_queue]
+		(const long long round_time_ms, const auto& performance)
 		{
 			++rounds_counter;
+			round_time_queue.push(round_time_ms);
 			round_time_sum += round_time_ms;
 			std::cout << "Round " << rounds_counter << " time: " << 
-				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms) << " ms." << std::endl;
+				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms) << std::endl;
 			if (num_rounds != rounds_counter)
 				std::cout << "Expected time to finish training : " <<
 				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string((static_cast<long long>(num_rounds) -
-					rounds_counter) * round_time_sum / rounds_counter) << " ms." << std::endl;
+					rounds_counter) * round_time_sum / round_time_queue.size()) << std::endl;
+
+			if (round_time_queue.size() >= 5) 
+			{
+				// take into account only the last five round time measurements
+				// to calculate the "current average" round time
+				round_time_sum -= round_time_queue.front();
+				round_time_queue.pop();
+			}
+
+			auto average_performance_white = 0.0;
+			auto average_performance_black = 0.0;
 
 			for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)
 			{
 				const auto& perf_item = performance[agent_id];
 				std::cout << agents[agent_id].get_name() << " (" << agents[agent_id].get_id() << ") performance : "
 					<< perf_item[0] << "/" << perf_item[1] << std::endl;
+
+				average_performance_white += perf_item[0];
+				average_performance_black += perf_item[1];
 			}
+
+			average_performance_white /= performance.size();
+			average_performance_black /= performance.size();
+			std::cout << "Average performance : " << average_performance_white << "/" <<
+				average_performance_black << std::endl;
+
+			std::cout << std::endl << "=======================================" << std::endl;
 		};
 
 		if (opponent_ensemble.has_value())
@@ -110,10 +134,11 @@ int main(int argc, char** argv)
 			std::cout << "Training against loaded ensemble" << std::endl;
 			std::cout << "================================" << std::endl;
 			opponent_ensemble.value().set_single_agent_mode(true);
-			engine.run(opponent_ensemble.value(), num_rounds, static_cast<int>(args.get_num_episodes()), reporter);
+			engine.run(opponent_ensemble.value(), num_rounds, static_cast<int>(args.get_num_episodes()),
+				reporter, args.get_fixed_pairs());
 
 		} else
-			engine.run(num_rounds, static_cast<int>(args.get_num_episodes()), reporter);
+			engine.run(num_rounds, static_cast<int>(args.get_num_episodes()), reporter, args.get_fixed_pairs());
 
 		for (const auto& agent : agents)
 		{

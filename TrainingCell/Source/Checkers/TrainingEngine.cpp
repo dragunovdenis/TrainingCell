@@ -97,17 +97,18 @@ namespace TrainingCell::Checkers
 	}
 
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
-		const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback)
+		const std::function<void(const long long& time_per_round_ms,
+			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs)
 	{
 		if (_agent_pointers.empty() || _agent_pointers.size() % 2 == 1)
 			throw std::exception("Collection of agents must be nonempty and contain an even number of elements");
 
 		std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
+		auto pairs = split_for_pairs(_agent_pointers.size());
 
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
 		{
 			DeepLearning::StopWatch sw;
-			const auto pairs = split_for_pairs(_agent_pointers.size());
 			Concurrency::parallel_for(0ull, pairs.size(), [this, &performance_scores, episodes_cnt, &pairs](const auto& pair_id)
 				{
 					const auto white_agent_id = pairs[pair_id][0];
@@ -126,27 +127,37 @@ namespace TrainingCell::Checkers
 				});
 
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
+
+			if (round_id != rounds_cnt - 1 && !fixed_pairs) //re-generate pairs
+				pairs = split_for_pairs(_agent_pointers.size());
 		}
 	}
 
 	void TrainingEngine::run(const TdlEnsembleAgent& ensemble, const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms,
-			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback)
+			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs)
 	{
 		std::vector ensemble_copies(_agent_pointers.size(), ensemble);
 		std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
+		std::vector<bool> fixed_board_placement;
+		if (fixed_pairs)
+		{
+			fixed_board_placement.resize(_agent_pointers.size());
+			std::generate(fixed_board_placement.begin(), fixed_board_placement.end(),
+				[]() { return DeepLearning::Utils::get_random_int(0, 1) == 0; });
+		}
 
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
 		{
 			DeepLearning::StopWatch sw;
 			Concurrency::parallel_for(0ull, _agent_pointers.size(), 
-				[this, &performance_scores, &ensemble_copies, episodes_cnt](const auto& agent_id)
+				[this, &performance_scores, &ensemble_copies, &fixed_board_placement, episodes_cnt, fixed_pairs](const auto& agent_id)
 				{
-					auto agent_white_ptr =  _agent_pointers[agent_id];
+					auto agent_white_ptr = _agent_pointers[agent_id];
 					auto agent_black_ptr = static_cast<Agent*>(&ensemble_copies[agent_id]);
 					bool trained_as_white = true;
 
-					if (DeepLearning::Utils::get_random_int(0, 1) == 1)
+					if (fixed_pairs ? fixed_board_placement[agent_id] : DeepLearning::Utils::get_random_int(0, 1) == 0)
 					{
 						std::swap(agent_white_ptr, agent_black_ptr);
 						trained_as_white = false;

@@ -73,36 +73,40 @@ const std::filesystem::path& Arguments::get_opponent_ensemble_path() const
 Arguments::Arguments(int argc, char** argv)
 {
 	TCLAP::CmdLine cmd("Checkers training engine", ' ', "1.0");
-	auto num_pairs_arg = TCLAP::ValueArg<unsigned int>("p", "pairs", "Number of agents pairs to train", true, 1, "integer");
+	auto num_pairs_arg = TCLAP::ValueArg<unsigned int>("", "pairs", "Number of agents pairs to train", true, 1, "integer");
 	cmd.add(num_pairs_arg);
 
-	auto num_rounds_arg = TCLAP::ValueArg<unsigned int>("r", "rounds", "Number of training rounds", true, 1, "integer");
+	auto num_rounds_arg = TCLAP::ValueArg<unsigned int>("", "rounds", "Number of training rounds", true, 1, "integer");
 	cmd.add(num_rounds_arg);
 
-	auto num_episodes_arg = TCLAP::ValueArg<unsigned int>("e", "episodes", "Number of episodes (plays) in each round", true, 1, "integer");
+	auto num_episodes_arg = TCLAP::ValueArg<unsigned int>("", "episodes", "Number of episodes (plays) in each round", true, 1, "integer");
 	cmd.add(num_episodes_arg);
 
-	auto output_folder_arg = TCLAP::ValueArg<std::string>("o", "output", "Output folder path", true, "", "string");
+	auto output_folder_arg = TCLAP::ValueArg<std::string>("", "output", "Output folder path", true, "", "string");
 	cmd.add(output_folder_arg);
 
-	auto discount_arg = TCLAP::ValueArg<double>("d", "discount", "Value of reward discount", false, 0.9, "double");
+	auto discount_arg = TCLAP::ValueArg<double>("", "discount", "Value of reward discount", false, 0.9, "double");
 	cmd.add(discount_arg);
 
-	auto lambda_arg = TCLAP::ValueArg<double>("l", "lambda", "Value of lambda", false, 0.2, "double");
+	auto lambda_arg = TCLAP::ValueArg<double>("", "lambda", "Value of lambda", false, 0.2, "double");
 	cmd.add(lambda_arg);
 
-	auto exploration_arg = TCLAP::ValueArg<double>("x", "exploration", "Exploration probability", false, 0.05, "double");
+	auto exploration_arg = TCLAP::ValueArg<double>("", "exploration", "Exploration probability", false, 0.05, "double");
 	cmd.add(exploration_arg);
 
-	auto learning_rate_arg = TCLAP::ValueArg<double>("t", "rate", "Learning rate", false, 0.01, "double");
+	auto learning_rate_arg = TCLAP::ValueArg<double>("", "rate", "Learning rate", false, 0.01, "double");
 	cmd.add(learning_rate_arg);
 
-	auto net_dimensions_arg = TCLAP::ValueArg<std::string>("n", "net",
+	auto net_dimensions_arg = TCLAP::ValueArg<std::string>("", "net",
 		"Neural net dimensions", false, "{32, 64, 32, 16, 8, 1}", "string");
 	cmd.add(net_dimensions_arg);
 
-	auto opponent_ensemble_path_arg = TCLAP::ValueArg<std::string>("z", "opponent", "Path to opponent ensemble", false, "", "string");
+	auto opponent_ensemble_path_arg = TCLAP::ValueArg<std::string>("", "opponent", "Path to opponent ensemble", false, "", "string");
 	cmd.add(opponent_ensemble_path_arg);
+
+	auto fixed_pairs_arg = TCLAP::ValueArg<bool>("", "fixed_pairs", 
+		"Flag determining if agent pairs are kept fixed during all the training", false, false, "boolean");
+	cmd.add(fixed_pairs_arg);
 
 	cmd.parse(argc, argv);
 
@@ -147,15 +151,22 @@ Arguments::Arguments(int argc, char** argv)
 
 	if (_opponent_ensemble_path != "" && !std::filesystem::is_regular_file(_opponent_ensemble_path))
 		throw std::exception("Invalid path to the opponent ensemble agent");
+
+	_fixed_pairs = fixed_pairs_arg.getValue();
 }
 
 std::string Arguments::to_string() const
 {
 	const auto dim_string = DeepLearning::Utils::vector_to_str(_net_dimensions);
 	return std::format(" Pairs to train: {}\n Rounds : {} \n Episodes per round: {}\n Output folder: {}\n Discount: {}\n\
- Lambda: {}\n Learning rate: {}\n Exploration probability: {}\n Net dimensions: {}\n Opponent ensemble path: {}", 
+ Lambda: {}\n Learning rate: {}\n Exploration probability: {}\n Net dimensions: {}\n Opponent ensemble path: {}\n Fixed pairs: {}\n", 
 		_num_pairs, _num_rounds, _num_episodes, _output_folder.string(), _discount,
 		_lambda, _learning_rate, _exploration_probability,
-		dim_string, _opponent_ensemble_path.string());
+		dim_string, _opponent_ensemble_path.string(), _fixed_pairs);
+}
+
+bool Arguments::get_fixed_pairs() const
+{
+	return _fixed_pairs;
 }
 

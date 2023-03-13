@@ -72,8 +72,10 @@ namespace TrainingCell::Checkers
 		/// <param name="episodes_cnt">Number of episodes in a round to play</param>
 		/// <param name="round_callback">Call-back function that is called after
 		/// each round to provide some intermediate information to the caller</param>
+		/// <param name="fixed_pairs">If "true" training pairs are fixed stale during all the training</param>
 		void run(const int rounds_cnt, const int episodes_cnt,
-		         const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback);
+		         const std::function<void(const long long& time_per_round_ms,
+					 const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs);
 
 		/// <summary>
 		/// Method to run training
@@ -83,8 +85,10 @@ namespace TrainingCell::Checkers
 		/// <param name="episodes_cnt">Number of episodes in a round to play</param>
 		/// <param name="round_callback">Call-back function that is called after
 		/// each round to provide some intermediate information to the caller</param>
+		/// <param name="fixed_pairs">If "true" training pairs are kept fixed during all the training</param>
 		void run(const TdlEnsembleAgent& ensemble, const int rounds_cnt, const int episodes_cnt,
-			const std::function<void(const long long& time_per_round_ms, const std::vector<std::array<double, 2>>& agent_performances)>& round_callback);
+			const std::function<void(const long long& time_per_round_ms,
+				const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs);
 
 	};
 }

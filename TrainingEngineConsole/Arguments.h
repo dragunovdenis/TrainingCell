@@ -74,6 +74,11 @@ class Arguments
 	/// </summary>
 	std::filesystem::path _opponent_ensemble_path;
 
+	/// <summary>
+	/// Flag determining if pairs should be re-arranged after each round
+	/// </summary>
+	bool _fixed_pairs;
+
 public:
 	/// <summary>
 	/// Read-only access to the corresponding field
@@ -134,5 +139,10 @@ public:
 	/// Returns human readable string representation of all the arguments
 	/// </summary>
 	[[nodiscard]] std::string to_string() const;
+
+	/// <summary>
+	/// Read-only access to the corresponding field
+	/// </summary>
+	[[nodiscard]] bool get_fixed_pairs() const;
 };
 
