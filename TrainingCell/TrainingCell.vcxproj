@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClInclude Include="Headers\Checkers\Agent.h" />
     <ClInclude Include="Headers\Checkers\AgentPack.h" />
+    <ClInclude Include="Headers\Checkers\AgentTypeId.h" />
     <ClInclude Include="Headers\Checkers\Board.h" />
     <ClInclude Include="Headers\Checkers\InteractiveAgent.h" />
     <ClInclude Include="Headers\Checkers\RandomAgent.h" />
@@ -28,6 +29,7 @@
   <ItemGroup>
     <ClCompile Include="Source\Checkers\Agent.cpp" />
     <ClCompile Include="Source\Checkers\AgentPack.cpp" />
+    <ClCompile Include="Source\Checkers\AgentTypeId.cpp" />
     <ClCompile Include="Source\Checkers\Board.cpp" />
     <ClCompile Include="Source\Checkers\InteractiveAgent.cpp" />
     <ClCompile Include="Source\Checkers\RandomAgent.cpp" />
@@ -156,11 +158,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets" Condition="Exists('..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets')" />
+    <Import Project="..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets" Condition="Exists('..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets'))" />
+    <Error Condition="!Exists('..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets'))" />
   </Target>
 </Project>

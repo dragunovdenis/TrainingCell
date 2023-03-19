@@ -21,7 +21,6 @@
 #include "../TrainingCell/Headers/Checkers/RandomAgent.h"
 #include "../TrainingCell/Headers/Checkers/TdLambdaAgent.h"
 #include "../TrainingCell/Headers/Checkers/TdlEnsembleAgent.h"
-#include "../TrainingCell/Headers/Checkers/AgentPack.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include <ppl.h>
 
@@ -30,7 +29,7 @@ using namespace TrainingCell::Checkers;
 
 namespace TrainingCellTest
 {
-	TEST_CLASS(TrainingCellTest)
+	TEST_CLASS(CheckersAgentTrainingTest)
 	{
 		/// <summary>
 		/// Run "standard" training of a TD(lambda) agent
@@ -150,59 +149,6 @@ namespace TrainingCellTest
 			const auto performance = standard_performance_test(agent);
 			Logger::WriteMessage((std::string("Performance: ") + std::to_string(performance) + "\n").c_str());
 			Assert::IsTrue(performance > 0.97, L"Too low performance");
-		}
-
-		TEST_METHOD(TdLambdaAgentPackSerialization)
-		{
-			//Arrange
-			const TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
-			const auto pack = AgentPack::make<TdLambdaAgent>(agent);
-
-			//Act
-			const auto pack_from_stream = DeepLearning::MsgPack::unpack<AgentPack>(DeepLearning::MsgPack::pack(pack));
-
-			//Assert
-			Assert::IsTrue(pack_from_stream.agent().equal(agent), L"agents are not equal");
-		}
-
-		TEST_METHOD(EnsembleAgentPackSerialization)
-		{
-			//Arrange
-			TdlEnsembleAgent agent({
-				{{ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1},
-				{{ 32, 21, 32, 1 }, 3.05, 0.3, 1.9, 2.1},
-				});
-			const auto pack = AgentPack::make<TdlEnsembleAgent>(agent);
-
-			//Act
-			const auto pack_from_stream = DeepLearning::MsgPack::unpack<AgentPack>(DeepLearning::MsgPack::pack(pack));
-
-			//Assert
-			Assert::IsTrue(pack_from_stream.agent().equal(agent), L"agents are not equal");
-		}
-
-
-		TEST_METHOD(TdLambdaAgentSerialization)
-		{
-			//Arrange
-			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.1);
-			auto state = State::get_start_state();
-			//Do some number of iterations but not call "game over" method so that all
-			//the auxiliary data of the agent is nontrivial
-			const int iter_count = 10;
-			for (auto iter_id = 0; iter_id < iter_count; ++iter_id)
-			{
-				const auto moves = state.get_moves();
-				const auto move_id = agent.make_move(state, moves);
-				state.make_move(moves[move_id], true, false);
-				state.invert();
-			}
-
-			//Act
-			const auto agent_from_stream = DeepLearning::MsgPack::unpack<TdLambdaAgent>(DeepLearning::MsgPack::pack(agent));
-
-			//Assert
-			Assert::IsTrue(agent == agent_from_stream, L"Deserialized agent is not equal to the initial one");
 		}
 	};
 }

@@ -17,22 +17,10 @@
 
 #pragma once
 #include "Utils.h"
+#include "AgentTypeId.h"
 
 namespace TrainingCell::Checkers
 {
-	/// <summary>
-	///	Enumerates different agent types
-	///	Used to handle message-pack serialization of agents through their base class (class Agent)
-	/// </summary>
-	enum class AgentTypeId : int
-	{
-		UNKNOWN = 0,
-		RANDOM = 1,
-		INTERACTIVE = 2,
-		TDL = 3,
-		TDL_ENSEMBLE = 4,
-	};
-
 	/// <summary>
 	///	Abstract checkers agent (interface)
 	/// </summary>

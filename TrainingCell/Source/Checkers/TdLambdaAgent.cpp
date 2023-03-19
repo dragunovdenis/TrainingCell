@@ -17,6 +17,7 @@
 
 #include "../../Headers/Checkers/TdLambdaAgent.h"
 #include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include <nlohmann/json.hpp>
 
 namespace TrainingCell::Checkers
 {
@@ -195,12 +196,60 @@ namespace TrainingCell::Checkers
 		return best_move_id;
 	}
 
+	const char* json_agent_type_id = "AgentType";
+	const char* json_name_id = "Name";
+	const char* json_guid_id = "GUID";
+	const char* json_net_dim_id = "NetDim";
+	const char* json_lambda_id = "Lambda";
+	const char* json_discount_id = "Discount";
+	const char* json_learning_rate_id = "LearnRate";
+	const char* json_exploration_rate_id = "Exploration";
+	const char* json_training_mode_id = "TrainingMode";
+
+	std::string TdLambdaAgent::to_script() const
+	{
+		nlohmann::json json;
+		json[json_agent_type_id] = to_string(TYPE_ID());
+		json[json_name_id] = _name;
+		json[json_guid_id] = _id;
+		json[json_net_dim_id] = DeepLearning::Utils::vector_to_str(get_net_dimensions());
+		json[json_lambda_id] = _lambda;
+		json[json_discount_id] = _gamma;
+		json[json_learning_rate_id] = _alpha;
+		json[json_exploration_rate_id] = _exploration_epsilon;
+		json[json_training_mode_id] = _training_mode;
+
+		return json.dump();
+	}
+
+	TdLambdaAgent::TdLambdaAgent(const std::string& script_str):_new_game(true)
+	{
+		const auto json = nlohmann::json::parse(script_str);
+
+		if (parse_agent_type_id(json[json_agent_type_id].get<std::string>()) != TYPE_ID())
+			throw std::exception("Unexpected agent type");
+
+		set_name(json[json_name_id]);
+		auto layer_dims_str = json[json_net_dim_id].get<std::string>();
+		initialize_net(DeepLearning::Utils::parse_vector<std::size_t>(layer_dims_str));
+		_lambda = json[json_lambda_id].get<double>();
+		_gamma = json[json_discount_id].get<double>();
+		_alpha = json[json_learning_rate_id].get<double>();
+		_exploration_epsilon = json[json_exploration_rate_id].get<double>();
+		_training_mode = json[json_training_mode_id].get<bool>();
+	}
+
 	TdLambdaAgent::TdLambdaAgent(
 		const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
 		const double lambda, const double gamma, const double alpha, const std::string& name) :
 		_new_game(true), _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha)
 	{
 		set_name(name);
+		initialize_net(layer_dimensions);
+	}
+
+	void TdLambdaAgent::initialize_net(const std::vector<std::size_t>& layer_dimensions)
+	{
 		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
 			throw std::exception("Invalid Net configuration");
 
@@ -210,6 +259,17 @@ namespace TrainingCell::Checkers
 		_net = DeepLearning::Net(layer_dimensions, activ_func_ids);
 	}
 
+	bool TdLambdaAgent::equal_hyperparams(const TdLambdaAgent& anotherAgent) const
+	{
+		return _net.equal_hyperparams(anotherAgent._net) &&
+			_name == anotherAgent._name &&
+		    _exploration_epsilon == anotherAgent._exploration_epsilon &&
+			_training_mode == anotherAgent._training_mode &&
+			_lambda == anotherAgent._lambda &&
+			_gamma == anotherAgent._gamma &&
+			_alpha == anotherAgent._alpha;
+	}
+
 	bool TdLambdaAgent::operator ==(const TdLambdaAgent& anotherAgent) const
 	{
 		return _net.equal(anotherAgent._net) &&
@@ -217,13 +277,8 @@ namespace TrainingCell::Checkers
 			_prev_state == anotherAgent._prev_state &&
 			_prev_state_with_move == anotherAgent._prev_state_with_move &&
 			_new_game == anotherAgent._new_game &&
-			_exploration_epsilon == anotherAgent._exploration_epsilon &&
-			_training_mode == anotherAgent._training_mode &&
-			_lambda == anotherAgent._lambda &&
-			_gamma == anotherAgent._gamma &&
-			_alpha == anotherAgent._alpha &&
-			_id == anotherAgent._id;
-
+			_id == anotherAgent._id &&
+			equal_hyperparams(anotherAgent);
 	}
 
 	bool TdLambdaAgent::operator !=(const TdLambdaAgent& anotherAgent) const

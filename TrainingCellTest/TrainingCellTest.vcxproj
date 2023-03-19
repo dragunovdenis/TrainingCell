@@ -90,7 +90,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="TrainingCellCheckersTest.cpp" />
+    <ClCompile Include="ChackersAgentSerializationTest.cpp" />
+    <ClCompile Include="CheckersAgentTrainingTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TrainingCell\TrainingCell.vcxproj">

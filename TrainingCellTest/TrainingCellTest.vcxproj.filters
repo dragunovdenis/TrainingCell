@@ -15,7 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TrainingCellCheckersTest.cpp">
+    <ClCompile Include="CheckersAgentTrainingTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChackersAgentSerializationTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

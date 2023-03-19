@@ -93,10 +93,25 @@ namespace TrainingCell::Checkers
 		///	Resets training state of the object which is an obligatory procedure to start new episode
 		/// </summary>
 		void reset();
+
+		/// <summary>
+		/// Initializes neural net according to the given dimension array
+		/// </summary>
+		void initialize_net(const std::vector<std::size_t>& layer_dimensions);
 	public:
 
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_state_with_move, _new_game,
 			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha);
+
+		/// <summary>
+		/// Returns script representation of all the hyper-parameters of the agent
+		/// </summary>
+		[[nodiscard]] std::string to_script() const;
+
+		/// <summary>
+		/// Construction from the given string-script
+		/// </summary>
+		TdLambdaAgent(const std::string& script_str);
 
 		/// <summary>Constructor</summary>
 		/// <param name="layer_dimensions">Dimensions of the fully connected layers that constitute the underlying neural network</param>
@@ -185,6 +200,11 @@ namespace TrainingCell::Checkers
 		/// Inequality operator
 		/// </summary>
 		bool operator != (const TdLambdaAgent& anotherAgent) const;
+
+		/// <summary>
+		/// Returns "true" if the given agent has the same hyper-parameters as the current one
+		/// </summary>
+		bool equal_hyperparams(const TdLambdaAgent & anotherAgent) const;
 
 		/// <summary>
 		/// Serializes the current instance of the agent into the "message-pack" format and saves it
