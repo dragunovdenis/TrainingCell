@@ -39,7 +39,7 @@ namespace TrainingCell::Checkers
 	TrainingEngine::TrainingEngine(const std::vector<Agent*>& agent_pointers) : _agent_pointers(agent_pointers)
 	{}
 
-	std::vector<std::array<int, 2>> TrainingEngine::split_for_pairs(const std::size_t agents_count)
+	std::vector<std::array<int, 2>> TrainingEngine::split_for_pairs(const std::size_t agents_count, const bool fixed_pairs)
 	{
 		if (agents_count == 0 || agents_count % 2 == 1)
 			throw std::exception("Invalid collection of agents. Can't build pairs");
@@ -53,7 +53,7 @@ namespace TrainingCell::Checkers
 		{
 			for (int& agent_id : pair)
 			{
-				const auto index_id = DeepLearning::Utils::get_random_int(0, static_cast<int>(ids.size()) - 1);
+				const auto index_id = fixed_pairs ? 0 : DeepLearning::Utils::get_random_int(0, static_cast<int>(ids.size()) - 1);
 				agent_id = ids[index_id];
 				ids.erase(ids.begin() + index_id);
 			}
@@ -98,13 +98,13 @@ namespace TrainingCell::Checkers
 
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms,
-			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs)
+			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs) const
 	{
 		if (_agent_pointers.empty() || _agent_pointers.size() % 2 == 1)
 			throw std::exception("Collection of agents must be nonempty and contain an even number of elements");
 
 		std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
-		auto pairs = split_for_pairs(_agent_pointers.size());
+		auto pairs = split_for_pairs(_agent_pointers.size(), fixed_pairs);
 
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
 		{
@@ -129,7 +129,7 @@ namespace TrainingCell::Checkers
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
 
 			if (round_id != rounds_cnt - 1 && !fixed_pairs) //re-generate pairs
-				pairs = split_for_pairs(_agent_pointers.size());
+				pairs = split_for_pairs(_agent_pointers.size(), fixed_pairs);
 		}
 	}
 
@@ -144,7 +144,7 @@ namespace TrainingCell::Checkers
 		{
 			fixed_board_placement.resize(_agent_pointers.size());
 			std::generate(fixed_board_placement.begin(), fixed_board_placement.end(),
-				[]() { return DeepLearning::Utils::get_random_int(0, 1) == 0; });
+				[i = 0]() mutable { return i++ % 2 == 0; });
 		}
 
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)

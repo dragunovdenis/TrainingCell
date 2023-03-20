@@ -39,7 +39,7 @@ namespace TrainingCell::Checkers
 		///	Each index appears exactly once (in one of the pairs)
 		///	The number of agents must be even, otherwise exception will be thrown
 		/// </summary>
-		static std::vector<std::array<int, 2>> split_for_pairs(const std::size_t agents_count);
+		static std::vector<std::array<int, 2>> split_for_pairs(const std::size_t agents_count, const bool fixed_pairs);
 
 		/// <summary>
 		/// Evaluates performance of the given agent by "running" them against "random" agents
@@ -75,7 +75,7 @@ namespace TrainingCell::Checkers
 		/// <param name="fixed_pairs">If "true" training pairs are fixed stale during all the training</param>
 		void run(const int rounds_cnt, const int episodes_cnt,
 		         const std::function<void(const long long& time_per_round_ms,
-					 const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs);
+					 const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs) const;
 
 		/// <summary>
 		/// Method to run training
