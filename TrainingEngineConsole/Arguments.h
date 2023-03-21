@@ -19,130 +19,177 @@
 
 #include <filesystem>
 
-/// <summary>
-/// Parsed command line arguments
-/// </summary>
-class Arguments
+namespace Training
 {
 	/// <summary>
-	/// Number of agent pairs to train
+	/// Parsed command line arguments
 	/// </summary>
-	unsigned int _num_pairs;
+	class Arguments
+	{
+		/// <summary>
+		/// Hash string of command line arguments
+		/// </summary>
+		const std::string _hash;
 
-	/// <summary>
-	/// Number of training rounds to do
-	/// </summary>
-	unsigned int _num_rounds;
+		/// <summary>
+		/// Number of agent pairs to train
+		/// </summary>
+		unsigned int _num_pairs;
 
-	/// <summary>
-	/// Number of episodes in each training round
-	/// </summary>
-	unsigned int _num_episodes;
+		/// <summary>
+		/// Number of training rounds to do
+		/// </summary>
+		unsigned int _num_rounds;
 
-	/// <summary>
-	/// Path to the folder to save output
-	/// </summary>
-	std::filesystem::path _output_folder;
+		/// <summary>
+		/// Number of episodes in each training round
+		/// </summary>
+		unsigned int _num_episodes;
 
-	/// <summary>
-	/// Reward discount [0, 1]
-	/// </summary>
-	double _discount;
+		/// <summary>
+		/// Path to the folder to save output
+		/// </summary>
+		std::filesystem::path _output_folder;
 
-	/// <summary>
-	/// Lambda [0, 1]
-	/// </summary>
-	double _lambda;
+		/// <summary>
+		/// Reward discount [0, 1]
+		/// </summary>
+		double _discount;
 
-	/// <summary>
-	/// Exploration probability
-	/// </summary>
-	double _exploration_probability;
+		/// <summary>
+		/// Lambda [0, 1]
+		/// </summary>
+		double _lambda;
 
-	/// <summary>
-	/// Learning rate
-	/// </summary>
-	double _learning_rate;
+		/// <summary>
+		/// Exploration probability
+		/// </summary>
+		double _exploration_probability;
 
-	/// <summary>
-	/// Dimensions of the neural net layers
-	/// </summary>
-	std::vector<std::size_t> _net_dimensions;
+		/// <summary>
+		/// Learning rate
+		/// </summary>
+		double _learning_rate;
 
-	/// <summary>
-	/// Path to the "opponent" ensemble (optional)
-	/// </summary>
-	std::filesystem::path _opponent_ensemble_path;
+		/// <summary>
+		/// Dimensions of the neural net layers
+		/// </summary>
+		std::vector<std::size_t> _net_dimensions;
 
-	/// <summary>
-	/// Flag determining if pairs should be re-arranged after each round
-	/// </summary>
-	bool _fixed_pairs;
+		/// <summary>
+		/// Path to the "opponent" ensemble (optional)
+		/// </summary>
+		std::filesystem::path _opponent_ensemble_path;
 
-public:
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] unsigned int get_num_pairs() const;
+		/// <summary>
+		/// Flag determining if pairs should be re-arranged after each round
+		/// </summary>
+		bool _fixed_pairs;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] unsigned int get_num_rounds() const;
+		/// <summary>
+		/// Returns hexadecimal string representation of the given command line arguments
+		/// </summary>
+		static std::string calc_hash(const int argc, char** const argv);
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] unsigned int get_num_episodes() const;
+		/// <summary>
+		/// Number of rounds after which state should be dumped to disk 
+		/// </summary>
+		unsigned int _dump_rounds{};
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] const std::filesystem::path& get_output_folder() const;
+		/// <summary>
+		/// Number of rounds after which all the agents should be saved
+		/// </summary>
+		unsigned int _save_rounds{};
+	public:
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] unsigned int get_num_pairs() const;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] double get_discount() const;
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] unsigned int get_num_rounds() const;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] double get_lambda() const;
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] unsigned int get_num_episodes() const;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] double get_exploration_probability() const;
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] const std::filesystem::path& get_output_folder() const;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] double get_learning_rate() const;
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] double get_discount() const;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] const std::vector<std::size_t>& get_net_dimensions() const;
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] double get_lambda() const;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] const std::filesystem::path& get_opponent_ensemble_path() const;
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] double get_exploration_probability() const;
 
-	/// <summary>
-	/// Constructor (from command line arguments)
-	/// </summary>
-	Arguments(int argc, char** argv);
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] double get_learning_rate() const;
 
-	/// <summary>
-	/// Returns human readable string representation of all the arguments
-	/// </summary>
-	[[nodiscard]] std::string to_string() const;
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] const std::vector<std::size_t>& get_net_dimensions() const;
 
-	/// <summary>
-	/// Read-only access to the corresponding field
-	/// </summary>
-	[[nodiscard]] bool get_fixed_pairs() const;
-};
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] const std::filesystem::path& get_opponent_ensemble_path() const;
+
+		/// <summary>
+		/// Constructor (from command line arguments)
+		/// </summary>
+		Arguments(const int argc, char** const argv);
+
+		/// <summary>
+		/// Returns human readable string representation of all the arguments
+		/// </summary>
+		[[nodiscard]] std::string to_string() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] bool get_fixed_pairs() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] std::string get_hash() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] unsigned int get_dump_rounds() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] unsigned int get_save_rounds() const;
+
+		/// <summary>
+		/// Returns path to the file where state should be dumped
+		/// </summary>
+		[[nodiscard]] std::filesystem::path get_state_dump_path() const;
+
+		/// <summary>
+		/// Returns name of the file where state should be dumped
+		/// </summary>
+		[[nodiscard]] std::filesystem::path get_state_dump_file_name() const;
+	};
+}
 

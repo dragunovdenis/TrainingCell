@@ -120,6 +120,7 @@
   <ItemGroup>
     <ClCompile Include="Arguments.cpp" />
     <ClCompile Include="TrainingEngineConsole.cpp" />
+    <ClCompile Include="TrainingState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -131,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Arguments.h" />
+    <ClInclude Include="TrainingState.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

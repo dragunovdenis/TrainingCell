@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <queue>
 #include "Arguments.h"
+#include "TrainingState.h"
 
 using namespace TrainingCell::Checkers;
 
@@ -36,7 +37,7 @@ void report_fatal_error(const std::string& message)
 /// <summary>
 /// Returns a "standard" agent to train
 /// </summary>
-TdLambdaAgent create_agent(const std::string& name, const Arguments& args)
+TdLambdaAgent create_agent(const std::string& name, const Training::Arguments& args)
 {
 	return { args.get_net_dimensions(),
 		args.get_exploration_probability(),
@@ -60,36 +61,91 @@ std::optional<TdlEnsembleAgent> try_load_ensemble(const std::filesystem::path& e
 	}
 }
 
+/// <summary>
+/// Tries to load training state from the given file and returns "true" in case of success
+/// </summary>
+bool try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state)
+{
+	try
+	{
+		state = Training::TrainingState::load_from_file(state_path);
+
+		std::cout << "=========================================" << std::endl;
+		std::cout << "State dump from round " << state.get_round_id() << " was successfully loaded" << std::endl;
+		std::cout << "Discard? (y/n)";
+		char decision;
+		std::cin.get(decision);
+		std::cout << "=========================================" << std::endl;
+
+		if (decision == 'y')
+		{
+			state.reset();
+			return false;
+		}
+	}
+	catch (...)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 int main(int argc, char** argv)
 {
 	try
 	{
-		const Arguments args(argc, argv);
+		const Training::Arguments args(argc, argv);
 
 		std::cout << args.to_string() << std::endl;
 
-		std::vector<TdLambdaAgent> agents(args.get_num_pairs() * 2ull);
-		std::vector<Agent*> agent_pointers(args.get_num_pairs() * 2ull);
-
-		for (auto agent_id = 0u; agent_id < 2 * args.get_num_pairs(); ++agent_id)
+		Training::TrainingState state;
+		if (!try_load_state(args.get_state_dump_path(), state))
 		{
-			agents[agent_id] = create_agent(std::string("Agent ") + std::to_string(agent_id), args);
-			agent_pointers[agent_id] = &agents[agent_id];
+			for (auto agent_id = 0u; agent_id < 2 * args.get_num_pairs(); ++agent_id)
+				state.add_agent(create_agent(std::string("Agent ") + std::to_string(agent_id), args));
 		}
 
+		std::vector<Agent*> agent_pointers;
+		agent_pointers.reserve(state.agents_count());
+		for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
+			agent_pointers.push_back(&state[agent_id]);
+
 		TrainingEngine engine(agent_pointers);
-		int rounds_counter = 0;
 		auto round_time_sum = 0ll; // to calculate average round time
 		std::queue<long long> round_time_queue;
 
-		const auto num_rounds = static_cast<int>(args.get_num_rounds());
+		const auto num_rounds = static_cast<int>(args.get_num_rounds() - state.get_round_id());
 
 		auto opponent_ensemble = try_load_ensemble(args.get_opponent_ensemble_path());
 
-		const auto reporter = [&agents, &rounds_counter, num_rounds, &round_time_sum, &round_time_queue]
+		const auto saver = [&state, &args](const std::string& sub_folder_name)
+		{
+			const auto directory_path = !sub_folder_name.empty()? args.get_output_folder() / sub_folder_name : args.get_output_folder();
+			std::filesystem::create_directories(directory_path);
+
+			TdlEnsembleAgent ensemble;
+			ensemble.set_name("Ensemble");
+			for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
+			{
+				const auto& agent = state[agent_id];
+				const auto agent_file_path = directory_path / (agent.get_name() + ".tda");
+				std::cout << agent_file_path << std::endl;
+				agent.save_to_file(agent_file_path);
+				ensemble.add(agent);
+			}
+			std::cout << "=============================================" << std::endl;
+
+			ensemble.save_to_file(directory_path / (ensemble.get_name() + ".ena"));
+
+			state.save_to_file(directory_path / args.get_state_dump_file_name());//Save final of state
+			state.save_performance_report(directory_path / "Performance_report.txt");//Save performance report
+		};
+
+		const auto reporter = [&state, num_rounds, &round_time_sum, &round_time_queue, &saver, &args]
 		(const long long round_time_ms, const auto& performance)
 		{
-			++rounds_counter;
+			const auto rounds_counter = state.increment_round();
 			round_time_queue.push(round_time_ms);
 			round_time_sum += round_time_ms;
 			std::cout << "Round " << rounds_counter << " time: " << 
@@ -113,7 +169,7 @@ int main(int argc, char** argv)
 			for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)
 			{
 				const auto& perf_item = performance[agent_id];
-				std::cout << agents[agent_id].get_name() << " (" << agents[agent_id].get_id() << ") performance : "
+				std::cout << state[agent_id].get_name() << " (" << state[agent_id].get_id() << ") performance : "
 					<< perf_item[0] << "/" << perf_item[1] << std::endl;
 
 				average_performance_white += perf_item[0];
@@ -126,6 +182,14 @@ int main(int argc, char** argv)
 				average_performance_black << std::endl;
 
 			std::cout << std::endl << "=======================================" << std::endl;
+
+			state.add_performance_record(rounds_counter, average_performance_white, average_performance_black);
+
+			if (args.get_dump_rounds() != 0 && (rounds_counter % args.get_dump_rounds() == 0))
+				state.save_to_file(args.get_state_dump_path());
+
+			if (args.get_save_rounds() != 0 && (rounds_counter % args.get_save_rounds() == 0))
+				saver(std::format("Round_{}", rounds_counter));
 		};
 
 		if (opponent_ensemble.has_value())
@@ -140,14 +204,7 @@ int main(int argc, char** argv)
 		} else
 			engine.run(num_rounds, static_cast<int>(args.get_num_episodes()), reporter, args.get_fixed_pairs());
 
-		for (const auto& agent : agents)
-		{
-			std::cout << args.get_output_folder() / (agent.get_name() + ".tda") << std::endl;
-			agent.save_to_file(args.get_output_folder() / (agent.get_name() + ".tda"));
-		}
-
-		TdlEnsembleAgent ensemble(agents);
-		ensemble.save_to_file(args.get_output_folder() / (ensemble.get_name() + ".ena"));
+		saver("");
 	}
 	catch (std::exception& e)
 	{
