@@ -139,7 +139,7 @@ int main(int argc, char** argv)
 
 			ensemble.save_to_file(directory_path / (ensemble.get_name() + ".ena"));
 
-			state.save_to_file(directory_path / args.get_state_dump_file_name());//Save final of state
+			state.save_to_file(directory_path / args.get_state_dump_file_name(), true);//Save final of state
 			state.save_performance_report(directory_path / "Performance_report.txt");//Save performance report
 		};
 
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
 			state.add_performance_record(rounds_counter, average_performance_white, average_performance_black);
 
 			if (args.get_dump_rounds() != 0 && (rounds_counter % args.get_dump_rounds() == 0))
-				state.save_to_file(args.get_state_dump_path());
+				state.save_to_file(args.get_state_dump_path(), true);
 
 			if (args.get_save_rounds() != 0 && (rounds_counter % args.get_save_rounds() == 0))
 				saver(std::format("Round_{}", rounds_counter));

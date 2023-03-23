@@ -107,7 +107,11 @@ namespace Training
 		/// <summary>
 		/// Saves state to the given file
 		/// </summary>
-		void save_to_file(const std::filesystem::path& file_path) const;
+		/// <param name="file_path">Path to the file where state should be saved</param>
+		/// <param name="extended">If "true" an additional text file with the description
+		/// of all the agents will be saved along with the state. The description file will
+		/// have the same name as state file and ".txt" extension</param>
+		void save_to_file(const std::filesystem::path& file_path, const bool extended) const;
 
 		/// <summary>
 		/// Saves performance report to the given file

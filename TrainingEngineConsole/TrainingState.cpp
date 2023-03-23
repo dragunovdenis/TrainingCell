@@ -63,9 +63,27 @@ namespace Training
 		return ++_round_id;
 	}
 
-	void TrainingState::save_to_file(const std::filesystem::path& file_path) const
+	void TrainingState::save_to_file(const std::filesystem::path& file_path, const bool extended) const
 	{
 		DeepLearning::MsgPack::save_to_file(*this, file_path);
+
+		if (extended)
+		{
+			if (file_path.extension() == ".txt")
+				throw std::exception("State file cannot have `.txt` extension");
+
+			auto description_file_path = file_path;
+			description_file_path.replace_extension(".txt");
+			std::ofstream file(description_file_path);
+
+			if (!file)
+				throw std::exception("Failed to create file");
+
+			for(const auto& agent : _agents)
+				file << agent.to_script() << std::endl;
+
+			file.close();
+		}
 	}
 
 	void TrainingState::save_performance_report(const std::filesystem::path& file_path) const
