@@ -115,7 +115,8 @@ int main(int argc, char** argv)
 		auto round_time_sum = 0ll; // to calculate average round time
 		std::queue<long long> round_time_queue;
 
-		const auto num_rounds = static_cast<int>(args.get_num_rounds() - state.get_round_id());
+		const auto max_round_id = static_cast<int>(args.get_num_rounds());
+		const auto num_rounds_left = static_cast<int>(args.get_num_rounds() - state.get_round_id());
 
 		auto opponent_ensemble = try_load_ensemble(args.get_opponent_ensemble_path());
 
@@ -142,7 +143,7 @@ int main(int argc, char** argv)
 			state.save_performance_report(directory_path / "Performance_report.txt");//Save performance report
 		};
 
-		const auto reporter = [&state, num_rounds, &round_time_sum, &round_time_queue, &saver, &args]
+		const auto reporter = [&state, max_round_id, &round_time_sum, &round_time_queue, &saver, &args]
 		(const long long round_time_ms, const auto& performance)
 		{
 			const auto rounds_counter = state.increment_round();
@@ -150,9 +151,9 @@ int main(int argc, char** argv)
 			round_time_sum += round_time_ms;
 			std::cout << "Round " << rounds_counter << " time: " << 
 				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms) << std::endl;
-			if (num_rounds != rounds_counter)
+			if (max_round_id != rounds_counter)
 				std::cout << "Expected time to finish training : " <<
-				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string((static_cast<long long>(num_rounds) -
+				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string((static_cast<long long>(max_round_id) -
 					rounds_counter) * round_time_sum / round_time_queue.size()) << std::endl;
 
 			if (round_time_queue.size() >= 5) 
@@ -198,11 +199,11 @@ int main(int argc, char** argv)
 			std::cout << "Training against loaded ensemble" << std::endl;
 			std::cout << "================================" << std::endl;
 			opponent_ensemble.value().set_single_agent_mode(true);
-			engine.run(opponent_ensemble.value(), num_rounds, static_cast<int>(args.get_num_episodes()),
+			engine.run(opponent_ensemble.value(), num_rounds_left, static_cast<int>(args.get_num_episodes()),
 				reporter, args.get_fixed_pairs());
 
 		} else
-			engine.run(num_rounds, static_cast<int>(args.get_num_episodes()), reporter, args.get_fixed_pairs());
+			engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter, args.get_fixed_pairs());
 
 		saver("");
 	}
