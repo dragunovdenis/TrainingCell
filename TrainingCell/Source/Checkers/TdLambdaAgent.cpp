@@ -198,7 +198,6 @@ namespace TrainingCell::Checkers
 
 	const char* json_agent_type_id = "AgentType";
 	const char* json_name_id = "Name";
-	const char* json_guid_id = "GUID";
 	const char* json_net_dim_id = "NetDim";
 	const char* json_lambda_id = "Lambda";
 	const char* json_discount_id = "Discount";
@@ -211,7 +210,6 @@ namespace TrainingCell::Checkers
 		nlohmann::json json;
 		json[json_agent_type_id] = to_string(TYPE_ID());
 		json[json_name_id] = _name;
-		json[json_guid_id] = _id;
 		json[json_net_dim_id] = DeepLearning::Utils::vector_to_str(get_net_dimensions());
 		json[json_lambda_id] = _lambda;
 		json[json_discount_id] = _gamma;
@@ -224,19 +222,54 @@ namespace TrainingCell::Checkers
 
 	TdLambdaAgent::TdLambdaAgent(const std::string& script_str):_new_game(true)
 	{
+		assign(script_str, /*hyper_params_only*/ false);
+	}
+
+	void TdLambdaAgent::assign_hyperparams(const std::string& script_str)
+	{
+		assign(script_str, /*hyper_params_only*/ true);
+	}
+
+	void TdLambdaAgent::assign(const std::string& script_str, const bool hyper_params_only)
+	{
 		const auto json = nlohmann::json::parse(script_str);
 
 		if (parse_agent_type_id(json[json_agent_type_id].get<std::string>()) != TYPE_ID())
 			throw std::exception("Unexpected agent type");
 
-		set_name(json[json_name_id]);
-		auto layer_dims_str = json[json_net_dim_id].get<std::string>();
-		initialize_net(DeepLearning::Utils::parse_vector<std::size_t>(layer_dims_str));
-		_lambda = json[json_lambda_id].get<double>();
-		_gamma = json[json_discount_id].get<double>();
-		_alpha = json[json_learning_rate_id].get<double>();
-		_exploration_epsilon = json[json_exploration_rate_id].get<double>();
-		_training_mode = json[json_training_mode_id].get<bool>();
+		if (json.contains(json_name_id))
+			set_name(json[json_name_id]);
+
+		if (json.contains(json_net_dim_id))
+		{
+			if (hyper_params_only)
+			{
+				//Sanity check
+				auto dim_str = json[json_net_dim_id].get<std::string>();
+				if (DeepLearning::Utils::parse_vector<unsigned int>(dim_str) != get_net_dimensions())
+					throw std::exception("Net dimension in the script differs from that of the agent");
+			}
+			else
+			{
+				auto layer_dims_str = json[json_net_dim_id].get<std::string>();
+				initialize_net(DeepLearning::Utils::parse_vector<std::size_t>(layer_dims_str));
+			}
+		}
+
+		if (json.contains(json_lambda_id))
+			_lambda = json[json_lambda_id].get<double>();
+
+		if (json.contains(json_discount_id))
+			_gamma = json[json_discount_id].get<double>();
+
+		if (json.contains(json_learning_rate_id))
+			_alpha = json[json_learning_rate_id].get<double>();
+
+		if (json.contains(json_exploration_rate_id))
+			_exploration_epsilon = json[json_exploration_rate_id].get<double>();
+
+		if (json.contains(json_training_mode_id))
+			_training_mode = json[json_training_mode_id].get<bool>();
 	}
 
 	TdLambdaAgent::TdLambdaAgent(

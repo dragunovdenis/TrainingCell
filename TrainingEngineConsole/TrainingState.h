@@ -68,7 +68,26 @@ namespace Training
 		/// </summary>
 		unsigned int _round_id{};
 
+		/// <summary>
+		/// Saves all the agents in the current state to the given file in "script" format (hyper-parameters of all agents)
+		/// </summary>
+		void save_agents_script(const std::filesystem::path& script_file_path) const;
+
+		/// <summary>
+		/// Constructs collection of agents from the "script" in the given file
+		/// </summary>
+		void assign_agents_from_script(const std::filesystem::path& script_file_path);
 	public:
+		/// <summary>
+		/// Returns "script" representation of all the agents in the state (one line per agent)
+		/// </summary>
+		[[nodiscard]] std::string get_agents_script() const;
+
+		/// <summary>
+		/// Adjusts hyper-parameters of the agents using "script" in the given file
+		/// </summary>
+		void adjust_agent_hyper_parameters(const std::filesystem::path& script_file_path);
+
 		/// <summary>
 		/// Adds the given agent to the corresponding collection
 		/// </summary>
@@ -124,9 +143,19 @@ namespace Training
 		static TrainingState load_from_file(const std::filesystem::path& file_path);
 
 		/// <summary>
+		/// Default constructor
+		/// </summary>
+		TrainingState() = default;
+
+		/// <summary>
+		/// Construction from a script-file
+		/// </summary>
+		TrainingState(const std::filesystem::path& agent_script_file_path);
+
+		/// <summary>
 		/// Reset state of the object
 		/// </summary>
-		void reset();
+		void reset(const bool keep_agents = false);
 
 		/// <summary>
 		/// Message-pack stuff

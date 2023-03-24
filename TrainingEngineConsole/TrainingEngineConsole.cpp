@@ -34,18 +34,6 @@ void report_fatal_error(const std::string& message)
 	static_cast<void>(std::getchar());
 }
 
-/// <summary>
-/// Returns a "standard" agent to train
-/// </summary>
-TdLambdaAgent create_agent(const std::string& name, const Training::Arguments& args)
-{
-	return { args.get_net_dimensions(),
-		args.get_exploration_probability(),
-		args.get_lambda(),
-		args.get_discount(),
-		args.get_learning_rate(), name
-};
-}
 
 /// <summary>
 /// Tries to load ensemble from the given file on disk and returns it in case of success
@@ -62,20 +50,72 @@ std::optional<TdlEnsembleAgent> try_load_ensemble(const std::filesystem::path& e
 }
 
 /// <summary>
-/// Tries to load training state from the given file and returns "true" in case of success
+/// Tries to load training state from the given file and returns "true" in case of success; Does not write anything to console
 /// </summary>
-bool try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state)
+bool try_load_state_silent(const std::filesystem::path& state_path, Training::TrainingState& state)
 {
 	try
 	{
 		state = Training::TrainingState::load_from_file(state_path);
+	}
+	catch (...)
+	{
+		state.reset();
+		return false;
+	}
 
-		std::cout << "=========================================" << std::endl;
+	return true;
+}
+
+/// <summary>
+/// Tries to load training state from the given file on disk, or construct state from the given script on disk
+/// Returns "true" if succeeded
+/// </summary>
+bool try_load_or_construct_sate(const std::filesystem::path& source_path, Training::TrainingState& state)
+{
+	if (try_load_state_silent(source_path, state))
+	{
+		//we need to reset everything related to training except the agents
+		state.reset(/*keep agents*/ true);
+		return true;
+	}
+
+	try
+	{
+		//try to load as script
+		state = Training::TrainingState(source_path);
+	}
+	catch (...)
+	{
+		state.reset();
+		return false;
+	}
+
+	return true;
+}
+
+/// <summary>
+/// Writes a "horizontal separator" to console
+/// </summary>
+static void horizontal_console_separator()
+{
+	std::cout << "=========================================" << std::endl;
+
+}
+
+/// <summary>
+/// Tries to load training state from the given file and returns "true" in case of success
+/// </summary>
+bool try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state)
+{
+	if (try_load_state_silent(state_path, state))
+	{
+		horizontal_console_separator();
 		std::cout << "State dump from round " << state.get_round_id() << " was successfully loaded" << std::endl;
 		std::cout << "Discard? (y/n)";
 		char decision;
 		std::cin.get(decision);
-		std::cout << "=========================================" << std::endl;
+		horizontal_console_separator();
 
 		if (decision == 'y')
 		{
@@ -83,10 +123,8 @@ bool try_load_state(const std::filesystem::path& state_path, Training::TrainingS
 			return false;
 		}
 	}
-	catch (...)
-	{
+	else
 		return false;
-	}
 
 	return true;
 }
@@ -102,8 +140,21 @@ int main(int argc, char** argv)
 		Training::TrainingState state;
 		if (!try_load_state(args.get_state_dump_path(), state))
 		{
-			for (auto agent_id = 0u; agent_id < 2 * args.get_num_pairs(); ++agent_id)
-				state.add_agent(create_agent(std::string("Agent ") + std::to_string(agent_id), args));
+			if (!try_load_or_construct_sate(args.get_source_path(), state))
+				throw std::exception(std::format("Failed to load/construct state from the given source: {}",
+					args.get_source_path().string()).c_str());
+
+			std::cout << "State was loaded/constructed from source: " << std::endl;
+			std::cout << state.get_agents_script() << std::endl;
+
+			if (std::filesystem::is_regular_file(args.get_adjustments_path()))
+			{
+				state.adjust_agent_hyper_parameters(args.get_adjustments_path());
+				horizontal_console_separator();
+				std::cout << "State was adjusted: " << std::endl;
+				std::cout << state.get_agents_script() << std::endl;
+				horizontal_console_separator();
+			}
 		}
 
 		std::vector<Agent*> agent_pointers;
@@ -135,7 +186,7 @@ int main(int argc, char** argv)
 				agent.save_to_file(agent_file_path);
 				ensemble.add(agent);
 			}
-			std::cout << "=============================================" << std::endl;
+			horizontal_console_separator();
 
 			ensemble.save_to_file(directory_path / (ensemble.get_name() + ".ena"));
 
@@ -182,7 +233,7 @@ int main(int argc, char** argv)
 			std::cout << "Average performance : " << average_performance_white << "/" <<
 				average_performance_black << std::endl;
 
-			std::cout << std::endl << "=======================================" << std::endl;
+			horizontal_console_separator();
 
 			state.add_performance_record(rounds_counter, average_performance_white, average_performance_black);
 
@@ -195,9 +246,9 @@ int main(int argc, char** argv)
 
 		if (opponent_ensemble.has_value())
 		{
-			std::cout << "================================" << std::endl;
+			horizontal_console_separator();
 			std::cout << "Training against loaded ensemble" << std::endl;
-			std::cout << "================================" << std::endl;
+			horizontal_console_separator();
 			opponent_ensemble.value().set_single_agent_mode(true);
 			engine.run(opponent_ensemble.value(), num_rounds_left, static_cast<int>(args.get_num_episodes()),
 				reporter, args.get_fixed_pairs());

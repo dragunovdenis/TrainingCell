@@ -18,6 +18,7 @@
 #include "TrainingState.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include <fstream>
+#include <sstream>
 #include <format>
 
 namespace Training
@@ -63,6 +64,55 @@ namespace Training
 		return ++_round_id;
 	}
 
+	void TrainingState::save_agents_script(const std::filesystem::path& script_file_path) const
+	{
+		std::ofstream file(script_file_path);
+
+		if (!file)
+			throw std::exception("Failed to create file");
+
+		file << get_agents_script();
+		file.close();
+	}
+
+	std::string TrainingState::get_agents_script() const
+	{
+		std::stringstream ss;
+
+		for (const auto& agent : _agents)
+			ss << "{" << agent.to_script() << "}" << std::endl;
+
+		return ss.str();
+	}
+
+	void TrainingState::assign_agents_from_script(const std::filesystem::path& script_file_path)
+	{
+		_agents.clear();
+
+		auto script = DeepLearning::Utils::read_all_text(script_file_path);
+		std::string agent_script;
+
+		while (!(agent_script = DeepLearning::Utils::extract_balanced_sub_string(script, '{', '}')).empty())
+			_agents.emplace_back(agent_script);
+	}
+
+	void TrainingState::adjust_agent_hyper_parameters(const std::filesystem::path& script_file_path)
+	{
+		auto script = DeepLearning::Utils::read_all_text(script_file_path);
+		std::string agent_script;
+		auto agent_id = 0ull;
+
+		while (!(agent_script = DeepLearning::Utils::extract_balanced_sub_string(script, '{', '}')).empty() &&
+			agent_id < _agents.size())
+		{
+			_agents[agent_id].assign_hyperparams(agent_script);
+			++agent_id;
+		}
+
+		if (agent_id < _agents.size())
+			throw std::exception("Not all agents have been adjusted");
+	}
+
 	void TrainingState::save_to_file(const std::filesystem::path& file_path, const bool extended) const
 	{
 		DeepLearning::MsgPack::save_to_file(*this, file_path);
@@ -74,15 +124,7 @@ namespace Training
 
 			auto description_file_path = file_path;
 			description_file_path.replace_extension(".txt");
-			std::ofstream file(description_file_path);
-
-			if (!file)
-				throw std::exception("Failed to create file");
-
-			for(const auto& agent : _agents)
-				file << agent.to_script() << std::endl;
-
-			file.close();
+			save_agents_script(description_file_path);
 		}
 	}
 
@@ -104,10 +146,19 @@ namespace Training
 		return DeepLearning::MsgPack::load_from_file<TrainingState>(file_path);
 	}
 
-	void TrainingState::reset()
+	TrainingState::TrainingState(const std::filesystem::path& agent_script_file_path)
+	{
+		assign_agents_from_script(agent_script_file_path);
+	}
+
+	void TrainingState::reset(const bool keep_agents)
 	{
 		_round_id = 0;
-		_agents.clear();
 		_performance.clear();
+
+		if (keep_agents)
+			return;
+
+		_agents.clear();
 	}
 }

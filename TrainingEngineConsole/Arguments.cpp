@@ -17,24 +17,56 @@
 
 #include "Arguments.h"
 #include <tclap/CmdLine.h>
+#include <fstream>
+#include <sstream>
 #include "../DeepLearning/DeepLearning/Utilities.h"
 
 namespace Training
 {
-	std::string Arguments::calc_hash(const int argc, char** const argv)
+	/// <summary>
+	/// Calculates hexadecimal representation of a 8 bytes hash of the given file
+	/// </summary>
+	std::string calc_file_hash(const std::filesystem::path& file_path)
 	{
-		std::string accumulated_str;
+		const std::ifstream file(file_path);
 
-		for (auto arg_id = 0; arg_id < argc; ++arg_id)
-			accumulated_str += argv[arg_id];
+		if (!file)
+			throw std::exception(std::format("Cant open file {}", file_path.string()).c_str());
 
-		return DeepLearning::Utils::get_hash_as_hex_str(
-			DeepLearning::Utils::normalize_string(accumulated_str));
+		std::stringstream ss;
+		ss << file.rdbuf();
+
+		return DeepLearning::Utils::get_hash_as_hex_str(ss.str());
 	}
 
-	unsigned Arguments::get_num_pairs() const
+	std::string Arguments::calc_hash() const
 	{
-		return _num_pairs;
+		std::string str;
+
+		str += calc_file_hash(_source_path);
+
+		if (std::filesystem::is_regular_file(_adjustments_path))
+			str += calc_file_hash(_adjustments_path);
+
+		str += std::to_string(_num_rounds);
+		str += std::to_string(_num_episodes);
+		str += std::to_string(_save_rounds);
+		str += std::to_string(_dump_rounds);
+		str += DeepLearning::Utils::to_upper_case(_output_folder.string());
+		str += DeepLearning::Utils::to_upper_case(_opponent_ensemble_path.string());
+		str += std::to_string(_fixed_pairs);
+
+		return DeepLearning::Utils::get_hash_as_hex_str(str);
+	}
+
+	std::filesystem::path Arguments::get_source_path() const
+	{
+		return _source_path;
+	}
+
+	std::filesystem::path Arguments::get_adjustments_path() const
+	{
+		return _adjustments_path;
 	}
 
 	unsigned Arguments::get_num_rounds() const
@@ -52,41 +84,22 @@ namespace Training
 		return _output_folder;
 	}
 
-	double Arguments::get_discount() const
-	{
-		return _discount;
-	}
-
-	double Arguments::get_lambda() const
-	{
-		return _lambda;
-	}
-
-	double Arguments::get_exploration_probability() const
-	{
-		return _exploration_probability;
-	}
-
-	double Arguments::get_learning_rate() const
-	{
-		return _learning_rate;
-	}
-
-	const std::vector<std::size_t>& Arguments::get_net_dimensions() const
-	{
-		return _net_dimensions;
-	}
-
 	const std::filesystem::path& Arguments::get_opponent_ensemble_path() const
 	{
 		return _opponent_ensemble_path;
 	}
 
-	Arguments::Arguments(const int argc, char** const argv) : _hash(calc_hash(argc, argv))
+	Arguments::Arguments(const int argc, char** const argv)
 	{
 		TCLAP::CmdLine cmd("Checkers training engine", ' ', "1.0");
-		auto num_pairs_arg = TCLAP::ValueArg<unsigned int>("", "pairs", "Number of agents pairs to train", true, 1, "integer");
-		cmd.add(num_pairs_arg);
+
+		auto source_path_arg = TCLAP::ValueArg<std::string>("", "source", 
+"Path to saved state or to an agent script file", true, "", "string");
+		cmd.add(source_path_arg);
+
+		auto adjustments_path_arg = TCLAP::ValueArg<std::string>("", "adjustments", 
+"Path an agent script file (to adjust parameters of `source` agents)", false, "", "string");
+		cmd.add(adjustments_path_arg);
 
 		auto num_rounds_arg = TCLAP::ValueArg<unsigned int>("", "rounds", "Number of training rounds", true, 1, "integer");
 		cmd.add(num_rounds_arg);
@@ -96,22 +109,6 @@ namespace Training
 
 		auto output_folder_arg = TCLAP::ValueArg<std::string>("", "output", "Output folder path", true, "", "string");
 		cmd.add(output_folder_arg);
-
-		auto discount_arg = TCLAP::ValueArg<double>("", "discount", "Value of reward discount", false, 0.9, "double");
-		cmd.add(discount_arg);
-
-		auto lambda_arg = TCLAP::ValueArg<double>("", "lambda", "Value of lambda", false, 0.2, "double");
-		cmd.add(lambda_arg);
-
-		auto exploration_arg = TCLAP::ValueArg<double>("", "exploration", "Exploration probability", false, 0.05, "double");
-		cmd.add(exploration_arg);
-
-		auto learning_rate_arg = TCLAP::ValueArg<double>("", "rate", "Learning rate", false, 0.01, "double");
-		cmd.add(learning_rate_arg);
-
-		auto net_dimensions_arg = TCLAP::ValueArg<std::string>("", "net",
-			"Neural net dimensions", false, "{32, 64, 32, 16, 8, 1}", "string");
-		cmd.add(net_dimensions_arg);
 
 		auto opponent_ensemble_path_arg = TCLAP::ValueArg<std::string>("", "opponent", "Path to opponent ensemble", false, "", "string");
 		cmd.add(opponent_ensemble_path_arg);
@@ -130,9 +127,15 @@ namespace Training
 
 		cmd.parse(argc, argv);
 
-		_num_pairs = static_cast<int>(num_pairs_arg.getValue());
-		if (_num_pairs == 0)
-			throw std::exception("Number of agent pairs should be positive integer");
+		_source_path = source_path_arg.getValue();
+
+		if (!std::filesystem::is_regular_file(_source_path))
+			throw std::exception("Invalid source file");
+
+		_adjustments_path = adjustments_path_arg.getValue();
+
+		if (_adjustments_path != "" && !std::filesystem::is_regular_file(_adjustments_path))
+			throw std::exception("Invalid adjustments file");
 
 		_num_rounds = static_cast<int>(num_rounds_arg.getValue());
 		if (_num_rounds == 0)
@@ -141,20 +144,6 @@ namespace Training
 		_num_episodes = static_cast<int>(num_episodes_arg.getValue());
 		if (_num_episodes == 0)
 			throw std::exception("Number of episodes should be positive integer");
-
-		_discount = discount_arg.getValue();
-		if (_discount < 0.0 || _discount > 1.0)
-			throw std::exception("Discount must be within [0, 1]");
-
-		_lambda = lambda_arg.getValue();
-		if (_lambda < 0.0 || _lambda > 1.0)
-			throw std::exception("Lambda must be within [0, 1]");
-
-		_exploration_probability = exploration_arg.getValue();
-
-		_learning_rate = learning_rate_arg.getValue();
-
-		_net_dimensions = DeepLearning::Utils::parse_vector<std::size_t>(net_dimensions_arg.getValue());
 
 		_output_folder = std::filesystem::path(output_folder_arg.getValue());
 
@@ -177,17 +166,16 @@ namespace Training
 		_dump_rounds = dump_rounds_arg.getValue();
 
 		_save_rounds = save_rounds_arg.getValue();
+
+		_hash = calc_hash();
 	}
 
 	std::string Arguments::to_string() const
 	{
-		const auto dim_string = DeepLearning::Utils::vector_to_str(_net_dimensions);
-		return std::format(" Pairs to train: {}\n Rounds : {} \n Episodes per round: {}\n Output folder: {}\n Discount: {}\n\
- Lambda: {}\n Learning rate: {}\n Exploration probability: {}\n Net dimensions: {}\n Opponent ensemble path: {}\n Fixed pairs: {}\n\
- Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
-			_num_pairs, _num_rounds, _num_episodes, _output_folder.string(), _discount,
-			_lambda, _learning_rate, _exploration_probability,
-			dim_string, _opponent_ensemble_path.string(), _fixed_pairs, _dump_rounds, _save_rounds, _hash);
+		return std::format(" Source Path: {}\n Adjustments Path: {}\n Rounds: {}\n Episodes per round: {}\n Output folder: {}\n\
+ Opponent ensemble path: {}\n Fixed pairs: {}\n Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
+			_source_path.string(), _adjustments_path.string(), _num_rounds, _num_episodes, _output_folder.string(),
+			_opponent_ensemble_path.string(), _fixed_pairs, _dump_rounds, _save_rounds, _hash);
 	}
 
 	bool Arguments::get_fixed_pairs() const

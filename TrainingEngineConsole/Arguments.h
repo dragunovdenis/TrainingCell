@@ -27,69 +27,49 @@ namespace Training
 	class Arguments
 	{
 		/// <summary>
-		/// Hash string of command line arguments
+		/// Returns hexadecimal string representation of the current command line arguments
 		/// </summary>
-		const std::string _hash;
+		[[nodiscard]] std::string calc_hash() const;
 
 		/// <summary>
-		/// Number of agent pairs to train
+		/// Hash string of command line arguments
 		/// </summary>
-		unsigned int _num_pairs;
+		std::string _hash{};
+
+		/// <summary>
+		/// Path to a file with "source" agents to train
+		/// </summary>
+		std::filesystem::path _source_path{};
+
+		/// <summary>
+		/// Path to a file with hyper-parameter adjustments for the "source" agents
+		/// </summary>
+		std::filesystem::path _adjustments_path{};
 
 		/// <summary>
 		/// Number of training rounds to do
 		/// </summary>
-		unsigned int _num_rounds;
+		unsigned int _num_rounds{};
 
 		/// <summary>
 		/// Number of episodes in each training round
 		/// </summary>
-		unsigned int _num_episodes;
+		unsigned int _num_episodes{};
 
 		/// <summary>
 		/// Path to the folder to save output
 		/// </summary>
-		std::filesystem::path _output_folder;
-
-		/// <summary>
-		/// Reward discount [0, 1]
-		/// </summary>
-		double _discount;
-
-		/// <summary>
-		/// Lambda [0, 1]
-		/// </summary>
-		double _lambda;
-
-		/// <summary>
-		/// Exploration probability
-		/// </summary>
-		double _exploration_probability;
-
-		/// <summary>
-		/// Learning rate
-		/// </summary>
-		double _learning_rate;
-
-		/// <summary>
-		/// Dimensions of the neural net layers
-		/// </summary>
-		std::vector<std::size_t> _net_dimensions;
+		std::filesystem::path _output_folder{};
 
 		/// <summary>
 		/// Path to the "opponent" ensemble (optional)
 		/// </summary>
-		std::filesystem::path _opponent_ensemble_path;
+		std::filesystem::path _opponent_ensemble_path{};
 
 		/// <summary>
 		/// Flag determining if pairs should be re-arranged after each round
 		/// </summary>
-		bool _fixed_pairs;
-
-		/// <summary>
-		/// Returns hexadecimal string representation of the given command line arguments
-		/// </summary>
-		static std::string calc_hash(const int argc, char** const argv);
+		bool _fixed_pairs{};
 
 		/// <summary>
 		/// Number of rounds after which state should be dumped to disk 
@@ -101,10 +81,16 @@ namespace Training
 		/// </summary>
 		unsigned int _save_rounds{};
 	public:
+
 		/// <summary>
 		/// Read-only access to the corresponding field
 		/// </summary>
-		[[nodiscard]] unsigned int get_num_pairs() const;
+		[[nodiscard]] std::filesystem::path get_source_path() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] std::filesystem::path get_adjustments_path() const;
 
 		/// <summary>
 		/// Read-only access to the corresponding field
@@ -120,31 +106,6 @@ namespace Training
 		/// Read-only access to the corresponding field
 		/// </summary>
 		[[nodiscard]] const std::filesystem::path& get_output_folder() const;
-
-		/// <summary>
-		/// Read-only access to the corresponding field
-		/// </summary>
-		[[nodiscard]] double get_discount() const;
-
-		/// <summary>
-		/// Read-only access to the corresponding field
-		/// </summary>
-		[[nodiscard]] double get_lambda() const;
-
-		/// <summary>
-		/// Read-only access to the corresponding field
-		/// </summary>
-		[[nodiscard]] double get_exploration_probability() const;
-
-		/// <summary>
-		/// Read-only access to the corresponding field
-		/// </summary>
-		[[nodiscard]] double get_learning_rate() const;
-
-		/// <summary>
-		/// Read-only access to the corresponding field
-		/// </summary>
-		[[nodiscard]] const std::vector<std::size_t>& get_net_dimensions() const;
 
 		/// <summary>
 		/// Read-only access to the corresponding field

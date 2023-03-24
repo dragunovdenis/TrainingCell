@@ -98,6 +98,11 @@ namespace TrainingCell::Checkers
 		/// Initializes neural net according to the given dimension array
 		/// </summary>
 		void initialize_net(const std::vector<std::size_t>& layer_dimensions);
+
+		/// <summary>
+		/// Assigns parameters of the agent from the given script-string
+		/// </summary>
+		void assign(const std::string& script_str, const bool hyper_params_only);
 	public:
 
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_state_with_move, _new_game,
@@ -123,6 +128,11 @@ namespace TrainingCell::Checkers
 		/// <param name="name">Name of the agent</param>
 		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
 			const double lambda, const double gamma, const double alpha, const std::string& name = "TdlAgent");
+
+		/// <summary>
+		/// Assigns hyper-parameters of the agent from the given script-string (keeps net untouches)
+		/// </summary>
+		void assign_hyperparams(const std::string& script_str);
 
 		/// <summary>
 		/// Default constructor
