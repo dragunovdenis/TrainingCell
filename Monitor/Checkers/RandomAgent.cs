@@ -41,7 +41,7 @@ namespace Monitor.Checkers
             if (Ptr == IntPtr.Zero)
                 throw new Exception("Failed to construct agent");
 
-            Name = $"Random ({Guid.NewGuid()})";
+            Name = $"Random";
         }
 
         /// <summary>

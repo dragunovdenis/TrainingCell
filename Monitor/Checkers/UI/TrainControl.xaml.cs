@@ -26,6 +26,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace Monitor.Checkers.UI
 {
@@ -70,8 +71,6 @@ namespace Monitor.Checkers.UI
             _id = id;
             //Put the "random" agent to the list by default
             AddAgent(new RandomAgent());
-            AddAgent(new TdLambdaAgent("White-" + _id));
-            AddAgent(new TdLambdaAgent("Black-" + _id));
 
             AppDomain.CurrentDomain.ProcessExit += (o, e) =>
             {
@@ -108,6 +107,11 @@ namespace Monitor.Checkers.UI
             /// Number of times "White" player won
             /// </summary>
             int WhiteWins { get; }
+
+            /// <summary>
+            /// Used to synchronize interactions with UI
+            /// </summary>
+            DispatcherOperation DispatcherOp { get; }
         }
 
         /// <summary>
@@ -129,6 +133,11 @@ namespace Monitor.Checkers.UI
             /// Number of times "White" player won
             /// </summary>
             public int WhiteWins { get; set; }
+
+            /// <summary>
+            /// Used to synchronize interactions with UI
+            /// </summary>
+            public DispatcherOperation DispatcherOp { get; set; }
         }
 
         public ObservableCollection<string> InfoCollection { get; } = new ObservableCollection<string>();
@@ -186,7 +195,8 @@ namespace Monitor.Checkers.UI
                                 $"Draws total/inst. %: {totalGamesLocal - whiteWinsLocal - blackWinsLocal}/{drawsPercentsFromLastReport:F1}; " +
                                 $"Total Games: {totalGamesLocal}; Elapsed time: {elapsedTimeSec:F1} sec.";
 
-                            _ = Dispatcher.BeginInvoke(new Action(() =>
+                            result.DispatcherOp?.Wait();
+                            result.DispatcherOp = Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 InfoCollection.Add(infoLine);
 
@@ -200,7 +210,8 @@ namespace Monitor.Checkers.UI
                     () => _playTaskCancellation.IsCancellationRequested,
                     (errorMessage) =>
                     {
-                        Dispatcher.BeginInvoke(new Action(() =>
+                        result.DispatcherOp?.Wait();
+                        result.DispatcherOp = Dispatcher.BeginInvoke(new Action(() =>
                         {
                             InfoCollection.Add("Error :" + errorMessage);
                         }));
@@ -213,6 +224,7 @@ namespace Monitor.Checkers.UI
             playTask.ContinueWith((task) =>
             {
                 var res = task.Result;
+                res.DispatcherOp?.Wait();
 
                 _playTaskCancellation = null;
                 IsPlaying = false;
