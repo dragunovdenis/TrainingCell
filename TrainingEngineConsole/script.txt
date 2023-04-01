@@ -1,0 +1,2 @@
+{{"AgentType":"TDL","Discount":0.9,"Exploration":0.05,"Lambda":0.2,"LearnRate":0.01,"Name":"Agent0","NetDim":"{32, 32, 16, 8, 1}","TrainingMode":true}, 3 }
+{{"AgentType":"TDL","Discount":0.9,"Exploration":0.05,"Lambda":0.2,"LearnRate":0.01,"Name":"Agent1","NetDim":"{32, 64, 32, 16, 8, 1}","TrainingMode":true}, 5 }

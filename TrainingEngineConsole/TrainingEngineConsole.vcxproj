@@ -134,6 +134,10 @@
     <ClInclude Include="Arguments.h" />
     <ClInclude Include="TrainingState.h" />
   </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="run.bat" />
+    <CopyFileToFolders Include="script.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\tclap.1.2.1\build\native\tclap.targets" Condition="Exists('..\packages\tclap.1.2.1\build\native\tclap.targets')" />

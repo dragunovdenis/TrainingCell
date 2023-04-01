@@ -24,13 +24,27 @@
 #include <queue>
 #include "Arguments.h"
 #include "TrainingState.h"
+#include <iostream>
 
 using namespace TrainingCell::Checkers;
 
+/// <summary>
+/// Prints to console while taking care about flushing the buffer
+/// </summary>
+void static print_to_console(const std::string& message, const bool endl)
+{
+	std::cout << message;
+	if (endl)
+		std::cout << std::endl;
+
+	std::cout.flush();
+	Sleep(10);
+}
+
 void report_fatal_error(const std::string& message)
 {
-	std::cout << message << std::endl;
-	std::cout << "Press any key to exit" << std::endl;
+	print_to_console(message, true);
+	print_to_console("Press any key to exit", true);
 	static_cast<void>(std::getchar());
 }
 
@@ -99,8 +113,23 @@ bool try_load_or_construct_sate(const std::filesystem::path& source_path, Traini
 /// </summary>
 static void horizontal_console_separator()
 {
-	std::cout << "=========================================" << std::endl;
+	print_to_console("=========================================", true);
 
+}
+
+/// <summary>
+/// Returns true if user wants to continue
+/// </summary>
+bool decision_prompt(const std::string& prompt_string = "Continue? (y/n):")
+{
+	print_to_console(prompt_string, false);
+
+	char decision;
+	std::cin.get(decision);
+	std::cin.ignore();
+	horizontal_console_separator();
+
+	return decision == 'y';
 }
 
 /// <summary>
@@ -111,13 +140,9 @@ bool try_load_state(const std::filesystem::path& state_path, Training::TrainingS
 	if (try_load_state_silent(state_path, state))
 	{
 		horizontal_console_separator();
-		std::cout << "State dump from round " << state.get_round_id() << " was successfully loaded" << std::endl;
-		std::cout << "Discard? (y/n)";
-		char decision;
-		std::cin.get(decision);
-		horizontal_console_separator();
+		print_to_console("State dump from round " + std::to_string(state.get_round_id()) + " was successfully loaded", true);
 
-		if (decision == 'y')
+		if (decision_prompt("Discard? (y/n):"))
 		{
 			state.reset();
 			return false;
@@ -144,16 +169,19 @@ int main(int argc, char** argv)
 				throw std::exception(std::format("Failed to load/construct state from the given source: {}",
 					args.get_source_path().string()).c_str());
 
-			std::cout << "State was loaded/constructed from source: " << std::endl;
-			std::cout << state.get_agents_script() << std::endl;
+			print_to_console("State was loaded/constructed from source: ", true);
+			print_to_console(state.get_agents_script(), true);
+			if (!decision_prompt())
+				return 0;
 
 			if (std::filesystem::is_regular_file(args.get_adjustments_path()))
 			{
 				state.adjust_agent_hyper_parameters(args.get_adjustments_path());
 				horizontal_console_separator();
-				std::cout << "State was adjusted: " << std::endl;
-				std::cout << state.get_agents_script() << std::endl;
-				horizontal_console_separator();
+				print_to_console("State was adjusted: ", true);
+				print_to_console(state.get_agents_script(), true);
+				if (!decision_prompt())
+					return 0;
 			}
 		}
 
@@ -181,8 +209,8 @@ int main(int argc, char** argv)
 			for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
 			{
 				const auto& agent = state[agent_id];
-				const auto agent_file_path = directory_path / (agent.get_name() + ".tda");
-				std::cout << agent_file_path << std::endl;
+				const auto agent_file_path = directory_path / (agent.get_name() + "--" + agent.get_id() + ".tda");
+				print_to_console(agent_file_path.string(), true);
 				agent.save_to_file(agent_file_path);
 				ensemble.add(agent);
 			}
@@ -200,12 +228,12 @@ int main(int argc, char** argv)
 			const auto rounds_counter = state.increment_round();
 			round_time_queue.push(round_time_ms);
 			round_time_sum += round_time_ms;
-			std::cout << "Round " << rounds_counter << " time: " << 
-				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms) << std::endl;
+			print_to_console("Round " + std::to_string(rounds_counter) + " time: " +
+				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms), true);
 			if (max_round_id != rounds_counter)
-				std::cout << "Expected time to finish training : " <<
+				print_to_console("Expected time to finish training : " +
 				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string((static_cast<long long>(max_round_id) -
-					rounds_counter) * round_time_sum / round_time_queue.size()) << std::endl;
+					rounds_counter) * round_time_sum / round_time_queue.size()), true);
 
 			if (round_time_queue.size() >= 5) 
 			{
@@ -221,8 +249,8 @@ int main(int argc, char** argv)
 			for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)
 			{
 				const auto& perf_item = performance[agent_id];
-				std::cout << state[agent_id].get_name() << " (" << state[agent_id].get_id() << ") performance : "
-					<< perf_item[0] << "/" << perf_item[1] << std::endl;
+				print_to_console(state[agent_id].get_name() + " (" + state[agent_id].get_id() + ") performance : "
+					+ std::to_string(perf_item[0]) + "/" + std::to_string(perf_item[1]), true);
 
 				average_performance_white += perf_item[0];
 				average_performance_black += perf_item[1];
@@ -230,8 +258,8 @@ int main(int argc, char** argv)
 
 			average_performance_white /= performance.size();
 			average_performance_black /= performance.size();
-			std::cout << "Average performance : " << average_performance_white << "/" <<
-				average_performance_black << std::endl;
+			print_to_console("Average performance : " + std::to_string(average_performance_white) + "/" +
+				std::to_string(average_performance_black), true);
 
 			horizontal_console_separator();
 
@@ -247,7 +275,7 @@ int main(int argc, char** argv)
 		if (opponent_ensemble.has_value())
 		{
 			horizontal_console_separator();
-			std::cout << "Training against loaded ensemble" << std::endl;
+			print_to_console("Training against loaded ensemble", true);
 			horizontal_console_separator();
 			opponent_ensemble.value().set_single_agent_mode(true);
 			engine.run(opponent_ensemble.value(), num_rounds_left, static_cast<int>(args.get_num_episodes()),

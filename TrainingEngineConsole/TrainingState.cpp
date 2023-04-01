@@ -79,34 +79,86 @@ namespace Training
 	{
 		std::stringstream ss;
 
-		for (const auto& agent : _agents)
-			ss << "{" << agent.to_script() << "}" << std::endl;
+		auto range_start = 0ull;
+
+		while (range_start < _agents.size())
+		{
+			const auto& start_agent = _agents[range_start];
+			const auto range_end = std::distance(_agents.begin(),
+				std::find_if_not(_agents.begin() + range_start, _agents.end(), [&start_agent](const auto& agent)
+				{
+					return start_agent.equal_hyperparams(agent);
+				}));
+
+			const auto agents_in_range = static_cast<int>(range_end - range_start);
+
+			if (agents_in_range == 1)
+				ss << "{" << start_agent.to_script() << "}" << std::endl;
+			else
+				ss << "{" << start_agent.to_script() << ", " << agents_in_range <<  " }" << std::endl;
+
+			range_start = range_end;
+		}
 
 		return ss.str();
+	}
+
+	/// <summary>
+	/// Splits the given script onto pairs consisting of an agent scripts and an
+	/// integer number, defining number of agents the script is associated with
+	/// </summary>
+	std::vector<std::pair<std::string, int>> parse_script(const std::string& script)
+	{
+		auto script_copy = script;
+		std::vector<std::pair<std::string, int>> result;
+
+		do
+		{
+			auto aggregate_agent_script = DeepLearning::Utils::extract_balanced_sub_string(script_copy, '{', '}');
+			if (aggregate_agent_script.empty())
+				break;
+
+			const auto agent_script = DeepLearning::Utils::extract_balanced_sub_string(aggregate_agent_script, '{', '}', true);
+			const auto factor_v = DeepLearning::Utils::parse_scalars<int>(aggregate_agent_script);
+			if (factor_v.size() > 1)
+				throw std::exception("Unexpected syntax in the script");
+
+			const auto clones_count = factor_v.empty() ? 1 : factor_v[0];
+
+			result.emplace_back(agent_script, clones_count);
+
+		} while (true);
+
+		return result;
 	}
 
 	void TrainingState::assign_agents_from_script(const std::filesystem::path& script_file_path)
 	{
 		_agents.clear();
 
-		auto script = DeepLearning::Utils::read_all_text(script_file_path);
-		std::string agent_script;
+		const auto script = DeepLearning::Utils::read_all_text(script_file_path);
+		const auto script_collection = parse_script(script);
 
-		while (!(agent_script = DeepLearning::Utils::extract_balanced_sub_string(script, '{', '}')).empty())
-			_agents.emplace_back(agent_script);
+		for (const auto& script_pair : script_collection)
+		{
+			for (auto clone_id = 0; clone_id < script_pair.second; ++clone_id)
+			{
+				_agents.emplace_back(script_pair.first);
+				_agents.rbegin()->set_name(_agents.rbegin()->get_name() + "-" + std::to_string(clone_id));
+			}
+		}
 	}
 
 	void TrainingState::adjust_agent_hyper_parameters(const std::filesystem::path& script_file_path)
 	{
-		auto script = DeepLearning::Utils::read_all_text(script_file_path);
-		std::string agent_script;
+		const auto script = DeepLearning::Utils::read_all_text(script_file_path);
+		const auto script_collection = parse_script(script);
 		auto agent_id = 0ull;
 
-		while (!(agent_script = DeepLearning::Utils::extract_balanced_sub_string(script, '{', '}')).empty() &&
-			agent_id < _agents.size())
+		for (const auto& script_pair : script_collection)
 		{
-			_agents[agent_id].assign_hyperparams(agent_script);
-			++agent_id;
+			for (auto clone_id = 0; clone_id < script_pair.second; ++clone_id)
+				_agents[agent_id++].assign_hyperparams(script_pair.first);
 		}
 
 		if (agent_id < _agents.size())
