@@ -150,5 +150,22 @@ namespace TrainingCellTest
 			Logger::WriteMessage((std::string("Performance: ") + std::to_string(performance) + "\n").c_str());
 			Assert::IsTrue(performance > 0.97, L"Too low performance");
 		}
+
+		TEST_METHOD(TdLambdaAgentTrainingRegression)
+		{
+			//Arrange
+			auto agent0 = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0.tda");
+			auto agent1 = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent1.tda");
+			const auto agent0_trained = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0_trained.tda");
+			const auto agent1_trained = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent1_trained.tda");
+
+			//Act
+			Board board(&agent0, &agent1);
+			board.play(200);
+
+			//Assert
+			Assert::IsTrue(agent0 == agent0_trained, L"0th agent does not coincide with the reference");
+			Assert::IsTrue(agent1 == agent1_trained, L"1st agent does not coincide with the reference");
+		}
 	};
 }
