@@ -26,6 +26,27 @@ namespace TrainingCell::Checkers
 	/// </summary>
 	class TdLambdaAgent : public Agent
 	{
+		/// <summary>
+		/// Hold data related to a picked move
+		/// </summary>
+		struct MoveData
+		{
+			/// <summary>
+			/// ID of the move
+			/// </summary>
+			int move_id {};
+
+			/// <summary>
+			/// Value of the after-state
+			/// </summary>
+			double value {};
+
+			/// <summary>
+			/// After-sate resulted from the move
+			/// </summary>
+			State after_state {};
+		};
+
 		friend class TdlEnsembleAgent;
 		/// <summary>
 		///	The neural net to approximate state value function
@@ -43,19 +64,19 @@ namespace TrainingCell::Checkers
 		std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _z{};
 
 		/// <summary>
-		///	Copy of the previous state, that is either the initial state of the game or a result of latest opponent move
+		/// Previous state
 		/// </summary>
 		State _prev_state{};
 
 		/// <summary>
-		///	Previous state modified by the latest move taken by the agent
+		/// Previous afterstate
 		/// </summary>
-		State _prev_state_with_move{};
+		State _prev_afterstate{};
 
 		/// <summary>
-		///	Parameters defining the epsilon-greediness of the agent (exploration capabilities of the agent,
-		///	i.e. probability that the agent takes a random action instead of the one with the highest predicted value)
-		///	<= 0 means no exploration, >= 1.0 means only random exploration
+		/// Parameters defining the epsilon-greediness of the agent (exploration capabilities of the agent,
+		/// i.e. probability that the agent takes a random action instead of the one with the highest predicted value)
+		/// <= 0 means no exploration, >= 1.0 means only random exploration
 		/// </summary>
 		double _exploration_epsilon{};
 
@@ -85,9 +106,19 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] int pick_move_id(const State& state, const std::vector<Move>& moves) const;
 
 		/// <summary>
-		/// Updates "z" field
+		/// Returns index of the picked move and the related data
 		/// </summary>
-		void update_z();
+		[[nodiscard]] MoveData pick_move(const State& state, const std::vector<Move>& moves) const;
+
+		/// <summary>
+		/// Calculates afterstate and its value
+		/// </summary>
+		[[nodiscard]] MoveData evaluate(const State& state, const std::vector<Move>& moves, const int move_id) const;
+
+		/// <summary>
+		/// Updates "z" field and returns value of the afterstate value function at the "previous afterstate"
+		/// </summary>
+		double update_z_and_evaluate_prev_after_state();
 
 		/// <summary>
 		///	Resets training state of the object which is an obligatory procedure to start new episode
@@ -105,7 +136,7 @@ namespace TrainingCell::Checkers
 		void assign(const std::string& script_str, const bool hyper_params_only);
 	public:
 
-		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_state_with_move, _new_game,
+		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_afterstate, _new_game,
 			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha);
 
 		/// <summary>

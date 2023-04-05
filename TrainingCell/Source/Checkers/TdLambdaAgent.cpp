@@ -31,10 +31,8 @@ namespace TrainingCell::Checkers
 	{
 		if (_training_mode)
 		{
-			update_z();
-			const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
 			const auto reward = 2 * static_cast<int>(result);
-			const auto delta = reward - prev_state_with_move_value;
+			const auto delta = reward - update_z_and_evaluate_prev_after_state();
 			_net.update(_z, -_alpha * delta, 0.0);
 		}
 
@@ -106,24 +104,30 @@ namespace TrainingCell::Checkers
 			2.0 * diff_score[Piece::AntiKing]) / 50.0;
 	}
 
-	void TdLambdaAgent::update_z()
+	double TdLambdaAgent::update_z_and_evaluate_prev_after_state()
 	{
+		auto calc_result = _net.calc_gradient_and_value(_prev_afterstate.to_tensor(),
+			DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
+
+		auto& gradient = std::get<0>(calc_result);
+
 		if (_z.empty())
-			_z = _net.calc_gradient(_prev_state_with_move.to_tensor(),
-				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
+		{
+			_z = std::move(gradient);
+		}
 		else
 		{
-			auto gradients = _net.calc_gradient(_prev_state_with_move.to_tensor(),
-				DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
-			if (gradients.size() != _z.size())
+			if (gradient.size() != _z.size())
 				throw std::exception("Incompatible data");
 
-			for (auto layer_id = 0ull; layer_id < gradients.size(); ++layer_id)
+			for (auto layer_id = 0ull; layer_id < gradient.size(); ++layer_id)
 			{
-				gradients[layer_id] += _z[layer_id] * _lambda * _gamma;
-				_z[layer_id] = std::move(gradients[layer_id]);
+				gradient[layer_id] += _z[layer_id] * _lambda * _gamma;
+				_z[layer_id] = std::move(gradient[layer_id]);
 			}
 		}
+
+		return std::get<1>(calc_result)(0, 0, 0);
 	}
 
 	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves)
@@ -131,69 +135,64 @@ namespace TrainingCell::Checkers
 		if (!_training_mode)
 			return pick_move_id(current_state, moves);
 
+		const auto move_data = pick_move(current_state, moves);
+
 		if (_new_game)
 		{
-			_prev_state_with_move = _prev_state = current_state;
-			const auto move_id = pick_move_id(current_state, moves);
-			_prev_state_with_move.make_move(moves[move_id], true, false);
+			_prev_afterstate = move_data.after_state;
+			_prev_state = current_state;
 			_new_game = false;
-			return  move_id;
+			return move_data.move_id;
 		}
 
-		//update approximation function
-		update_z();
-
-		const auto move_to_take = pick_move_id(current_state, moves);
-		auto current_state_with_move = current_state;
-		current_state_with_move.make_move(moves[move_to_take], true, false);
-
-		const auto current_state_with_move_value = _net.act(current_state_with_move.to_tensor())(0, 0, 0);
-		const auto prev_state_with_move_value = _net.act(_prev_state_with_move.to_tensor())(0, 0, 0);
 		const auto reward = calculate_reward(_prev_state, current_state);
 
-		const auto delta = reward + _gamma * current_state_with_move_value - prev_state_with_move_value;
+		const auto prev_afterstate_value = update_z_and_evaluate_prev_after_state();
+		const auto delta = reward + _gamma * move_data.value - prev_afterstate_value;
 
 		_net.update(_z, -_alpha * delta, 0.0);
 
-		_prev_state_with_move = current_state_with_move;
+		_prev_afterstate = move_data.after_state;
 		_prev_state = current_state;
 
-		return move_to_take;
+		return move_data.move_id;
 	}
 
 	int TdLambdaAgent::pick_move_id(const State& state, const std::vector<Move>& moves) const
 	{
-		if (moves.empty())
-			return -1;
+		return pick_move(state, moves).move_id;
+	}
 
-		if (moves.size() == 1)
-			return 0;
+	TdLambdaAgent::MoveData TdLambdaAgent::evaluate(const State& state, const std::vector<Move>& moves, const int move_id) const
+	{
+		auto afterstate = state;
+		afterstate.make_move(moves[move_id], true, false);
+		const auto value = _net.act(afterstate.to_tensor())(0, 0, 0);
+		return { move_id,  value, afterstate };
+	}
+
+	TdLambdaAgent::MoveData TdLambdaAgent::pick_move(const State& state, const std::vector<Move>& moves) const
+	{
+		if (moves.empty())
+			return { -1 };
 
 		if (_training_mode && DeepLearning::Utils::get_random(0, 1.0) <= _exploration_epsilon)
-			//Exploration move
-			return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1);
+			return evaluate(state, moves, DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1));
 
-		//Exploitation move
-		int best_move_id = -1;
-		auto best_value = -std::numeric_limits<double>::max();
+		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() };
 
 		for (auto move_id = 0ull; move_id < moves.size(); ++move_id)
 		{
-			auto state_copy = state;
-			state_copy.make_move(moves[move_id], true, false);
-			const auto eval_result = _net.act(state_copy.to_tensor())(0, 0, 0);
+			const auto trial_move_data = evaluate(state, moves, static_cast<int>(move_id));
 
-			if (eval_result > best_value)
-			{
-				best_value = eval_result;
-				best_move_id = static_cast<int>(move_id);
-			}
+			if (trial_move_data.value > best_move_data.value)
+				best_move_data = trial_move_data;
 		}
 
-		if (best_move_id < 0)
+		if (best_move_data.move_id < 0)
 			throw std::exception((get_name() + ": neural network is NaN. Try decreasing learning rate parameter.").c_str());
 
-		return best_move_id;
+		return best_move_data;
 	}
 
 	const char* json_agent_type_id = "AgentType";
@@ -308,7 +307,7 @@ namespace TrainingCell::Checkers
 		return _net.equal(anotherAgent._net) &&
 			_z == anotherAgent._z &&
 			_prev_state == anotherAgent._prev_state &&
-			_prev_state_with_move == anotherAgent._prev_state_with_move &&
+			_prev_afterstate == anotherAgent._prev_afterstate &&
 			_new_game == anotherAgent._new_game &&
 			_id == anotherAgent._id &&
 			equal_hyperparams(anotherAgent);

@@ -114,7 +114,6 @@ bool try_load_or_construct_sate(const std::filesystem::path& source_path, Traini
 static void horizontal_console_separator()
 {
 	print_to_console("=========================================", true);
-
 }
 
 /// <summary>
@@ -205,7 +204,7 @@ int main(int argc, char** argv)
 			std::filesystem::create_directories(directory_path);
 
 			TdlEnsembleAgent ensemble;
-			ensemble.set_name("Ensemble");
+			ensemble.set_name("Ensemble_R_" + std::to_string(state.get_round_id()));
 			for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
 			{
 				const auto& agent = state[agent_id];

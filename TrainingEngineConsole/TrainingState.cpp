@@ -79,26 +79,8 @@ namespace Training
 	{
 		std::stringstream ss;
 
-		auto range_start = 0ull;
-
-		while (range_start < _agents.size())
-		{
-			const auto& start_agent = _agents[range_start];
-			const auto range_end = std::distance(_agents.begin(),
-				std::find_if_not(_agents.begin() + range_start, _agents.end(), [&start_agent](const auto& agent)
-				{
-					return start_agent.equal_hyperparams(agent);
-				}));
-
-			const auto agents_in_range = static_cast<int>(range_end - range_start);
-
-			if (agents_in_range == 1)
-				ss << "{" << start_agent.to_script() << "}" << std::endl;
-			else
-				ss << "{" << start_agent.to_script() << ", " << agents_in_range <<  " }" << std::endl;
-
-			range_start = range_end;
-		}
+		for (const auto& agent : _agents)
+			ss << "{" << agent.to_script() << "}" << std::endl;
 
 		return ss.str();
 	}

@@ -123,6 +123,9 @@ namespace TrainingCellTest
 
 					{
 						const auto performance = standard_performance_test(agent);
+
+						Assert::IsFalse(isnan(performance), L"Optimization has failed");
+
 						std::lock_guard lock(m);
 						average_win_percentage += performance;
 
