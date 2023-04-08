@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="TestData">
+      <UniqueIdentifier>{e4a2c61d-3596-47d6-b8a7-c09b64c7eebd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TestData\TdlTrainingRegression">
+      <UniqueIdentifier>{af0de28c-3bbc-4093-9061-d002ae503f60}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CheckersAgentTrainingTest.cpp">
@@ -24,5 +30,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="TestData\TdlTrainingRegression\agent0.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\agent0_trained.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\agent1.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\agent1_trained.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
   </ItemGroup>
 </Project>
