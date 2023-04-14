@@ -20,6 +20,7 @@
 #include <fstream>
 #include <sstream>
 #include <format>
+#include "../../DeepLearning/DeepLearning/Utilities.h"
 
 namespace Training
 {
@@ -114,12 +115,17 @@ namespace Training
 		return result;
 	}
 
-	void TrainingState::assign_agents_from_script(const std::filesystem::path& script_file_path)
+	void TrainingState::assign_agents_from_script_file(const std::filesystem::path& script_file_path)
 	{
-		_agents.clear();
-
 		const auto script = DeepLearning::Utils::read_all_text(script_file_path);
-		const auto script_collection = parse_script(script);
+		assign_agents_from_script(script);
+	}
+
+	void TrainingState::assign_agents_from_script(const std::string& script_str)
+	{
+		const auto script_collection = parse_script(script_str);
+
+		_agents.clear();
 
 		for (const auto& script_pair : script_collection)
 		{
@@ -182,7 +188,7 @@ namespace Training
 
 	TrainingState::TrainingState(const std::filesystem::path& agent_script_file_path)
 	{
-		assign_agents_from_script(agent_script_file_path);
+		assign_agents_from_script_file(agent_script_file_path);
 	}
 
 	void TrainingState::reset(const bool keep_agents)
@@ -194,5 +200,29 @@ namespace Training
 			return;
 
 		_agents.clear();
+	}
+
+	void TrainingState::set_discount(const double& discount)
+	{
+		for (auto& agent : _agents)
+			agent.set_discount(discount);
+	}
+
+	void TrainingState::set_lambda(const double& lambda)
+	{
+		for (auto& agent : _agents)
+			agent.set_lambda(lambda);
+	}
+
+	void TrainingState::set_learning_rate(const double& l_rate)
+	{
+		for (auto& agent : _agents)
+			agent.set_learning_rate(l_rate);
+	}
+
+	void TrainingState::set_exploration(const double& exploration)
+	{
+		for (auto& agent : _agents)
+			agent.set_exploration_probability(exploration);
 	}
 }

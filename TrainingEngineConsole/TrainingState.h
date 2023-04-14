@@ -16,8 +16,9 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../TrainingCell/Headers/Checkers/TdLambdaAgent.h"
+#include <filesystem>
 #include <msgpack.hpp>
+#include "Headers/Checkers/TdLambdaAgent.h"
 
 namespace Training
 {
@@ -76,8 +77,14 @@ namespace Training
 		/// <summary>
 		/// Constructs collection of agents from the "script" in the given file
 		/// </summary>
-		void assign_agents_from_script(const std::filesystem::path& script_file_path);
+		void assign_agents_from_script_file(const std::filesystem::path& script_file_path);
+
 	public:
+		/// <summary>
+		/// Constructs collection of agents from the given "script-string"
+		/// </summary>
+		void assign_agents_from_script(const std::string& script_str);
+
 		/// <summary>
 		/// Returns "script" representation of all the agents in the state (one line per agent)
 		/// </summary>
@@ -156,6 +163,26 @@ namespace Training
 		/// Reset state of the object
 		/// </summary>
 		void reset(const bool keep_agents = false);
+
+		/// <summary>
+		/// Updates the reward discounts of all the agents by the given value
+		/// </summary>
+		void set_discount(const double& discount);
+
+		/// <summary>
+		/// Updates "lambda" parameter of all the agents by the given value
+		/// </summary>
+		void set_lambda(const double& lambda);
+
+		/// <summary>
+		/// Updates "learning rate" parameter of all the agents by the given value
+		/// </summary>
+		void set_learning_rate(const double& l_rate);
+
+		/// <summary>
+		/// Updates "exploration" parameter of all the agents by the given value
+		/// </summary>
+		void set_exploration(const double& exploration);
 
 		/// <summary>
 		/// Message-pack stuff

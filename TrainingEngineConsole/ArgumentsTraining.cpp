@@ -15,38 +15,23 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "Arguments.h"
+#include "ArgumentsTraining.h"
 #include <tclap/CmdLine.h>
 #include <fstream>
 #include <sstream>
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "ConsoleUtils.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
 
-namespace Training
+namespace Training::Modes
 {
-	/// <summary>
-	/// Calculates hexadecimal representation of a 8 bytes hash of the given file
-	/// </summary>
-	std::string calc_file_hash(const std::filesystem::path& file_path)
-	{
-		const std::ifstream file(file_path);
-
-		if (!file)
-			throw std::exception(std::format("Cant open file {}", file_path.string()).c_str());
-
-		std::stringstream ss;
-		ss << file.rdbuf();
-
-		return DeepLearning::Utils::get_hash_as_hex_str(ss.str());
-	}
-
-	std::string Arguments::calc_hash() const
+	std::string ArgumentsTraining::calc_hash() const
 	{
 		std::string str;
 
-		str += calc_file_hash(_source_path);
+		str += ConsoleUtils::calc_file_hash(_source_path);
 
 		if (std::filesystem::is_regular_file(_adjustments_path))
-			str += calc_file_hash(_adjustments_path);
+			str += ConsoleUtils::calc_file_hash(_adjustments_path);
 
 		str += std::to_string(_num_rounds);
 		str += std::to_string(_num_episodes);
@@ -59,37 +44,37 @@ namespace Training
 		return DeepLearning::Utils::get_hash_as_hex_str(str);
 	}
 
-	std::filesystem::path Arguments::get_source_path() const
+	std::filesystem::path ArgumentsTraining::get_source_path() const
 	{
 		return _source_path;
 	}
 
-	std::filesystem::path Arguments::get_adjustments_path() const
+	std::filesystem::path ArgumentsTraining::get_adjustments_path() const
 	{
 		return _adjustments_path;
 	}
 
-	unsigned Arguments::get_num_rounds() const
+	unsigned ArgumentsTraining::get_num_rounds() const
 	{
 		return _num_rounds;
 	}
 
-	unsigned Arguments::get_num_episodes() const
+	unsigned ArgumentsTraining::get_num_episodes() const
 	{
 		return _num_episodes;
 	}
 
-	const std::filesystem::path& Arguments::get_output_folder() const
+	const std::filesystem::path& ArgumentsTraining::get_output_folder() const
 	{
 		return _output_folder;
 	}
 
-	const std::filesystem::path& Arguments::get_opponent_ensemble_path() const
+	const std::filesystem::path& ArgumentsTraining::get_opponent_ensemble_path() const
 	{
 		return _opponent_ensemble_path;
 	}
 
-	Arguments::Arguments(const int argc, char** const argv)
+	ArgumentsTraining::ArgumentsTraining(const int argc, char** const argv)
 	{
 		TCLAP::CmdLine cmd("Checkers training engine", ' ', "1.0");
 
@@ -98,7 +83,7 @@ namespace Training
 		cmd.add(source_path_arg);
 
 		auto adjustments_path_arg = TCLAP::ValueArg<std::string>("", "adjustments", 
-"Path an agent script file (to adjust parameters of `source` agents)", false, "", "string");
+"Path to an agent script file (to adjust parameters of `source` agents)", false, "", "string");
 		cmd.add(adjustments_path_arg);
 
 		auto num_rounds_arg = TCLAP::ValueArg<unsigned int>("", "rounds", "Number of training rounds", true, 1, "integer");
@@ -170,7 +155,7 @@ namespace Training
 		_hash = calc_hash();
 	}
 
-	std::string Arguments::to_string() const
+	std::string ArgumentsTraining::to_string() const
 	{
 		return std::format(" Source Path: {}\n Adjustments Path: {}\n Rounds: {}\n Episodes per round: {}\n Output folder: {}\n\
  Opponent ensemble path: {}\n Fixed pairs: {}\n Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
@@ -178,32 +163,32 @@ namespace Training
 			_opponent_ensemble_path.string(), _fixed_pairs, _dump_rounds, _save_rounds, _hash);
 	}
 
-	bool Arguments::get_fixed_pairs() const
+	bool ArgumentsTraining::get_fixed_pairs() const
 	{
 		return _fixed_pairs;
 	}
 
-	std::string Arguments::get_hash() const
+	std::string ArgumentsTraining::get_hash() const
 	{
 		return _hash;
 	}
 
-	unsigned Arguments::get_dump_rounds() const
+	unsigned ArgumentsTraining::get_dump_rounds() const
 	{
 		return _dump_rounds;
 	}
 
-	unsigned Arguments::get_save_rounds() const
+	unsigned ArgumentsTraining::get_save_rounds() const
 	{
 		return _save_rounds;
 	}
 
-	std::filesystem::path Arguments::get_state_dump_path() const
+	std::filesystem::path ArgumentsTraining::get_state_dump_path() const
 	{
 		return get_output_folder() / get_state_dump_file_name();
 	}
 
-	std::filesystem::path Arguments::get_state_dump_file_name() const
+	std::filesystem::path ArgumentsTraining::get_state_dump_file_name() const
 	{
 		return get_hash() + ".sdmp";
 	}

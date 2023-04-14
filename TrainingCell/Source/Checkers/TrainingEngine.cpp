@@ -62,12 +62,11 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::array<double, 2> TrainingEngine::evaluate_performance(Agent& agent)
+	std::array<double, 2> TrainingEngine::evaluate_performance(Agent& agent, const int episodes_to_play)
 	{
 		agent.set_training_mode(false);
 
-		constexpr int episodes_to_play = 1000;
-		constexpr auto factor = 1.0 / episodes_to_play;
+		const auto factor = 1.0 / episodes_to_play;
 		RandomAgent random_agent{};
 
 		Board board(&agent, &random_agent);
@@ -98,7 +97,8 @@ namespace TrainingCell::Checkers
 
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms,
-			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs) const
+			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback,
+		const bool fixed_pairs, const int test_episodes) const
 	{
 		if (_agent_pointers.empty() || _agent_pointers.size() % 2 == 1)
 			throw std::exception("Collection of agents must be nonempty and contain an even number of elements");
@@ -109,7 +109,8 @@ namespace TrainingCell::Checkers
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
 		{
 			DeepLearning::StopWatch sw;
-			Concurrency::parallel_for(0ull, pairs.size(), [this, &performance_scores, episodes_cnt, &pairs](const auto& pair_id)
+			Concurrency::parallel_for(0ull, pairs.size(),
+				[this, &performance_scores, episodes_cnt, &pairs, test_episodes](const auto& pair_id)
 				{
 					const auto white_agent_id = pairs[pair_id][0];
 					auto agent_white_ptr = _agent_pointers[white_agent_id];
@@ -122,8 +123,8 @@ namespace TrainingCell::Checkers
 					add_training_record(*agent_white_ptr, *agent_black_ptr, episodes_cnt, true);
 					add_training_record(*agent_black_ptr, *agent_white_ptr, episodes_cnt, false);
 
-					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id]);
-					performance_scores[black_agent_id] = evaluate_performance(*_agent_pointers[black_agent_id]);
+					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id], test_episodes);
+					performance_scores[black_agent_id] = evaluate_performance(*_agent_pointers[black_agent_id], test_episodes);
 				});
 
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);

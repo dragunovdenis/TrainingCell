@@ -47,7 +47,7 @@ namespace TrainingCell::Checkers
 		/// winning percentage when the agent played as a "white" player and the second one represents winning percentage when
 		/// the agent played as a "black" player
 		/// </summary>
-		static std::array<double, 2> evaluate_performance(Agent& agent);
+		static std::array<double, 2> evaluate_performance(Agent& agent, const int episodes_to_play = 1000);
 	public:
 		/// <summary>
 		/// Adds the given agent pointer to the collection of agent pointers
@@ -73,9 +73,11 @@ namespace TrainingCell::Checkers
 		/// <param name="round_callback">Call-back function that is called after
 		/// each round to provide some intermediate information to the caller</param>
 		/// <param name="fixed_pairs">If "true" training pairs are fixed stale during all the training</param>
+		/// <param name="test_episodes">Number of episodes to run when evaluating performance of trained agents</param>
 		void run(const int rounds_cnt, const int episodes_cnt,
 		         const std::function<void(const long long& time_per_round_ms,
-					 const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs) const;
+					 const std::vector<std::array<double, 2>>& agent_performances)>& round_callback,
+			const bool fixed_pairs, const int test_episodes = 1000) const;
 
 		/// <summary>
 		/// Method to run training

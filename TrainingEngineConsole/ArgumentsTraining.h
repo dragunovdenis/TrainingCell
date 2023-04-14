@@ -19,12 +19,12 @@
 
 #include <filesystem>
 
-namespace Training
+namespace Training::Modes
 {
 	/// <summary>
-	/// Parsed command line arguments
+	/// Parsed command line arguments (for the training mode)
 	/// </summary>
-	class Arguments
+	class ArgumentsTraining
 	{
 		/// <summary>
 		/// Returns hexadecimal string representation of the current command line arguments
@@ -115,7 +115,7 @@ namespace Training
 		/// <summary>
 		/// Constructor (from command line arguments)
 		/// </summary>
-		Arguments(const int argc, char** const argv);
+		ArgumentsTraining(const int argc, char** const argv);
 
 		/// <summary>
 		/// Returns human readable string representation of all the arguments

@@ -15,40 +15,13 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include <chrono>
-#include <iostream>
+#pragma once
 
-#include "ConsoleUtils.h"
-#include "TrainingMode.h"
-#include "OptimizationMode.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
-
-using namespace Training::Modes;
-
-enum class Mode: int { Training = 0, Optimization = 1, };
-
-int main(int argc, char** argv)
+namespace Training::Modes
 {
-	try
-	{
-		if (argc < 2)
-			throw std::exception("Invalid command line");
-
-		const auto mode_str = std::string(argv[1]);
-		const auto mode = static_cast<Mode>(DeepLearning::Utils::parse_scalars<int>(mode_str)[0]);
-
-		argv[1] = argv[0];
-		switch (mode)
-		{
-			case Mode::Training: run_training(argc - 1, &argv[1]); break;
-			case Mode::Optimization: run_parameter_optimization(argc - 1, &argv[1]); break;
-			default:
-				throw std::exception("Unexpected mode");
-		}
-	}
-	catch (std::exception& e)
-	{
-		Training::ConsoleUtils::report_fatal_error(e.what());
-	}
+	/// <summary>
+	/// Method to run optimization of training parameters in order to maximize training efficiency
+	/// </summary>
+	void run_parameter_optimization(int argc, char** argv);
 }
 

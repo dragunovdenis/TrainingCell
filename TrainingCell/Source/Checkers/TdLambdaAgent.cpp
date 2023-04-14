@@ -17,6 +17,7 @@
 
 #include "../../Headers/Checkers/TdLambdaAgent.h"
 #include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "../../../DeepLearning/DeepLearning/Utilities.h"
 #include <nlohmann/json.hpp>
 
 namespace TrainingCell::Checkers

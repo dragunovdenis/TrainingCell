@@ -121,8 +121,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Arguments.cpp" />
+    <ClCompile Include="ArgumentsOptimization.cpp" />
+    <ClCompile Include="ArgumentsTraining.cpp" />
+    <ClCompile Include="ConsoleUtils.cpp" />
+    <ClCompile Include="OptimizationMode.cpp" />
     <ClCompile Include="TrainingEngineConsole.cpp" />
+    <ClCompile Include="TrainingMode.cpp" />
     <ClCompile Include="TrainingState.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -134,11 +138,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Arguments.h" />
+    <ClInclude Include="ArgumentsOptimization.h" />
+    <ClInclude Include="ArgumentsTraining.h" />
+    <ClInclude Include="ConsoleUtils.h" />
+    <ClInclude Include="OptimizationMode.h" />
+    <ClInclude Include="TrainingMode.h" />
     <ClInclude Include="TrainingState.h" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="run.bat" />
+    <CopyFileToFolders Include="run_training.bat" />
+    <CopyFileToFolders Include="run_optimization.bat" />
     <CopyFileToFolders Include="script.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
