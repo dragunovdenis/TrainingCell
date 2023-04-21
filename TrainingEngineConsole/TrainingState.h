@@ -49,6 +49,11 @@ namespace Training
 			double perf_black{};
 
 			/// <summary>
+			/// Returns score
+			/// </summary>
+			[[nodiscard]] double get_score() const;
+
+			/// <summary>
 			/// Message-pack stuff
 			/// </summary>
 			MSGPACK_DEFINE(round, perf_white, perf_black);
@@ -62,7 +67,17 @@ namespace Training
 		/// <summary>
 		/// Collection of averaged performance records (presumably one per round)
 		/// </summary>
-		std::vector<PerformanceRec> _performance{};
+		std::vector<PerformanceRec> _performances{};
+
+		/// <summary>
+		/// Collections of agents that have been copied from the regular collection of agents on the "registration" of "best score"
+		/// </summary>
+		std::vector<TrainingCell::Checkers::TdLambdaAgent> _agents_best_score{};
+
+		/// <summary>
+		/// Value of the "best score"
+		/// </summary>
+		double _best_score = -1;
 
 		/// <summary>
 		/// Index of the current round
@@ -79,6 +94,11 @@ namespace Training
 		/// </summary>
 		void assign_agents_from_script_file(const std::filesystem::path& script_file_path);
 
+		/// <summary>
+		/// If the given score if higher than the "best score", the corresponding collection of "best agents" and the "best score"
+		/// get updated accordingly. 
+		/// </summary>
+		void register_score(const double score);
 	public:
 		/// <summary>
 		/// Constructs collection of agents from the given "script-string"
@@ -140,6 +160,23 @@ namespace Training
 		void save_to_file(const std::filesystem::path& file_path, const bool extended) const;
 
 		/// <summary>
+		/// Constructs an ensemble from the current collection of agents and saves it to the given folder
+		/// Returns full path to the saved file
+		/// </summary>
+		[[nodiscard]] std::filesystem::path save_current_ensemble(const std::filesystem::path& folder_path, const std::string& tag) const;
+
+		/// <summary>
+		/// Constructs an ensemble from the current collection of "best score" agents and saves it to the given folder
+		/// Returns full path to the saved file
+		/// </summary>
+		[[nodiscard]] std::filesystem::path save_best_score_ensemble(const std::filesystem::path& folder_path, const std::string& tag) const;
+
+		/// <summary>
+		/// Read-only access to the collection of performances
+		/// </summary>
+		[[nodiscard]] const std::vector<PerformanceRec>& get_performances() const;
+
+		/// <summary>
 		/// Saves performance report to the given file
 		/// </summary>
 		void save_performance_report(const std::filesystem::path& file_path) const;
@@ -187,7 +224,7 @@ namespace Training
 		/// <summary>
 		/// Message-pack stuff
 		/// </summary>
-		MSGPACK_DEFINE(_round_id, _agents, _performance);
+		MSGPACK_DEFINE(_round_id, _agents, _performances, _best_score, _agents_best_score);
 	};
 	
 }

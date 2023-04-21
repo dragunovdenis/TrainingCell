@@ -114,22 +114,12 @@ namespace Training::Modes
 			const auto directory_path = !sub_folder_name.empty() ? args.get_output_folder() / sub_folder_name : args.get_output_folder();
 			std::filesystem::create_directories(directory_path);
 
-			TrainingCell::Checkers::TdlEnsembleAgent ensemble;
-			ensemble.set_name("Ensemble_R_" + std::to_string(state.get_round_id()));
-			for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
-			{
-				const auto& agent = state[agent_id];
-				const auto agent_file_path = directory_path / (agent.get_name() + "--" + agent.get_id() + ".tda");
-				ConsoleUtils::print_to_console(agent_file_path.string());
-				agent.save_to_file(agent_file_path);
-				ensemble.add(agent);
-			}
-			ConsoleUtils::horizontal_console_separator();
+			const auto& last_performance_record = *state.get_performances().rbegin();
+			const auto ensemble_path = state.save_current_ensemble(directory_path, std::to_string(last_performance_record.get_score()));
+			ConsoleUtils::print_to_console("Ensemble was saved to " + ensemble_path.string());
 
-			ensemble.save_to_file(directory_path / (ensemble.get_name() + ".ena"));
-
-			state.save_to_file(directory_path / args.get_state_dump_file_name(), true);//Save final of state
-			state.save_performance_report(directory_path / "Performance_report.txt");//Save performance report
+			state.save_to_file(directory_path / args.get_state_dump_file_name(), true);
+			state.save_performance_report(directory_path / "Performance_report.txt");
 		};
 
 		const auto reporter = [&state, max_round_id, &round_time_sum, &round_time_queue, &saver, &args]
@@ -139,7 +129,7 @@ namespace Training::Modes
 			round_time_queue.push(round_time_ms);
 			round_time_sum += round_time_ms;
 			ConsoleUtils::print_to_console("Round " + std::to_string(rounds_counter) + " time: " +
-				DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms));
+			DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string(round_time_ms));
 			if (max_round_id != rounds_counter)
 				ConsoleUtils::print_to_console("Expected time to finish training : " +
 					DeepLearning::Utils::milliseconds_to_dd_hh_mm_ss_string((static_cast<long long>(max_round_id) -
@@ -196,5 +186,9 @@ namespace Training::Modes
 			engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter, args.get_fixed_pairs());
 
 		saver("");
+
+		const auto best_score_path = state.save_best_score_ensemble(args.get_output_folder(), "best_score");
+		ConsoleUtils::print_to_console("Best score ensemble was saved to " + best_score_path.string());
+
 	}
 }

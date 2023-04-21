@@ -21,6 +21,7 @@
 #include <sstream>
 #include <format>
 #include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "Headers/Checkers/TdlEnsembleAgent.h"
 
 namespace Training
 {
@@ -31,7 +32,8 @@ namespace Training
 
 	void TrainingState::add_performance_record(const unsigned round, const double perf_white, const double perf_black)
 	{
-		_performance.emplace_back(PerformanceRec{ round, perf_white, perf_black });
+		_performances.emplace_back(PerformanceRec{ round, perf_white, perf_black });
+		register_score(_performances.rbegin()->get_score());
 	}
 
 	TrainingCell::Checkers::TdLambdaAgent& TrainingState::operator[](const std::size_t id)
@@ -63,6 +65,11 @@ namespace Training
 	unsigned int TrainingState::increment_round()
 	{
 		return ++_round_id;
+	}
+
+	double TrainingState::PerformanceRec::get_score() const
+	{
+		return 0.5 * (perf_white + perf_black);
 	}
 
 	void TrainingState::save_agents_script(const std::filesystem::path& script_file_path) const
@@ -121,6 +128,15 @@ namespace Training
 		assign_agents_from_script(script);
 	}
 
+	void TrainingState::register_score(const double score)
+	{
+		if (_best_score >= score)
+			return;
+
+		_best_score = score;
+		_agents_best_score = std::vector(_agents);
+	}
+
 	void TrainingState::assign_agents_from_script(const std::string& script_str)
 	{
 		const auto script_collection = parse_script(script_str);
@@ -168,6 +184,29 @@ namespace Training
 		}
 	}
 
+	std::filesystem::path TrainingState::save_current_ensemble(const std::filesystem::path& folder_path, const std::string& tag) const
+	{
+		const std::string name = "Ensemble_r_" + std::to_string(_round_id) + "_" + tag;
+		const auto full_path = folder_path / (name + ".ena");
+		TrainingCell::Checkers::TdlEnsembleAgent(_agents, name).save_to_file(full_path);
+
+		return full_path;
+	}
+
+	std::filesystem::path TrainingState::save_best_score_ensemble(const std::filesystem::path& folder_path, const std::string& tag) const
+	{
+		const std::string name = "Ensemble_s_" + std::to_string(_best_score) + "_" + tag;
+		const auto full_path = folder_path / (name + ".ena");
+		TrainingCell::Checkers::TdlEnsembleAgent(_agents_best_score, name).save_to_file(full_path);
+
+		return full_path;
+	}
+
+	const std::vector<TrainingState::PerformanceRec>& TrainingState::get_performances() const
+	{
+		return _performances;
+	}
+
 	void TrainingState::save_performance_report(const std::filesystem::path& file_path) const
 	{
 		std::ofstream file(file_path);
@@ -175,10 +214,11 @@ namespace Training
 		if (!file)
 			throw std::exception(std::format("Cant create file: {}", file_path.string()).c_str());
 
-		file << std::format("{:10} {:14} {:14}", "Round", "White Score", "Black Score") << std::endl;
+		file << std::format("{:10} {:14} {:14} {:14}", "Round", "White Score", "Black Score", "Score") << std::endl;
 
-		for (const auto& rec : _performance)
-			file << std::format("{:10} {:10.5f} {:10.5f}", rec.round, rec.perf_white, rec.perf_black) << std::endl;
+		for (const auto& rec : _performances)
+			file << std::format("{:10} {:10.5f} {:10.5f} {:10.5f}",
+				rec.round, rec.perf_white, rec.perf_black, rec.get_score()) << std::endl;
 	}
 
 	TrainingState TrainingState::load_from_file(const std::filesystem::path& file_path)
@@ -194,12 +234,14 @@ namespace Training
 	void TrainingState::reset(const bool keep_agents)
 	{
 		_round_id = 0;
-		_performance.clear();
+		_performances.clear();
 
 		if (keep_agents)
 			return;
 
 		_agents.clear();
+		_best_score = -1;
+		_agents_best_score.clear();
 	}
 
 	void TrainingState::set_discount(const double& discount)

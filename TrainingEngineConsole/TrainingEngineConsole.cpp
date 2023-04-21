@@ -16,8 +16,6 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <chrono>
-#include <iostream>
-
 #include "ConsoleUtils.h"
 #include "TrainingMode.h"
 #include "OptimizationMode.h"

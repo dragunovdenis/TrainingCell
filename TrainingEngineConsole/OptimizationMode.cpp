@@ -185,7 +185,7 @@ namespace Training::Modes
 	/// vector to to the corresponding parameters of agents</param>
 	/// <param name="init_state">Initial state that we start with when evaluating the cost function</param>
 	/// <param name="episodes_to_train">Number of episodes to train agents</param>
-	/// <param name="episodes_to_evaluate">Number of episodes to evaluate performance of the trainied agents</param>
+	/// <param name="episodes_to_evaluate">Number of episodes to evaluate performance of the trained agents</param>
 	template <int N>
 	double calculate_cost(const DeepLearning::VectorNdReal<N>& params, const ParameterFlags& args, const TrainingState& init_state,
 		const int episodes_to_train, const int episodes_to_evaluate)
@@ -303,11 +303,11 @@ namespace Training::Modes
 		{
 			state = TrainingState(args.get_source_path());
 			sync_training_parameters(state);
-			ConsoleUtils::print_to_console("State was from script: ");
+			ConsoleUtils::print_to_console("State was constructed from script: ");
 			ConsoleUtils::print_to_console(state.get_agents_script());
 			state.save_to_file(args.get_state_dump_path(), false);
-			if (!ConsoleUtils::decision_prompt())
-				return;
+		if (!ConsoleUtils::decision_prompt())
+			return;
 		}
 		else
 			continue_optimization = true;
