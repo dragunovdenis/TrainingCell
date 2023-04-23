@@ -57,14 +57,14 @@ namespace Training::Modes
 		unsigned int _num_episodes{};
 
 		/// <summary>
+		/// Number of evaluation episodes after each training round
+		/// </summary>
+		unsigned int _num_eval_episodes{};
+
+		/// <summary>
 		/// Path to the folder to save output
 		/// </summary>
 		std::filesystem::path _output_folder{};
-
-		/// <summary>
-		/// Path to the "opponent" ensemble (optional)
-		/// </summary>
-		std::filesystem::path _opponent_ensemble_path{};
 
 		/// <summary>
 		/// Flag determining if pairs should be re-arranged after each round
@@ -105,12 +105,12 @@ namespace Training::Modes
 		/// <summary>
 		/// Read-only access to the corresponding field
 		/// </summary>
-		[[nodiscard]] const std::filesystem::path& get_output_folder() const;
+		[[nodiscard]] unsigned int get_num_eval_episodes() const;
 
 		/// <summary>
 		/// Read-only access to the corresponding field
 		/// </summary>
-		[[nodiscard]] const std::filesystem::path& get_opponent_ensemble_path() const;
+		[[nodiscard]] const std::filesystem::path& get_output_folder() const;
 
 		/// <summary>
 		/// Constructor (from command line arguments)

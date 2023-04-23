@@ -107,8 +107,6 @@ namespace Training::Modes
 		const auto max_round_id = static_cast<int>(args.get_num_rounds());
 		const auto num_rounds_left = static_cast<int>(args.get_num_rounds() - state.get_round_id());
 
-		auto opponent_ensemble = try_load_ensemble(args.get_opponent_ensemble_path());
-
 		const auto saver = [&state, &args](const std::string& sub_folder_name)
 		{
 			const auto directory_path = !sub_folder_name.empty() ? args.get_output_folder() / sub_folder_name : args.get_output_folder();
@@ -172,18 +170,8 @@ namespace Training::Modes
 				saver(std::format("Round_{}", rounds_counter));
 		};
 
-		if (opponent_ensemble.has_value())
-		{
-			ConsoleUtils::horizontal_console_separator();
-			ConsoleUtils::print_to_console("Training against loaded ensemble");
-			ConsoleUtils::horizontal_console_separator();
-			opponent_ensemble.value().set_single_agent_mode(true);
-			engine.run(opponent_ensemble.value(), num_rounds_left, static_cast<int>(args.get_num_episodes()),
-				reporter, args.get_fixed_pairs());
-
-		}
-		else
-			engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter, args.get_fixed_pairs());
+		engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
+			args.get_fixed_pairs(), args.get_num_eval_episodes());
 
 		saver("");
 

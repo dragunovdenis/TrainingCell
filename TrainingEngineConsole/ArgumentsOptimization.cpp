@@ -93,7 +93,7 @@ namespace Training::Modes
 		if (_min_simplex_size < 0)
 			throw std::exception("Invalid minimal simplex size");
 
-		_num_episodes = static_cast<int>(num_episodes_arg.getValue());
+		_num_episodes = num_episodes_arg.getValue();
 		if (_num_episodes == 0)
 			throw std::exception("Number of episodes should be positive integer");
 
@@ -127,8 +127,9 @@ namespace Training::Modes
 
 	std::string ArgumentsOptimization::to_string() const
 	{
-		return std::format(" Source Path: {}\n Episodes per round: {}\n Evaluation episodes: {}\n Min simplex size: {}\n Output folder: {}\n\
- Dump Rounds: {}\n Lambda flag: {}\n Discount flag: {}\n Learning rate flag: {}\n Exploration flag {}\n Hash: {}\n",
+		return std::format(" Source Path: {}\n Episodes per round: {}\n Evaluation episodes: {}\n Min simplex size: {}\n"
+					 " Output folder: {}\n Dump Rounds: {}\n Lambda flag: {}\n Discount flag: {}\n Learning rate flag: {}\n"
+					 " Exploration flag {}\n Hash: {}\n",
 			_source_path.string(), _num_episodes, _num_eval_episodes, _min_simplex_size, _output_folder.string(),
 			_dump_rounds, _lambda_flag, _discount_flag, _learning_rate_flag, _exploration_flag, _hash);
 	}

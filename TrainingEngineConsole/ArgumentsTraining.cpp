@@ -35,10 +35,10 @@ namespace Training::Modes
 
 		str += std::to_string(_num_rounds);
 		str += std::to_string(_num_episodes);
+		str += std::to_string(_num_eval_episodes);
 		str += std::to_string(_save_rounds);
 		str += std::to_string(_dump_rounds);
 		str += DeepLearning::Utils::to_upper_case(_output_folder.string());
-		str += DeepLearning::Utils::to_upper_case(_opponent_ensemble_path.string());
 		str += std::to_string(_fixed_pairs);
 
 		return DeepLearning::Utils::get_hash_as_hex_str(str);
@@ -64,14 +64,14 @@ namespace Training::Modes
 		return _num_episodes;
 	}
 
+	unsigned ArgumentsTraining::get_num_eval_episodes() const
+	{
+		return _num_eval_episodes;
+	}
+
 	const std::filesystem::path& ArgumentsTraining::get_output_folder() const
 	{
 		return _output_folder;
-	}
-
-	const std::filesystem::path& ArgumentsTraining::get_opponent_ensemble_path() const
-	{
-		return _opponent_ensemble_path;
 	}
 
 	ArgumentsTraining::ArgumentsTraining(const int argc, char** const argv)
@@ -92,11 +92,11 @@ namespace Training::Modes
 		auto num_episodes_arg = TCLAP::ValueArg<unsigned int>("", "episodes", "Number of episodes (plays) in each round", true, 1, "integer");
 		cmd.add(num_episodes_arg);
 
+		auto num_eval_episodes_arg = TCLAP::ValueArg<unsigned int>("", "eval_episodes", "Number of evaluation episodes (plays) after each round", true, 1000, "integer");
+		cmd.add(num_eval_episodes_arg);
+
 		auto output_folder_arg = TCLAP::ValueArg<std::string>("", "output", "Output folder path", true, "", "string");
 		cmd.add(output_folder_arg);
-
-		auto opponent_ensemble_path_arg = TCLAP::ValueArg<std::string>("", "opponent", "Path to opponent ensemble", false, "", "string");
-		cmd.add(opponent_ensemble_path_arg);
 
 		auto fixed_pairs_arg = TCLAP::ValueArg<bool>("", "fixed_pairs",
 			"Flag determining if agent pairs are kept fixed during all the training", false, false, "boolean");
@@ -122,13 +122,17 @@ namespace Training::Modes
 		if (_adjustments_path != "" && !std::filesystem::is_regular_file(_adjustments_path))
 			throw std::exception("Invalid adjustments file");
 
-		_num_rounds = static_cast<int>(num_rounds_arg.getValue());
+		_num_rounds = num_rounds_arg.getValue();
 		if (_num_rounds == 0)
 			throw std::exception("Number of rounds should be positive integer");
 
-		_num_episodes = static_cast<int>(num_episodes_arg.getValue());
+		_num_episodes = num_episodes_arg.getValue();
 		if (_num_episodes == 0)
 			throw std::exception("Number of episodes should be positive integer");
+
+		_num_eval_episodes = num_eval_episodes_arg.getValue();
+		if (_num_eval_episodes == 0)
+			throw std::exception("Number of evaluation episodes should be positive integer");
 
 		_output_folder = std::filesystem::path(output_folder_arg.getValue());
 
@@ -141,11 +145,6 @@ namespace Training::Modes
 		if (rc.value() != 0)
 			throw std::exception("Output path must be a valid directory");
 
-		_opponent_ensemble_path = opponent_ensemble_path_arg.getValue();
-
-		if (_opponent_ensemble_path != "" && !std::filesystem::is_regular_file(_opponent_ensemble_path))
-			throw std::exception("Invalid path to the opponent ensemble agent");
-
 		_fixed_pairs = fixed_pairs_arg.getValue();
 
 		_dump_rounds = dump_rounds_arg.getValue();
@@ -157,10 +156,11 @@ namespace Training::Modes
 
 	std::string ArgumentsTraining::to_string() const
 	{
-		return std::format(" Source Path: {}\n Adjustments Path: {}\n Rounds: {}\n Episodes per round: {}\n Output folder: {}\n\
- Opponent ensemble path: {}\n Fixed pairs: {}\n Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
-			_source_path.string(), _adjustments_path.string(), _num_rounds, _num_episodes, _output_folder.string(),
-			_opponent_ensemble_path.string(), _fixed_pairs, _dump_rounds, _save_rounds, _hash);
+		return std::format(" Source Path: {}\n Adjustments Path: {}\n Rounds: {}\n Episodes per round: {}\n"
+					 " Evaluation episodes per round: {}\n Output folder: {}\n"
+					 " Fixed pairs: {}\n Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
+			_source_path.string(), _adjustments_path.string(), _num_rounds, _num_episodes, _num_eval_episodes, _output_folder.string(),
+			_fixed_pairs, _dump_rounds, _save_rounds, _hash);
 	}
 
 	bool ArgumentsTraining::get_fixed_pairs() const
