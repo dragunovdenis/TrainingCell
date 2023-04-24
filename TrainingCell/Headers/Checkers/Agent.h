@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "Utils.h"
+#include "State.h"
 #include "AgentTypeId.h"
 
 namespace TrainingCell::Checkers

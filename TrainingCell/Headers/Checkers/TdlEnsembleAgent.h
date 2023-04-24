@@ -41,7 +41,7 @@ namespace TrainingCell::Checkers
 		/// Returns "true" if we are in a mode when only one, "chosen", agent from the collection
 		/// is used to infer moves
 		/// </summary>
-		bool is_single_agent_mode() const;
+		[[nodiscard]] bool is_single_agent_mode() const;
 
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id);

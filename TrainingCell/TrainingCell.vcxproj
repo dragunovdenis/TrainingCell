@@ -24,7 +24,7 @@
     <ClInclude Include="Headers\Checkers\TdLambdaAgent.h" />
     <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h" />
     <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
-    <ClInclude Include="Headers\Checkers\Utils.h" />
+    <ClInclude Include="Headers\Checkers\State.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\Agent.cpp" />
@@ -36,7 +36,7 @@
     <ClCompile Include="Source\Checkers\TdLambdaAgent.cpp" />
     <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp" />
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
-    <ClCompile Include="Source\Checkers\Utils.cpp" />
+    <ClCompile Include="Source\Checkers\State.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

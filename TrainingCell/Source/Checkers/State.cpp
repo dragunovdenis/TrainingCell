@@ -15,7 +15,7 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/Utils.h"
+#include "../../Headers/Checkers/State.h"
 #include <algorithm>
 #include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
 
@@ -185,10 +185,18 @@ namespace TrainingCell::Checkers
 		}
 	}
 
+	State::State(const State_array& state_array, const bool inverted) : State_array(state_array), _inverted(inverted)
+	{}
+
+	bool State::is_inverted() const
+	{
+		return _inverted;
+	}
+
 	State State::get_start_state()
 	{
-		return {
-			     Piece::Man, Piece::Man, Piece::Man, Piece::Man,
+		return State{ State_array{
+				 Piece::Man, Piece::Man, Piece::Man, Piece::Man,
 				 Piece::Man, Piece::Man, Piece::Man, Piece::Man,
 				 Piece::Man, Piece::Man, Piece::Man, Piece::Man,
 				 Piece::Space, Piece::Space, Piece::Space, Piece::Space,
@@ -196,7 +204,7 @@ namespace TrainingCell::Checkers
 				 Piece::AntiMan, Piece::AntiMan, Piece::AntiMan, Piece::AntiMan,
 				 Piece::AntiMan, Piece::AntiMan, Piece::AntiMan, Piece::AntiMan,
 				 Piece::AntiMan, Piece::AntiMan, Piece::AntiMan, Piece::AntiMan,
-		};
+		}, false};
 	}
 
 	Piece State::get_piece(const PiecePosition& position) const
@@ -242,6 +250,8 @@ namespace TrainingCell::Checkers
 			(*this)[field_id] = Utils::get_anti_piece((*this)[sz - 1 - field_id]);
 			(*this)[sz - 1 - field_id] = Utils::get_anti_piece(temp);
 		}
+
+		_inverted = !_inverted;
 	}
 
 	StateScore State::calc_score() const
@@ -362,6 +372,16 @@ namespace TrainingCell::Checkers
 	void State::make_move(const SubMove& sub_move, const bool remove_captured)
 	{
 		make_move({ {sub_move} }, remove_captured);
+	}
+
+	bool State::operator==(const State& another_state) const
+	{
+		return std::equal(begin(), end(), another_state.begin()) && is_inverted() == another_state.is_inverted();
+	}
+
+	bool State::operator!=(const State & another_state) const
+	{
+		return !(*this == another_state);
 	}
 
 	bool Utils::is_allay_piece(const Piece piece)

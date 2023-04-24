@@ -69,7 +69,7 @@ namespace TrainingCell::Checkers
 
 		/// <summary>Returns difference between the current and given scores</summary>
 		/// <param name="score_to_subtract">Score that should be subtracted from the current one</param>
-		StateScore diff(const StateScore& score_to_subtract) const;
+		[[nodiscard]] StateScore diff(const StateScore& score_to_subtract) const;
 	};
 
 
@@ -233,8 +233,25 @@ namespace TrainingCell::Checkers
 	/// </summary>
 	class State : public State_array
 	{
+	private:
+		bool _inverted{};
 	public:
-		MSGPACK_DEFINE(MSGPACK_BASE(State_array));
+		MSGPACK_DEFINE(MSGPACK_BASE(State_array), _inverted)
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		State() = default;
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		explicit State(const State_array& state_array, const bool inverted = false);
+
+		/// <summary>
+		/// Returns "true" if the state is reversed with respect to its initial "orientation"
+		/// </summary>
+		[[nodiscard]] bool is_inverted() const;
 
 		/// <summary>
 		///	Returns state that corresponds to the beginning of the game
@@ -302,12 +319,22 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	Converts the current state to tensor representation
 		/// </summary>
-		DeepLearning::Tensor to_tensor() const;
+		[[nodiscard]] DeepLearning::Tensor to_tensor() const;
 
 		/// <summary>
 		///	Returns collection of available moves for the current state
 		/// </summary>
-		std::vector<Move> get_moves() const;
+		[[nodiscard]] std::vector<Move> get_moves() const;
+
+		/// <summary>
+		/// Equality operator
+		/// </summary>
+		bool operator ==(const State& another_state) const;
+
+		/// <summary>
+		/// Inequality operator
+		/// </summary>
+		bool operator !=(const State& another_state) const;
 	};
 
 	/// <summary>

@@ -24,7 +24,7 @@
     <ClInclude Include="Headers\Checkers\Agent.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Checkers\Utils.h">
+    <ClInclude Include="Headers\Checkers\State.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Checkers\Board.h">
@@ -53,7 +53,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Checkers\Utils.cpp">
+    <ClCompile Include="Source\Checkers\State.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\Agent.cpp">
