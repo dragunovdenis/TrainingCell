@@ -194,21 +194,21 @@ namespace Training::Modes
 
 		assign_params(params.to_std_vector(), args, state);
 
-		std::vector<TrainingCell::Checkers::Agent*> agent_ptrs;
+		std::vector<Agent*> agent_ptrs;
 
 		for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
 			agent_ptrs.push_back(&state[agent_id]);
 
-		TrainingCell::Checkers::TrainingEngine engine(agent_ptrs);
+		TrainingEngine engine(agent_ptrs);
 
 		auto result = -1.0;
 		engine.run(1 /*one round*/, episodes_to_train, [&result](const auto& time, const auto& performance)
 			{
 				result = 0.0;
 				for (const auto& perf_item : performance)
-					result += perf_item[0] + perf_item[1];
+					result += perf_item.get_score();
 
-				result /= (2 * performance.size());
+				result /= performance.size();
 			}, true /*fixed pairs*/, episodes_to_evaluate);
 
 		return result;

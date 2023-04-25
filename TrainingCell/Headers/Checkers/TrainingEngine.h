@@ -21,6 +21,7 @@
 #include "Agent.h"
 #include <functional>
 #include "TdlEnsembleAgent.h"
+#include "msgpack.hpp"
 
 namespace TrainingCell::Checkers
 {
@@ -29,6 +30,44 @@ namespace TrainingCell::Checkers
 	/// </summary>
 	class TrainingEngine
 	{
+	public:
+		/// <summary>
+		/// Data structure to contain performance information
+		/// </summary>
+		struct PerformanceRec
+		{
+			/// <summary>
+			/// Round the record corresponds to
+			/// </summary>
+			int round{};
+
+			/// <summary>
+			/// Performance of an agent when it plays for "whites"
+			/// </summary>
+			double perf_white{};
+
+			/// <summary>
+			/// Performance of an agent when it plays for "blacks"
+			/// </summary>
+			double perf_black{};
+
+			/// <summary>
+			/// Percentage of "draw" games during the training in the current round
+			/// </summary>
+			double draws{};
+
+			/// <summary>
+			/// Returns score
+			/// </summary>
+			[[nodiscard]] double get_score() const;
+
+			/// <summary>
+			/// Message-pack stuff
+			/// </summary>
+			MSGPACK_DEFINE(round, perf_white, perf_black, draws);
+		};
+
+	private:
 		/// <summary>
 		/// Collection of pointer to the agents to be trained
 		/// </summary>
@@ -47,8 +86,10 @@ namespace TrainingCell::Checkers
 		/// winning percentage when the agent played as a "white" player and the second one represents winning percentage when
 		/// the agent played as a "black" player
 		/// </summary>
-		static std::array<double, 2> evaluate_performance(Agent& agent, const int episodes_to_play = 1000);
+		static PerformanceRec evaluate_performance(Agent& agent, const int episodes_to_play,
+			const int round_id, const double draw_percentage);
 	public:
+
 		/// <summary>
 		/// Adds the given agent pointer to the collection of agent pointers
 		/// Returns index of the added agent in the collection of agents
@@ -76,21 +117,7 @@ namespace TrainingCell::Checkers
 		/// <param name="test_episodes">Number of episodes to run when evaluating performance of trained agents</param>
 		void run(const int rounds_cnt, const int episodes_cnt,
 		         const std::function<void(const long long& time_per_round_ms,
-					 const std::vector<std::array<double, 2>>& agent_performances)>& round_callback,
+					 const std::vector<PerformanceRec>& agent_performances)>& round_callback,
 			const bool fixed_pairs, const int test_episodes = 1000) const;
-
-		/// <summary>
-		/// Method to run training
-		/// </summary>
-		/// <param name="ensemble">Ensemble agent to train with</param>
-		/// <param name="rounds_cnt">Number of rounds to run. After each round agents get re-grouped in pairs</param>
-		/// <param name="episodes_cnt">Number of episodes in a round to play</param>
-		/// <param name="round_callback">Call-back function that is called after
-		/// each round to provide some intermediate information to the caller</param>
-		/// <param name="fixed_pairs">If "true" training pairs are kept fixed during all the training</param>
-		void run(const TdlEnsembleAgent& ensemble, const int rounds_cnt, const int episodes_cnt,
-			const std::function<void(const long long& time_per_round_ms,
-				const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs);
-
 	};
 }

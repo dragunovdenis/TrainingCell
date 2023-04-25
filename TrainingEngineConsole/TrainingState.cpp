@@ -30,13 +30,39 @@ namespace Training
 		_agents.push_back(agent);
 	}
 
-	void TrainingState::add_performance_record(const unsigned round, const double perf_white, const double perf_black)
+	/// <summary>
+	/// Returns average performance of the given collection of performance records
+	/// </summary>
+	TrainingEngine::PerformanceRec calc_average_performance(const std::vector<TrainingEngine::PerformanceRec>& performance)
 	{
-		_performances.emplace_back(PerformanceRec{ round, perf_white, perf_black });
-		register_score(_performances.rbegin()->get_score());
+		TrainingEngine::PerformanceRec average_perf{ -1, 0, 0, 0 };
+		for (const auto& perf_rec : performance)
+		{
+			average_perf.perf_white += perf_rec.perf_white;
+			average_perf.perf_black += perf_rec.perf_black;
+			average_perf.draws += perf_rec.draws;
+		}
+		const auto rec_count = static_cast<double>(performance.size());
+
+		average_perf.perf_white /= rec_count;
+		average_perf.perf_black /= rec_count;
+		average_perf.draws /= rec_count;
+
+		return average_perf;
 	}
 
-	TrainingCell::Checkers::TdLambdaAgent& TrainingState::operator[](const std::size_t id)
+	TrainingEngine::PerformanceRec TrainingState::add_performance_record(const std::vector<TrainingEngine::PerformanceRec>& performance)
+	{
+		auto average_perf = calc_average_performance(performance);
+		average_perf.round = performance[0].round;
+
+		_performances.emplace_back(average_perf);
+		register_performance(performance);
+
+		return average_perf;
+	}
+
+	TdLambdaAgent& TrainingState::operator[](const std::size_t id)
 	{
 		if (id >= _agents.size())
 			throw std::exception("Index out of bounds");
@@ -44,7 +70,7 @@ namespace Training
 		return _agents[id];
 	}
 
-	const TrainingCell::Checkers::TdLambdaAgent& TrainingState::operator[](const std::size_t id) const
+	const TdLambdaAgent& TrainingState::operator[](const std::size_t id) const
 	{
 		if (id >= _agents.size())
 			throw std::exception("Index out of bounds");
@@ -65,11 +91,6 @@ namespace Training
 	unsigned int TrainingState::increment_round()
 	{
 		return ++_round_id;
-	}
-
-	double TrainingState::PerformanceRec::get_score() const
-	{
-		return 0.5 * (perf_white + perf_black);
 	}
 
 	void TrainingState::save_agents_script(const std::filesystem::path& script_file_path) const
@@ -128,13 +149,28 @@ namespace Training
 		assign_agents_from_script(script);
 	}
 
-	void TrainingState::register_score(const double score)
+	void TrainingState::register_performance(const std::vector<TrainingEngine::PerformanceRec>& performance)
 	{
-		if (_best_score >= score)
+		if (_best_performance.empty())
+		{
+			_best_performance = performance;
+			_agents_best_performance = std::vector(_agents);
 			return;
+		}
 
-		_best_score = score;
-		_agents_best_score = std::vector(_agents);
+		if (_best_performance.size() != performance.size() ||
+			_agents_best_performance.size() != _agents.size() ||
+			_best_performance.size() != _agents.size())
+			throw std::exception("Inconsistent data");
+
+		for (auto score_id = 0; score_id < _best_performance.size(); ++score_id)
+		{
+			if (_best_performance[score_id].get_score() >= performance[score_id].get_score())
+				continue;
+
+			_best_performance[score_id] = performance[score_id];
+			_agents_best_performance[score_id] = TdLambdaAgent(_agents[score_id]);
+		}
 	}
 
 	void TrainingState::assign_agents_from_script(const std::string& script_str)
@@ -188,21 +224,23 @@ namespace Training
 	{
 		const std::string name = "Ensemble_r_" + std::to_string(_round_id) + "_" + tag;
 		const auto full_path = folder_path / (name + ".ena");
-		TrainingCell::Checkers::TdlEnsembleAgent(_agents, name).save_to_file(full_path);
+		TdlEnsembleAgent(_agents, name).save_to_file(full_path);
 
 		return full_path;
 	}
 
 	std::filesystem::path TrainingState::save_best_score_ensemble(const std::filesystem::path& folder_path, const std::string& tag) const
 	{
-		const std::string name = "Ensemble_s_" + std::to_string(_best_score) + "_" + tag;
+		const auto average_performance = calc_average_performance(_best_performance);
+
+		const std::string name = "Ensemble_s_" + std::to_string(average_performance.get_score()) + "_" + tag;
 		const auto full_path = folder_path / (name + ".ena");
-		TrainingCell::Checkers::TdlEnsembleAgent(_agents_best_score, name).save_to_file(full_path);
+		TdlEnsembleAgent(_agents_best_performance, name).save_to_file(full_path);
 
 		return full_path;
 	}
 
-	const std::vector<TrainingState::PerformanceRec>& TrainingState::get_performances() const
+	const std::vector<TrainingEngine::PerformanceRec>& TrainingState::get_performances() const
 	{
 		return _performances;
 	}
@@ -214,11 +252,11 @@ namespace Training
 		if (!file)
 			throw std::exception(std::format("Cant create file: {}", file_path.string()).c_str());
 
-		file << std::format("{:10} {:14} {:14} {:14}", "Round", "White Score", "Black Score", "Score") << std::endl;
+		file << std::format("{:10} {:14} {:14} {:14} {:14}", "Round", "White Score", "Black Score", "Draws", "Score") << std::endl;
 
 		for (const auto& rec : _performances)
-			file << std::format("{:10} {:10.5f} {:10.5f} {:10.5f}",
-				rec.round, rec.perf_white, rec.perf_black, rec.get_score()) << std::endl;
+			file << std::format("{:10} {:10.5f} {:10.5f} {:10.5f} {:10.5f}",
+				rec.round, rec.perf_white, rec.perf_black, rec.draws, rec.get_score()) << std::endl;
 	}
 
 	TrainingState TrainingState::load_from_file(const std::filesystem::path& file_path)
@@ -240,8 +278,8 @@ namespace Training
 			return;
 
 		_agents.clear();
-		_best_score = -1;
-		_agents_best_score.clear();
+		_best_performance.clear();
+		_agents_best_performance.clear();
 	}
 
 	void TrainingState::set_discount(const double& discount)

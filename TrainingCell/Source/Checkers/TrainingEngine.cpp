@@ -62,7 +62,8 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::array<double, 2> TrainingEngine::evaluate_performance(Agent& agent, const int episodes_to_play)
+	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(Agent& agent, const int episodes_to_play,
+		const int round_id, const double draw_percentage)
 	{
 		agent.set_training_mode(false);
 
@@ -79,7 +80,7 @@ namespace TrainingCell::Checkers
 
 		agent.set_training_mode(true);
 
-		return { white_wins, black_wins };
+		return  PerformanceRec{ round_id, white_wins, black_wins, draw_percentage };
 	}
 
 	/// <summary>
@@ -97,20 +98,20 @@ namespace TrainingCell::Checkers
 
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms,
-			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback,
+			const std::vector<PerformanceRec>& agent_performances)>& round_callback,
 		const bool fixed_pairs, const int test_episodes) const
 	{
 		if (_agent_pointers.empty() || _agent_pointers.size() % 2 == 1)
 			throw std::exception("Collection of agents must be nonempty and contain an even number of elements");
 
-		std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
+		std::vector<PerformanceRec> performance_scores(_agent_pointers.size());
 		auto pairs = split_for_pairs(_agent_pointers.size(), fixed_pairs);
 
 		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
 		{
 			DeepLearning::StopWatch sw;
 			Concurrency::parallel_for(0ull, pairs.size(),
-				[this, &performance_scores, episodes_cnt, &pairs, test_episodes](const auto& pair_id)
+				[this, &performance_scores, episodes_cnt, &pairs, test_episodes, round_id](const auto& pair_id)
 				{
 					const auto white_agent_id = pairs[pair_id][0];
 					auto agent_white_ptr = _agent_pointers[white_agent_id];
@@ -123,8 +124,13 @@ namespace TrainingCell::Checkers
 					add_training_record(*agent_white_ptr, *agent_black_ptr, episodes_cnt, true);
 					add_training_record(*agent_black_ptr, *agent_white_ptr, episodes_cnt, false);
 
-					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id], test_episodes);
-					performance_scores[black_agent_id] = evaluate_performance(*_agent_pointers[black_agent_id], test_episodes);
+					const auto draw_percentage = (episodes_cnt - board.get_blacks_wins() - board.get_whites_wins()) * 1.0 / episodes_cnt;
+
+					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id], test_episodes,
+						round_id, draw_percentage);
+
+					performance_scores[black_agent_id] = evaluate_performance(*_agent_pointers[black_agent_id], test_episodes,
+						round_id, draw_percentage);
 				});
 
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
@@ -134,44 +140,8 @@ namespace TrainingCell::Checkers
 		}
 	}
 
-	void TrainingEngine::run(const TdlEnsembleAgent& ensemble, const int rounds_cnt, const int episodes_cnt,
-		const std::function<void(const long long& time_per_round_ms,
-			const std::vector<std::array<double, 2>>& agent_performances)>& round_callback, const bool fixed_pairs)
+	double TrainingEngine::PerformanceRec::get_score() const
 	{
-		std::vector ensemble_copies(_agent_pointers.size(), ensemble);
-		std::vector<std::array<double, 2>> performance_scores(_agent_pointers.size());
-		std::vector<bool> fixed_board_placement;
-		if (fixed_pairs)
-		{
-			fixed_board_placement.resize(_agent_pointers.size());
-			std::generate(fixed_board_placement.begin(), fixed_board_placement.end(),
-				[i = 0]() mutable { return i++ % 2 == 0; });
-		}
-
-		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
-		{
-			DeepLearning::StopWatch sw;
-			Concurrency::parallel_for(0ull, _agent_pointers.size(), 
-				[this, &performance_scores, &ensemble_copies, &fixed_board_placement, episodes_cnt, fixed_pairs](const auto& agent_id)
-				{
-					auto agent_white_ptr = _agent_pointers[agent_id];
-					auto agent_black_ptr = static_cast<Agent*>(&ensemble_copies[agent_id]);
-					bool trained_as_white = true;
-
-					if (fixed_pairs ? fixed_board_placement[agent_id] : DeepLearning::Utils::get_random_int(0, 1) == 0)
-					{
-						std::swap(agent_white_ptr, agent_black_ptr);
-						trained_as_white = false;
-					}
-
-					Board board(agent_white_ptr, agent_black_ptr);
-					board.play(episodes_cnt);
-
-					add_training_record(*_agent_pointers[agent_id], ensemble_copies[agent_id], episodes_cnt, trained_as_white);
-					performance_scores[agent_id] = evaluate_performance(*_agent_pointers[agent_id]);
-				});
-
-			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
-		}
+		return 0.5 * (perf_white + perf_black);
 	}
 }

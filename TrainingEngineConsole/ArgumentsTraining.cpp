@@ -92,7 +92,7 @@ namespace Training::Modes
 		auto num_episodes_arg = TCLAP::ValueArg<unsigned int>("", "episodes", "Number of episodes (plays) in each round", true, 1, "integer");
 		cmd.add(num_episodes_arg);
 
-		auto num_eval_episodes_arg = TCLAP::ValueArg<unsigned int>("", "eval_episodes", "Number of evaluation episodes (plays) after each round", true, 1000, "integer");
+		auto num_eval_episodes_arg = TCLAP::ValueArg<unsigned int>("", "eval_episodes", "Number of evaluation episodes (plays) after each round", false, 1000, "integer");
 		cmd.add(num_eval_episodes_arg);
 
 		auto output_folder_arg = TCLAP::ValueArg<std::string>("", "output", "Output folder path", true, "", "string");

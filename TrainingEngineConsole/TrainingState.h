@@ -19,6 +19,9 @@
 #include <filesystem>
 #include <msgpack.hpp>
 #include "Headers/Checkers/TdLambdaAgent.h"
+#include "Headers/Checkers/TrainingEngine.h"
+
+using namespace TrainingCell::Checkers;
 
 namespace Training
 {
@@ -29,55 +32,24 @@ namespace Training
 	class TrainingState
 	{
 		/// <summary>
-		/// Data structure to contain performance information
-		/// </summary>
-		struct PerformanceRec
-		{
-			/// <summary>
-			/// Round the record corresponds to
-			/// </summary>
-			unsigned int round{};
-
-			/// <summary>
-			/// Performance of an agent when it plays for "whites"
-			/// </summary>
-			double perf_white {};
-			
-			/// <summary>
-			/// Performance of an agent when it plays for "blacks"
-			/// </summary>
-			double perf_black{};
-
-			/// <summary>
-			/// Returns score
-			/// </summary>
-			[[nodiscard]] double get_score() const;
-
-			/// <summary>
-			/// Message-pack stuff
-			/// </summary>
-			MSGPACK_DEFINE(round, perf_white, perf_black);
-		};
-
-		/// <summary>
 		/// Collections of agents that undergo training
 		/// </summary>
-		std::vector<TrainingCell::Checkers::TdLambdaAgent> _agents{};
+		std::vector<TdLambdaAgent> _agents{};
 
 		/// <summary>
 		/// Collection of averaged performance records (presumably one per round)
 		/// </summary>
-		std::vector<PerformanceRec> _performances{};
+		std::vector<TrainingEngine::PerformanceRec> _performances{};
 
 		/// <summary>
 		/// Collections of agents that have been copied from the regular collection of agents on the "registration" of "best score"
 		/// </summary>
-		std::vector<TrainingCell::Checkers::TdLambdaAgent> _agents_best_score{};
+		std::vector<TdLambdaAgent> _agents_best_performance{};
 
 		/// <summary>
-		/// Value of the "best score"
+		/// Best performance records for each agent in the collection of "best score" agents
 		/// </summary>
-		double _best_score = -1;
+		std::vector<TrainingEngine::PerformanceRec> _best_performance {};
 
 		/// <summary>
 		/// Index of the current round
@@ -98,7 +70,7 @@ namespace Training
 		/// If the given score if higher than the "best score", the corresponding collection of "best agents" and the "best score"
 		/// get updated accordingly. 
 		/// </summary>
-		void register_score(const double score);
+		void register_performance(const std::vector<TrainingEngine::PerformanceRec>& performance);
 	public:
 		/// <summary>
 		/// Constructs collection of agents from the given "script-string"
@@ -118,22 +90,23 @@ namespace Training
 		/// <summary>
 		/// Adds the given agent to the corresponding collection
 		/// </summary>
-		void add_agent(const TrainingCell::Checkers::TdLambdaAgent& agent);
+		void add_agent(const TdLambdaAgent& agent);
 
 		/// <summary>
 		/// Adds performance record to the corresponding collection
+		/// Returns average performance record
 		/// </summary>
-		void add_performance_record(const unsigned int round, const double perf_white, const double perf_black);
+		TrainingEngine::PerformanceRec add_performance_record(const std::vector<TrainingEngine::PerformanceRec>& performance);
 
 		/// <summary>
 		/// Sub-script operator
 		/// </summary>
-		TrainingCell::Checkers::TdLambdaAgent& operator [](const std::size_t id);
+		TdLambdaAgent& operator [](const std::size_t id);
 
 		/// <summary>
 		/// Sub-script operator (constant version)
 		/// </summary>
-		const TrainingCell::Checkers::TdLambdaAgent& operator [](const std::size_t id) const;
+		const TdLambdaAgent& operator [](const std::size_t id) const;
 
 		/// <summary>
 		/// Returns number of agents in the corresponding collection
@@ -174,7 +147,7 @@ namespace Training
 		/// <summary>
 		/// Read-only access to the collection of performances
 		/// </summary>
-		[[nodiscard]] const std::vector<PerformanceRec>& get_performances() const;
+		[[nodiscard]] const std::vector<TrainingEngine::PerformanceRec>& get_performances() const;
 
 		/// <summary>
 		/// Saves performance report to the given file
@@ -224,7 +197,7 @@ namespace Training
 		/// <summary>
 		/// Message-pack stuff
 		/// </summary>
-		MSGPACK_DEFINE(_round_id, _agents, _performances, _best_score, _agents_best_score);
+		MSGPACK_DEFINE(_round_id, _agents, _performances, _best_performance, _agents_best_performance);
 	};
 	
 }

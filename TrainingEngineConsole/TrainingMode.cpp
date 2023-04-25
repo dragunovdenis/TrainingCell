@@ -118,6 +118,9 @@ namespace Training::Modes
 
 			state.save_to_file(directory_path / args.get_state_dump_file_name(), true);
 			state.save_performance_report(directory_path / "Performance_report.txt");
+
+			const auto best_score_path = state.save_best_score_ensemble(directory_path, "best_score");
+			ConsoleUtils::print_to_console("Best score ensemble was saved to " + best_score_path.string());
 		};
 
 		const auto reporter = [&state, max_round_id, &round_time_sum, &round_time_queue, &saver, &args]
@@ -141,27 +144,19 @@ namespace Training::Modes
 				round_time_queue.pop();
 			}
 
-			auto average_performance_white = 0.0;
-			auto average_performance_black = 0.0;
-
 			for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)
 			{
 				const auto& perf_item = performance[agent_id];
-				ConsoleUtils::print_to_console(state[agent_id].get_name() + " (" + state[agent_id].get_id() + ") performance : "
-					+ std::to_string(perf_item[0]) + "/" + std::to_string(perf_item[1]));
-
-				average_performance_white += perf_item[0];
-				average_performance_black += perf_item[1];
+				ConsoleUtils::print_to_console(state[agent_id].get_name() + " (" + state[agent_id].get_id() + ") performance (b/w/d): "
+					+ std::to_string(perf_item.perf_white) + "/" + std::to_string(perf_item.perf_black) + "/" + std::to_string(perf_item.draws));
 			}
 
-			average_performance_white /= performance.size();
-			average_performance_black /= performance.size();
-			ConsoleUtils::print_to_console("Average performance : " + std::to_string(average_performance_white) + "/" +
-				std::to_string(average_performance_black));
+			const auto average_performance = state.add_performance_record(performance);
+			ConsoleUtils::print_to_console("Average performance (w/b/d): " + std::to_string(average_performance.perf_white) + "/" +
+				std::to_string(average_performance.perf_black) + "/" + std::to_string(average_performance.draws));
 
 			ConsoleUtils::horizontal_console_separator();
 
-			state.add_performance_record(rounds_counter, average_performance_white, average_performance_black);
 
 			if (args.get_dump_rounds() != 0 && (rounds_counter % args.get_dump_rounds() == 0))
 				state.save_to_file(args.get_state_dump_path(), true);
@@ -174,9 +169,5 @@ namespace Training::Modes
 			args.get_fixed_pairs(), args.get_num_eval_episodes());
 
 		saver("");
-
-		const auto best_score_path = state.save_best_score_ensemble(args.get_output_folder(), "best_score");
-		ConsoleUtils::print_to_console("Best score ensemble was saved to " + best_score_path.string());
-
 	}
 }
