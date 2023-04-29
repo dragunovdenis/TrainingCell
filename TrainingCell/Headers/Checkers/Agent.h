@@ -41,13 +41,13 @@ namespace TrainingCell::Checkers
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
 		/// </summary>
-		virtual int make_move(const State& current_state, const std::vector<Move>& moves) = 0;
+		virtual int make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
-		virtual void game_over(const State& final_state, const GameResult& result) = 0;
+		virtual void game_over(const State& final_state, const GameResult& result, const bool as_white) = 0;
 
 		/// <summary>
 		/// Returns type identifier of the current instance
@@ -74,7 +74,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns true if the current agent is equal to the given one
 		/// </summary>
-		virtual bool equal(const Agent& agent) const = 0;
+		[[nodiscard]] virtual bool equal(const Agent& agent) const;
 
 		std::string _id{};
 		std::string _name{};

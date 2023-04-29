@@ -39,7 +39,16 @@ namespace TrainingCell::Checkers
 
 	bool Board::is_inverted() const
 	{
-		return _agent_to_move_id == 1;
+		//Sanity check
+		if (_state.is_inverted() == is_agent_to_move_white())
+			throw std::exception("Inconsistency between the agent at move and the current state");
+
+		return _state.is_inverted();
+	}
+
+	bool Board::is_agent_to_move_white() const
+	{
+		return _agent_to_move_id == 0;
 	}
 
 	void Board::take_turn()
@@ -99,14 +108,14 @@ namespace TrainingCell::Checkers
 					else
 						_blacksWin++;
 
-					agent_to_move()->game_over(_state, GameResult::Loss);
-					agent_to_wait()->game_over(_state, GameResult::Victory);
+					agent_to_move()->game_over(_state, GameResult::Loss, is_agent_to_move_white());
+					agent_to_wait()->game_over(_state, GameResult::Victory, !is_agent_to_move_white());
 
 				}
 				else //draw case
 				{
-					agent_to_move()->game_over(_state, GameResult::Draw);
-					agent_to_wait()->game_over(_state, GameResult::Draw);
+					agent_to_move()->game_over(_state, GameResult::Draw, is_agent_to_move_white());
+					agent_to_wait()->game_over(_state, GameResult::Draw, !is_agent_to_move_white());
 				}
 
 				if (publishStats != nullptr)
@@ -127,7 +136,7 @@ namespace TrainingCell::Checkers
 		if (moves.empty())
 			return {};//invalid move
 
-		const auto chosen_move_id = agent_to_move()->make_move(_state, moves);
+		const auto chosen_move_id = agent_to_move()->make_move(_state, moves, is_agent_to_move_white());
 
 		if (chosen_move_id < 0 || chosen_move_id >= moves.size())
 			throw std::exception("Invalid move id");

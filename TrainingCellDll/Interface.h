@@ -184,7 +184,7 @@ extern "C"
 	/// <summary>
 	/// Constructs "interactive" checkers agent on the heap and returns pointer to it
 	/// </summary>
-	TRAINING_CELL_API void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool _play_for_whites);
+	TRAINING_CELL_API void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool play_for_whites);
 
 	/// <summary>
 	/// Disposes the agent pointed by the given pointer

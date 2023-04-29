@@ -16,42 +16,16 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "Agent.h"
-#include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "TdlAbstractAgent.h"
 
 namespace TrainingCell::Checkers
 {
 	/// <summary>
 	///	Agent implementing TD("lambda") ("eligibility traces"-based) learning strategy
 	/// </summary>
-	class TdLambdaAgent : public Agent
+	class TdLambdaAgent : public TdlAbstractAgent
 	{
-		/// <summary>
-		/// Hold data related to a picked move
-		/// </summary>
-		struct MoveData
-		{
-			/// <summary>
-			/// ID of the move
-			/// </summary>
-			int move_id {};
-
-			/// <summary>
-			/// Value of the after-state
-			/// </summary>
-			double value {};
-
-			/// <summary>
-			/// After-sate resulted from the move
-			/// </summary>
-			State after_state {};
-		};
-
 		friend class TdlEnsembleAgent;
-		/// <summary>
-		///	The neural net to approximate state value function
-		/// </summary>
-		DeepLearning::Net<DeepLearning::CpuDC> _net{};
 
 		/// <summary>
 		/// A flag indicating that we are about to start new game
@@ -72,33 +46,6 @@ namespace TrainingCell::Checkers
 		/// Previous afterstate
 		/// </summary>
 		State _prev_afterstate{};
-
-		/// <summary>
-		/// Parameters defining the epsilon-greediness of the agent (exploration capabilities of the agent,
-		/// i.e. probability that the agent takes a random action instead of the one with the highest predicted value)
-		/// <= 0 means no exploration, >= 1.0 means only random exploration
-		/// </summary>
-		double _exploration_epsilon{};
-
-		/// <summary>
-		///	The "Lambda" parameter of TD("lambda") approach
-		/// </summary>
-		double _lambda = 0.0;
-
-		/// <summary>
-		///	Reward discount parameter
-		/// </summary>
-		double _gamma = 0.8;
-
-		/// <summary>
-		///	Learning rate
-		/// </summary>
-		double _alpha = 0.01;
-
-		/// <summary>
-		/// Defines whether the agent is going to train while playing
-		/// </summary>
-		bool _training_mode = true;
 
 		/// <summary>
 		/// Returns id of a move to take
@@ -126,18 +73,13 @@ namespace TrainingCell::Checkers
 		void reset();
 
 		/// <summary>
-		/// Initializes neural net according to the given dimension array
-		/// </summary>
-		void initialize_net(const std::vector<std::size_t>& layer_dimensions);
-
-		/// <summary>
 		/// Assigns parameters of the agent from the given script-string
 		/// </summary>
 		void assign(const std::string& script_str, const bool hyper_params_only);
 	public:
 
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_afterstate, _new_game,
-			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha);
+			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha, _reward_factor)
 
 		/// <summary>
 		/// Returns script representation of all the hyper-parameters of the agent
@@ -174,63 +116,13 @@ namespace TrainingCell::Checkers
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
 		/// </summary>
-		int make_move(const State& current_state, const std::vector<Move>& moves) override;
+		int make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white) override;
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
-		void game_over(const State& final_state, const GameResult& result) override;
-
-		/// <summary>
-		/// Sets probability of making random moves
-		/// </summary>
-		void set_exploration_probability(double epsilon);
-
-		/// <summary>
-		/// Returns actual value of exploration probability
-		/// </summary>
-		[[nodiscard]] double get_exploratory_probability() const;
-
-		/// <summary>
-		/// Updates parameter gamma with the given value;
-		/// </summary>
-		void set_discount(double gamma);
-
-		/// <summary>
-		/// Returns actual value of parameter gamma (reward discount)
-		/// </summary>
-		[[nodiscard]] double get_discount() const;
-
-		/// <summary>
-		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing
-		/// </summary>
-		void set_training_mode(const bool training_mode) override;
-
-		/// <summary>
-		/// Returns actual value of training mode
-		/// </summary>
-		[[nodiscard]] bool get_training_mode() const override;
-
-		/// <summary>
-		/// Updates "lambda" parameter with the given value
-		/// </summary>
-		void set_lambda(const double lambda);
-
-		/// <summary>
-		/// Returns actual value of "lambda" parameter
-		/// </summary>
-		[[nodiscard]] double get_lambda() const;
-
-		/// <summary>
-		/// Updates learning rate with the given value
-		/// </summary>
-		void set_learning_rate(const double alpha);
-
-		/// <summary>
-		/// Returns acutal value of the learning rate parameter ("alpha")
-		/// </summary>
-		[[nodiscard]] double get_learning_rate() const;
+		void game_over(const State& final_state, const GameResult& result, const bool as_white) override;
 
 		/// <summary>
 		/// Equality operator
@@ -280,10 +172,5 @@ namespace TrainingCell::Checkers
 		/// Returns true if the current agent is equal to the given one
 		/// </summary>
 		[[nodiscard]] bool equal(const Agent& agent) const override;
-
-		/// <summary>
-		/// Returns dimensions of the layers of the underlying neural network
-		/// </summary>
-		[[nodiscard]] std::vector<unsigned int> get_net_dimensions() const;
 	};
 }

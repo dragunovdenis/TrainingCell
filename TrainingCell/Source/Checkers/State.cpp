@@ -634,4 +634,16 @@ namespace TrainingCell::Checkers
 
 		return get_non_capturing_moves(current_state);
 	}
+
+	double Utils::calculate_reward(const State& init_state, const State& final_state)
+	{
+		const auto init_score = init_state.calc_score();
+		const auto final_score = final_state.calc_score();
+		const auto diff_score = final_score.diff(init_score);
+
+		return (2.0 * diff_score[Piece::King] +
+			diff_score[Piece::Man] -
+			diff_score[Piece::AntiMan] -
+			2.0 * diff_score[Piece::AntiKing]) / 50.0;
+	}
 }

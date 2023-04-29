@@ -31,6 +31,7 @@ namespace TrainingCell::Checkers
 		INTERACTIVE = 2,
 		TDL = 3,
 		TDL_ENSEMBLE = 4,
+		TDL_AUTO = 5,
 	};
 
 	/// <summary>

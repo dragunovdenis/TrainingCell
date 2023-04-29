@@ -205,7 +205,7 @@ void* PackCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* age
 
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
-void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool _play_for_whites)
+void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool play_for_whites)
 {
 	try
 	{
@@ -226,7 +226,7 @@ void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move
 			{
 				game_over_callback(reinterpret_cast<const int*>(state.data()), static_cast<int>(state.size()), static_cast<int>(result));
 				
-			}, _play_for_whites);
+			}, play_for_whites);
 	}
 	catch (...)
 	{

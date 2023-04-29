@@ -28,7 +28,7 @@ namespace TrainingCell::Checkers
 		_z.clear();
 	}
 
-	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result)
+	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
 	{
 		if (_training_mode)
 		{
@@ -38,71 +38,6 @@ namespace TrainingCell::Checkers
 		}
 
 		reset();
-	}
-
-	void TdLambdaAgent::set_exploration_probability(double epsilon)
-	{
-		_exploration_epsilon = epsilon;
-	}
-
-	double TdLambdaAgent::get_exploratory_probability() const
-	{
-		return _exploration_epsilon;
-	}
-
-	void TdLambdaAgent::set_discount(double gamma)
-	{
-		_gamma = gamma;
-	}
-
-	double TdLambdaAgent::get_discount() const
-	{
-		return _gamma;
-	}
-
-	void TdLambdaAgent::set_training_mode(const bool training_mode)
-	{
-		_training_mode = training_mode;
-	}
-
-	bool TdLambdaAgent::get_training_mode() const
-	{
-		return _training_mode;
-	}
-
-	void TdLambdaAgent::set_lambda(const double lambda)
-	{
-		_lambda = lambda;
-	}
-
-	double TdLambdaAgent::get_lambda() const
-	{
-		return _lambda;
-	}
-
-	void TdLambdaAgent::set_learning_rate(const double alpha)
-	{
-		_alpha = alpha;
-	}
-
-	double TdLambdaAgent::get_learning_rate() const
-	{
-		return _alpha;
-	}
-
-	/// <summary>
-	/// Calculates reward based on the given initial and final state of the game
-	/// </summary>
-	double calculate_reward(const State& init_state, const State& final_state)
-	{
-		const auto init_score = init_state.calc_score();
-		const auto final_score = final_state.calc_score();
-		const auto diff_score = final_score.diff(init_score);
-
-		return (2.0 * diff_score[Piece::King] +
-			diff_score[Piece::Man] -
-			diff_score[Piece::AntiMan] -
-			2.0 * diff_score[Piece::AntiKing]) / 50.0;
 	}
 
 	double TdLambdaAgent::update_z_and_evaluate_prev_after_state()
@@ -131,7 +66,7 @@ namespace TrainingCell::Checkers
 		return std::get<1>(calc_result)(0, 0, 0);
 	}
 
-	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves)
+	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
 		if (!_training_mode)
 			return pick_move_id(current_state, moves);
@@ -146,7 +81,7 @@ namespace TrainingCell::Checkers
 			return move_data.move_id;
 		}
 
-		const auto reward = calculate_reward(_prev_state, current_state);
+		const auto reward = get_reward_factor() * Utils::calculate_reward(_prev_state, current_state);
 
 		const auto prev_afterstate_value = update_z_and_evaluate_prev_after_state();
 		const auto delta = reward + _gamma * move_data.value - prev_afterstate_value;
@@ -164,7 +99,7 @@ namespace TrainingCell::Checkers
 		return pick_move(state, moves).move_id;
 	}
 
-	TdLambdaAgent::MoveData TdLambdaAgent::evaluate(const State& state, const std::vector<Move>& moves, const int move_id) const
+	MoveData TdLambdaAgent::evaluate(const State& state, const std::vector<Move>& moves, const int move_id) const
 	{
 		auto afterstate = state;
 		afterstate.make_move(moves[move_id], true, false);
@@ -172,7 +107,7 @@ namespace TrainingCell::Checkers
 		return { move_id,  value, afterstate };
 	}
 
-	TdLambdaAgent::MoveData TdLambdaAgent::pick_move(const State& state, const std::vector<Move>& moves) const
+	MoveData TdLambdaAgent::pick_move(const State& state, const std::vector<Move>& moves) const
 	{
 		if (moves.empty())
 			return { -1 };
@@ -204,6 +139,7 @@ namespace TrainingCell::Checkers
 	const char* json_learning_rate_id = "LearnRate";
 	const char* json_exploration_rate_id = "Exploration";
 	const char* json_training_mode_id = "TrainingMode";
+	const char* json_reward_factor_id = "RewardFactor";
 
 	std::string TdLambdaAgent::to_script() const
 	{
@@ -216,6 +152,7 @@ namespace TrainingCell::Checkers
 		json[json_learning_rate_id] = _alpha;
 		json[json_exploration_rate_id] = _exploration_epsilon;
 		json[json_training_mode_id] = _training_mode;
+		json[json_reward_factor_id] = _reward_factor;
 
 		return json.dump();
 	}
@@ -270,27 +207,16 @@ namespace TrainingCell::Checkers
 
 		if (json.contains(json_training_mode_id))
 			_training_mode = json[json_training_mode_id].get<bool>();
+
+		if (json.contains(json_reward_factor_id))
+			_reward_factor = json[json_reward_factor_id].get<double>();
 	}
 
 	TdLambdaAgent::TdLambdaAgent(
 		const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
 		const double lambda, const double gamma, const double alpha, const std::string& name) :
-		_new_game(true), _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha)
-	{
-		set_name(name);
-		initialize_net(layer_dimensions);
-	}
-
-	void TdLambdaAgent::initialize_net(const std::vector<std::size_t>& layer_dimensions)
-	{
-		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
-			throw std::exception("Invalid Net configuration");
-
-		std::vector activ_func_ids(layer_dimensions.size() - 1, DeepLearning::ActivationFunctionId::RELU);
-		activ_func_ids.rbegin()[0] = DeepLearning::ActivationFunctionId::LINEAR;
-
-		_net = DeepLearning::Net(layer_dimensions, activ_func_ids);
-	}
+		TdlAbstractAgent(layer_dimensions, exploration_epsilon, lambda, gamma, alpha, name)
+	{}
 
 	bool TdLambdaAgent::equal_hyperparams(const TdLambdaAgent& anotherAgent) const
 	{
@@ -305,13 +231,7 @@ namespace TrainingCell::Checkers
 
 	bool TdLambdaAgent::operator ==(const TdLambdaAgent& anotherAgent) const
 	{
-		return _net.equal(anotherAgent._net) &&
-			_z == anotherAgent._z &&
-			_prev_state == anotherAgent._prev_state &&
-			_prev_afterstate == anotherAgent._prev_afterstate &&
-			_new_game == anotherAgent._new_game &&
-			_id == anotherAgent._id &&
-			equal_hyperparams(anotherAgent);
+		return equal(anotherAgent);
 	}
 
 	bool TdLambdaAgent::operator !=(const TdLambdaAgent& anotherAgent) const
@@ -346,20 +266,11 @@ namespace TrainingCell::Checkers
 
 	bool TdLambdaAgent::equal(const Agent& agent) const
 	{
-		const auto other_tdl_agent_ptr = dynamic_cast<const TdLambdaAgent*>(&agent);
-		return other_tdl_agent_ptr != nullptr && (*other_tdl_agent_ptr) == *this;
-	}
-
-	std::vector<unsigned int> TdLambdaAgent::get_net_dimensions() const
-	{
-		const auto dims = _net.get_dimensions();
-		std::vector<unsigned int> result(dims.size());
-
-		std::ranges::transform(dims, result.begin(), [](const auto& dim)
-			{
-				return static_cast<unsigned int>(dim.coord_prod());
-			});
-
-		return result;
+		const auto other_agent_ptr = dynamic_cast<const TdLambdaAgent*>(&agent);
+		return other_agent_ptr != nullptr && TdlAbstractAgent::equal(agent) &&
+			_z == other_agent_ptr->_z &&
+			_prev_state == other_agent_ptr->_prev_state &&
+			_prev_afterstate == other_agent_ptr->_prev_afterstate &&
+			_new_game == other_agent_ptr->_new_game;
 	}
 }

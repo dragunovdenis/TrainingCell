@@ -70,7 +70,7 @@ namespace TrainingCellTest
 			for (auto iter_id = 0; iter_id < iter_count; ++iter_id)
 			{
 				const auto moves = state.get_moves();
-				const auto move_id = agent.make_move(state, moves);
+				const auto move_id = agent.make_move(state, moves, true);
 				state.make_move(moves[move_id], true, false);
 				state.invert();
 			}
@@ -85,7 +85,8 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentScriptGeneration)
 		{
 			//Arrange
-			const TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "Some Name");
+			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "Some Name");
+			agent.set_reward_factor(0.375);
 
 			//Act
 			const auto script = agent.to_script();

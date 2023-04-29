@@ -82,7 +82,12 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	A flag that indicates whether the state is "inverted" or not
 		/// </summary>
-		bool is_inverted() const;
+		[[nodiscard]] bool is_inverted() const;
+
+		/// <summary>
+		/// Returns true it the current "agent-to-move" is that one that plays white pieces
+		/// </summary>
+		[[nodiscard]] bool is_agent_to_move_white() const;
 
 		/// <summary>
 		/// Number of times "whites" (agent with index "0") won during the training

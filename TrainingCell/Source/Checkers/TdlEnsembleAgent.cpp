@@ -73,7 +73,7 @@ namespace TrainingCell::Checkers
 		return _ensemble[id];
 	}
 
-	int TdlEnsembleAgent::make_move(const State& current_state, const std::vector<Move>& moves)
+	int TdlEnsembleAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
 		if (moves.empty())
 			return -1;
@@ -92,7 +92,7 @@ namespace TrainingCell::Checkers
 		return static_cast<int>(std::distance(votes.begin(), std::ranges::max_element(votes)));
 	}
 
-	void TdlEnsembleAgent::game_over(const State& final_state, const GameResult& result)
+	void TdlEnsembleAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
 	{
 		set_single_agent_mode(is_single_agent_mode());
 	}
@@ -119,7 +119,7 @@ namespace TrainingCell::Checkers
 
 	bool TdlEnsembleAgent::operator == (const TdlEnsembleAgent& anotherAgent) const
 	{
-		return _ensemble == anotherAgent._ensemble && _id == anotherAgent._id && _chosen_agent_id == anotherAgent._chosen_agent_id;
+		return equal(anotherAgent);
 	}
 
 	bool TdlEnsembleAgent::operator != (const TdlEnsembleAgent& anotherAgent) const
@@ -140,6 +140,9 @@ namespace TrainingCell::Checkers
 	bool TdlEnsembleAgent::equal(const Agent& agent) const
 	{
 		const auto other_ensemble_ptr = dynamic_cast<const TdlEnsembleAgent*>(&agent);
-		return other_ensemble_ptr != nullptr && (*other_ensemble_ptr) == *this;
+		return other_ensemble_ptr != nullptr && Agent::equal(agent) &&
+			_ensemble == other_ensemble_ptr->_ensemble &&
+			_id == other_ensemble_ptr->_id &&
+			_chosen_agent_id == other_ensemble_ptr->_chosen_agent_id;
 	}
 }

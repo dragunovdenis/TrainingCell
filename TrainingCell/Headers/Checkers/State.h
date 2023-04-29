@@ -428,6 +428,11 @@ namespace TrainingCell::Checkers
 		///	Returns all the available moves for the given state
 		/// </summary>
 		static std::vector<Move> get_moves(const State& current_state);
+
+		/// <summary>
+		/// Calculates reward based on the given initial and final state of the game
+		/// </summary>
+		static double calculate_reward(const State& init_state, const State& final_state);
 	};
 }
 

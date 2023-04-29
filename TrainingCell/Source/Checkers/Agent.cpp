@@ -24,6 +24,13 @@ namespace TrainingCell::Checkers
 
 	bool Agent::get_training_mode() const { throw std::exception("Not implemented"); }
 
+	bool Agent::equal(const Agent& agent) const
+	{
+		return _id == agent._id &&
+			_name == agent._name &&
+			_record_book == agent._record_book;
+	}
+
 	const std::string& Agent::get_name() const
 	{
 		return _name;

@@ -165,7 +165,9 @@ namespace Training
 
 		for (auto score_id = 0; score_id < _best_performance.size(); ++score_id)
 		{
-			if (_best_performance[score_id].get_score() >= performance[score_id].get_score())
+			//We assume that an agent with the same score but from the later stage of
+			//training is superior to that from the earlier stage, that is why below we have a strict inequality sign
+			if (_best_performance[score_id].get_score() > performance[score_id].get_score())
 				continue;
 
 			_best_performance[score_id] = performance[score_id];

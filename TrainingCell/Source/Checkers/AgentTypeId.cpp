@@ -25,7 +25,7 @@ namespace TrainingCell::Checkers
 		const auto str_normalized = DeepLearning::Utils::normalize_string(str);
 
 		for (auto id = static_cast<unsigned int>(AgentTypeId::UNKNOWN);
-			id <= static_cast<unsigned int>(AgentTypeId::TDL_ENSEMBLE); ++id)
+			id <= static_cast<unsigned int>(AgentTypeId::TDL_AUTO); ++id)
 		{
 			const auto agent_id = static_cast<AgentTypeId>(id);
 			if (to_string(agent_id) == str_normalized)
@@ -42,8 +42,9 @@ namespace TrainingCell::Checkers
 			case AgentTypeId::TDL_ENSEMBLE : return "TDL_ENSEMBLE";
 			case AgentTypeId::INTERACTIVE  : return "INTERACTIVE";
 			case AgentTypeId::RANDOM       : return "RANDOM";
-			case AgentTypeId::TDL          : return "TDL";
-		    case AgentTypeId::UNKNOWN      :
+			case AgentTypeId::TDL   	   : return "TDL";
+			case AgentTypeId::TDL_AUTO     : return "TDL_AUTO";
+			case AgentTypeId::UNKNOWN      :
 			default                        : return "UNKNOWN";
 		}
 	}
