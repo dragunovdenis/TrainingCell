@@ -25,41 +25,32 @@ namespace TrainingCell::Checkers
 		return _net;
 	}
 
-	void TdLambdaAutoAgent::init_sub_agents()
-	{
-		_white_sub_agent_ptr = std::make_unique<TdLambdaSubAgent<true>>(this, this);
-		_black_sub_agent_ptr = std::make_unique<TdLambdaSubAgent<false>>(this, this);
-	}
-
 	TdLambdaAutoAgent::TdLambdaAutoAgent()
-	{
-		init_sub_agents();
-	}
+	{}
 
 	TdLambdaAutoAgent::TdLambdaAutoAgent(const std::vector<std::size_t>& layer_dimensions,
 		const double exploration_epsilon, const double lambda, const double gamma, const double alpha,
 		const std::string& name) : TdlAbstractAgent(layer_dimensions, exploration_epsilon, lambda, gamma, alpha, name)
-	{
-		init_sub_agents();
-	}
+	{}
 
 	int TdLambdaAutoAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
+		//Sanity check
 		if (current_state.is_inverted() == as_white)
 			throw std::exception("Inconsistency encountered");
 
 		if (as_white)
-			return _white_sub_agent_ptr->make_move(current_state, moves);
+			return _white_sub_agent_ptr.make_move(current_state, moves);
 
-		return _black_sub_agent_ptr->make_move(current_state, moves);
+		return _black_sub_agent_ptr.make_move(current_state, moves);
 	}
 
 	void TdLambdaAutoAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
 	{
 		if (as_white)
-			return _white_sub_agent_ptr->game_over(final_state, result);
+			return _white_sub_agent_ptr.game_over(final_state, result);
 
-		return _black_sub_agent_ptr->game_over(final_state, result);
+		return _black_sub_agent_ptr.game_over(final_state, result);
 	}
 
 	AgentTypeId TdLambdaAutoAgent::TYPE_ID()
@@ -75,10 +66,5 @@ namespace TrainingCell::Checkers
 	bool TdLambdaAutoAgent::can_train() const
 	{
 		return true;
-	}
-
-	bool TdLambdaAutoAgent::equal(const Agent& agent) const
-	{
-		return TdlAbstractAgent::equal(agent);
 	}
 }

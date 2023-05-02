@@ -25,7 +25,6 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	/// TD(lambda) sub-agent
 	/// </summary>
-	template <bool WHITE>
 	class TdLambdaSubAgent
 	{
 		const TdlSettingsReadOnly* _settings_ptr{};
@@ -33,14 +32,9 @@ namespace TrainingCell::Checkers
 		AfterStateValueFunction* const _func_ptr{};
 
 		/// <summary>
-		/// Returns "1" if "WHITE" is "true" and "-1" otherwise
-		/// </summary>
-		static constexpr int color_factor();
-
-		/// <summary>
 		/// A flag indicating that we are about to start new game
 		/// </summary>
-		bool _new_game{};
+		bool _new_game{true};
 
 		/// <summary>
 		///	Auxiliary data structure that is used during training process

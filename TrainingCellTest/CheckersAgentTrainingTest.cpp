@@ -20,6 +20,7 @@
 #include "../TrainingCell/Headers/Checkers/Agent.h"
 #include "../TrainingCell/Headers/Checkers/RandomAgent.h"
 #include "../TrainingCell/Headers/Checkers/TdLambdaAgent.h"
+#include "../TrainingCell/Headers/Checkers/TdLambdaAutoAgent.h"
 #include "../TrainingCell/Headers/Checkers/TdlEnsembleAgent.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include <ppl.h>
@@ -32,36 +33,61 @@ namespace TrainingCellTest
 	TEST_CLASS(CheckersAgentTrainingTest)
 	{
 		/// <summary>
+		/// Enumerates different training modes
+		/// </summary>
+		enum class TrainingMode : int
+		{
+			WHITE = 0,
+			BLACK = 1,
+			BOTH = 2,
+			
+		};
+
+		/// <summary>
 		/// Run "standard" training of a TD(lambda) agent
 		/// </summary>
-		static TdLambdaAgent train_agent_standard(const int episodes_with_exploration = 5000)
+		template <class A>
+		static A train_agent_standard(const int episodes_with_exploration = 5000, const TrainingMode mode = TrainingMode::BLACK)
 		{
 			RandomAgent agent0;
-			TdLambdaAgent result({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.15, 0.9, 0.05);
-			Board board(&agent0, &result);
-			board.play(episodes_with_exploration);
-			result.set_exploration_probability(-1);
-			result.set_learning_rate(0.01);
-			board.play(2000);
-			result.set_learning_rate(0.001);
-			board.play(2000);
+			A result({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.15, 0.97, 0.025);
+			train_agent_standard(result, episodes_with_exploration, mode);
 
 			return result;
+		}
+
+		/// <summary>
+		/// Run "standard" training of a TD(lambda) agent
+		/// </summary>
+		template <class A>
+		static void train_agent_standard(A& agent_to_train, const int episodes_with_exploration, const TrainingMode mode)
+		{
+			RandomAgent r_agent;
+			auto board = mode == TrainingMode::WHITE ? Board(&agent_to_train, &r_agent) : ((mode == TrainingMode::BLACK) ?
+				Board(&r_agent, &agent_to_train) : Board(&agent_to_train, &agent_to_train));
+			board.play(episodes_with_exploration);
+			agent_to_train.set_exploration_probability(-1);
+			agent_to_train.set_learning_rate(0.01);
+			board.play(2000);
+			agent_to_train.set_learning_rate(0.001);
+			board.play(2000);
 		}
 
 		/// <summary>
 		/// Runs "standard" performance test of the given agent and
 		/// returns its success rate</summary>
 		/// <param name="agent">Agent to test. Notice it is the caller who should make
+		/// <param name="as_white">If "true" the agent will be tested while "playing white" pieces, otherwise, it will play for "black"</param>
 		/// sure that the agent is not in the "training mode" before passing it to the method</param>
 		/// <returns>Percentage of wins when playing with "random" agent</returns>
-		static double standard_performance_test(Agent& agent)
+		static double standard_performance_test(Agent& agent, const bool as_white = false)
 		{
 			RandomAgent r_agent;
-			Board board(&r_agent, &agent);
-			board.play(1000);
+			auto board = as_white ? Board(&agent , &r_agent) : Board(&r_agent, &agent);
+			constexpr auto episodes = 1000;
+			board.play(episodes);
 
-			return board.get_blacks_wins() * 1.0 / (board.get_whites_wins() + board.get_blacks_wins());
+			return (as_white ? board.get_whites_wins() : board.get_blacks_wins()) * 1.0 / episodes;
 		}
 
 		/// <summary>
@@ -85,7 +111,7 @@ namespace TrainingCellTest
 					if (result.size() >= number_of_agents_in_ensemble)
 						return;
 
-					auto agent = train_agent_standard(episodes_with_exploration);
+					auto agent = train_agent_standard<TdLambdaAgent>(episodes_with_exploration);
 					agent.set_training_mode(false);
 
 					if (result.size() >= number_of_agents_in_ensemble)
@@ -106,41 +132,56 @@ namespace TrainingCellTest
 			return result;
 		}
 
+		/// <summary>
+		/// General method to assess performance of the given agent
+		/// </summary>
+		template <class A>
+		static void assess_performance(A& agent, const double min_acceptable_performance)
+		{
+			const auto performance_as_black = standard_performance_test(agent, false);
+			Logger::WriteMessage((std::string("Score as black: ") + std::to_string(performance_as_black) + "\n").c_str());
+			const auto performance_as_white = standard_performance_test(agent, true);
+			Logger::WriteMessage((std::string("Score as white: ") + std::to_string(performance_as_white) + "\n").c_str());
+			const auto smallest_win_percentage = std::min(performance_as_black, performance_as_white);
+			Assert::IsTrue(smallest_win_percentage > min_acceptable_performance, L"Too low win percentage");
+		}
+
 	public:
 		
 		TEST_METHOD(TdLambdaAgentTraining)
 		{
-			TdlEnsembleAgent ensemble;
+			auto agent = train_agent_standard<TdLambdaAgent>(5000, TrainingMode::BLACK);
+			agent.set_training_mode(false);
 
-			auto smallest_win_percentage = 1.0;
-			auto average_win_percentage = 0.0;
-			constexpr auto epochs = 1;
-			std::mutex m;
-			Concurrency::parallel_for(0, epochs, [&](auto i)
-				{
-					auto agent = train_agent_standard();
-					agent.set_training_mode(false);
+			//Assert
+			assess_performance(agent, 0.95);
+		}
 
-					{
-						const auto performance = standard_performance_test(agent);
+		TEST_METHOD(TdLambdaAutoAgentAsBlackTraining)
+		{
+			auto agent = train_agent_standard<TdLambdaAutoAgent>(5000, TrainingMode::BLACK);
+			agent.set_training_mode(false);
 
-						Assert::IsFalse(isnan(performance), L"Optimization has failed");
+			//Assert
+			assess_performance(agent, 0.95);
+		}
 
-						std::lock_guard lock(m);
-						average_win_percentage += performance;
+		TEST_METHOD(TdLambdaAutoAgentAsWhiteTraining)
+		{
+			auto agent = train_agent_standard<TdLambdaAutoAgent>(5000, TrainingMode::WHITE);
+			agent.set_training_mode(false);
 
-						if (smallest_win_percentage > performance)
-							smallest_win_percentage = performance;
+			//Assert
+			assess_performance(agent, 0.95);
+		}
 
-						Logger::WriteMessage((std::string("Black Win Percentage:") + std::to_string(performance) + "\n").c_str());
-					}
-				});
+		TEST_METHOD(TdLambdaAutoAgentTraining)
+		{
+			auto agent = train_agent_standard<TdLambdaAutoAgent>(5000, TrainingMode::BOTH);
+			agent.set_training_mode(false);
 
-			average_win_percentage /= epochs;
-
-			Logger::WriteMessage((std::string("Minimal percentage: ") + std::to_string(smallest_win_percentage) + "\n").c_str());
-			Logger::WriteMessage((std::string("Average percentage: ") + std::to_string(average_win_percentage) + "\n").c_str());
-			Assert::IsTrue(smallest_win_percentage > 0.9, L"Too low win percentage");
+			//Assert
+			assess_performance(agent, 0.95);
 		}
 
 		TEST_METHOD(EnsembleAgentTest)
@@ -149,9 +190,7 @@ namespace TrainingCellTest
 			auto agent = train_ensemble_agent(0.5, 5, 100);
 
 			//Assert
-			const auto performance = standard_performance_test(agent);
-			Logger::WriteMessage((std::string("Performance: ") + std::to_string(performance) + "\n").c_str());
-			Assert::IsTrue(performance > 0.97, L"Too low performance");
+			assess_performance(agent, 0.97);
 		}
 
 		TEST_METHOD(TdLambdaAgentTrainingRegression)

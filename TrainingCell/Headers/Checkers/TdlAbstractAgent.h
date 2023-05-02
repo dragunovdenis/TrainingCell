@@ -130,8 +130,23 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		void initialize_net(const std::vector<std::size_t>& layer_dimensions);
 
+		/// <summary>
+		/// Assigns parameters of the agent from the given script-string
+		/// </summary>
+		void assign(const std::string& script_str, const bool hyper_params_only);
+
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon, _training_mode, _lambda, _gamma, _alpha, _reward_factor)
+
+		/// <summary>
+		/// Returns script representation of all the hyper-parameters of the agent
+		/// </summary>
+		[[nodiscard]] std::string to_script() const;
+
+		/// <summary>
+		/// Returns "true" if the given agent has the same hyper-parameters as the current one
+		/// </summary>
+		[[nodiscard]] bool equal_hyperparams(const TdlAbstractAgent& anotherAgent) const;
 
 		/// <summary>
 		/// Returns true if the current agent is equal to the given one

@@ -21,14 +21,12 @@
 
 namespace TrainingCell::Checkers
 {
-	template <bool WHITE>
-	int TdLambdaSubAgent<WHITE>::pick_move_id(const State& state, const std::vector<Move>& moves) const
+	int TdLambdaSubAgent::pick_move_id(const State& state, const std::vector<Move>& moves) const
 	{
 		return pick_move(state, moves).move_id;
 	}
 
-	template <bool WHITE>
-	MoveData TdLambdaSubAgent<WHITE>::pick_move(const State& state, const std::vector<Move>& moves) const
+	MoveData TdLambdaSubAgent::pick_move(const State& state, const std::vector<Move>& moves) const
 	{
 		if (moves.empty())
 			return { -1 };
@@ -37,13 +35,13 @@ namespace TrainingCell::Checkers
 			DeepLearning::Utils::get_random(0, 1.0) <= _settings_ptr->get_exploratory_probability())
 			return evaluate(state, moves, DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1));
 
-		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() * color_factor() };
+		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() };
 
 		for (auto move_id = 0ull; move_id < moves.size(); ++move_id)
 		{
 			const auto trial_move_data = evaluate(state, moves, static_cast<int>(move_id));
 
-			if (color_factor() * trial_move_data.value > color_factor() * best_move_data.value)
+			if (trial_move_data.value > best_move_data.value)
 				best_move_data = trial_move_data;
 		}
 
@@ -53,22 +51,19 @@ namespace TrainingCell::Checkers
 		return best_move_data;
 	}
 
-	template <bool WHITE>
-	MoveData TdLambdaSubAgent<WHITE>::evaluate(const State& state, const std::vector<Move>& moves,
+	MoveData TdLambdaSubAgent::evaluate(const State& state, const std::vector<Move>& moves,
 		const int move_id) const
 	{
 		auto afterstate = state;
 		afterstate.make_move(moves[move_id], true, false);
-		const auto value = _func_ptr->net().act(
-			(WHITE ? afterstate : afterstate.get_inverted()).to_tensor())(0, 0, 0);
+		const auto value = _func_ptr->net().act(afterstate.to_tensor())(0, 0, 0);
 		return { move_id,  value, afterstate };
 	}
 
-	template <bool WHITE>
-	double TdLambdaSubAgent<WHITE>::update_z_and_evaluate_prev_after_state()
+	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state()
 	{
-		auto calc_result = _func_ptr->net().calc_gradient_and_value(
-			(WHITE ? _prev_afterstate : _prev_afterstate.get_inverted()).to_tensor(),
+		auto calc_result = _func_ptr->net().
+		calc_gradient_and_value(_prev_afterstate.to_tensor(),
 			DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
 
 		auto& gradient = std::get<0>(calc_result);
@@ -94,25 +89,18 @@ namespace TrainingCell::Checkers
 		return std::get<1>(calc_result)(0, 0, 0);
 	}
 
-	template <bool WHITE>
-	void TdLambdaSubAgent<WHITE>::reset()
+	void TdLambdaSubAgent::reset()
 	{
 		_new_game = true;
 		_z.clear();
 	}
 
-	template <bool WHITE>
-	TdLambdaSubAgent<WHITE>::TdLambdaSubAgent(const TdlSettingsReadOnly* settings_ptr,
+	TdLambdaSubAgent::TdLambdaSubAgent(const TdlSettingsReadOnly* settings_ptr,
 		AfterStateValueFunction* const func_ptr) : _settings_ptr(settings_ptr), _func_ptr(func_ptr)
 	{}
 
-	template <bool WHITE>
-	int TdLambdaSubAgent<WHITE>::make_move(const State& current_state, const std::vector<Move>& moves)
+	int TdLambdaSubAgent::make_move(const State& current_state, const std::vector<Move>& moves)
 	{
-		//Sanity check
-		if (WHITE == current_state.is_inverted())
-			throw std::exception("Unexpected state");
-
 		if (!_settings_ptr->get_training_mode())
 			return pick_move_id(current_state, moves);
 
@@ -140,25 +128,15 @@ namespace TrainingCell::Checkers
 		return move_data.move_id;
 	}
 
-	template <bool WHITE>
-	void TdLambdaSubAgent<WHITE>::game_over(const State& final_state, const GameResult& result)
+	void TdLambdaSubAgent::game_over(const State& final_state, const GameResult& result)
 	{
 		if (_settings_ptr->get_training_mode())
 		{
-			const auto reward = 2 * static_cast<int>(result) * color_factor();
+			const auto reward = 2 * static_cast<int>(result);
 			const auto delta = reward - update_z_and_evaluate_prev_after_state();
 			_func_ptr->net().update(_z, -_settings_ptr->get_learning_rate() * delta, 0.0);
 		}
 
 		reset();
 	}
-
-	template <bool WHITE>
-	constexpr int TdLambdaSubAgent<WHITE>::color_factor()
-	{
-		return WHITE ? 1 : -1;
-	}
-
-	template class TdLambdaSubAgent<true>;
-	template class TdLambdaSubAgent<false>;
 }

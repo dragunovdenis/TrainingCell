@@ -30,7 +30,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// A flag indicating that we are about to start new game
 		/// </summary>
-		bool _new_game{};
+		bool _new_game{true};
 
 		/// <summary>
 		///	Auxiliary data structure that is used during training process
@@ -72,19 +72,10 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		void reset();
 
-		/// <summary>
-		/// Assigns parameters of the agent from the given script-string
-		/// </summary>
-		void assign(const std::string& script_str, const bool hyper_params_only);
 	public:
 
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_afterstate, _new_game,
 			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha, _reward_factor)
-
-		/// <summary>
-		/// Returns script representation of all the hyper-parameters of the agent
-		/// </summary>
-		[[nodiscard]] std::string to_script() const;
 
 		/// <summary>
 		/// Construction from the given string-script
@@ -133,11 +124,6 @@ namespace TrainingCell::Checkers
 		/// Inequality operator
 		/// </summary>
 		bool operator != (const TdLambdaAgent& anotherAgent) const;
-
-		/// <summary>
-		/// Returns "true" if the given agent has the same hyper-parameters as the current one
-		/// </summary>
-		bool equal_hyperparams(const TdLambdaAgent & anotherAgent) const;
 
 		/// <summary>
 		/// Serializes the current instance of the agent into the "message-pack" format and saves it

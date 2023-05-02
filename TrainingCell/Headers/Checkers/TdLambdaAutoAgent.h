@@ -33,7 +33,6 @@ namespace TrainingCell::Checkers
 		virtual ~AfterStateValueFunction() = default;
 
 	private:
-		template <bool WHITE>
 		friend class TdLambdaSubAgent;
 		/// <summary>
 		/// Access to the neural net 
@@ -52,19 +51,14 @@ namespace TrainingCell::Checkers
 		DeepLearning::Net<DeepLearning::CpuDC>& net() override;
 
 		/// <summary>
-		/// Pointer to the "white" sub-agent
+		/// The "white" sub-agent
 		/// </summary>
-		std::unique_ptr<TdLambdaSubAgent<true>> _white_sub_agent_ptr{};
+		TdLambdaSubAgent _white_sub_agent_ptr{this, this};
 
 		/// <summary>
-		/// Pointer to the "black" sub-agent
+		/// The "black" sub-agent
 		/// </summary>
-		std::unique_ptr<TdLambdaSubAgent<false>> _black_sub_agent_ptr{};
-
-		/// <summary>
-		///	Initializes sub-agents
-		/// </summary>
-		void init_sub_agents();
+		TdLambdaSubAgent _black_sub_agent_ptr{ this, this };
 
 	public:
 
@@ -84,7 +78,7 @@ namespace TrainingCell::Checkers
 		/// <param name="alpha">Learning rate</param>
 		/// <param name="name">Name of the agent</param>
 		TdLambdaAutoAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-			const double lambda, const double gamma, const double alpha, const std::string& name);
+			const double lambda, const double gamma, const double alpha, const std::string& name = "AutoAgent");
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
@@ -114,11 +108,6 @@ namespace TrainingCell::Checkers
 		/// property because the later can throw exception (as not applicable)
 		/// </summary>
 		[[nodiscard]] bool can_train() const override;
-
-		/// <summary>
-		/// Returns true if the current agent is equal to the given one
-		/// </summary>
-		[[nodiscard]] bool equal(const Agent& agent) const override;
 	};
 
 }
