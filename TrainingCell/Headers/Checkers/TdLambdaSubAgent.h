@@ -29,7 +29,7 @@ namespace TrainingCell::Checkers
 	{
 		const TdlSettingsReadOnly* _settings_ptr{};
 
-		AfterStateValueFunction* const _func_ptr{};
+		DeepLearning::Net<DeepLearning::CpuDC>* _net_ptr{};
 
 		/// <summary>
 		/// A flag indicating that we are about to start new game
@@ -76,27 +76,40 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		void reset();
 
-	public:
 		/// <summary>
-		/// Delete default constructor so that the agent can be created only through the non-default one
+		/// Assigns the given pointers to the corresponding fields
 		/// </summary>
-		TdLambdaSubAgent() = delete;
+		void activate(const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr);
 
 		/// <summary>
-		/// Constructor
+		/// Resets the corresponding pointer fields
 		/// </summary>
-		TdLambdaSubAgent(const TdlSettingsReadOnly* settings_ptr, AfterStateValueFunction* const func_ptr);
+		void deactivate();
+
+	public:
+		/// <summary>
+		/// Default constructor
+		/// </summary>
+		TdLambdaSubAgent() = default;
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
 		/// </summary>
-		int make_move(const State& current_state, const std::vector<Move>& moves);
+		int make_move(const State& current_state, const std::vector<Move>& moves,
+			const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr);
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
-		void game_over(const State& final_state, const GameResult& result);
+		void game_over(const State& final_state, const GameResult& result,
+			const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr);
+
+		/// <summary>
+		/// Returns true if the current sub-agent is equal to the given sub-agent
+		/// disregarding their pointer fields
+		/// </summary>
+		[[nodiscard]] bool semi_equal(const TdLambdaSubAgent& another_sub_agent) const;
 	};
 }

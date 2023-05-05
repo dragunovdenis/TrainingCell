@@ -142,7 +142,6 @@ namespace TrainingCell::Checkers
 		const auto other_ensemble_ptr = dynamic_cast<const TdlEnsembleAgent*>(&agent);
 		return other_ensemble_ptr != nullptr && Agent::equal(agent) &&
 			_ensemble == other_ensemble_ptr->_ensemble &&
-			_id == other_ensemble_ptr->_id &&
 			_chosen_agent_id == other_ensemble_ptr->_chosen_agent_id;
 	}
 }

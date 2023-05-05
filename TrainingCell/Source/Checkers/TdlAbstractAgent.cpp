@@ -91,7 +91,7 @@ namespace TrainingCell::Checkers
 	{
 		nlohmann::json json;
 		json[json_agent_type_id] = to_string(get_type_id());
-		json[json_name_id] = _name;
+		json[json_name_id] = get_name();
 		json[json_net_dim_id] = DeepLearning::Utils::vector_to_str(get_net_dimensions());
 		json[json_lambda_id] = _lambda;
 		json[json_discount_id] = _gamma;
@@ -106,7 +106,7 @@ namespace TrainingCell::Checkers
 	bool TdlAbstractAgent::equal_hyperparams(const TdlAbstractAgent& anotherAgent) const
 	{
 		return _net.equal_hyperparams(anotherAgent._net) &&
-			_name == anotherAgent._name &&
+			get_name() == anotherAgent.get_name() &&
 			_exploration_epsilon == anotherAgent._exploration_epsilon &&
 			_training_mode == anotherAgent._training_mode &&
 			_lambda == anotherAgent._lambda &&

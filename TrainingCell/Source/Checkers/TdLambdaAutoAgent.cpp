@@ -17,20 +17,13 @@
 
 #include "../../Headers/Checkers/TdLambdaAutoAgent.h"
 #include "../../Headers/Checkers/TdLambdaSubAgent.h"
+#include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
 
 namespace TrainingCell::Checkers
 {
-	DeepLearning::Net<DeepLearning::CpuDC>& TdLambdaAutoAgent::net()
-	{
-		return _net;
-	}
-
-	TdLambdaAutoAgent::TdLambdaAutoAgent()
-	{}
-
 	TdLambdaAutoAgent::TdLambdaAutoAgent(const std::vector<std::size_t>& layer_dimensions,
-		const double exploration_epsilon, const double lambda, const double gamma, const double alpha,
-		const std::string& name) : TdlAbstractAgent(layer_dimensions, exploration_epsilon, lambda, gamma, alpha, name)
+	                                     const double exploration_epsilon, const double lambda, const double gamma, const double alpha,
+	                                     const std::string& name) : TdlAbstractAgent(layer_dimensions, exploration_epsilon, lambda, gamma, alpha, name)
 	{}
 
 	int TdLambdaAutoAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
@@ -40,17 +33,17 @@ namespace TrainingCell::Checkers
 			throw std::exception("Inconsistency encountered");
 
 		if (as_white)
-			return _white_sub_agent_ptr.make_move(current_state, moves);
+			return _white_sub_agent.make_move(current_state, moves, this, &_net);
 
-		return _black_sub_agent_ptr.make_move(current_state, moves);
+		return _black_sub_agent.make_move(current_state, moves, this, &_net);
 	}
 
 	void TdLambdaAutoAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
 	{
 		if (as_white)
-			return _white_sub_agent_ptr.game_over(final_state, result);
+			return _white_sub_agent.game_over(final_state, result, this, &_net);
 
-		return _black_sub_agent_ptr.game_over(final_state, result);
+		return _black_sub_agent.game_over(final_state, result, this, &_net);
 	}
 
 	AgentTypeId TdLambdaAutoAgent::TYPE_ID()
@@ -66,5 +59,91 @@ namespace TrainingCell::Checkers
 	bool TdLambdaAutoAgent::can_train() const
 	{
 		return true;
+	}
+
+	bool TdLambdaAutoAgent::equal(const Agent& agent) const
+	{
+		const auto agent_ptr = dynamic_cast<const TdLambdaAutoAgent*>(&agent);
+		return agent_ptr != nullptr && TdlAbstractAgent::equal(agent);
+	}
+
+	bool TdLambdaAutoAgent::operator==(const TdLambdaAutoAgent& another_agent) const
+	{
+		return equal(another_agent);
+	}
+
+	bool TdLambdaAutoAgent::operator!=(const TdLambdaAutoAgent& another_agent) const
+	{
+		return !(*this == another_agent);
+	}
+
+	void TdLambdaAutoAgent::save_to_file(const std::filesystem::path& file_path) const
+	{
+		DeepLearning::MsgPack::save_to_file(*this, file_path);
+	}
+
+	namespace
+	{
+		/// <summary>
+		/// Class that serves a single purpose: to load legacy agent from message-pack stream
+		/// </summary>
+		class LegacyTdLambdaAgent : public Agent
+		{
+		public:
+
+			LegacyTdLambdaAgent() = default;
+
+			int make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white) override
+			{ throw std::exception("Not implemented");};
+
+			void game_over(const State& final_state, const GameResult& result, const bool as_white) override
+			{ throw std::exception("Not implemented");}
+
+			[[nodiscard]] AgentTypeId get_type_id() const override
+			{ throw std::exception("Not implemented"); }
+
+			[[nodiscard]] bool can_train() const override
+			{ throw std::exception("Not implemented"); }
+
+			DeepLearning::Net<DeepLearning::CpuDC> _net{};
+			double _exploration_epsilon{};
+			double _lambda = 0.0;
+			double _gamma = 0.8;
+			double _alpha = 0.01;
+			bool _training_mode = true;
+			double _reward_factor{ 1 };
+			bool _new_game{ true };
+			std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _z{};
+			State _prev_state{};
+			State _prev_afterstate{};
+
+			MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_afterstate, _new_game,
+				_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha, _reward_factor)
+		};
+		
+	}
+
+	TdLambdaAutoAgent TdLambdaAutoAgent::load_from_file(const std::filesystem::path& file_path)
+	{
+		try
+		{
+			return DeepLearning::MsgPack::load_from_file<TdLambdaAutoAgent>(file_path);
+		} catch (...)
+		{
+			//Try load to the legacy container
+			const auto temp_container = DeepLearning::MsgPack::load_from_file<LegacyTdLambdaAgent>(file_path);
+
+			TdLambdaAutoAgent result{};
+			result._net = DeepLearning::Net<DeepLearning::CpuDC>(temp_container._net);
+			result._lambda = temp_container._lambda;
+			result._gamma = temp_container._gamma;
+			result._alpha = temp_container._alpha;
+			result._exploration_epsilon = temp_container._exploration_epsilon;
+			result._training_mode = temp_container._training_mode;
+			result._reward_factor = temp_container._reward_factor;
+			static_cast<Agent&>(result) = static_cast<const Agent&>(temp_container);
+
+			return result;
+		}
 	}
 }

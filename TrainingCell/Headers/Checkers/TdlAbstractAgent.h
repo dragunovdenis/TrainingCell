@@ -27,6 +27,9 @@ namespace TrainingCell::Checkers
 	class TdlSettingsReadOnly
 	{
 	public:
+		/// <summary>
+		/// Virtual default destructor
+		/// </summary>
 		virtual ~TdlSettingsReadOnly() = default;
 
 		/// <summary>

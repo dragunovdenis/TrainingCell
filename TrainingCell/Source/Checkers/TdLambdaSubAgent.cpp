@@ -56,14 +56,14 @@ namespace TrainingCell::Checkers
 	{
 		auto afterstate = state;
 		afterstate.make_move(moves[move_id], true, false);
-		const auto value = _func_ptr->net().act(afterstate.to_tensor())(0, 0, 0);
+		const auto value = _net_ptr->act(afterstate.to_tensor())(0, 0, 0);
 		return { move_id,  value, afterstate };
 	}
 
 	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state()
 	{
-		auto calc_result = _func_ptr->net().
-		calc_gradient_and_value(_prev_afterstate.to_tensor(),
+		auto calc_result =
+			_net_ptr->calc_gradient_and_value(_prev_afterstate.to_tensor(),
 			DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
 
 		auto& gradient = std::get<0>(calc_result);
@@ -95,12 +95,23 @@ namespace TrainingCell::Checkers
 		_z.clear();
 	}
 
-	TdLambdaSubAgent::TdLambdaSubAgent(const TdlSettingsReadOnly* settings_ptr,
-		AfterStateValueFunction* const func_ptr) : _settings_ptr(settings_ptr), _func_ptr(func_ptr)
-	{}
-
-	int TdLambdaSubAgent::make_move(const State& current_state, const std::vector<Move>& moves)
+	void TdLambdaSubAgent::activate(const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr)
 	{
+		_settings_ptr = settings_ptr;
+		_net_ptr = net_ptr;
+	}
+
+	void TdLambdaSubAgent::deactivate()
+	{
+		_settings_ptr = nullptr;
+		_net_ptr = nullptr;
+	}
+
+	int TdLambdaSubAgent::make_move(const State& current_state, const std::vector<Move>& moves,
+		const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr)
+	{
+		activate(settings_ptr, net_ptr);
+
 		if (!_settings_ptr->get_training_mode())
 			return pick_move_id(current_state, moves);
 
@@ -120,23 +131,37 @@ namespace TrainingCell::Checkers
 		const auto prev_afterstate_value = update_z_and_evaluate_prev_after_state();
 		const auto delta = reward + _settings_ptr->get_discount() * move_data.value - prev_afterstate_value;
 
-		_func_ptr->net().update(_z, -_settings_ptr->get_learning_rate() * delta, 0.0);
+		_net_ptr->update(_z, -_settings_ptr->get_learning_rate() * delta, 0.0);
 
 		_prev_afterstate = move_data.after_state;
 		_prev_state = current_state;
 
+		deactivate();
+
 		return move_data.move_id;
 	}
 
-	void TdLambdaSubAgent::game_over(const State& final_state, const GameResult& result)
+	void TdLambdaSubAgent::game_over(const State& final_state, const GameResult& result, 
+		const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr)
 	{
+		activate(settings_ptr, net_ptr);
+
 		if (_settings_ptr->get_training_mode())
 		{
 			const auto reward = 2 * static_cast<int>(result);
 			const auto delta = reward - update_z_and_evaluate_prev_after_state();
-			_func_ptr->net().update(_z, -_settings_ptr->get_learning_rate() * delta, 0.0);
+			_net_ptr->update(_z, -_settings_ptr->get_learning_rate() * delta, 0.0);
 		}
 
 		reset();
+
+		deactivate();
+	}
+
+	bool TdLambdaSubAgent::semi_equal(const TdLambdaSubAgent& another_sub_agent) const
+	{
+		return _z == another_sub_agent._z &&
+			_prev_state == another_sub_agent._prev_state &&
+			_prev_afterstate == another_sub_agent._prev_afterstate;
 	}
 }

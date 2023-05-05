@@ -22,43 +22,34 @@
 namespace TrainingCell::Checkers
 {
 	/// <summary>
-	/// Interface to access afterstate function
+	/// Enumerates auto training modes
 	/// </summary>
-	class AfterStateValueFunction
+	enum class AutoTrainingSubMode : int
 	{
-	public:
-		/// <summary>
-		///	Virtual destructor
-		/// </summary>
-		virtual ~AfterStateValueFunction() = default;
-
-	private:
-		friend class TdLambdaSubAgent;
-		/// <summary>
-		/// Access to the neural net 
-		/// </summary>
-		virtual DeepLearning::Net<DeepLearning::CpuDC>& net() = 0;
+		//No training
+		NONE = 0,
+		//Training only while playing white pieces
+		WHITE_ONLY = 1,
+		//Training only when playing black pieces
+		BLACK_ONLY = 1 << 1,
+		//Training when playing either black or white pieces (possibly simultaneously)
+		FULL = WHITE_ONLY | BLACK_ONLY,
 	};
 
 	/// <summary>
 	/// Self-training capable TD(lambda) agent
 	/// </summary>
-	class TdLambdaAutoAgent : virtual public TdlAbstractAgent, virtual public AfterStateValueFunction
+	class TdLambdaAutoAgent : virtual public TdlAbstractAgent
 	{
-		/// <summary>
-		/// Access to the neural net 
-		/// </summary>
-		DeepLearning::Net<DeepLearning::CpuDC>& net() override;
-
 		/// <summary>
 		/// The "white" sub-agent
 		/// </summary>
-		TdLambdaSubAgent _white_sub_agent_ptr{this, this};
+		TdLambdaSubAgent _white_sub_agent{};
 
 		/// <summary>
 		/// The "black" sub-agent
 		/// </summary>
-		TdLambdaSubAgent _black_sub_agent_ptr{ this, this };
+		TdLambdaSubAgent _black_sub_agent{};
 
 	public:
 
@@ -67,7 +58,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Default constructor
 		/// </summary>
-		TdLambdaAutoAgent();
+		TdLambdaAutoAgent() = default;
 
 		/// <summary>Constructor</summary>
 		/// <param name="layer_dimensions">Dimensions of the layers of the neural net that will serve as "afterstate value function".
@@ -108,6 +99,33 @@ namespace TrainingCell::Checkers
 		/// property because the later can throw exception (as not applicable)
 		/// </summary>
 		[[nodiscard]] bool can_train() const override;
+
+		/// <summary>
+		/// Returns true if the current agent is equal to the given one
+		/// </summary>
+		[[nodiscard]] bool equal(const Agent& agent) const override;
+
+		/// <summary>
+		/// Equality operator
+		/// </summary>
+		bool operator == (const TdLambdaAutoAgent& another_agent) const;
+
+		/// <summary>
+		/// Inequality operator
+		/// </summary>
+		bool operator != (const TdLambdaAutoAgent& another_agent) const;
+
+		/// <summary>
+		/// Serializes the current instance of the agent into the "message-pack" format and saves it
+		/// to the given file. Trows exception if fails.
+		/// </summary>
+		void save_to_file(const std::filesystem::path& file_path) const;
+
+		/// <summary>
+		/// Instantiates agent from the given "message-pack" file.
+		/// Throws exception if fails.
+		/// </summary>
+		static TdLambdaAutoAgent load_from_file(const std::filesystem::path& file_path);
 	};
 
 }

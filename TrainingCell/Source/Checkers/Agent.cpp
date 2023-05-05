@@ -69,4 +69,9 @@ namespace TrainingCell::Checkers
 
 		return _record_book[record_id];
 	}
+
+	const std::vector<std::string>& Agent::get_record_book() const
+	{
+		return _record_book;
+	}
 }
