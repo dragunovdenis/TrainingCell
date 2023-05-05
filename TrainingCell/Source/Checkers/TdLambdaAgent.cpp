@@ -58,7 +58,7 @@ namespace TrainingCell::Checkers
 
 			for (auto layer_id = 0ull; layer_id < gradient.size(); ++layer_id)
 			{
-				gradient[layer_id] += _z[layer_id] * _lambda * _gamma;
+				gradient[layer_id].add_scaled(_z[layer_id], _lambda * _gamma);
 				_z[layer_id] = std::move(gradient[layer_id]);
 			}
 		}
