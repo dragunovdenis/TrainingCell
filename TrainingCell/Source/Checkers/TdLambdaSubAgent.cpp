@@ -80,10 +80,7 @@ namespace TrainingCell::Checkers
 			const auto lambda_times_gamma = _settings_ptr->get_lambda() * _settings_ptr->get_discount();
 
 			for (auto layer_id = 0ull; layer_id < gradient.size(); ++layer_id)
-			{
-				gradient[layer_id].add_scaled(_z[layer_id], lambda_times_gamma);
-				_z[layer_id] = std::move(gradient[layer_id]);
-			}
+				_z[layer_id].scale_and_add(lambda_times_gamma, gradient[layer_id]);
 		}
 
 		return std::get<1>(calc_result)(0, 0, 0);
