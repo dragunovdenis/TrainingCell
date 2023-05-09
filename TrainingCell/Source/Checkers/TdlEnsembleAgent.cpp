@@ -18,6 +18,7 @@
 #include "../../Headers/Checkers/TdlEnsembleAgent.h"
 #include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
+#include "../../Headers/Checkers/TdlLegacyMsgPackAdapter.h"
 
 namespace TrainingCell::Checkers
 {
@@ -82,12 +83,12 @@ namespace TrainingCell::Checkers
 			return 0; // the choice is obvious
 
 		if (is_single_agent_mode())
-			return _ensemble[_chosen_agent_id].pick_move_id(current_state, moves);
+			return _ensemble[_chosen_agent_id].pick_move_id(current_state, moves, as_white);
 
 		std::vector votes(moves.size(), 0);
 
 		for (const auto& a : _ensemble)
-			++votes[a.pick_move_id(current_state, moves)];
+			++votes[a.pick_move_id(current_state, moves, as_white)];
 
 		return static_cast<int>(std::distance(votes.begin(), std::ranges::max_element(votes)));
 	}
@@ -112,9 +113,64 @@ namespace TrainingCell::Checkers
 		DeepLearning::MsgPack::save_to_file(*this, file_path);
 	}
 
+	namespace
+	{
+		/// <summary>
+		/// A dummy class to be able to load "legacy" version opf the ensemble from MessagePack stream
+		/// </summary>
+		class TdlEnsembleLegacyMsgPackAdapter : public Agent
+		{
+		public:
+			TdlEnsembleLegacyMsgPackAdapter() = default;
+			std::vector<TdlLegacyMsgPackAdapter> _ensemble{};
+			int _chosen_agent_id = -1;
+			MSGPACK_DEFINE(MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id);
+
+			int make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white) override
+			{
+				throw std::exception("Not implemented");
+			};
+
+			void game_over(const State& final_state, const GameResult& result, const bool as_white) override
+			{
+				throw std::exception("Not implemented");
+			}
+
+			[[nodiscard]] AgentTypeId get_type_id() const override
+			{
+				throw std::exception("Not implemented");
+			}
+
+			[[nodiscard]] bool can_train() const override
+			{
+				throw std::exception("Not implemented");
+			}
+		};
+	}
+
 	TdlEnsembleAgent TdlEnsembleAgent::load_from_file(const std::filesystem::path& file_path)
 	{
-		return DeepLearning::MsgPack::load_from_file<TdlEnsembleAgent>(file_path);
+		try
+		{
+			return DeepLearning::MsgPack::load_from_file<TdlEnsembleAgent>(file_path);
+		} catch (...)
+		{
+			const auto legacy_container = DeepLearning::MsgPack::load_from_file<TdlEnsembleLegacyMsgPackAdapter>(file_path);
+
+			TdlEnsembleAgent result{};
+
+			result._ensemble.reserve(legacy_container._ensemble.size());
+			std::ranges::transform(legacy_container._ensemble, std::back_inserter(result._ensemble),
+				[](const auto& legacy_agent)
+				{
+					return TdLambdaAgent(legacy_agent);
+				});
+
+			result._chosen_agent_id = legacy_container._chosen_agent_id;
+			static_cast<Agent&>(result) = static_cast<const Agent&>(legacy_container);
+
+			return result;
+		}
 	}
 
 	bool TdlEnsembleAgent::operator == (const TdlEnsembleAgent& anotherAgent) const
@@ -142,6 +198,7 @@ namespace TrainingCell::Checkers
 		const auto other_ensemble_ptr = dynamic_cast<const TdlEnsembleAgent*>(&agent);
 		return other_ensemble_ptr != nullptr && Agent::equal(agent) &&
 			_ensemble == other_ensemble_ptr->_ensemble &&
-			_chosen_agent_id == other_ensemble_ptr->_chosen_agent_id;
+			_chosen_agent_id == other_ensemble_ptr->_chosen_agent_id &&
+			_msg_pack_version == other_ensemble_ptr->_msg_pack_version;
 	}
 }

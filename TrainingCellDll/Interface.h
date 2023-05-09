@@ -16,9 +16,6 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../TrainingCell/Headers/Checkers/RandomAgent.h"
-#include "../TrainingCell/Headers/Checkers/InteractiveAgent.h"
-#include "../TrainingCell/Headers/Checkers/TdLambdaAgent.h"
 #include "../TrainingCell/Headers/Checkers/Board.h"
 
 #ifdef TRAINING_CELL_EXPORTS
@@ -31,6 +28,10 @@ namespace TrainingCell
 {
 	namespace Checkers
 	{
+		class InteractiveAgent;
+		class RandomAgent;
+		class TdLambdaAgent;
+		class TdlEnsembleAgent;
 		class AgentPack;
 	}
 }

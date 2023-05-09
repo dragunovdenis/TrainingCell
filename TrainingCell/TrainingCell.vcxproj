@@ -23,9 +23,9 @@
     <ClInclude Include="Headers\Checkers\RandomAgent.h" />
     <ClInclude Include="Headers\Checkers\TdlAbstractAgent.h" />
     <ClInclude Include="Headers\Checkers\TdLambdaAgent.h" />
-    <ClInclude Include="Headers\Checkers\TdLambdaAutoAgent.h" />
     <ClInclude Include="Headers\Checkers\TdLambdaSubAgent.h" />
     <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h" />
+    <ClInclude Include="Headers\Checkers\TdlLegacyMsgPackAdapter.h" />
     <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
     <ClInclude Include="Headers\Checkers\State.h" />
   </ItemGroup>
@@ -38,7 +38,6 @@
     <ClCompile Include="Source\Checkers\RandomAgent.cpp" />
     <ClCompile Include="Source\Checkers\TdlAbstractAgent.cpp" />
     <ClCompile Include="Source\Checkers\TdLambdaAgent.cpp" />
-    <ClCompile Include="Source\Checkers\TdLambdaAutoAgent.cpp" />
     <ClCompile Include="Source\Checkers\TdLambdaSubAgent.cpp" />
     <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp" />
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />

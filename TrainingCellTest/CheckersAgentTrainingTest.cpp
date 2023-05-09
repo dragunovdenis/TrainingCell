@@ -20,7 +20,6 @@
 #include "../TrainingCell/Headers/Checkers/Agent.h"
 #include "../TrainingCell/Headers/Checkers/RandomAgent.h"
 #include "../TrainingCell/Headers/Checkers/TdLambdaAgent.h"
-#include "../TrainingCell/Headers/Checkers/TdLambdaAutoAgent.h"
 #include "../TrainingCell/Headers/Checkers/TdlEnsembleAgent.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include <ppl.h>
@@ -46,11 +45,10 @@ namespace TrainingCellTest
 		/// <summary>
 		/// Run "standard" training of a TD(lambda) agent
 		/// </summary>
-		template <class A>
-		static A train_agent_standard(const int episodes_with_exploration = 5000, const TrainingMode mode = TrainingMode::BLACK)
+		static TdLambdaAgent train_agent_standard(const int episodes_with_exploration = 5000, const TrainingMode mode = TrainingMode::BLACK)
 		{
 			RandomAgent agent0;
-			A result({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.15, 0.97, 0.025);
+			TdLambdaAgent result({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.15, 0.97, 0.025);
 			train_agent_standard(result, episodes_with_exploration, mode);
 
 			return result;
@@ -59,8 +57,7 @@ namespace TrainingCellTest
 		/// <summary>
 		/// Run "standard" training of a TD(lambda) agent
 		/// </summary>
-		template <class A>
-		static void train_agent_standard(A& agent_to_train, const int episodes_with_exploration, const TrainingMode mode)
+		static void train_agent_standard(TdLambdaAgent& agent_to_train, const int episodes_with_exploration, const TrainingMode mode)
 		{
 			RandomAgent r_agent;
 			auto board = mode == TrainingMode::WHITE ? Board(&agent_to_train, &r_agent) : ((mode == TrainingMode::BLACK) ?
@@ -111,7 +108,7 @@ namespace TrainingCellTest
 					if (result.size() >= number_of_agents_in_ensemble)
 						return;
 
-					auto agent = train_agent_standard<TdLambdaAgent>(episodes_with_exploration);
+					auto agent = train_agent_standard(episodes_with_exploration);
 					agent.set_training_mode(false);
 
 					if (result.size() >= number_of_agents_in_ensemble)
@@ -147,19 +144,10 @@ namespace TrainingCellTest
 		}
 
 	public:
-		
-		TEST_METHOD(TdLambdaAgentTraining)
-		{
-			auto agent = train_agent_standard<TdLambdaAgent>(5000, TrainingMode::BLACK);
-			agent.set_training_mode(false);
-
-			//Assert
-			assess_performance(agent, 0.95);
-		}
 
 		TEST_METHOD(TdLambdaAutoAgentAsBlackTraining)
 		{
-			auto agent = train_agent_standard<TdLambdaAutoAgent>(5000, TrainingMode::BLACK);
+			auto agent = train_agent_standard(5000, TrainingMode::BLACK);
 			agent.set_training_mode(false);
 
 			//Assert
@@ -168,7 +156,7 @@ namespace TrainingCellTest
 
 		TEST_METHOD(TdLambdaAutoAgentAsWhiteTraining)
 		{
-			auto agent = train_agent_standard<TdLambdaAutoAgent>(5000, TrainingMode::WHITE);
+			auto agent = train_agent_standard(5000, TrainingMode::WHITE);
 			agent.set_training_mode(false);
 
 			//Assert
@@ -177,7 +165,7 @@ namespace TrainingCellTest
 
 		TEST_METHOD(TdLambdaAutoAgentTraining)
 		{
-			auto agent = train_agent_standard<TdLambdaAutoAgent>(5000, TrainingMode::BOTH);
+			auto agent = train_agent_standard(5000, TrainingMode::BOTH);
 			agent.set_training_mode(false);
 
 			//Assert

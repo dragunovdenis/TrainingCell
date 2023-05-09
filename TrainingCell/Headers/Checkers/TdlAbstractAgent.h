@@ -87,7 +87,7 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	/// General interface of TD(lambda) agent
 	/// </summary>
-	class TdlAbstractAgent : virtual public Agent, virtual public TdlSettingsReadOnly
+	class TdlAbstractAgent : public Agent, public TdlSettingsReadOnly
 	{
 	protected:
 		/// <summary>

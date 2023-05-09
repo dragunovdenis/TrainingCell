@@ -16,152 +16,61 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../../Headers/Checkers/TdLambdaAgent.h"
+#include "../../Headers/Checkers/TdLambdaSubAgent.h"
 #include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
-#include <nlohmann/json.hpp>
+#include "../../Headers/Checkers/TdlLegacyMsgPackAdapter.h"
 
 namespace TrainingCell::Checkers
 {
-	void TdLambdaAgent::reset()
+	TdLambdaAgent::TdLambdaAgent(const TdlLegacyMsgPackAdapter& legacyContainer)
 	{
-		_new_game = true;
-		_z.clear();
-	}
-
-	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
-	{
-		if (_training_mode)
-		{
-			const auto reward = 2 * static_cast<int>(result);
-			const auto delta = reward - update_z_and_evaluate_prev_after_state();
-			_net.update(_z, -_alpha * delta, 0.0);
-		}
-
-		reset();
-	}
-
-	double TdLambdaAgent::update_z_and_evaluate_prev_after_state()
-	{
-		auto calc_result = _net.calc_gradient_and_value(_prev_afterstate.to_tensor(),
-			DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
-
-		auto& gradient = std::get<0>(calc_result);
-
-		if (_z.empty())
-		{
-			_z = std::move(gradient);
-		}
-		else
-		{
-			if (gradient.size() != _z.size())
-				throw std::exception("Incompatible data");
-
-			for (auto layer_id = 0ull; layer_id < gradient.size(); ++layer_id)
-				_z[layer_id].scale_and_add(_lambda * _gamma, gradient[layer_id]);
-		}
-
-		return std::get<1>(calc_result)(0, 0, 0);
-	}
-
-	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
-	{
-		if (!_training_mode)
-			return pick_move_id(current_state, moves);
-
-		const auto move_data = pick_move(current_state, moves);
-
-		if (_new_game)
-		{
-			_prev_afterstate = move_data.after_state;
-			_prev_state = current_state;
-			_new_game = false;
-			return move_data.move_id;
-		}
-
-		const auto reward = get_reward_factor() * Utils::calculate_reward(_prev_state, current_state);
-
-		const auto prev_afterstate_value = update_z_and_evaluate_prev_after_state();
-		const auto delta = reward + _gamma * move_data.value - prev_afterstate_value;
-
-		_net.update(_z, -_alpha * delta, 0.0);
-
-		_prev_afterstate = move_data.after_state;
-		_prev_state = current_state;
-
-		return move_data.move_id;
-	}
-
-	int TdLambdaAgent::pick_move_id(const State& state, const std::vector<Move>& moves) const
-	{
-		return pick_move(state, moves).move_id;
-	}
-
-	MoveData TdLambdaAgent::evaluate(const State& state, const std::vector<Move>& moves, const int move_id) const
-	{
-		auto afterstate = state;
-		afterstate.make_move(moves[move_id], true, false);
-		const auto value = _net.act(afterstate.to_tensor())(0, 0, 0);
-		return { move_id,  value, afterstate };
-	}
-
-	MoveData TdLambdaAgent::pick_move(const State& state, const std::vector<Move>& moves) const
-	{
-		if (moves.empty())
-			return { -1 };
-
-		if (_training_mode && DeepLearning::Utils::get_random(0, 1.0) <= _exploration_epsilon)
-			return evaluate(state, moves, DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1));
-
-		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() };
-
-		for (auto move_id = 0ull; move_id < moves.size(); ++move_id)
-		{
-			const auto trial_move_data = evaluate(state, moves, static_cast<int>(move_id));
-
-			if (trial_move_data.value > best_move_data.value)
-				best_move_data = trial_move_data;
-		}
-
-		if (best_move_data.move_id < 0)
-			throw std::exception((get_name() + ": neural network is NaN. Try decreasing learning rate parameter.").c_str());
-
-		return best_move_data;
+		_net = DeepLearning::Net<DeepLearning::CpuDC>(legacyContainer._net);
+		_lambda = legacyContainer._lambda;
+		_gamma = legacyContainer._gamma;
+		_alpha = legacyContainer._alpha;
+		_exploration_epsilon = legacyContainer._exploration_epsilon;
+		_training_mode = legacyContainer._training_mode;
+		_reward_factor = legacyContainer._reward_factor;
+		static_cast<Agent&>(*this) = static_cast<const Agent&>(legacyContainer);
 	}
 
 	TdLambdaAgent::TdLambdaAgent(const std::string& script_str)
 	{
-		assign(script_str, /*hyper_params_only*/ false);
+		assign(script_str, /*hyper-params only*/false);
 	}
 
 	void TdLambdaAgent::assign_hyperparams(const std::string& script_str)
 	{
-		assign(script_str, /*hyper_params_only*/ true);
+		assign(script_str, /*hyper-params only*/true);
 	}
 
-	TdLambdaAgent::TdLambdaAgent(
-		const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-		const double lambda, const double gamma, const double alpha, const std::string& name) :
-		TdlAbstractAgent(layer_dimensions, exploration_epsilon, lambda, gamma, alpha, name)
+	TdLambdaAgent::TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions,
+	                             const double exploration_epsilon, const double lambda, const double gamma, const double alpha,
+	                             const std::string& name) : TdlAbstractAgent(layer_dimensions, exploration_epsilon, lambda, gamma, alpha, name)
 	{}
 
-	bool TdLambdaAgent::operator ==(const TdLambdaAgent& anotherAgent) const
+	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
-		return equal(anotherAgent);
+		if (as_white)
+			return _white_sub_agent.make_move(current_state, moves, *this, _net);
+
+		return _black_sub_agent.make_move(current_state, moves, *this, _net);
 	}
 
-	bool TdLambdaAgent::operator !=(const TdLambdaAgent& anotherAgent) const
+	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
 	{
-		return !(*this == anotherAgent);
+		if (as_white)
+			return _white_sub_agent.game_over(final_state, result, *this, _net);
+
+		return _black_sub_agent.game_over(final_state, result, *this, _net);
 	}
 
-	void TdLambdaAgent::save_to_file(const std::filesystem::path& file_path) const
+	int TdLambdaAgent::pick_move_id(const State& current_state, const std::vector<Move>& moves, const bool as_white) const
 	{
-		DeepLearning::MsgPack::save_to_file(*this, file_path);
-	}
+		if (as_white)
+			return TdLambdaSubAgent::pick_move_id(current_state, moves, *this, _net);
 
-	TdLambdaAgent TdLambdaAgent::load_from_file(const std::filesystem::path& file_path)
-	{
-		return DeepLearning::MsgPack::load_from_file<TdLambdaAgent>(file_path);
+		return TdLambdaSubAgent::pick_move_id(current_state, moves, *this, _net);
 	}
 
 	AgentTypeId TdLambdaAgent::TYPE_ID()
@@ -181,11 +90,36 @@ namespace TrainingCell::Checkers
 
 	bool TdLambdaAgent::equal(const Agent& agent) const
 	{
-		const auto other_agent_ptr = dynamic_cast<const TdLambdaAgent*>(&agent);
-		return other_agent_ptr != nullptr && TdlAbstractAgent::equal(agent) &&
-			_z == other_agent_ptr->_z &&
-			_prev_state == other_agent_ptr->_prev_state &&
-			_prev_afterstate == other_agent_ptr->_prev_afterstate &&
-			_new_game == other_agent_ptr->_new_game;
+		const auto agent_ptr = dynamic_cast<const TdLambdaAgent*>(&agent);
+		return agent_ptr != nullptr && TdlAbstractAgent::equal(agent) &&
+			_msg_pack_version == agent_ptr->_msg_pack_version;
+	}
+
+	bool TdLambdaAgent::operator==(const TdLambdaAgent& another_agent) const
+	{
+		return equal(another_agent);
+	}
+
+	bool TdLambdaAgent::operator!=(const TdLambdaAgent& another_agent) const
+	{
+		return !(*this == another_agent);
+	}
+
+	void TdLambdaAgent::save_to_file(const std::filesystem::path& file_path) const
+	{
+		DeepLearning::MsgPack::save_to_file(*this, file_path);
+	}
+
+	TdLambdaAgent TdLambdaAgent::load_from_file(const std::filesystem::path& file_path)
+	{
+		try
+		{
+			return DeepLearning::MsgPack::load_from_file<TdLambdaAgent>(file_path);
+		} catch (...)
+		{
+			//Try load to the legacy container
+			const auto legacy_container = DeepLearning::MsgPack::load_from_file<TdlLegacyMsgPackAdapter>(file_path);
+			return TdLambdaAgent(legacy_container);
+		}
 	}
 }

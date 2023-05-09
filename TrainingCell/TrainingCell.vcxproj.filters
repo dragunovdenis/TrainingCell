@@ -19,10 +19,10 @@
     <Filter Include="Source Files\Checkers">
       <UniqueIdentifier>{753f16b3-380a-4bae-a7c2-a105d6c3e84a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Checkers\AutoTraining">
+    <Filter Include="Header Files\Checkers\TDL">
       <UniqueIdentifier>{d4c82825-52eb-4fee-98ec-dac3304fff64}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Checkers\AutoTraining">
+    <Filter Include="Source Files\Checkers\TDL">
       <UniqueIdentifier>{8dca9af0-2988-407c-94f0-bb3e709f17c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -45,26 +45,26 @@
     <ClInclude Include="Headers\Checkers\InteractiveAgent.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdLambdaAgent.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\Checkers\TrainingEngine.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Checkers\AgentTypeId.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdlAbstractAgent.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdLambdaAutoAgent.h">
-      <Filter>Header Files\Checkers\AutoTraining</Filter>
+    <ClInclude Include="Headers\Checkers\TdLambdaAgent.h">
+      <Filter>Header Files\Checkers\TDL</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Checkers\TdLambdaSubAgent.h">
-      <Filter>Header Files\Checkers\AutoTraining</Filter>
+      <Filter>Header Files\Checkers\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\TdlAbstractAgent.h">
+      <Filter>Header Files\Checkers\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\TdlLegacyMsgPackAdapter.h">
+      <Filter>Header Files\Checkers\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h">
+      <Filter>Header Files\Checkers\TDL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -86,26 +86,23 @@
     <ClCompile Include="Source\Checkers\InteractiveAgent.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Checkers\TdLambdaAgent.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\AgentTypeId.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Checkers\TdLambdaAutoAgent.cpp">
-      <Filter>Source Files\Checkers\AutoTraining</Filter>
+    <ClCompile Include="Source\Checkers\TdLambdaAgent.cpp">
+      <Filter>Source Files\Checkers\TDL</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\TdLambdaSubAgent.cpp">
-      <Filter>Source Files\Checkers\AutoTraining</Filter>
+      <Filter>Source Files\Checkers\TDL</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\TdlAbstractAgent.cpp">
-      <Filter>Source Files\Checkers</Filter>
+      <Filter>Source Files\Checkers\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp">
+      <Filter>Source Files\Checkers\TDL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

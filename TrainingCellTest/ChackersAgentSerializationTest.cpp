@@ -62,11 +62,13 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentSerialization)
 		{
 			//Arrange
-			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11);
+			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "some_name");
+			agent.set_reward_factor(0.375);
 			auto state = State::get_start_state();
+
 			//Do some number of iterations but not call "game over" method so that all
 			//the auxiliary data of the agent is nontrivial
-			const int iter_count = 10;
+			constexpr int iter_count = 10;
 			for (auto iter_id = 0; iter_id < iter_count; ++iter_id)
 			{
 				const auto moves = state.get_moves();

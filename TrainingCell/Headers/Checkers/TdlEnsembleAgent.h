@@ -38,13 +38,18 @@ namespace TrainingCell::Checkers
 		int _chosen_agent_id = -1;
 
 		/// <summary>
+		/// Field to track version of the container and facilitate backward compatibility if needed
+		/// </summary>
+		int _msg_pack_version = 1;
+
+		/// <summary>
 		/// Returns "true" if we are in a mode when only one, "chosen", agent from the collection
 		/// is used to infer moves
 		/// </summary>
 		[[nodiscard]] bool is_single_agent_mode() const;
 
 	public:
-		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id);
+		MSGPACK_DEFINE(_msg_pack_version, MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id);
 
 		/// <summary>
 		/// Default constructor

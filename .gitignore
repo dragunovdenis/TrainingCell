@@ -65,3 +65,4 @@ Debug/
 packages/
 *.user
 Monitor/obj/
+Monitor/Properties/launchSettings.json

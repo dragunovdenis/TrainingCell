@@ -17,6 +17,8 @@
 
 #include "Interface.h"
 #include "../TrainingCell/Headers/Checkers/AgentPack.h"
+#include "../TrainingCell/Headers/Checkers/RandomAgent.h"
+#include "../TrainingCell/Headers/Checkers/InteractiveAgent.h"
 
 namespace
 {

@@ -27,10 +27,6 @@ namespace TrainingCell::Checkers
 	/// </summary>
 	class TdLambdaSubAgent
 	{
-		const TdlSettingsReadOnly* _settings_ptr{};
-
-		DeepLearning::Net<DeepLearning::CpuDC>* _net_ptr{};
-
 		/// <summary>
 		/// A flag indicating that we are about to start new game
 		/// </summary>
@@ -52,39 +48,26 @@ namespace TrainingCell::Checkers
 		State _prev_afterstate{};
 
 		/// <summary>
-		/// Returns id of a move to take
-		/// </summary>
-		[[nodiscard]] int pick_move_id(const State& state, const std::vector<Move>& moves) const;
-
-		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
-		[[nodiscard]] MoveData pick_move(const State& state, const std::vector<Move>& moves) const;
+		[[nodiscard]] static MoveData pick_move(const State& state, const std::vector<Move>& moves,
+			const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		/// Calculates afterstate and its value
 		/// </summary>
-		[[nodiscard]] MoveData evaluate(const State& state, const std::vector<Move>& moves, const int move_id) const;
+		[[nodiscard]] static MoveData evaluate(const State& state, const std::vector<Move>& moves, const int move_id,
+			const DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		/// Updates "z" field and returns value of the afterstate value function at the "previous afterstate"
 		/// </summary>
-		double update_z_and_evaluate_prev_after_state();
+		double update_z_and_evaluate_prev_after_state(const TdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		///	Resets training state of the object which is an obligatory procedure to start new episode
 		/// </summary>
 		void reset();
-
-		/// <summary>
-		/// Assigns the given pointers to the corresponding fields
-		/// </summary>
-		void activate(const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr);
-
-		/// <summary>
-		/// Resets the corresponding pointer fields
-		/// </summary>
-		void deactivate();
 
 	public:
 		/// <summary>
@@ -97,19 +80,24 @@ namespace TrainingCell::Checkers
 		/// that the agent wants to take given the current state
 		/// </summary>
 		int make_move(const State& current_state, const std::vector<Move>& moves,
-			const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr);
+			const TdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
 		void game_over(const State& final_state, const GameResult& result,
-			const TdlSettingsReadOnly* settings_ptr, DeepLearning::Net<DeepLearning::CpuDC>* const net_ptr);
+			const TdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
+
+		/// <summary>
+		/// Returns index of the picked move and the related data
+		/// </summary>
+		[[nodiscard]] static int pick_move_id(const State& state, const std::vector<Move>& moves,
+			const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		/// Returns true if the current sub-agent is equal to the given sub-agent
-		/// disregarding their pointer fields
 		/// </summary>
-		[[nodiscard]] bool semi_equal(const TdLambdaSubAgent& another_sub_agent) const;
+		[[nodiscard]] bool equal(const TdLambdaSubAgent& another_sub_agent) const;
 	};
 }
