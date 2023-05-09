@@ -117,6 +117,11 @@ namespace TrainingCell::Checkers
 		/// Returns constant reference to the entire record book of the agent
 		/// </summary>
 		[[nodiscard]] const std::vector<std::string>& get_record_book() const;
+
+		/// <summary>
+		/// Returns smart pointer to a clone of the current instance
+		/// </summary>
+		[[nodiscard]] virtual std::unique_ptr<Agent> clone() const;
 	};
 }
 

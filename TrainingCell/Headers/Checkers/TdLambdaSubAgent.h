@@ -28,6 +28,11 @@ namespace TrainingCell::Checkers
 	class TdLambdaSubAgent
 	{
 		/// <summary>
+		/// A flag that should be set depending on the "color of pieces" the agent is playing
+		/// </summary>
+		const bool _is_white{false};
+
+		/// <summary>
 		/// A flag indicating that we are about to start new game
 		/// </summary>
 		bool _new_game{true};
@@ -50,8 +55,8 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
-		[[nodiscard]] static MoveData pick_move(const State& state, const std::vector<Move>& moves,
-			const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net);
+		[[nodiscard]] MoveData pick_move(const State& state, const std::vector<Move>& moves,
+			const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const;
 
 		/// <summary>
 		/// Calculates afterstate and its value
@@ -73,7 +78,12 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Default constructor
 		/// </summary>
-		TdLambdaSubAgent() = default;
+		TdLambdaSubAgent() = delete;
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		TdLambdaSubAgent(const bool is_white);
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
@@ -92,8 +102,8 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
-		[[nodiscard]] static int pick_move_id(const State& state, const std::vector<Move>& moves,
-			const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net);
+		[[nodiscard]] int pick_move_id(const State& state, const std::vector<Move>& moves,
+			const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const;
 
 		/// <summary>
 		/// Returns true if the current sub-agent is equal to the given sub-agent

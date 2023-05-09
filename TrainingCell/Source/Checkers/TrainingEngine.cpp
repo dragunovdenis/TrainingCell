@@ -62,23 +62,22 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(Agent& agent, const int episodes_to_play,
+	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(const Agent& agent, const int episodes_to_play,
 		const int round_id, const double draw_percentage)
 	{
-		agent.set_training_mode(false);
+		const auto agent_clone = agent.clone();
+		agent_clone->set_training_mode(false);
 
 		const auto factor = 1.0 / episodes_to_play;
 		RandomAgent random_agent{};
 
-		Board board(&agent, &random_agent);
+		Board board(agent_clone.get(), &random_agent);
 		board.play(episodes_to_play);
 		const auto white_wins = board.get_whites_wins() * factor;
 
 		board.swap_agents();
 		board.play(episodes_to_play);
 		const auto black_wins = board.get_blacks_wins() * factor;
-
-		agent.set_training_mode(true);
 
 		return  PerformanceRec{ round_id, white_wins, black_wins, draw_percentage };
 	}

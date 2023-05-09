@@ -29,7 +29,7 @@ namespace TrainingCell::Checkers
 		_gamma = legacyContainer._gamma;
 		_alpha = legacyContainer._alpha;
 		_exploration_epsilon = legacyContainer._exploration_epsilon;
-		_training_mode = legacyContainer._training_mode;
+		_training_sub_mode = training_mode_to_sub_mode(legacyContainer._training_mode);
 		_reward_factor = legacyContainer._reward_factor;
 		static_cast<Agent&>(*this) = static_cast<const Agent&>(legacyContainer);
 	}
@@ -51,26 +51,17 @@ namespace TrainingCell::Checkers
 
 	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
-		if (as_white)
-			return _white_sub_agent.make_move(current_state, moves, *this, _net);
-
-		return _black_sub_agent.make_move(current_state, moves, *this, _net);
+		return _sub_agents[as_white].make_move(current_state, moves, *this, _net);
 	}
 
 	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
 	{
-		if (as_white)
-			return _white_sub_agent.game_over(final_state, result, *this, _net);
-
-		return _black_sub_agent.game_over(final_state, result, *this, _net);
+		_sub_agents[as_white].game_over(final_state, result, *this, _net);
 	}
 
 	int TdLambdaAgent::pick_move_id(const State& current_state, const std::vector<Move>& moves, const bool as_white) const
 	{
-		if (as_white)
-			return TdLambdaSubAgent::pick_move_id(current_state, moves, *this, _net);
-
-		return TdLambdaSubAgent::pick_move_id(current_state, moves, *this, _net);
+		return _sub_agents[as_white].pick_move_id(current_state, moves, *this, _net);
 	}
 
 	AgentTypeId TdLambdaAgent::TYPE_ID()
@@ -119,7 +110,12 @@ namespace TrainingCell::Checkers
 		{
 			//Try load to the legacy container
 			const auto legacy_container = DeepLearning::MsgPack::load_from_file<TdlLegacyMsgPackAdapter>(file_path);
-			return TdLambdaAgent(legacy_container);
+			return { legacy_container };
 		}
+	}
+
+	std::unique_ptr<Agent> TdLambdaAgent::clone() const
+	{
+		return std::make_unique<TdLambdaAgent>(*this);
 	}
 }

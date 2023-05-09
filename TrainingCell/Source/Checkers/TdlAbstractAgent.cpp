@@ -21,6 +21,15 @@
 
 namespace TrainingCell::Checkers
 {
+	bool TdlAbstractAgent::get_training_mode(const bool is_white) const
+	{
+		if (_training_sub_mode == AutoTrainingSubMode::FULL)
+			return true;
+
+		return is_white ? _training_sub_mode == AutoTrainingSubMode::WHITE_ONLY :
+			_training_sub_mode == AutoTrainingSubMode::BLACK_ONLY;
+	}
+
 	void TdlAbstractAgent::initialize_net(const std::vector<std::size_t>& layer_dimensions)
 	{
 		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
@@ -81,7 +90,7 @@ namespace TrainingCell::Checkers
 			_exploration_epsilon = json[json_exploration_rate_id].get<double>();
 
 		if (json.contains(json_training_mode_id))
-			_training_mode = json[json_training_mode_id].get<bool>();
+			_training_sub_mode = json[json_training_mode_id].get<AutoTrainingSubMode>();
 
 		if (json.contains(json_reward_factor_id))
 			_reward_factor = json[json_reward_factor_id].get<double>();
@@ -97,7 +106,7 @@ namespace TrainingCell::Checkers
 		json[json_discount_id] = _gamma;
 		json[json_learning_rate_id] = _alpha;
 		json[json_exploration_rate_id] = _exploration_epsilon;
-		json[json_training_mode_id] = _training_mode;
+		json[json_training_mode_id] = _training_sub_mode;
 		json[json_reward_factor_id] = _reward_factor;
 
 		return json.dump();
@@ -108,7 +117,7 @@ namespace TrainingCell::Checkers
 		return _net.equal_hyperparams(anotherAgent._net) &&
 			get_name() == anotherAgent.get_name() &&
 			_exploration_epsilon == anotherAgent._exploration_epsilon &&
-			_training_mode == anotherAgent._training_mode &&
+			_training_sub_mode == anotherAgent._training_sub_mode &&
 			_lambda == anotherAgent._lambda &&
 			_gamma == anotherAgent._gamma &&
 			_alpha == anotherAgent._alpha;
@@ -124,7 +133,7 @@ namespace TrainingCell::Checkers
 			_alpha == other_agent_ptr->_alpha &&
 			_gamma == other_agent_ptr->_gamma &&
 			_lambda == other_agent_ptr->_lambda &&
-			_training_mode == other_agent_ptr->_training_mode &&
+			_training_sub_mode == other_agent_ptr->_training_sub_mode &&
 			_reward_factor == other_agent_ptr->_reward_factor;
 	}
 
@@ -156,14 +165,24 @@ namespace TrainingCell::Checkers
 		return _gamma;
 	}
 
+	AutoTrainingSubMode TdlAbstractAgent::training_mode_to_sub_mode(const bool training_mode)
+	{
+		return training_mode ? AutoTrainingSubMode::FULL : AutoTrainingSubMode::NONE;
+	}
+
 	void TdlAbstractAgent::set_training_mode(const bool training_mode)
 	{
-		_training_mode = training_mode;
+		_training_sub_mode = training_mode_to_sub_mode(training_mode);
 	}
 
 	bool TdlAbstractAgent::get_training_mode() const
 	{
-		return _training_mode;
+		return _training_sub_mode != AutoTrainingSubMode::NONE;
+	}
+
+	void TdlAbstractAgent::set_training_sub_mode(const AutoTrainingSubMode sub_mode)
+	{
+		_training_sub_mode = sub_mode;
 	}
 
 	void TdlAbstractAgent::set_reward_factor(const double reward_factor)

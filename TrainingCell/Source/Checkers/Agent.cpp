@@ -74,4 +74,9 @@ namespace TrainingCell::Checkers
 	{
 		return _record_book;
 	}
+
+	std::unique_ptr<Agent> Agent::clone() const
+	{
+		throw std::exception("Not implemented");
+	}
 }

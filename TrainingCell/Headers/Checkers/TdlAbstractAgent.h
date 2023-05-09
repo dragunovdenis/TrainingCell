@@ -53,14 +53,29 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] virtual double get_learning_rate() const = 0;
 
 		/// <summary>
-		/// Returns actual value of training mode
+		/// Returns actual value of training mode depending on the color of the pieces
 		/// </summary>
-		[[nodiscard]] virtual bool get_training_mode() const = 0;
+		[[nodiscard]] virtual bool get_training_mode(const bool as_white) const = 0;
 
 		/// <summary>
 		/// Returns the current value of "reward factor" parameter
 		/// </summary>
 		[[nodiscard]] virtual double get_reward_factor() const = 0;
+	};
+
+	/// <summary>
+	/// Enumerates auto training modes
+	/// </summary>
+	enum class AutoTrainingSubMode : int
+	{
+		//No training
+		NONE = 0,
+		//Training only when playing white pieces
+		WHITE_ONLY = 1,
+		//Training only when playing black pieces
+		BLACK_ONLY = 1 << 1,
+		//Training when playing either black or white pieces (possibly simultaneously)
+		FULL = WHITE_ONLY | BLACK_ONLY,
 	};
 
 	/// <summary>
@@ -120,7 +135,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Defines whether the agent is going to train while playing
 		/// </summary>
-		bool _training_mode = true;
+		AutoTrainingSubMode _training_sub_mode{ AutoTrainingSubMode ::FULL};
 
 		/// <summary>
 		/// Factor that is applied to the result of internal reward function during training
@@ -138,8 +153,13 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		void assign(const std::string& script_str, const bool hyper_params_only);
 
+		/// <summary>
+		/// Convertor from training mode to training sub-mode
+		/// </summary>
+		static AutoTrainingSubMode training_mode_to_sub_mode(const bool training_mode);
+
 	public:
-		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon, _training_mode, _lambda, _gamma, _alpha, _reward_factor)
+		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon, _training_sub_mode, _lambda, _gamma, _alpha, _reward_factor)
 
 		/// <summary>
 		/// Returns script representation of all the hyper-parameters of the agent
@@ -228,6 +248,16 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] bool get_training_mode() const override;
 
 		/// <summary>
+		/// Returns actual value of training sub-mode
+		/// </summary>
+		void set_training_sub_mode(const AutoTrainingSubMode sub_mode);
+
+		/// <summary>
+		/// Returns actual value of training mode depending on the color of the pieces
+		/// </summary>
+		[[nodiscard]] bool get_training_mode(const bool as_white) const override;
+
+		/// <summary>
 		/// Sets the "reward factor" parameters of the agent
 		/// </summary>
 		void set_reward_factor(const double reward_factor);
@@ -238,3 +268,5 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] double get_reward_factor() const override;
 	};
 }
+
+MSGPACK_ADD_ENUM(TrainingCell::Checkers::AutoTrainingSubMode)

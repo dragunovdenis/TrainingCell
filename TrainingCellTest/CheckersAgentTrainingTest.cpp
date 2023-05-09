@@ -45,10 +45,12 @@ namespace TrainingCellTest
 		/// <summary>
 		/// Run "standard" training of a TD(lambda) agent
 		/// </summary>
-		static TdLambdaAgent train_agent_standard(const int episodes_with_exploration = 5000, const TrainingMode mode = TrainingMode::BLACK)
+		static TdLambdaAgent train_agent_standard(const int episodes_with_exploration = 5000, const TrainingMode mode = TrainingMode::BLACK,
+			const AutoTrainingSubMode training_sub_mode = AutoTrainingSubMode::FULL )
 		{
 			RandomAgent agent0;
 			TdLambdaAgent result({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.15, 0.97, 0.025);
+			result.set_training_sub_mode(training_sub_mode);
 			train_agent_standard(result, episodes_with_exploration, mode);
 
 			return result;
@@ -74,8 +76,8 @@ namespace TrainingCellTest
 		/// Runs "standard" performance test of the given agent and
 		/// returns its success rate</summary>
 		/// <param name="agent">Agent to test. Notice it is the caller who should make
-		/// <param name="as_white">If "true" the agent will be tested while "playing white" pieces, otherwise, it will play for "black"</param>
 		/// sure that the agent is not in the "training mode" before passing it to the method</param>
+		/// <param name="as_white">If "true" the agent will be tested while "playing white" pieces, otherwise, it will play for "black"</param>
 		/// <returns>Percentage of wins when playing with "random" agent</returns>
 		static double standard_performance_test(Agent& agent, const bool as_white = false)
 		{
@@ -145,7 +147,7 @@ namespace TrainingCellTest
 
 	public:
 
-		TEST_METHOD(TdLambdaAutoAgentAsBlackTraining)
+		TEST_METHOD(TdLambdaAgentAsBlackTraining)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::BLACK);
 			agent.set_training_mode(false);
@@ -154,7 +156,7 @@ namespace TrainingCellTest
 			assess_performance(agent, 0.95);
 		}
 
-		TEST_METHOD(TdLambdaAutoAgentAsWhiteTraining)
+		TEST_METHOD(TdLambdaAgentAsWhiteTraining)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::WHITE);
 			agent.set_training_mode(false);
@@ -163,13 +165,31 @@ namespace TrainingCellTest
 			assess_performance(agent, 0.95);
 		}
 
-		TEST_METHOD(TdLambdaAutoAgentTraining)
+		TEST_METHOD(TdLambdaAgentAutoTraining)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::BOTH);
 			agent.set_training_mode(false);
 
 			//Assert
 			assess_performance(agent, 0.95);
+		}
+
+		TEST_METHOD(TdLambdaAgentAutoTrainingWhiteOnly)
+		{
+			auto agent = train_agent_standard(5000, TrainingMode::BOTH, AutoTrainingSubMode::WHITE_ONLY);
+			agent.set_training_mode(false);
+
+			//Assert
+			assess_performance(agent, 0.93);
+		}
+
+		TEST_METHOD(TdLambdaAgentAutoTrainingBlackOnly)
+		{
+			auto agent = train_agent_standard(5000, TrainingMode::BOTH, AutoTrainingSubMode::BLACK_ONLY);
+			agent.set_training_mode(false);
+
+			//Assert
+			assess_performance(agent, 0.93);
 		}
 
 		TEST_METHOD(EnsembleAgentTest)

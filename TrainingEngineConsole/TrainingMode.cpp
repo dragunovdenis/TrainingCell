@@ -95,12 +95,12 @@ namespace Training::Modes
 			}
 		}
 
-		std::vector<TrainingCell::Checkers::Agent*> agent_pointers;
+		std::vector<Agent*> agent_pointers;
 		agent_pointers.reserve(state.agents_count());
 		for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
 			agent_pointers.push_back(&state[agent_id]);
 
-		TrainingCell::Checkers::TrainingEngine engine(agent_pointers);
+		TrainingEngine engine(agent_pointers);
 		auto round_time_sum = 0ll; // to calculate average round time
 		std::queue<long long> round_time_queue;
 

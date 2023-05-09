@@ -24,21 +24,6 @@ namespace TrainingCell::Checkers
 	class TdlLegacyMsgPackAdapter;
 
 	/// <summary>
-	/// Enumerates auto training modes
-	/// </summary>
-	enum class AutoTrainingSubMode : int
-	{
-		//No training
-		NONE = 0,
-		//Training only while playing white pieces
-		WHITE_ONLY = 1,
-		//Training only when playing black pieces
-		BLACK_ONLY = 1 << 1,
-		//Training when playing either black or white pieces (possibly simultaneously)
-		FULL = WHITE_ONLY | BLACK_ONLY,
-	};
-
-	/// <summary>
 	/// Self-training capable TD(lambda) agent
 	/// </summary>
 	class TdLambdaAgent : public TdlAbstractAgent
@@ -49,14 +34,9 @@ namespace TrainingCell::Checkers
 		int _msg_pack_version = 1;
 
 		/// <summary>
-		/// The "white" sub-agent
+		/// Array of sub-agents (the first one "plays" black pieces and the second one "plays" white pieces)
 		/// </summary>
-		TdLambdaSubAgent _white_sub_agent{};
-
-		/// <summary>
-		/// The "black" sub-agent
-		/// </summary>
-		TdLambdaSubAgent _black_sub_agent{};
+		std::vector<TdLambdaSubAgent> _sub_agents{ TdLambdaSubAgent{false} , TdLambdaSubAgent{true} };
 
 	public:
 
@@ -153,6 +133,12 @@ namespace TrainingCell::Checkers
 		/// Throws exception if fails.
 		/// </summary>
 		static TdLambdaAgent load_from_file(const std::filesystem::path& file_path);
+
+		/// <summary>
+		/// Returns smart pointer to a clone of the current instance
+		/// </summary>
+		[[nodiscard]] std::unique_ptr<Agent> clone() const override;
+
 	};
 
 }
