@@ -82,19 +82,6 @@ namespace TrainingCell::Checkers
 		return  PerformanceRec{ round_id, white_wins, black_wins, draw_percentage };
 	}
 
-	/// <summary>
-	/// Adds training record for the given agent
-	/// </summary>
-	/// <param name="agent">Agent to add training record</param>
-	/// <param name="opponent">The "opponent" agent</param>
-	/// <param name="episodes_cnt">Number of training episodes</param>
-	/// <param name="trained_as_white">Set "true" if the agent was playing for "whites" during the training</param>
-	void add_training_record(Agent& agent, const Agent& opponent, const int episodes_cnt, const bool trained_as_white)
-	{
-		agent.add_record(std::format("White : {}; Opponent: {} ({}); episodes: {}", trained_as_white,
-			opponent.get_name(), opponent.get_id(), episodes_cnt));
-	}
-
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms,
 			const std::vector<PerformanceRec>& agent_performances)>& round_callback,
@@ -120,8 +107,6 @@ namespace TrainingCell::Checkers
 
 					Board board(agent_white_ptr, agent_black_ptr);
 					board.play(episodes_cnt);
-					add_training_record(*agent_white_ptr, *agent_black_ptr, episodes_cnt, true);
-					add_training_record(*agent_black_ptr, *agent_white_ptr, episodes_cnt, false);
 
 					const auto draw_percentage = (episodes_cnt - board.get_blacks_wins() - board.get_whites_wins()) * 1.0 / episodes_cnt;
 

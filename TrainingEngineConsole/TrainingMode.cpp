@@ -163,6 +163,9 @@ namespace Training::Modes
 
 			if (args.get_save_rounds() != 0 && (rounds_counter % args.get_save_rounds() == 0))
 				saver(std::format("Round_{}", rounds_counter));
+
+			constexpr auto bytes_in_megabyte = 1 << 20;
+			ConsoleUtils::print_to_console("Current memory usage (Mb): " + std::to_string(ConsoleUtils::get_phys_mem_usage() / bytes_in_megabyte));
 		};
 
 		engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,

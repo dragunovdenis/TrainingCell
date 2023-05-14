@@ -20,9 +20,19 @@
 #include "TrainingState.h"
 #include "fstream"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "windows.h"
+#include "psapi.h"
+
 
 namespace Training::ConsoleUtils
 {
+	std::size_t get_phys_mem_usage()
+	{
+		PROCESS_MEMORY_COUNTERS_EX pmc;
+		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+		return pmc.PrivateUsage;
+	}
+
 	void horizontal_console_separator()
 	{
 		print_to_console("=========================================");

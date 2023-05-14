@@ -27,6 +27,11 @@ namespace Training
 namespace Training::ConsoleUtils
 {
 	/// <summary>
+	/// Returns amount of physical memory in bytes used by the current process at the moment of call
+	/// </summary>
+	std::size_t get_phys_mem_usage();
+
+	/// <summary>
 	/// Writes a "horizontal separator" to console
 	/// </summary>
 	void horizontal_console_separator();
