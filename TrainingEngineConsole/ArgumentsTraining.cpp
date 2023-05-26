@@ -17,8 +17,6 @@
 
 #include "ArgumentsTraining.h"
 #include <tclap/CmdLine.h>
-#include <fstream>
-#include <sstream>
 #include "ConsoleUtils.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
 
@@ -40,6 +38,7 @@ namespace Training::Modes
 		str += std::to_string(_dump_rounds);
 		str += DeepLearning::Utils::to_upper_case(_output_folder.string());
 		str += std::to_string(_fixed_pairs);
+		str += std::to_string(_auto_training);
 
 		return DeepLearning::Utils::get_hash_as_hex_str(str);
 	}
@@ -102,6 +101,10 @@ namespace Training::Modes
 			"Flag determining if agent pairs are kept fixed during all the training", false, false, "boolean");
 		cmd.add(fixed_pairs_arg);
 
+		auto auto_training_arg = TCLAP::ValueArg<bool>("", "auto_training",
+			"Flag determining if agent will be trained in self-playing mode", false, false, "boolean");
+		cmd.add(auto_training_arg);
+
 		auto dump_rounds_arg = TCLAP::ValueArg<unsigned int>("", "dump_rounds",
 			"Number of rounds after which state should be dumped to disk", false, 0, "unsigned int");
 		cmd.add(dump_rounds_arg);
@@ -147,6 +150,8 @@ namespace Training::Modes
 
 		_fixed_pairs = fixed_pairs_arg.getValue();
 
+		_auto_training = auto_training_arg.getValue();
+
 		_dump_rounds = dump_rounds_arg.getValue();
 
 		_save_rounds = save_rounds_arg.getValue();
@@ -158,14 +163,19 @@ namespace Training::Modes
 	{
 		return std::format(" Source Path: {}\n Adjustments Path: {}\n Rounds: {}\n Episodes per round: {}\n"
 					 " Evaluation episodes per round: {}\n Output folder: {}\n"
-					 " Fixed pairs: {}\n Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
+			" Fixed pairs: {}\n Auto training: {}\n Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
 			_source_path.string(), _adjustments_path.string(), _num_rounds, _num_episodes, _num_eval_episodes, _output_folder.string(),
-			_fixed_pairs, _dump_rounds, _save_rounds, _hash);
+			_fixed_pairs, _auto_training, _dump_rounds, _save_rounds, _hash);
 	}
 
 	bool ArgumentsTraining::get_fixed_pairs() const
 	{
 		return _fixed_pairs;
+	}
+
+	bool ArgumentsTraining::get_auto_training() const
+	{
+		return _auto_training;
 	}
 
 	std::string ArgumentsTraining::get_hash() const

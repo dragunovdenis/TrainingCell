@@ -168,8 +168,16 @@ namespace Training::Modes
 			ConsoleUtils::print_to_console("Current memory usage (Mb): " + std::to_string(ConsoleUtils::get_phys_mem_usage() / bytes_in_megabyte));
 		};
 
-		engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
-			args.get_fixed_pairs(), args.get_num_eval_episodes());
+		if (args.get_auto_training())
+		{
+			engine.run_auto(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
+				static_cast<int>(args.get_num_eval_episodes()));
+		}
+		else
+		{
+			engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
+				args.get_fixed_pairs(), static_cast<int>(args.get_num_eval_episodes()));
+		}
 
 		saver("");
 	}

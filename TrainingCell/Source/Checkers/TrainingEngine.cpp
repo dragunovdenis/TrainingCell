@@ -124,6 +124,32 @@ namespace TrainingCell::Checkers
 		}
 	}
 
+	void TrainingEngine::run_auto(const int rounds_cnt, const int episodes_cnt,
+		const std::function<void(const long long& time_per_round_ms, const std::vector<PerformanceRec>&
+			agent_performances)>& round_callback, const int test_episodes) const
+	{
+		if (_agent_pointers.empty())
+			throw std::exception("Collection of agents must be nonempty");
+
+		std::vector<PerformanceRec> performance_scores(_agent_pointers.size());
+
+		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
+		{
+			DeepLearning::StopWatch sw;
+			Concurrency::parallel_for(0ull, _agent_pointers.size(),
+				[this, &performance_scores, episodes_cnt, test_episodes, round_id](const auto& agent_id)
+			{
+				auto agent_ptr = _agent_pointers[agent_id];
+				Board board(agent_ptr, agent_ptr);
+				board.play(episodes_cnt);
+				const auto draw_percentage = (episodes_cnt - board.get_blacks_wins() - board.get_whites_wins()) * 1.0 / episodes_cnt;
+				performance_scores[agent_id] = evaluate_performance(*agent_ptr, test_episodes, round_id, draw_percentage);
+			});
+
+			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
+		}
+	}
+
 	double TrainingEngine::PerformanceRec::get_score() const
 	{
 		return 0.5 * (perf_white + perf_black);

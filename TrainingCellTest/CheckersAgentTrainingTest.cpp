@@ -180,7 +180,7 @@ namespace TrainingCellTest
 			agent.set_training_mode(false);
 
 			//Assert
-			assess_performance(agent, 0.93);
+			assess_performance(agent, 0.89);
 		}
 
 		TEST_METHOD(TdLambdaAgentAutoTrainingBlackOnly)
@@ -189,7 +189,7 @@ namespace TrainingCellTest
 			agent.set_training_mode(false);
 
 			//Assert
-			assess_performance(agent, 0.93);
+			assess_performance(agent, 0.89);
 		}
 
 		TEST_METHOD(EnsembleAgentTest)

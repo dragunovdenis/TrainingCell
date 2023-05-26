@@ -119,5 +119,18 @@ namespace TrainingCell::Checkers
 		         const std::function<void(const long long& time_per_round_ms,
 					 const std::vector<PerformanceRec>& agent_performances)>& round_callback,
 			const bool fixed_pairs, const int test_episodes = 1000) const;
+
+		/// <summary>
+		/// Method to run auto-training
+		/// </summary>
+		/// <param name="rounds_cnt">Number of rounds to run</param>
+		/// <param name="episodes_cnt">Number of episodes in a round to play</param>
+		/// <param name="round_callback">Call-back function that is called after
+		/// each round to provide some intermediate information to the caller</param>
+		/// <param name="test_episodes">Number of episodes to run when evaluating performance of trained agents</param>
+		void run_auto(const int rounds_cnt, const int episodes_cnt,
+			const std::function<void(const long long& time_per_round_ms,
+				const std::vector<PerformanceRec>& agent_performances)>& round_callback,
+			const int test_episodes = 1000) const;
 	};
 }

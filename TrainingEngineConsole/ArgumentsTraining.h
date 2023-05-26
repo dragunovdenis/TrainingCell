@@ -72,6 +72,11 @@ namespace Training::Modes
 		bool _fixed_pairs{};
 
 		/// <summary>
+		/// If "true" agents get trained in the self-playing mode
+		/// </summary>
+		bool _auto_training{};
+
+		/// <summary>
 		/// Number of rounds after which state should be dumped to disk 
 		/// </summary>
 		unsigned int _dump_rounds{};
@@ -126,6 +131,11 @@ namespace Training::Modes
 		/// Read-only access to the corresponding field
 		/// </summary>
 		[[nodiscard]] bool get_fixed_pairs() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] bool get_auto_training() const;
 
 		/// <summary>
 		/// Read-only access to the corresponding field
