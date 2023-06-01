@@ -65,7 +65,7 @@ namespace TrainingCell::Checkers
 	void Board::reset_state()
 	{
 		_agent_to_move_id = 0;
-		_state = State::get_start_state();
+		_state = _start_state;
 	}
 
 	void Board::reset_wins()
@@ -74,12 +74,15 @@ namespace TrainingCell::Checkers
 		_blacksWin = 0;
 	}
 
-	void Board::play(const int episodes, const int max_moves_without_capture,
+	void Board::play(const int episodes, const int max_moves_without_capture, const std::optional<State>& start_state,
 		PublishCheckersStateCallBack publishState,
 		PublishTrainingStatsCallBack publishStats,
 		CancelCallBack cancel,
 		ErrorMessageCallBack error)
 	{
+		if (start_state.has_value())
+			_start_state = start_state.value();
+
 		try
 		{
 			for (auto episode_id = 0; episode_id < episodes; episode_id++)

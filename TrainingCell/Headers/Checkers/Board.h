@@ -80,6 +80,11 @@ namespace TrainingCell::Checkers
 		State _state;
 
 		/// <summary>
+		/// Start state for each new episode (game)
+		/// </summary>
+		State _start_state{State ::get_start_state()};
+
+		/// <summary>
 		///	A flag that indicates whether the state is "inverted" or not
 		/// </summary>
 		[[nodiscard]] bool is_inverted() const;
@@ -117,9 +122,17 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	Runs the given number of episodes (games)
 		/// </summary>
-		void play(const int episodes, const int max_moves_without_capture = 200, PublishCheckersStateCallBack publishState = nullptr,
-			PublishTrainingStatsCallBack publishStats = nullptr, CancelCallBack cancel = nullptr,
-			ErrorMessageCallBack error = nullptr);
+		/// <param name="episodes">Number of episodes (games) to play</param>
+		/// <param name="max_moves_without_capture">Defines maximal number of moves without a capture that will be qualified as a "draw"</param>
+		/// <param name="start_state">State from which each episode (game) should be started. Default value result in a "standard" start state of the board</param>
+		/// <param name="publishState">Callback to be called after each move. Allows caller to get some intermediate information about the process</param>
+		/// <param name="publishStats">Callback to be called after each episode (game). Allows caller to get some intermediate information about the process</param>
+		/// <param name="cancel">Callback allowing caller to cancel the process</param>
+		/// <param name="error">Callback allowing caller to get some information about errors encountered</param>
+		void play(const int episodes, const int max_moves_without_capture = 200, const std::optional<State>& start_state = std::nullopt,
+		          PublishCheckersStateCallBack publishState = nullptr,
+		          PublishTrainingStatsCallBack publishStats = nullptr, CancelCallBack cancel = nullptr,
+		          ErrorMessageCallBack error = nullptr);
 
 		/// <summary>
 		/// Reset winning statistics

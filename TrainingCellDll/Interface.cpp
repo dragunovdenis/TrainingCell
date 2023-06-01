@@ -41,7 +41,7 @@ void RunCheckersTraining(TrainingCell::Checkers::Agent* const agent1,
 	TrainingCell::Checkers::ErrorMessageCallBack errorCallBack)
 {
 	TrainingCell::Checkers::Board board(agent1, agent2);
-	board.play(episodes, 200, publishStateCallBack, publishStatsCallBack,
+	board.play(episodes, 200, std::nullopt, publishStateCallBack, publishStatsCallBack,
 		cancellationCallBack, errorCallBack);
 }
 #pragma region Random Agent
