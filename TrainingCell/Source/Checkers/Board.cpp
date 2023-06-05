@@ -19,7 +19,7 @@
 
 namespace TrainingCell::Checkers
 {
-	Board::Board(Agent* const agentA, Agent* const agentB)
+	Board::Board(IMinimalAgent* const agentA, IMinimalAgent* const agentB)
 	{
 		if (agentA == nullptr || agentB == nullptr)
 			throw std::exception("Invalid agents");
@@ -27,12 +27,12 @@ namespace TrainingCell::Checkers
 		_agents = { agentA, agentB };
 	}
 
-	Agent* Board::agent_to_move() const
+	IMinimalAgent* Board::agent_to_move() const
 	{
 		return _agents[_agent_to_move_id];
 	}
 
-	Agent* Board::agent_to_wait() const
+	IMinimalAgent* Board::agent_to_wait() const
 	{
 		return _agents[next_agent_id()];
 	}

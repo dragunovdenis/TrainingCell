@@ -194,6 +194,32 @@ namespace Monitor.Checkers
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentGetSearchMode")]
+        public static extern byte TdLambdaAgentGetSearchMode(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentSetSearchMode")]
+        public static extern bool TdLambdaAgentSetSearchMode(IntPtr agentPtr,
+            [MarshalAs(UnmanagedType.U1)]
+            bool searchMode);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentGetSearchModeIterations")]
+        public static extern int TdLambdaAgentGetSearchModeIterations(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentSetSearchModeIterations")]
+        public static extern bool TdLambdaAgentSetSearchModeIterations(IntPtr agentPtr, int searchIterations);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "PackCheckersTdLambdaAgent")]
         public static extern IntPtr PackTdLambdaAgent(IntPtr agentPtr);
         #endregion

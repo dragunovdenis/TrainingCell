@@ -50,6 +50,8 @@ namespace TrainingCell::Checkers
 	const char* json_exploration_rate_id = "Exploration";
 	const char* json_training_mode_id = "TrainingMode";
 	const char* json_reward_factor_id = "RewardFactor";
+	const char* json_search_method_id = "SearchMethod";
+	const char* json_td_search_iterations_id = "TdSearchIterations";
 
 	void TdlAbstractAgent::assign(const std::string& script_str, const bool hyper_params_only)
 	{
@@ -94,6 +96,12 @@ namespace TrainingCell::Checkers
 
 		if (json.contains(json_reward_factor_id))
 			_reward_factor = json[json_reward_factor_id].get<double>();
+
+		if (json.contains(json_search_method_id))
+			_search_method = json[json_search_method_id].get<TreeSearchMethod>();
+
+		if (json.contains(json_td_search_iterations_id))
+			_td_search_iterations = json[json_td_search_iterations_id].get<int>();
 	}
 
 	std::string TdlAbstractAgent::to_script() const
@@ -108,6 +116,8 @@ namespace TrainingCell::Checkers
 		json[json_exploration_rate_id] = _exploration_epsilon;
 		json[json_training_mode_id] = _training_sub_mode;
 		json[json_reward_factor_id] = _reward_factor;
+		json[json_search_method_id] = _search_method;
+		json[json_td_search_iterations_id] = _td_search_iterations;
 
 		return json.dump();
 	}
@@ -120,7 +130,9 @@ namespace TrainingCell::Checkers
 			_training_sub_mode == anotherAgent._training_sub_mode &&
 			_lambda == anotherAgent._lambda &&
 			_gamma == anotherAgent._gamma &&
-			_alpha == anotherAgent._alpha;
+			_alpha == anotherAgent._alpha &&
+			_search_method == anotherAgent._search_method &&
+			_td_search_iterations == anotherAgent._td_search_iterations;
 	}
 
 	bool TdlAbstractAgent::equal(const Agent& agent) const
@@ -134,7 +146,9 @@ namespace TrainingCell::Checkers
 			_gamma == other_agent_ptr->_gamma &&
 			_lambda == other_agent_ptr->_lambda &&
 			_training_sub_mode == other_agent_ptr->_training_sub_mode &&
-			_reward_factor == other_agent_ptr->_reward_factor;
+			_reward_factor == other_agent_ptr->_reward_factor &&
+			_search_method == other_agent_ptr->_search_method &&
+			_td_search_iterations == other_agent_ptr->_td_search_iterations;
 	}
 
 	TdlAbstractAgent::TdlAbstractAgent(const std::vector<std::size_t>& layer_dimensions,
@@ -193,6 +207,26 @@ namespace TrainingCell::Checkers
 	double TdlAbstractAgent::get_reward_factor() const
 	{
 		return _reward_factor;
+	}
+
+	void TdlAbstractAgent::set_tree_search_method(const TreeSearchMethod search_method)
+	{
+		_search_method = search_method;
+	}
+
+	TreeSearchMethod TdlAbstractAgent::get_tree_search_method() const
+	{
+		return _search_method;
+	}
+
+	void TdlAbstractAgent::set_td_search_iterations(const int search_iterations)
+	{
+		_td_search_iterations = search_iterations;
+	}
+
+	int TdlAbstractAgent::get_td_search_iterations() const
+	{
+		return _td_search_iterations;
 	}
 
 	void TdlAbstractAgent::set_lambda(const double lambda)

@@ -63,6 +63,7 @@ namespace TrainingCellTest
 		{
 			//Arrange
 			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "some_name");
+			//set some non-default values
 			agent.set_reward_factor(0.375);
 			auto state = State::get_start_state();
 
@@ -76,6 +77,9 @@ namespace TrainingCellTest
 				state.make_move(moves[move_id], true, false);
 				state.invert();
 			}
+			//Set some none-trivial search mode after iterations to save time
+			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
+			agent.set_td_search_iterations(1234);
 
 			//Act
 			const auto agent_from_stream = DeepLearning::MsgPack::unpack<TdLambdaAgent>(DeepLearning::MsgPack::pack(agent));
@@ -88,7 +92,10 @@ namespace TrainingCellTest
 		{
 			//Arrange
 			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "Some Name");
+			//set some non-default values
 			agent.set_reward_factor(0.375);
+			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
+			agent.set_td_search_iterations(1234);
 
 			//Act
 			const auto script = agent.to_script();

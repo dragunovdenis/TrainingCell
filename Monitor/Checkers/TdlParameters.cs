@@ -53,6 +53,16 @@ namespace Monitor.Checkers
         /// Identifier
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// Flag indicating whether the search mode is on
+        /// </summary>
+        bool SearchMode { get; }
+
+        /// <summary>
+        /// Number of search iterations to do if the search mode is on
+        /// </summary>
+        int SearchIterations { get; }
     }
 
     /// <summary>
@@ -91,6 +101,16 @@ namespace Monitor.Checkers
         public string Name { get; set; }
 
         /// <summary>
+        /// Flag indicating whether the search mode is on
+        /// </summary>
+        public bool SearchMode { get; set; }
+
+        /// <summary>
+        /// Number of search iterations to do if the search mode is on
+        /// </summary>
+        public int SearchIterations { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public TdlParameters() {}
@@ -109,6 +129,8 @@ namespace Monitor.Checkers
             LearningRate = source.LearningRate;
             TrainingMode = source.TrainingMode;
             Name = source.Name;
+            SearchMode = source.SearchMode;
+            SearchIterations = source.SearchIterations;
         }
     }
 }

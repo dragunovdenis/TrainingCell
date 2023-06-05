@@ -271,6 +271,42 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Flag indicating whether tree search mode is on or off
+        /// </summary>
+        public bool SearchMode
+        {
+            get => DllWrapper.TdLambdaAgentGetSearchMode(Ptr).ToBool();
+
+            set
+            {
+                if (SearchMode != value)
+                {
+                    if (!DllWrapper.TdLambdaAgentSetSearchMode(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Number of iterations to do if the search mode is on
+        /// </summary>
+        public int SearchIterations
+        {
+            get => DllWrapper.TdLambdaAgentGetSearchModeIterations(Ptr);
+
+            set
+            {
+                if (SearchIterations != value)
+                {
+                    if (!DllWrapper.TdLambdaAgentSetSearchModeIterations(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
         /// Neural net dimensions of the agent
         /// </summary>
         public uint[] NetDimensions
@@ -301,6 +337,8 @@ namespace Monitor.Checkers
                 LearningRate = LearningRate,
                 TrainingMode = TrainingMode,
                 Name = Name,
+                SearchMode = SearchMode,
+                SearchIterations = SearchIterations,
             };
         }
 
@@ -318,6 +356,8 @@ namespace Monitor.Checkers
             LearningRate = parameters.LearningRate;
             TrainingMode = parameters.TrainingMode;
             Name = parameters.Name;
+            SearchMode = parameters.SearchMode;
+            SearchIterations = parameters.SearchIterations;
 
             return true;
         }

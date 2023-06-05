@@ -92,9 +92,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TrainedAgents\TrainedEnsemble.apack" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="TrainingCell.ico" />
   </ItemGroup>
 </Project>

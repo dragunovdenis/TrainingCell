@@ -38,6 +38,21 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		std::vector<TdLambdaSubAgent> _sub_agents{ TdLambdaSubAgent{false} , TdLambdaSubAgent{true} };
 
+		/// <summary>
+		/// Can contain a search net if the TD-tree search mode is engaged 
+		/// </summary>
+		mutable std::optional<DeepLearning::Net<DeepLearning::CpuDC>> _search_net{};
+
+		/// <summary>
+		/// Returns settings that will be used in TD-tree search process
+		/// </summary>
+		TdlSettings get_search_settings() const;
+
+		/// <summary>
+		/// Runs TD-tree search and returns the "found" move (together with auxiliary data)
+		/// </summary>
+		MoveData run_search(const State& current_state, const std::vector<Move>& moves) const;
+
 	public:
 
 		MSGPACK_DEFINE(_msg_pack_version, MSGPACK_BASE(TdlAbstractAgent))
@@ -86,7 +101,7 @@ namespace TrainingCell::Checkers
 		void game_over(const State& final_state, const GameResult& result, const bool as_white) override;
 
 		/// <summary>
-		/// Returns ID of the chosen move, no training
+		/// Returns ID of the "best score" move, no training, no exploration
 		/// </summary>
 		[[nodiscard]] int pick_move_id(const State& current_state, const std::vector<Move>& moves, const bool as_white) const;
 

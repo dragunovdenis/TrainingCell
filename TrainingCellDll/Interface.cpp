@@ -205,6 +205,45 @@ void* PackCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* age
 	}
 }
 
+char CheckersTdLambdaAgentGetSearchMode(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return static_cast<char>(2);
+
+	return static_cast<char>(agent_ptr->get_tree_search_method() != TrainingCell::Checkers::TreeSearchMethod::NONE);
+}
+
+bool CheckersTdLambdaAgentSetSearchMode(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const bool search_mode)
+{
+	if (!agent_ptr)
+		return false;
+
+	//Currently dll interface allows to use only TD-tree search (TDTS)
+	agent_ptr->set_tree_search_method(search_mode ?
+		TrainingCell::Checkers::TreeSearchMethod::TD_SEARCH :
+		TrainingCell::Checkers::TreeSearchMethod::NONE);
+
+	return true;
+}
+
+int CheckersTdLambdaAgentGetSearchModeIterations(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return agent_ptr->get_td_search_iterations();
+}
+
+bool CheckersTdLambdaAgentSetSearchModeIterations(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const int search_iterations)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_td_search_iterations(search_iterations);
+
+	return true;
+}
+
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move_callback, const CheckersGameOverCallBack game_over_callback, const bool play_for_whites)
@@ -260,7 +299,7 @@ char CheckersAgentGetTrainingMode(const TrainingCell::Checkers::Agent* agent_ptr
 	if (!agent_ptr)
 		return static_cast<char>(2);
 
-	return agent_ptr->get_training_mode();
+	return static_cast<char>(agent_ptr->get_training_mode());
 }
 
 char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr)
@@ -268,7 +307,7 @@ char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr
 	if (!agent_ptr)
 		return static_cast<char>(2);
 
-	return agent_ptr->can_train();
+	return static_cast<char>(agent_ptr->can_train());
 }
 
 const char* CheckersAgentGetName(const TrainingCell::Checkers::Agent* agent_ptr)

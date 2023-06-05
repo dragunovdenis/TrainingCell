@@ -17,6 +17,7 @@
 
 #pragma once
 #include "../TrainingCell/Headers/Checkers/Board.h"
+#include "../TrainingCell/Headers/Checkers/Agent.h"
 
 #ifdef TRAINING_CELL_EXPORTS
 #define TRAINING_CELL_API __declspec(dllexport)
@@ -154,6 +155,30 @@ extern "C"
 	/// Allocates agent-pack for the given TD(lambda) agent and returns pointer to it (or null-pointer if something went wrong)
 	/// </summary>
 	TRAINING_CELL_API void* PackCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Returns "1" if the given agent has its tree search functionality on, "0" if the search mode is off.
+	/// Returned value other than "0" or "1" indicates an error.
+	/// </summary>
+	TRAINING_CELL_API char CheckersTdLambdaAgentGetSearchMode(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Sets search mode of the given agent, returns true is succeeded
+	/// </summary>
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchMode(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const bool search_mode);
+
+	/// <summary>
+	/// Returns number of search iterations to be done if tree search mode is on
+	/// Negative returned number indicates an error
+	/// </summary>
+	TRAINING_CELL_API int CheckersTdLambdaAgentGetSearchModeIterations(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Sets number of search iterations to be done if tree search mode is on
+	/// Returns "true" in case of success
+	/// </summary>
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchModeIterations(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const int search_iterations);
+
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 	/// <summary>

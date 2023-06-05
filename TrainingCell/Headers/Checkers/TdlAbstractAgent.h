@@ -17,52 +17,11 @@
 
 #pragma once
 #include "Agent.h"
+#include "TdlSettings.h"
 #include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 
 namespace TrainingCell::Checkers
 {
-	/// <summary>
-	/// Interface for TD(lambda) settings
-	/// </summary>
-	class TdlSettingsReadOnly
-	{
-	public:
-		/// <summary>
-		/// Virtual default destructor
-		/// </summary>
-		virtual ~TdlSettingsReadOnly() = default;
-
-		/// <summary>
-		/// Returns actual value of exploration probability
-		/// </summary>
-		[[nodiscard]] virtual double get_exploratory_probability() const = 0;
-
-		/// <summary>
-		/// Returns actual value of parameter gamma (reward discount)
-		/// </summary>
-		[[nodiscard]] virtual double get_discount() const = 0;
-
-		/// <summary>
-		/// Returns actual value of "lambda" parameter
-		/// </summary>
-		[[nodiscard]] virtual double get_lambda() const = 0;
-
-		/// <summary>
-		/// Returns actual value of the learning rate parameter ("alpha")
-		/// </summary>
-		[[nodiscard]] virtual double get_learning_rate() const = 0;
-
-		/// <summary>
-		/// Returns actual value of training mode depending on the color of the pieces
-		/// </summary>
-		[[nodiscard]] virtual bool get_training_mode(const bool as_white) const = 0;
-
-		/// <summary>
-		/// Returns the current value of "reward factor" parameter
-		/// </summary>
-		[[nodiscard]] virtual double get_reward_factor() const = 0;
-	};
-
 	/// <summary>
 	/// Enumerates auto training modes
 	/// </summary>
@@ -76,6 +35,15 @@ namespace TrainingCell::Checkers
 		BLACK_ONLY = 1 << 1,
 		//Training when playing either black or white pieces (possibly simultaneously)
 		FULL = WHITE_ONLY | BLACK_ONLY,
+	};
+
+	/// <summary>
+	/// Enumerates tree search methods for TD-lambda agent
+	/// </summary>
+	enum class TreeSearchMethod : int
+	{
+		NONE = 0, //no search
+		TD_SEARCH = 1, //Temporal difference search
 	};
 
 	/// <summary>
@@ -102,7 +70,7 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	/// General interface of TD(lambda) agent
 	/// </summary>
-	class TdlAbstractAgent : public Agent, public TdlSettingsReadOnly
+	class TdlAbstractAgent : public Agent, public ITdlSettingsReadOnly
 	{
 	protected:
 		/// <summary>
@@ -135,13 +103,23 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Defines whether the agent is going to train while playing
 		/// </summary>
-		AutoTrainingSubMode _training_sub_mode{ AutoTrainingSubMode ::FULL};
+		AutoTrainingSubMode _training_sub_mode{ AutoTrainingSubMode::FULL }; 
 
 		/// <summary>
 		/// Factor that is applied to the result of internal reward function during training
 		///	If set to "0", only final reward (win/loose) will be taken into account 
 		/// </summary>
 		double _reward_factor{1};
+
+		/// <summary>
+		/// Tree search method
+		/// </summary>
+		TreeSearchMethod _search_method{ TreeSearchMethod::NONE };
+
+		/// <summary>
+		/// Number of TD-tree search iterations. Ignored if TD-tree search is not used
+		/// </summary>
+		int _td_search_iterations{ 1000 };
 
 		/// <summary>
 		/// Initializes neural net according to the given dimension array
@@ -159,7 +137,8 @@ namespace TrainingCell::Checkers
 		static AutoTrainingSubMode training_mode_to_sub_mode(const bool training_mode);
 
 	public:
-		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon, _training_sub_mode, _lambda, _gamma, _alpha, _reward_factor)
+		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon,
+			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor, _search_method, _td_search_iterations)
 
 		/// <summary>
 		/// Returns script representation of all the hyper-parameters of the agent
@@ -258,7 +237,7 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] bool get_training_mode(const bool as_white) const override;
 
 		/// <summary>
-		/// Sets the "reward factor" parameters of the agent
+		/// Sets the "reward factor" parameter of the agent
 		/// </summary>
 		void set_reward_factor(const double reward_factor);
 
@@ -266,7 +245,28 @@ namespace TrainingCell::Checkers
 		/// Returns the current value of "reward factor" parameter
 		/// </summary>
 		[[nodiscard]] double get_reward_factor() const override;
+
+		/// <summary>
+		/// Sets the "tree search method" parameter of the agent
+		/// </summary>
+		void set_tree_search_method(const TreeSearchMethod search_method);
+
+		/// <summary>
+		/// Returns the current value of "tree search method" parameter
+		/// </summary>
+		[[nodiscard]] TreeSearchMethod get_tree_search_method() const;
+
+		/// <summary>
+		/// Sets the "TD search iterations" parameter of the agent
+		/// </summary>
+		void set_td_search_iterations(const int search_iterations);
+
+		/// <summary>
+		/// Returns the current value of "TD search iterations" parameter
+		/// </summary>
+		[[nodiscard]] int get_td_search_iterations() const;
 	};
 }
 
 MSGPACK_ADD_ENUM(TrainingCell::Checkers::AutoTrainingSubMode)
+MSGPACK_ADD_ENUM(TrainingCell::Checkers::TreeSearchMethod)

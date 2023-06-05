@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "Agent.h"
+#include "IMinimalAgent.h"
 
 namespace TrainingCell::Checkers
 {
@@ -47,7 +47,7 @@ namespace TrainingCell::Checkers
 	class Board
 	{
 		// two agents to play the game
-		std::array<Agent*, 2> _agents {};
+		std::array<IMinimalAgent*, 2> _agents {};
 
 		/// <summary>
 		///	Id of the agent that is to make a move
@@ -67,17 +67,17 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	Returns pointer to an agent that is to move
 		/// </summary>
-		[[nodiscard]] Agent* agent_to_move() const;
+		[[nodiscard]] IMinimalAgent* agent_to_move() const;
 
 		/// <summary>
 		///	Pointer to an agent that is waiting for its turn
 		/// </summary>
-		[[nodiscard]] Agent* agent_to_wait() const;
+		[[nodiscard]] IMinimalAgent* agent_to_wait() const;
 
 		/// <summary>
 		///	State of the board
 		/// </summary>
-		State _state;
+		State _state{};
 
 		/// <summary>
 		/// Start state for each new episode (game)
@@ -117,7 +117,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		///	Constructor
 		/// </summary>
-		Board(Agent* const agentA, Agent* const agentB);
+		Board(IMinimalAgent* const agentA, IMinimalAgent* const agentB);
 
 		/// <summary>
 		///	Runs the given number of episodes (games)

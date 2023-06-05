@@ -110,6 +110,8 @@ namespace Monitor.Checkers.UI
             Lambda = 0.2,
             LearningRate = 0.01,
             TrainingMode = true,
+            SearchMode = false,
+            SearchIterations = 10,
             Name = "Agent-" + Guid.NewGuid(),
         };
 
@@ -131,6 +133,8 @@ namespace Monitor.Checkers.UI
                     OnPropertyChanged(nameof(LearningRate));
                     OnPropertyChanged(nameof(TrainingMode));
                     OnPropertyChanged(nameof(AgentName));
+                    OnPropertyChanged(nameof(SearchMode));
+                    OnPropertyChanged(nameof(SearchIterations));
                 }
             }
         }
@@ -210,6 +214,40 @@ namespace Monitor.Checkers.UI
                 if (!_params.TrainingMode.Equals(value))
                 {
                     _params.TrainingMode = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Search mode flag of the agent
+        /// </summary>
+        public bool SearchMode
+        {
+            get => _params.SearchMode;
+
+            set
+            {
+                if (!_params.SearchMode.Equals(value))
+                {
+                    _params.SearchMode = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Number of search iterations to do if the TD-tree search mode is on
+        /// </summary>
+        public int SearchIterations
+        {
+            get => _params.SearchIterations;
+
+            set
+            {
+                if (!_params.SearchIterations.Equals(value))
+                {
+                    _params.SearchIterations = value;
                     OnPropertyChanged();
                 }
             }

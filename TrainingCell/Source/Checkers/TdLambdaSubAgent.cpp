@@ -22,7 +22,7 @@
 namespace TrainingCell::Checkers
 {
 	MoveData TdLambdaSubAgent::pick_move(const State& state, const std::vector<Move>& moves,
-		const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const
+		const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const
 	{
 		if (moves.empty())
 			return { -1 };
@@ -31,6 +31,12 @@ namespace TrainingCell::Checkers
 			DeepLearning::Utils::get_random(0, 1.0) <= settings.get_exploratory_probability())
 			return evaluate(state, moves, DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size()) - 1), net);
 
+		return pick_move(state, moves, net);
+	}
+
+	MoveData TdLambdaSubAgent::pick_move(const State& state, const std::vector<Move>& moves,
+		const DeepLearning::Net<DeepLearning::CpuDC>& net)
+	{
 		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() };
 
 		for (auto move_id = 0ull; move_id < moves.size(); ++move_id)
@@ -56,7 +62,7 @@ namespace TrainingCell::Checkers
 		return { move_id,  value, afterstate };
 	}
 
-	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state(const TdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
+	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
 		auto calc_result =
 			net.calc_gradient_and_value(_prev_afterstate.to_tensor(),
@@ -92,12 +98,19 @@ namespace TrainingCell::Checkers
 	{}
 
 	int TdLambdaSubAgent::make_move(const State& current_state, const std::vector<Move>& moves,
-	                                const TdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
+	                                const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
+	{
+		const auto move_data = pick_move(current_state, moves, settings, net);
+		return make_move(current_state, move_data, settings, net);
+	}
+
+	int TdLambdaSubAgent::make_move(const State& current_state, 
+		const MoveData& move_data,
+		const ITdlSettingsReadOnly& settings,
+		DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
 		if (!settings.get_training_mode(_is_white))
-			return pick_move_id(current_state, moves, settings, net);
-
-		const auto move_data = pick_move(current_state, moves, settings, net);
+			return move_data.move_id;
 
 		if (_new_game)
 		{
@@ -122,7 +135,7 @@ namespace TrainingCell::Checkers
 	}
 
 	void TdLambdaSubAgent::game_over(const State& final_state, const GameResult& result, 
-		const TdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
+		const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
 		if (settings.get_training_mode(_is_white))
 		{
@@ -135,7 +148,7 @@ namespace TrainingCell::Checkers
 	}
 
 	int TdLambdaSubAgent::pick_move_id(const State& state, const std::vector<Move>& moves,
-		const TdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const
+		const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const
 	{
 		return pick_move(state, moves, settings, net).move_id;
 	}
