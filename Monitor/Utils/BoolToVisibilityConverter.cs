@@ -16,51 +16,28 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+using System.Globalization;
+using System.Windows.Data;
+using System.Windows;
 
-namespace Monitor
+namespace Monitor.Utils
 {
     /// <summary>
-    /// General user interface for 2 players games
+    /// True/False to "Visible"/"Collapsed" converter
     /// </summary>
-    public interface ITwoPlayerGameUi : INotifyPropertyChanged
+    class BoolToVisibilityConverter : IValueConverter
     {
         /// <summary>
-        /// Flag to check if the game is ongoing
+        /// Forward conversion
         /// </summary>
-        bool IsPlaying { get; }
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            => (value != null && (bool)value) ? Visibility.Visible : Visibility.Collapsed;
 
         /// <summary>
-        /// If "true" progress bar should be shown
+        /// Backward conversion
         /// </summary>
-        bool ShowProgressBar { get; }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new Exception("Not implemented");
 
-        /// <summary>
-        /// Handles loading of an agent to play for "whites" (so that user will play for "blacks")
-        /// and starts the game
-        /// </summary>
-        void LoadWhiteAgent();
-
-        /// <summary>
-        /// Handles loading of an agent to play for "blacks" (so that user will play for "whites")
-        /// and starts the game
-        /// </summary>
-        void LoadBlackAgent();
-
-        /// <summary>
-        /// Terminates the current game session
-        /// </summary>
-        void TerminateGame();
-
-        /// <summary>
-        /// Event that is invoked each time we want to update training information on UI
-        /// </summary>
-        event Action<IList<string>> InfoEvent;
-
-        /// <summary>
-        /// Method to redraw UI
-        /// </summary>
-        void Draw();
     }
 }

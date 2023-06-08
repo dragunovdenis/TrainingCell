@@ -31,6 +31,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
         <utils:ObjectToVisibilityConverter 
             x:Key="ObjectToVisibilityConverter"
         />
+        <utils:BoolToVisibilityConverter 
+            x:Key="BoolToVisibilityConverter"
+        />
 
         <Style TargetType="Border" x:Key="LocalBorderStyle">
             <Setter Property="CornerRadius" Value="6"/>

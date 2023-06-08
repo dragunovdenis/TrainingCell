@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -189,6 +190,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private Task<int> RequestUserMove(int[] state, CheckersMove[] possibleMoves)
         {
+            ShowProgressBar = false;
             if (_state == null) _state = state;
             _userMoveRequest = new MoveRequest(possibleMoves);
             Draw();
@@ -232,11 +234,19 @@ namespace Monitor.Checkers.UI
         {
             get => _isPlaying;
 
-            private set
-            {
-                _isPlaying = value;
-                OnPropertyChanged(nameof(IsPlaying));
-            }
+            private set => SetField(ref _isPlaying, value);
+        }
+
+        private bool _showProgressBar;
+
+        /// <summary>
+        /// If "true" progress bar should be shown
+        /// </summary>
+        public bool ShowProgressBar
+        {
+            get => _showProgressBar;
+
+            private set => SetField(ref _showProgressBar, value);
         }
 
         /// <summary>
@@ -618,6 +628,7 @@ namespace Monitor.Checkers.UI
                     //It would be nice to come up with a mechanism that would allow user to deliberately choose between the possible moves in such a (rare) cases
                     var moveId =  possibleMoves.OrderByDescending(x => x.SubMoves.Length).First().Index;
                     _userMoveRequest.UserMoveResult.SetResult(moveId);
+                    ShowProgressBar = true;
                     _userMoveRequest = null;
                 }
             }
@@ -642,5 +653,17 @@ namespace Monitor.Checkers.UI
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
             }
         }
+
+        /// <summary>
+        /// Property setter with notification
+        /// </summary>
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+
     }
 }
