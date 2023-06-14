@@ -428,6 +428,11 @@ namespace Monitor.Checkers.UI
         }
 
         /// <summary>
+        /// Indicates whether the selected agent is an "ensemble"
+        /// </summary>
+        public bool IsEnsembleSelected => GetSelectedEnsembleAgent() != null;
+
+        /// <summary>
         /// Indicates whether there is an item to edit
         /// </summary>
         public bool CanEdit =>
@@ -465,6 +470,7 @@ namespace Monitor.Checkers.UI
             OnPropertyChanged(nameof(CanSave));
             OnPropertyChanged(nameof(CanEdit));
             OnPropertyChanged(nameof(CanRemove));
+            OnPropertyChanged(nameof(IsEnsembleSelected));
         }
 
         /// <summary>
@@ -523,11 +529,32 @@ namespace Monitor.Checkers.UI
         private void RemoveButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (!CanEdit || GetSelectedAgent() == null)
-                throw new Exception("The button bust be disabled");
+                throw new Exception("The button must be disabled");
 
             var agentToRemove = GetSelectedAgent();
             Agents.Remove(agentToRemove);
             agentToRemove.Dispose();
+        }
+
+        /// <summary>
+        /// Extract agents from selected ensemble
+        /// </summary>
+        private void ExtractButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var selectedEnsemble = GetSelectedEnsembleAgent();
+
+            if (selectedEnsemble == null)
+                throw new Exception("The button must be disabled");
+
+            for (var subAgentId = 0; subAgentId < selectedEnsemble.Size; ++subAgentId)
+            {
+                var subAgentToExtractReadOnly = selectedEnsemble.GetSubAgent(subAgentId);
+
+                if (Agents.Any(x => subAgentToExtractReadOnly.IsEqualTo(x)))
+                    continue; // such an agent is already present in the collection of agents so we continue
+
+                Agents.Add(selectedEnsemble.CopySubAgent(subAgentId));
+            }
         }
     }
 }

@@ -55,6 +55,17 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Returns a copy of the sub-agent with the given index.
+        /// The is supposed to be between 0 and "size of the ensemble" - 1
+        /// </summary>
+        public TdLambdaAgent CopySubAgent(int subAgentId)
+        {
+            return new TdLambdaAgent(
+                DllWrapper.CopyTdLambdaAgent(DllWrapper.TdlEnsembleAgentGetSubAgentPtr(Ptr, subAgentId)),
+                ownPointer: true);
+        }
+
+        /// <summary>
         /// Returns collection of the sub-agents in the order that corresponds to that of the native C++ agent
         /// </summary>
         public IList<ITdLambdaAgentReadOnly> GetSubAgents()

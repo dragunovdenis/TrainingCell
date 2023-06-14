@@ -66,6 +66,32 @@ void* ConstructCheckersTdLambdaAgent(const unsigned int* layer_dims,
 	return new TrainingCell::Checkers::TdLambdaAgent(convert(layer_dims, dims_count), exploration_epsilon, lambda, gamma, alpha);
 }
 
+void* CheckersTdLambdaAgentCreateCopy(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return nullptr;
+
+	return new TrainingCell::Checkers::TdLambdaAgent(*agent_ptr);
+}
+
+bool CheckersTdLambdaAgentsAreEqual(const TrainingCell::Checkers::TdLambdaAgent* agent0_ptr,
+	const TrainingCell::Checkers::TdLambdaAgent* agent1_ptr)
+{
+	if ((agent0_ptr == nullptr) ^ (agent1_ptr == nullptr))
+		return false;
+
+	if (agent0_ptr == agent1_ptr)//this accounts for the case when both pointers are null
+		return true;
+
+	try
+	{
+		return agent0_ptr->equal(*agent1_ptr);
+	} catch (...)
+	{
+		return false;
+	}
+}
+
 bool CheckersTdLambdaAgentSetEpsilon(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double exploration_epsilon)
 {
 	if (!agent_ptr)

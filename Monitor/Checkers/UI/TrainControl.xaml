@@ -105,6 +105,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                 <Button  IsEnabled="{Binding CanSave}" Click="SaveButton_Click">Save Selected Agent</Button>
                 <Button  Click="CreateEnsemble_OnClick">Create Ensemble</Button>
                 <Button  IsEnabled="{Binding CanRemove}" Click="RemoveButton_OnClick">Remove Selected Agent</Button>
+                <Button  IsEnabled="{Binding IsEnsembleSelected}" Click="ExtractButton_OnClick">Extract Sub-Agents</Button>
                 <Button  IsEnabled="{Binding IsPlaying, Converter= {StaticResource InvertBoolConverter}}" Click="FinishSession_OnClick">Finish Session</Button>
             </StackPanel>
         </Border>

@@ -116,6 +116,18 @@ namespace Monitor.Checkers
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentCreateCopy")]
+        public static extern IntPtr CopyTdLambdaAgent(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentsAreEqual")]
+        public static extern bool TdLambdaAgentsAreEqual(IntPtr agentPtr0, IntPtr agentPtr1);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
         [DllImport(dllName: TrainingCellInterface.DllName, EntryPoint = "CheckersTdLambdaAgentLoadFromFile", CharSet = CharSet.Ansi)]
         public static extern IntPtr LoadTdLambdaAgent(string path);
 

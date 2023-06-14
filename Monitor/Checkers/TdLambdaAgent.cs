@@ -67,6 +67,11 @@ namespace Monitor.Checkers
         /// Returns index of the added agent in the ensemble collection
         /// </summary>
         int AddToEnsemble(EnsembleAgent ensemble);
+
+        /// <summary>
+        /// Returns "true" if the current agent is equal to the given one
+        /// </summary>
+        bool IsEqualTo(IAgentReadOnly agent);
     }
 
     /// <summary>
@@ -138,6 +143,19 @@ namespace Monitor.Checkers
             0.05, 0.2, 0.8, 0.01)
         {
             Name = name;
+        }
+
+        /// <summary>
+        /// Returns "true" if the current agent is equal to the given one
+        /// </summary>
+        public bool IsEqualTo(IAgentReadOnly agent)
+        {
+            if (agent is TdLambdaAgent tdlAgent)
+            {
+                return DllWrapper.TdLambdaAgentsAreEqual(_ptr, tdlAgent._ptr);
+            }
+
+            return false;
         }
 
         /// <summary>

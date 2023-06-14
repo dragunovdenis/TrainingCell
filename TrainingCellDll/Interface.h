@@ -80,6 +80,18 @@ extern "C"
 		const int dims_count, const double exploration_epsilon, const double lambda, const double gamma, const double alpha);
 
 	/// <summary>
+	/// Returns pointer to a copy of the TD(lambda) agent pointed by the given pointer
+	/// Returns "null" if failed
+	/// </summary>
+	TRAINING_CELL_API void* CheckersTdLambdaAgentCreateCopy(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Returns true if the TD(lambda) agents pointed by the two given pointers are equal
+	/// </summary>
+	TRAINING_CELL_API bool CheckersTdLambdaAgentsAreEqual(const TrainingCell::Checkers::TdLambdaAgent* agent0_ptr,
+		const TrainingCell::Checkers::TdLambdaAgent* agent1_ptr);
+
+	/// <summary>
 	/// Updates exploration probability parameter of TD(lambda) agent represented with its pointer
 	///	Returns "true" if succeeded
 	/// </summary>
