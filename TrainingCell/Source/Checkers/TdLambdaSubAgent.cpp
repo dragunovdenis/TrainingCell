@@ -64,28 +64,22 @@ namespace TrainingCell::Checkers
 
 	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
-		auto calc_result =
-			net.calc_gradient_and_value(_prev_afterstate.to_tensor(),
-			DeepLearning::Tensor(1, 1, 1, false), DeepLearning::CostFunctionId::LINEAR);
+		const auto lambda_times_gamma = settings.get_lambda() * settings.get_discount();
+		const auto long_evaluation = lambda_times_gamma > 0 && !_z.empty();
 
-		auto& gradient = std::get<0>(calc_result);
+		auto& gradient_alias = long_evaluation ? _gradient_cache : _z;
 
-		if (_z.empty())
+		net.calc_gradient_and_value(_prev_afterstate.to_tensor(),
+			_value_cache, DeepLearning::CostFunctionId::LINEAR,
+			gradient_alias, _value_cache, _context);
+
+		if (long_evaluation)
 		{
-			_z = std::move(gradient);
-		}
-		else
-		{
-			if (gradient.size() != _z.size())
-				throw std::exception("Incompatible data");
-
-			const auto lambda_times_gamma = settings.get_lambda() * settings.get_discount();
-
-			for (auto layer_id = 0ull; layer_id < gradient.size(); ++layer_id)
-				_z[layer_id].scale_and_add(lambda_times_gamma, gradient[layer_id]);
+			for (auto layer_id = 0ull; layer_id < gradient_alias.size(); ++layer_id)
+				_z[layer_id].scale_and_add(lambda_times_gamma, gradient_alias[layer_id]);
 		}
 
-		return std::get<1>(calc_result)(0, 0, 0);
+		return _value_cache(0, 0, 0);
 	}
 
 	void TdLambdaSubAgent::reset()
