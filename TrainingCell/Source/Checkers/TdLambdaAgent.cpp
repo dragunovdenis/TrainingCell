@@ -57,6 +57,7 @@ namespace TrainingCell::Checkers
 		//and modify them a bit
 		result.set_training_mode(true, true);
 		result.set_training_mode(true, false);
+		result.set_train_depth(get_search_depth());
 
 		return result;
 	}

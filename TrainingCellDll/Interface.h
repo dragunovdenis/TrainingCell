@@ -131,9 +131,35 @@ extern "C"
 	TRAINING_CELL_API bool CheckersTdLambdaAgentSetLearningRate(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double alpha);
 
 	/// <summary>
-	/// Returns learning parameter of TD(lambda) agent represented with its pointer
+	/// Returns learning rate parameter of TD(lambda) agent represented with its pointer
 	/// </summary>
 	TRAINING_CELL_API double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates "reward factor" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "true" if succeeded
+	/// "Reward factor" serves to scale value of internal reward function of the agent
+	/// </summary>
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetRewardFactor(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double reward_factor);
+
+	/// <summary>
+	/// Returns "reward factor" parameter of TD(lambda) agent represented with its pointer
+	/// "Reward factor" serves to scale value of internal reward function of the agent
+	/// Returns "NaN" if failed
+	/// </summary>
+	TRAINING_CELL_API double CheckersTdLambdaAgentGetRewardFactor(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates "search depth" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "true" if succeeded
+	/// </summary>
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchDepth(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const int search_depth);
+
+	/// <summary>
+	/// Returns "search depth" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "-1" if failed
+	/// </summary>
+	TRAINING_CELL_API int CheckersTdLambdaAgentGetSearchDepth(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Returns neural net dimensions of TD(lambda) agent represented with its pointer

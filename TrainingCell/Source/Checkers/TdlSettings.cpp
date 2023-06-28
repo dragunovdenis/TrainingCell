@@ -31,6 +31,7 @@ namespace TrainingCell::Checkers
 		_training_mode_white = settings.get_training_mode(true);
 		_training_mode_black = settings.get_training_mode(false);
 		_reward_factor = settings.get_reward_factor();
+		_train_depth = settings.get_train_depth();
 	}
 
 	double TdlSettings::get_exploratory_probability() const
@@ -94,5 +95,15 @@ namespace TrainingCell::Checkers
 	void TdlSettings::set_reward_factor(const double reward_factor)
 	{
 		_reward_factor = reward_factor;
+	}
+
+	int TdlSettings::get_train_depth() const
+	{
+		return _train_depth;
+	}
+
+	void TdlSettings::set_train_depth(const int train_depth)
+	{
+		_train_depth = train_depth;
 	}
 }

@@ -59,6 +59,12 @@ namespace TrainingCell::Checkers
 		/// Returns the current value of "reward factor" parameter
 		/// </summary>
 		[[nodiscard]] virtual double get_reward_factor() const = 0;
+
+		/// <summary>
+		/// Returns number of first moves in each episode during which the neural net should be updated
+		/// (provided that "training mode" is on, otherwise the parameter is ignored)
+		/// </summary>
+		[[nodiscard]] virtual int get_train_depth() const = 0;
 	};
 
 	/// <summary>
@@ -73,6 +79,7 @@ namespace TrainingCell::Checkers
 		bool _training_mode_white{};
 		bool _training_mode_black{};
 		double _reward_factor{};
+		int _train_depth{};
 
 	public:
 		/// <summary>
@@ -144,5 +151,16 @@ namespace TrainingCell::Checkers
 		/// Setter for the corresponding property
 		/// </summary>
 		void set_reward_factor(const double reward_factor);
+
+		/// <summary>
+		/// Returns number of first moves in each episode during which the neural net should be updated
+		/// (provided that "training mode" is on, otherwise the parameter is ignored)
+		/// </summary>
+		[[nodiscard]] int get_train_depth() const override;
+
+		/// <summary>
+		/// Setter for the corresponding property
+		/// </summary>
+		void set_train_depth(const int train_depth);
 	};
 }

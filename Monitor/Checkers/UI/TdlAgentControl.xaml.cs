@@ -112,6 +112,8 @@ namespace Monitor.Checkers.UI
             TrainingMode = true,
             SearchMode = false,
             SearchIterations = 10,
+            SearchDepth = 1000,
+            RewardFactor = 1.0,
             Name = "Agent-" + Guid.NewGuid(),
         };
 
@@ -135,6 +137,8 @@ namespace Monitor.Checkers.UI
                     OnPropertyChanged(nameof(AgentName));
                     OnPropertyChanged(nameof(SearchMode));
                     OnPropertyChanged(nameof(SearchIterations));
+                    OnPropertyChanged(nameof(SearchDepth));
+                    OnPropertyChanged(nameof(RewardFactor));
                 }
             }
         }
@@ -248,6 +252,40 @@ namespace Monitor.Checkers.UI
                 if (!_params.SearchIterations.Equals(value))
                 {
                     _params.SearchIterations = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Number of first moves in each iteration that result in update of the search neural network
+        /// </summary>
+        public int SearchDepth
+        {
+            get => _params.SearchDepth;
+
+            set
+            {
+                if (!_params.SearchDepth.Equals(value))
+                {
+                    _params.SearchDepth = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Scale factor for the value of the internal reward function of the agent
+        /// </summary>
+        public double RewardFactor
+        {
+            get => _params.RewardFactor;
+
+            set
+            {
+                if (!_params.RewardFactor.Equals(value))
+                {
+                    _params.RewardFactor = value;
                     OnPropertyChanged();
                 }
             }

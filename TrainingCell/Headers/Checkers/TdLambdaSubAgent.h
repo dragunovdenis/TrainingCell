@@ -68,6 +68,11 @@ namespace TrainingCell::Checkers
 		State _prev_afterstate{};
 
 		/// <summary>
+		/// Number of moves taken by the sub-agent in the current episode
+		/// </summary>
+		int _move_counter{ 0 };
+
+		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
 		[[nodiscard]] MoveData pick_move(const State& state, const std::vector<Move>& moves,

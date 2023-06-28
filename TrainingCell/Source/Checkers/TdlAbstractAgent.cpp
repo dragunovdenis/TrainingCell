@@ -52,6 +52,7 @@ namespace TrainingCell::Checkers
 	const char* json_reward_factor_id = "RewardFactor";
 	const char* json_search_method_id = "SearchMethod";
 	const char* json_td_search_iterations_id = "TdSearchIterations";
+	const char* json_td_search_depth_id = "TdSearchDepth";
 
 	void TdlAbstractAgent::assign(const std::string& script_str, const bool hyper_params_only)
 	{
@@ -102,6 +103,9 @@ namespace TrainingCell::Checkers
 
 		if (json.contains(json_td_search_iterations_id))
 			_td_search_iterations = json[json_td_search_iterations_id].get<int>();
+
+		if (json.contains(json_td_search_depth_id))
+			_td_search_depth = json[json_td_search_depth_id].get<int>();
 	}
 
 	std::string TdlAbstractAgent::to_script() const
@@ -118,6 +122,7 @@ namespace TrainingCell::Checkers
 		json[json_reward_factor_id] = _reward_factor;
 		json[json_search_method_id] = _search_method;
 		json[json_td_search_iterations_id] = _td_search_iterations;
+		json[json_td_search_depth_id] = _td_search_depth;
 
 		return json.dump();
 	}
@@ -132,7 +137,8 @@ namespace TrainingCell::Checkers
 			_gamma == anotherAgent._gamma &&
 			_alpha == anotherAgent._alpha &&
 			_search_method == anotherAgent._search_method &&
-			_td_search_iterations == anotherAgent._td_search_iterations;
+			_td_search_iterations == anotherAgent._td_search_iterations &&
+			_td_search_depth == anotherAgent._td_search_depth;
 	}
 
 	bool TdlAbstractAgent::equal(const Agent& agent) const
@@ -148,7 +154,8 @@ namespace TrainingCell::Checkers
 			_training_sub_mode == other_agent_ptr->_training_sub_mode &&
 			_reward_factor == other_agent_ptr->_reward_factor &&
 			_search_method == other_agent_ptr->_search_method &&
-			_td_search_iterations == other_agent_ptr->_td_search_iterations;
+			_td_search_iterations == other_agent_ptr->_td_search_iterations &&
+			_td_search_depth == other_agent_ptr->_td_search_depth;
 	}
 
 	TdlAbstractAgent::TdlAbstractAgent(const std::vector<std::size_t>& layer_dimensions,
@@ -227,6 +234,22 @@ namespace TrainingCell::Checkers
 	int TdlAbstractAgent::get_td_search_iterations() const
 	{
 		return _td_search_iterations;
+	}
+
+	int TdlAbstractAgent::get_train_depth() const
+	{
+		//we do regular training on the maximal possible depth
+		return std::numeric_limits<int>::max();
+	}
+
+	int TdlAbstractAgent::get_search_depth() const
+	{
+		return _td_search_depth;
+	}
+
+	void TdlAbstractAgent::set_search_depth(const int depth)
+	{
+		_td_search_depth = depth;
 	}
 
 	void TdlAbstractAgent::set_lambda(const double lambda)

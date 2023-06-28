@@ -325,6 +325,43 @@ namespace Monitor.Checkers
         }
 
         /// <summary>
+        /// Number of first moves in each search iteration that result
+        /// in update of the search neural network (afterstate value function)
+        /// </summary>
+        public int SearchDepth
+        {
+            get => DllWrapper.TdLambdaAgentGetSearchDepth(Ptr);
+
+            set
+            {
+                if (SearchDepth != value)
+                {
+                    if (!DllWrapper.TdLambdaAgentSetSearchDepth(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Scale factor for the value of internal reward function of the agent
+        /// </summary>
+        public double RewardFactor
+        {
+            get => DllWrapper.TdLambdaAgentGetRewardFactor(Ptr);
+
+            set
+            {
+                if (!RewardFactor.Equals(value))
+                {
+                    if (!DllWrapper.TdLambdaAgentSetRewardFactor(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
         /// Neural net dimensions of the agent
         /// </summary>
         public uint[] NetDimensions
@@ -357,6 +394,8 @@ namespace Monitor.Checkers
                 Name = Name,
                 SearchMode = SearchMode,
                 SearchIterations = SearchIterations,
+                SearchDepth = SearchDepth,
+                RewardFactor = RewardFactor,
             };
         }
 
@@ -376,6 +415,8 @@ namespace Monitor.Checkers
             Name = parameters.Name;
             SearchMode = parameters.SearchMode;
             SearchIterations = parameters.SearchIterations;
+            SearchDepth = parameters.SearchDepth;
+            RewardFactor = parameters.RewardFactor;
 
             return true;
         }

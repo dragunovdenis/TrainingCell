@@ -49,9 +49,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <TextBox Text="Lambda"/>
                         <TextBox Text="Reward discount [0, 1]"/>
                         <TextBox Text="Exploration probability [0, 1]"/>
+                        <TextBox Text="Reward Factor"/>
                         <TextBox Text="Training Mode"/>
                         <TextBox Text="Search Mode"/>
                         <TextBox Text="Search Iterations"/>
+                        <TextBox Text="Search Depth"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0">
                         <StackPanel.Resources>
@@ -65,9 +67,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <TextBox Text="{Binding Lambda, Mode=TwoWay}"/>
                         <TextBox Text="{Binding Discount, Mode=TwoWay}"/>
                         <TextBox Text="{Binding Epsilon, Mode=TwoWay}"/>
-                        <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}" Margin="3,3,3,0"/>
-                        <CheckBox IsChecked="{Binding SearchMode, Mode=TwoWay}" Margin="3,3,3,0"/>
+                        <TextBox Text="{Binding RewardFactor, Mode=TwoWay}"/>
+                        <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}" Margin="3,3,3,3"/>
+                        <CheckBox IsChecked="{Binding SearchMode, Mode=TwoWay}" Margin="3,3,3,3"/>
                         <TextBox Text="{Binding SearchIterations, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding SearchDepth, Mode=TwoWay}"/>
                     </StackPanel>
                 </Grid>
             </Border>

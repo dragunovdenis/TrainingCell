@@ -18,6 +18,7 @@
 #include "../../Headers/Checkers/TdLambdaSubAgent.h"
 #include "../../Headers/Checkers/TdLambdaAgent.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
+#include <cmath>
 
 namespace TrainingCell::Checkers
 {
@@ -85,6 +86,7 @@ namespace TrainingCell::Checkers
 	void TdLambdaSubAgent::reset()
 	{
 		_new_game = true;
+		_move_counter = 0;
 		_z.clear();
 	}
 
@@ -103,7 +105,9 @@ namespace TrainingCell::Checkers
 		const ITdlSettingsReadOnly& settings,
 		DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
-		if (!settings.get_training_mode(_is_white))
+		_move_counter++;
+
+		if (!settings.get_training_mode(_is_white) || settings.get_train_depth() < _move_counter)
 			return move_data.move_id;
 
 		if (_new_game)
@@ -114,7 +118,7 @@ namespace TrainingCell::Checkers
 			return move_data.move_id;
 		}
 
-		const auto reward = settings.get_reward_factor() *
+		const auto reward = settings.get_reward_factor() <= 0.0 ? 0.0 : settings.get_reward_factor() *
 			Utils::calculate_reward(_prev_state, current_state);
 
 		const auto prev_afterstate_value = update_z_and_evaluate_prev_after_state(settings, net);
@@ -133,7 +137,10 @@ namespace TrainingCell::Checkers
 	{
 		if (settings.get_training_mode(_is_white))
 		{
-			const auto reward = 2 * static_cast<int>(result);
+			const auto moves_to_discount = _move_counter - settings.get_train_depth();
+			const auto discount_factor = moves_to_discount <= 0 ? 1.0 : pow(settings.get_discount(), moves_to_discount);
+
+			const auto reward = 2 * static_cast<int>(result) * discount_factor;
 			const auto delta = reward - update_z_and_evaluate_prev_after_state(settings, net);
 			net.update(_z, -settings.get_learning_rate() * delta, 0.0);
 		}

@@ -571,3 +571,38 @@ const void* CheckersTdlEnsembleAgentGetSubAgentPtr(const TrainingCell::Checkers:
 #pragma endregion TdlEnsembleAgent
 
 
+bool CheckersTdLambdaAgentSetRewardFactor(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double reward_factor)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_reward_factor(reward_factor);
+
+	return true;
+}
+
+double CheckersTdLambdaAgentGetRewardFactor(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return std::numeric_limits<double>::quiet_NaN();
+
+	return agent_ptr->get_reward_factor();
+}
+
+bool CheckersTdLambdaAgentSetSearchDepth(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const int search_depth)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_search_depth(search_depth);
+
+	return true;
+}
+
+int CheckersTdLambdaAgentGetSearchDepth(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return agent_ptr->get_search_depth();
+}

@@ -63,6 +63,17 @@ namespace Monitor.Checkers
         /// Number of search iterations to do if the search mode is on
         /// </summary>
         int SearchIterations { get; }
+
+        /// <summary>
+        /// Number of first moves in each search iteration that result in update of the search neural network
+        /// </summary>
+        int SearchDepth { get; }
+
+        /// <summary>
+        /// Scale factor for the value of internal reward function 
+        /// </summary>
+        double RewardFactor { get; }
+
     }
 
     /// <summary>
@@ -111,6 +122,16 @@ namespace Monitor.Checkers
         public int SearchIterations { get; set; }
 
         /// <summary>
+        /// Number of first moves in each search iteration that result in update of the search neural network
+        /// </summary>
+        public int SearchDepth { get; set; }
+
+        /// <summary>
+        /// Scale factor for the value of internal reward function 
+        /// </summary>
+        public double RewardFactor { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public TdlParameters() {}
@@ -131,6 +152,8 @@ namespace Monitor.Checkers
             Name = source.Name;
             SearchMode = source.SearchMode;
             SearchIterations = source.SearchIterations;
+            SearchDepth = source.SearchDepth;
+            RewardFactor = source.RewardFactor;
         }
     }
 }

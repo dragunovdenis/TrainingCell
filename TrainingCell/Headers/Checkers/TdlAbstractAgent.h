@@ -122,6 +122,12 @@ namespace TrainingCell::Checkers
 		int _td_search_iterations{ 1000 };
 
 		/// <summary>
+		/// Number of first moves in each episode during which the "search" neural net should be updated
+		/// (provided that "training mode" is on, otherwise the parameter is ignored)
+		/// </summary>
+		int _td_search_depth{ 1000 };
+
+		/// <summary>
 		/// Initializes neural net according to the given dimension array
 		/// </summary>
 		void initialize_net(const std::vector<std::size_t>& layer_dimensions);
@@ -138,7 +144,7 @@ namespace TrainingCell::Checkers
 
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon,
-			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor, _search_method, _td_search_iterations)
+			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor, _search_method, _td_search_iterations, _td_search_depth)
 
 		/// <summary>
 		/// Returns script representation of all the hyper-parameters of the agent
@@ -265,6 +271,22 @@ namespace TrainingCell::Checkers
 		/// Returns the current value of "TD search iterations" parameter
 		/// </summary>
 		[[nodiscard]] int get_td_search_iterations() const;
+
+		/// <summary>
+		/// Returns number of first moves in each episode during which the neural net should be updated
+		/// (provided that "training mode" is on, otherwise the parameter is ignored)
+		/// </summary>
+		[[nodiscard]] int get_train_depth() const override;
+
+		/// <summary>
+		/// Returns number of first moves in each search episode during which the "search" neural net should be updated
+		/// </summary>
+		[[nodiscard]] int get_search_depth() const;
+
+		/// <summary>
+		/// Sets number of first moves in each search episode during which the "search" neural net should be updated
+		/// </summary>
+		void set_search_depth(const int depth);
 	};
 }
 
