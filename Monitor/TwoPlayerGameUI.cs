@@ -32,6 +32,21 @@ namespace Monitor
         bool IsPlaying { get; }
 
         /// <summary>
+        /// Flag indicating whether agent can be edited
+        /// </summary>
+        bool CanEditAgent { get; }
+
+        /// <summary>
+        /// String representation of the time the previous move has taken
+        /// </summary>
+        string PreviousMoveTime { get; }
+
+        /// <summary>
+        /// Invokes UI to edit inactive agent
+        /// </summary>
+        void EditInactiveAgent();
+
+        /// <summary>
         /// If "true" progress bar should be shown
         /// </summary>
         bool ShowProgressBar { get; }

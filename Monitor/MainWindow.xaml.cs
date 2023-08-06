@@ -213,5 +213,13 @@ namespace Monitor
             OnPropertyChanged(propertyName);
             return true;
         }
+
+        /// <summary>
+        /// Handles "Edit" button click
+        /// </summary>
+        private void EditAgentButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            _checkersUi.EditInactiveAgent();
+        }
     }
 }

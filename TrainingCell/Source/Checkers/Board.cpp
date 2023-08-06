@@ -74,9 +74,21 @@ namespace TrainingCell::Checkers
 		_blacksWin = 0;
 	}
 
+	/// <summary>
+	/// Publishes current "state" if the corresponding call-back is assigned
+	/// </summary>
+	void publish_state(PublishCheckersStateCallBack publishCallback, const State& state, const Move& move, const IMinimalAgent* agent_to_play)
+	{
+		if (publishCallback)
+			publishCallback(reinterpret_cast<const int*>(state.data()),
+				static_cast<int>(state.size()),
+				move.sub_moves.data(),
+				static_cast<int>(move.sub_moves.size()), agent_to_play);
+	}
+
 	void Board::play(const int episodes, const int max_moves_without_capture, const std::optional<State>& start_state,
-		PublishCheckersStateCallBack publishState,
-		PublishTrainingStatsCallBack publishStats,
+		PublishCheckersStateCallBack publish_state_callback,
+		PublishTrainingStatsCallBack publish_stats_callback,
 		CancelCallBack cancel,
 		ErrorMessageCallBack error)
 	{
@@ -93,7 +105,8 @@ namespace TrainingCell::Checkers
 				auto moves_without_capture = 0;
 				reset_state();
 				Move last_move{};
-				while ((last_move = make_move(publishState)).is_valid() && moves_without_capture < max_moves_without_capture)
+				publish_state(publish_state_callback, _state, last_move, agent_to_move());
+				while ((last_move = make_move(publish_state_callback)).is_valid() && moves_without_capture < max_moves_without_capture)
 				{
 					if (last_move.sub_moves[0].capture.is_valid())
 						moves_without_capture = 0;
@@ -121,8 +134,8 @@ namespace TrainingCell::Checkers
 					agent_to_wait()->game_over(_state, GameResult::Draw, !is_agent_to_move_white());
 				}
 
-				if (publishStats != nullptr)
-					publishStats(_whitesWin, _blacksWin, episode_id + 1);
+				if (publish_stats_callback != nullptr)
+					publish_stats_callback(_whitesWin, _blacksWin, episode_id + 1);
 			}
 		}
 		catch (std::exception& e)
@@ -155,9 +168,8 @@ namespace TrainingCell::Checkers
 
 			const auto move_copy = is_inverted() ? move : move.get_inverted();
 
-			publish(reinterpret_cast<int*>(state_copy.data()),
-				static_cast<int>(state_copy.size()),
-				move_copy.sub_moves.data(), static_cast<int>(move_copy.sub_moves.size()));
+			//At the moment, agents have not been swapped, so "agent-to-play" is actually the "agent-to-wait"
+			publish_state(publish, state_copy, move_copy, agent_to_wait());
 		}
 
 		_state.make_move(move, true);

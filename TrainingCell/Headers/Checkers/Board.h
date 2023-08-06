@@ -24,7 +24,7 @@ namespace TrainingCell::Checkers
 	///	Callback to publish current state and move
 	/// </summary>
 	typedef void (*PublishCheckersStateCallBack)(const int* state, const int state_size,
-	                                             const SubMove* sub_moves, const int sub_moves_count);
+	                                             const SubMove* sub_moves, const int sub_moves_count, const IMinimalAgent* agent_to_play);
 
 	/// <summary>
 	///	Callback to publish training statistics
@@ -125,13 +125,13 @@ namespace TrainingCell::Checkers
 		/// <param name="episodes">Number of episodes (games) to play</param>
 		/// <param name="max_moves_without_capture">Defines maximal number of moves without a capture that will be qualified as a "draw"</param>
 		/// <param name="start_state">State from which each episode (game) should be started. Default value result in a "standard" start state of the board</param>
-		/// <param name="publishState">Callback to be called after each move. Allows caller to get some intermediate information about the process</param>
-		/// <param name="publishStats">Callback to be called after each episode (game). Allows caller to get some intermediate information about the process</param>
+		/// <param name="publish_state_callback">Callback to be called after each move. Allows caller to get some intermediate information about the process</param>
+		/// <param name="publish_stats_callback">Callback to be called after each episode (game). Allows caller to get some intermediate information about the process</param>
 		/// <param name="cancel">Callback allowing caller to cancel the process</param>
 		/// <param name="error">Callback allowing caller to get some information about errors encountered</param>
 		void play(const int episodes, const int max_moves_without_capture = 200, const std::optional<State>& start_state = std::nullopt,
-		          PublishCheckersStateCallBack publishState = nullptr,
-		          PublishTrainingStatsCallBack publishStats = nullptr, CancelCallBack cancel = nullptr,
+		          PublishCheckersStateCallBack publish_state_callback = nullptr,
+		          PublishTrainingStatsCallBack publish_stats_callback = nullptr, CancelCallBack cancel = nullptr,
 		          ErrorMessageCallBack error = nullptr);
 
 		/// <summary>

@@ -46,7 +46,7 @@ namespace Monitor.Checkers
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
             int[] state, int stateSize,
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
-            CheckersSubMove[] subMoves, int subMovesCount);
+            CheckersSubMove[] subMoves, int subMovesCount, IntPtr agentToPlayPtr);
 
         /// <summary>
         /// Checkers statistics report delegate

@@ -43,6 +43,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Background="LightGray">
                             <Button  Click="LoadWhiteAgentButton_OnClick" Name="LoadWhiteAgentButton" IsEnabled="{Binding CheckersUi.IsPlaying,
@@ -50,10 +51,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                             <Button  Click="LoadBlackAgentButton_OnClick" Name="LoadBlackAgentButton" IsEnabled="{Binding CheckersUi.IsPlaying,
                             Converter={StaticResource InvertBoolConverter}}">Load Black Agent</Button>
                             <Button Click="CancelButton_OnClick"  Name="CancelButton" IsEnabled="{Binding CheckersUi.IsPlaying}">Cancel</Button>
+                            <Button Click="EditAgentButton_OnClick"  Name="EditAgentButton" IsEnabled="{Binding CheckersUi.CanEditAgent}">Edit Agent</Button>
                             <TextBox Name = "InfoTextBox" IsReadOnly="True"></TextBox>
                         </StackPanel>
-                        <ProgressBar Grid.Row="1" Name="ProcessingBar" IsIndeterminate="True" Height="10" Visibility="{Binding CheckersUi.ShowProgressBar,
-                            Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        <DockPanel Grid.Row="1">
+                            <TextBox IsReadOnly="True" Background="LightGray" BorderThickness="0" Text="Timer:"/>
+                            <TextBox IsReadOnly="True" Background="LightGray" BorderThickness="0" Text="{Binding CheckersUi.PreviousMoveTime}"/>
+                        </DockPanel>
+                        <ProgressBar Grid.Row="2" Name="ProcessingBar" IsIndeterminate= "{Binding CheckersUi.ShowProgressBar}"  Height="15"/>
                     </Grid>
                 <DockPanel Grid.Column="0" Name="MainPanel" SizeChanged="MainPanel_OnSizeChanged">
                     <Canvas Name="MainCanvas" Background="White"></Canvas>

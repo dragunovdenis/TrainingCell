@@ -190,7 +190,6 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private Task<int> RequestUserMove(int[] state, CheckersMove[] possibleMoves)
         {
-            ShowProgressBar = false;
             if (_state == null) _state = state;
             _userMoveRequest = new MoveRequest(possibleMoves);
             Draw();
@@ -245,8 +244,18 @@ namespace Monitor.Checkers.UI
         public bool ShowProgressBar
         {
             get => _showProgressBar;
+            private set => _uiThreadDispatcher.Invoke(() => { SetField(ref _showProgressBar, value); });
+        }
 
-            private set => SetField(ref _showProgressBar, value);
+        private string _previousMoveTime = "";
+
+        /// <summary>
+        /// String representation of the time the previous move has taken
+        /// </summary>
+        public string PreviousMoveTime
+        {
+            get => _previousMoveTime;
+            set => _uiThreadDispatcher.Invoke(() => { SetField(ref _previousMoveTime, value); });
         }
 
         /// <summary>
@@ -288,6 +297,44 @@ namespace Monitor.Checkers.UI
             }
         }
 
+        private IAgent _inactiveAgent;
+
+        /// <summary>
+        /// Agent that is waiting for its turn to make a move
+        /// </summary>
+        private IAgent InactiveAgent
+        {
+            get => _inactiveAgent;
+            set
+            {
+                _uiThreadDispatcher.Invoke(() =>
+                {
+                    SetField(ref _inactiveAgent, value);
+                    OnPropertyChanged(nameof(CanEditAgent));
+                    ShowProgressBar = _inactiveAgent is InteractiveAgent;
+                });
+            }
+        }
+
+        /// <summary>
+        /// Invokes UI to edit inactive agent
+        /// </summary>
+        public void EditInactiveAgent()
+        {
+            if (InactiveAgent is TdLambdaAgent tdlInactive)
+            {
+                var dialog = new TdlAgentDialog(tdlInactive);
+                dialog.ShowDialog();
+            }
+            else
+                throw new Exception("Invalid type of inactive agent. Can't edit.");
+        }
+
+        /// <summary>
+        /// Flag indicating if agent editing is possible
+        /// </summary>
+        public bool CanEditAgent => InactiveAgent is TdLambdaAgent;
+
         /// <summary>
         /// Starts checkers game with the agents of the two given types (asynchronously) and returns immediately
         /// Returns true if the previous playing task is complete and the current one is successfully started
@@ -303,6 +350,7 @@ namespace Monitor.Checkers.UI
 
             IsPlaying = true;
             _playTaskCancellation = new CancellationTokenSource();
+
             _playTask = new Task(() =>
             {
                 using (var agentWhite = CreateAgent(agentTypeWhite, true))
@@ -312,11 +360,19 @@ namespace Monitor.Checkers.UI
                         if (agentWhite == null || agentBlack == null)
                             return;
 
+                        var timePoint = DateTime.Now;
                         DllWrapper.RunCheckersTraining(
                             agentWhite.Ptr, agentBlack.Ptr, episodes,
-                            (state, size, subMoves, subMovesCount) =>
+                            (state, size, subMoves, subMovesCount, agentToMovePtr) =>
                             {
+                                var timePointNext = DateTime.Now;
+                                var elapsedTime = timePointNext - timePoint; 
+                                PreviousMoveTime = elapsedTime.ToString(@"hh\:mm\:ss");
+                                timePoint = timePointNext;
+
                                 if (movePause > 0) Thread.Sleep(movePause);
+
+                                InactiveAgent = (agentToMovePtr == agentWhite.Ptr) ? agentBlack : agentWhite;
 
                                 _uiThreadDispatcher.Invoke(() =>
                                 {
@@ -326,6 +382,7 @@ namespace Monitor.Checkers.UI
                             },
                             (whiteWins, blackWins, totalGamers) =>
                             {
+                                InactiveAgent = null;
                                 _uiThreadDispatcher.Invoke(() =>
                                 {
                                     _state = null;
@@ -339,7 +396,14 @@ namespace Monitor.Checkers.UI
                                 });
                             }, () => _playTaskCancellation.IsCancellationRequested, 
                             (errorMessage) => _uiThreadDispatcher.Invoke(
-                                () => MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK)));
+                                () =>
+                                {
+                                    InactiveAgent = null;
+                                    MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK);
+                                }));
+
+                        InactiveAgent = null;
+                        PreviousMoveTime = "";
                     }
                 }
             });
@@ -628,7 +692,6 @@ namespace Monitor.Checkers.UI
                     //It would be nice to come up with a mechanism that would allow user to deliberately choose between the possible moves in such a (rare) cases
                     var moveId =  possibleMoves.OrderByDescending(x => x.SubMoves.Length).First().Index;
                     _userMoveRequest.UserMoveResult.SetResult(moveId);
-                    ShowProgressBar = true;
                     _userMoveRequest = null;
                 }
             }
