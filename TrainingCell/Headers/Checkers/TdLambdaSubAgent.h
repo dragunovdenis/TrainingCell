@@ -60,12 +60,12 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Previous state
 		/// </summary>
-		State _prev_state{};
+		DeepLearning::CpuDC::tensor_t _prev_state{};
 
 		/// <summary>
 		/// Previous afterstate
 		/// </summary>
-		State _prev_afterstate{};
+		DeepLearning::CpuDC::tensor_t _prev_after_state{};
 
 		/// <summary>
 		/// Number of moves taken by the sub-agent in the current episode
@@ -75,13 +75,13 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
-		[[nodiscard]] MoveData pick_move(const State& state, const std::vector<Move>& moves,
+		[[nodiscard]] MoveData pick_move(const IState& state, const std::vector<Move>& moves,
 			const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const;
 
 		/// <summary>
 		/// Calculates afterstate and its value
 		/// </summary>
-		[[nodiscard]] static MoveData evaluate(const State& state, const std::vector<Move>& moves, const int move_id,
+		[[nodiscard]] static MoveData evaluate(const IState& state, const std::vector<Move>& moves, const int move_id,
 			const DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
@@ -109,33 +109,33 @@ namespace TrainingCell::Checkers
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
 		/// </summary>
-		int make_move(const State& current_state, const std::vector<Move>& moves,
+		int make_move(const IState& current_state, const std::vector<Move>& moves,
 			const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		/// Returns index of a move from the given "move data" 
 		/// and performs all the training related actions (if those are required)
 		/// </summary>
-		int make_move(const State& current_state, const MoveData& move_data,
+		int make_move(const IState& current_state, MoveData&& move_data,
 			const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
-		void game_over(const State& final_state, const GameResult& result,
+		void game_over(const IState& final_state, const GameResult& result,
 			const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
-		[[nodiscard]] int pick_move_id(const State& state, const std::vector<Move>& moves,
+		[[nodiscard]] int pick_move_id(const IState& state, const std::vector<Move>& moves,
 			const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const;
 
 		/// <summary>
 		/// Returns index of the "best score" move (out of the collection of given ones) and the related data
 		/// </summary>
-		[[nodiscard]] static MoveData pick_move(const State& state, const std::vector<Move>& moves,
+		[[nodiscard]] static MoveData pick_move(const IState& state, const std::vector<Move>& moves,
 		                                        const DeepLearning::Net<DeepLearning::CpuDC>& net);
 
 		/// <summary>

@@ -51,7 +51,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Runs TD-tree search and returns the "found" move (together with auxiliary data)
 		/// </summary>
-		MoveData run_search(const State& current_state, const std::vector<Move>& moves) const;
+		MoveData run_search(const IState& current_state, const std::vector<Move>& moves) const;
 
 	public:
 
@@ -92,18 +92,18 @@ namespace TrainingCell::Checkers
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
 		/// </summary>
-		int make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white) override;
+		int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override;
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
-		void game_over(const State& final_state, const GameResult& result, const bool as_white) override;
+		void game_over(const IState& final_state, const GameResult& result, const bool as_white) override;
 
 		/// <summary>
 		/// Returns ID of the "best score" move, no training, no exploration
 		/// </summary>
-		[[nodiscard]] int pick_move_id(const State& current_state, const std::vector<Move>& moves, const bool as_white) const;
+		[[nodiscard]] int pick_move_id(const IState& current_state, const std::vector<Move>& moves, const bool as_white) const;
 
 		/// <summary>
 		/// Returns type ID

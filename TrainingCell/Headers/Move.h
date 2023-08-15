@@ -16,40 +16,40 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../IState.h"
+#include <vector>
+#include "SubMove.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
-	///	Representation of possible game statuses
+	/// Representation of a compound "move" in the checkers game
 	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
-	};
-
-	/// <summary>
-	/// Minimal "interface" that each checkers agent must possess
-	/// </summary>
-	class IMinimalAgent
+	class Move
 	{
 	public:
 		/// <summary>
-		/// Virtual destructor
+		/// Component moves
 		/// </summary>
-		virtual ~IMinimalAgent() = default;
+		std::vector<SubMove> sub_moves{};
 
 		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent "prefers" to take given the current state
+		/// Default constructor
 		/// </summary>
-		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
+		Move() = default;
 
 		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
+		/// Constructs "move" from a single "sub-move"
 		/// </summary>
-		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
+		Move(const SubMove& sub_move);
+
+		/// <summary>
+		/// "Inverts" the move, i.e. aligns the sub-move with "inverted" state
+		/// </summary>
+		void invert();
+
+		/// <summary>
+		/// Returns "inverted" move
+		/// </summary>
+		[[nodiscard]] Move get_inverted() const;
 	};
 }

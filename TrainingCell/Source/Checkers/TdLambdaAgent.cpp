@@ -62,7 +62,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	MoveData TdLambdaAgent::run_search(const State& current_state, const std::vector<Move>& moves) const
+	MoveData TdLambdaAgent::run_search(const IState& current_state, const std::vector<Move>& moves) const
 	{
 		if (!_search_net)
 			_search_net = std::make_optional(_net); // copy the current net if search net is not defined
@@ -70,21 +70,21 @@ namespace TrainingCell::Checkers
 		TdlTrainingAdapter adapter(&_search_net.value(), get_search_settings());
 		Board board(&adapter, &adapter);
 		board.play(_td_search_iterations,
-			100 /*max moves without capture for a draw*/, current_state);
+			100 /*max moves without capture for a draw*/, &current_state);
 
 		return TdLambdaSubAgent::pick_move(current_state, moves, _search_net.value());
 	}
 
 
-	int TdLambdaAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
+	int TdLambdaAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
 		if (_search_method == TreeSearchMethod::TD_SEARCH)
 		{
-			const auto move_data = run_search(current_state, moves);
+			auto move_data = run_search(current_state, moves);
 
 			if (get_training_mode())
 				//If the agent is in a "training" mode then we force it to "make a move" suggested by the search procedure
-				return _sub_agents[as_white].make_move(current_state, move_data, *this, _net);
+				return _sub_agents[as_white].make_move(current_state, std::move(move_data), *this, _net);
 
 			//Otherwise we just immediately output what search procedure has come up with
 			return move_data.move_id;
@@ -93,7 +93,7 @@ namespace TrainingCell::Checkers
 		return _sub_agents[as_white].make_move(current_state, moves, *this, _net);
 	}
 
-	void TdLambdaAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
+	void TdLambdaAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)
 	{
 		if (_search_method != TreeSearchMethod::NONE)
 			//in the current implementation search net should be reset at the end of each episode
@@ -102,7 +102,7 @@ namespace TrainingCell::Checkers
 		_sub_agents[as_white].game_over(final_state, result, *this, _net);
 	}
 
-	int TdLambdaAgent::pick_move_id(const State& current_state, const std::vector<Move>& moves, const bool as_white) const
+	int TdLambdaAgent::pick_move_id(const IState& current_state, const std::vector<Move>& moves, const bool as_white) const
 	{
 		if (_search_method == TreeSearchMethod::TD_SEARCH)
 			return run_search(current_state, moves).move_id;

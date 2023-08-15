@@ -41,7 +41,7 @@ void RunCheckersTraining(TrainingCell::Checkers::Agent* const agent1,
 	TrainingCell::Checkers::ErrorMessageCallBack errorCallBack)
 {
 	TrainingCell::Checkers::Board board(agent1, agent2);
-	board.play(episodes, 200, std::nullopt, publishStateCallBack, publishStatsCallBack,
+	board.play(episodes, 200, nullptr, publishStateCallBack, publishStatsCallBack,
 		cancellationCallBack, errorCallBack);
 }
 #pragma region Random Agent
@@ -280,18 +280,18 @@ void* ConstructCheckersInteractiveAgent(const CheckersMakeMoveCallBack make_move
 			return nullptr;
 
 		return new TrainingCell::Checkers::InteractiveAgent(
-			[=](const TrainingCell::Checkers::State& state, std::vector<TrainingCell::Checkers::Move> moves)
+			[=](const std::vector<int>& state, std::vector<TrainingCell::Move> moves)
 			{
 				std::vector<CheckersMoveDto> moves_dto;
 				moves_dto.reserve(moves.size());
 				for (auto& move : moves)
 					moves_dto.push_back(CheckersMoveDto{ move.sub_moves.data(), static_cast<int>(move.sub_moves.size()) });
 
-				return make_move_callback(reinterpret_cast<const int*>(state.data()), static_cast<int>(state.size()), moves_dto.data(), static_cast<int>(moves_dto.size()));
+				return make_move_callback(state.data(), static_cast<int>(state.size()), moves_dto.data(), static_cast<int>(moves_dto.size()));
 			},
-			[=](const TrainingCell::Checkers::State& state, const TrainingCell::Checkers::GameResult& result)
+			[=](const std::vector<int>& state, const TrainingCell::Checkers::GameResult& result)
 			{
-				game_over_callback(reinterpret_cast<const int*>(state.data()), static_cast<int>(state.size()), static_cast<int>(result));
+				game_over_callback(state.data(), static_cast<int>(state.size()), static_cast<int>(result));
 				
 			}, play_for_whites);
 	}

@@ -15,41 +15,26 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#pragma once
-#include "../IState.h"
+#include "../Headers/Move.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	/// <summary>
-	///	Representation of possible game statuses
-	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
-	};
 
-	/// <summary>
-	/// Minimal "interface" that each checkers agent must possess
-	/// </summary>
-	class IMinimalAgent
+	Move::Move(const SubMove& sub_move)
 	{
-	public:
-		/// <summary>
-		/// Virtual destructor
-		/// </summary>
-		virtual ~IMinimalAgent() = default;
+		sub_moves.push_back(sub_move);
+	}
 
-		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent "prefers" to take given the current state
-		/// </summary>
-		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
+	void Move::invert()
+	{
+		for (auto& sub_move : sub_moves)
+			sub_move.invert();
+	}
 
-		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
-		/// </summary>
-		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
-	};
+	Move Move::get_inverted() const
+	{
+		auto result = *this;
+		result.invert();
+		return result;
+	}
 }

@@ -86,14 +86,14 @@ namespace TrainingCell::Checkers
 				static_cast<int>(move.sub_moves.size()), agent_to_play);
 	}
 
-	void Board::play(const int episodes, const int max_moves_without_capture, const std::optional<State>& start_state,
+	void Board::play(const int episodes, const int max_moves_without_capture, const IState* start_state,
 		PublishCheckersStateCallBack publish_state_callback,
 		PublishTrainingStatsCallBack publish_stats_callback,
 		CancelCallBack cancel,
 		ErrorMessageCallBack error)
 	{
-		if (start_state.has_value())
-			_start_state = start_state.value();
+		if (start_state)
+			_start_state.assign(start_state->to_std_vector());
 
 		try
 		{
@@ -106,9 +106,9 @@ namespace TrainingCell::Checkers
 				reset_state();
 				Move last_move{};
 				publish_state(publish_state_callback, _state, last_move, agent_to_move());
-				while ((last_move = make_move(publish_state_callback)).is_valid() && moves_without_capture < max_moves_without_capture)
+				while (Utils::is_valid(last_move = make_move(publish_state_callback)) && moves_without_capture < max_moves_without_capture)
 				{
-					if (last_move.sub_moves[0].capture.is_valid())
+					if (Utils::is_valid(last_move.sub_moves[0].capture))
 						moves_without_capture = 0;
 					else
 						moves_without_capture++;
@@ -117,7 +117,7 @@ namespace TrainingCell::Checkers
 						break;//this will be qualified as a "draw"
 				}
 
-				if (!last_move.is_valid()) //win case
+				if (!Utils::is_valid(last_move)) //win case
 				{
 					if (_agent_to_move_id == 1)
 						_whitesWin++;

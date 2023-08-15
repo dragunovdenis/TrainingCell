@@ -58,11 +58,11 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// See summary of the base class declaration
 		/// </summary>
-		int make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white) override;
+		int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override;
 
 		/// <summary>
 		/// See summary of the base class declaration
 		/// </summary>
-		void game_over(const State& final_state, const GameResult& result, const bool as_white) override;
+		void game_over(const IState& final_state, const GameResult& result, const bool as_white) override;
 	};
 }

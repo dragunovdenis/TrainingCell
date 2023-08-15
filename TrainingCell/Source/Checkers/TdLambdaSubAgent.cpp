@@ -22,7 +22,7 @@
 
 namespace TrainingCell::Checkers
 {
-	MoveData TdLambdaSubAgent::pick_move(const State& state, const std::vector<Move>& moves,
+	MoveData TdLambdaSubAgent::pick_move(const IState& state, const std::vector<Move>& moves,
 		const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const
 	{
 		if (moves.empty())
@@ -35,7 +35,7 @@ namespace TrainingCell::Checkers
 		return pick_move(state, moves, net);
 	}
 
-	MoveData TdLambdaSubAgent::pick_move(const State& state, const std::vector<Move>& moves,
+	MoveData TdLambdaSubAgent::pick_move(const IState& state, const std::vector<Move>& moves,
 		const DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
 		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() };
@@ -54,13 +54,12 @@ namespace TrainingCell::Checkers
 		return best_move_data;
 	}
 
-	MoveData TdLambdaSubAgent::evaluate(const State& state, const std::vector<Move>& moves,
+	MoveData TdLambdaSubAgent::evaluate(const IState& state, const std::vector<Move>& moves,
 		const int move_id, const DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
-		auto afterstate = state;
-		afterstate.make_move(moves[move_id], true, false);
-		const auto value = net.act(afterstate.to_tensor())(0, 0, 0);
-		return { move_id,  value, afterstate };
+		auto afterstate = state.get_state(moves[move_id]);
+		const auto value = net.act(afterstate)(0, 0, 0);
+		return { move_id,  value, std::move(afterstate) };
 	}
 
 	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
@@ -70,7 +69,7 @@ namespace TrainingCell::Checkers
 
 		auto& gradient_alias = long_evaluation ? _gradient_cache : _z;
 
-		net.calc_gradient_and_value(_prev_afterstate.to_tensor(),
+		net.calc_gradient_and_value(_prev_after_state,
 			_value_cache, DeepLearning::CostFunctionId::LINEAR,
 			gradient_alias, _value_cache, _context);
 
@@ -93,15 +92,15 @@ namespace TrainingCell::Checkers
 	TdLambdaSubAgent::TdLambdaSubAgent(const bool is_white) : _is_white(is_white)
 	{}
 
-	int TdLambdaSubAgent::make_move(const State& current_state, const std::vector<Move>& moves,
+	int TdLambdaSubAgent::make_move(const IState& current_state, const std::vector<Move>& moves,
 	                                const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
-		const auto move_data = pick_move(current_state, moves, settings, net);
-		return make_move(current_state, move_data, settings, net);
+		auto move_data = pick_move(current_state, moves, settings, net);
+		return make_move(current_state, std::move(move_data), settings, net);
 	}
 
-	int TdLambdaSubAgent::make_move(const State& current_state, 
-		const MoveData& move_data,
+	int TdLambdaSubAgent::make_move(const IState& current_state, 
+		MoveData&& move_data,
 		const ITdlSettingsReadOnly& settings,
 		DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
@@ -112,30 +111,31 @@ namespace TrainingCell::Checkers
 
 		if (_new_game)
 		{
-			_prev_afterstate = move_data.after_state;
-			_prev_state = current_state;
+			_prev_after_state = std::move(move_data.after_state);
+			_prev_state = current_state.to_tensor();
 			_new_game = false;
 			return move_data.move_id;
 		}
 
+		auto current_state_tensor = current_state.to_tensor();
 		const auto reward = settings.get_reward_factor() <= 0.0 ? 0.0 : settings.get_reward_factor() *
-			Utils::calculate_reward(_prev_state, current_state);
+			current_state.calc_reward(_prev_state, current_state_tensor);
 
 		const auto prev_afterstate_value = update_z_and_evaluate_prev_after_state(settings, net);
 		const auto delta = reward + settings.get_discount() * move_data.value - prev_afterstate_value;
 
 		net.update(_z, -settings.get_learning_rate() * delta, 0.0);
 
-		_prev_afterstate = move_data.after_state;
-		_prev_state = current_state;
+		_prev_after_state = std::move(move_data.after_state);
+		_prev_state = std::move(current_state_tensor);
 
 		return move_data.move_id;
 	}
 
-	void TdLambdaSubAgent::game_over(const State& final_state, const GameResult& result, 
+	void TdLambdaSubAgent::game_over(const IState& final_state, const GameResult& result, 
 		const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
-		if (settings.get_training_mode(_is_white))
+		if (settings.get_training_mode(_is_white) && !_new_game)
 		{
 			const auto moves_to_discount = _move_counter - settings.get_train_depth();
 			const auto discount_factor = moves_to_discount <= 0 ? 1.0 : pow(settings.get_discount(), moves_to_discount);
@@ -148,7 +148,7 @@ namespace TrainingCell::Checkers
 		reset();
 	}
 
-	int TdLambdaSubAgent::pick_move_id(const State& state, const std::vector<Move>& moves,
+	int TdLambdaSubAgent::pick_move_id(const IState& state, const std::vector<Move>& moves,
 		const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const
 	{
 		return pick_move(state, moves, settings, net).move_id;
@@ -158,6 +158,6 @@ namespace TrainingCell::Checkers
 	{
 		return _z == another_sub_agent._z &&
 			_prev_state == another_sub_agent._prev_state &&
-			_prev_afterstate == another_sub_agent._prev_afterstate;
+			_prev_after_state == another_sub_agent._prev_after_state;
 	}
 }

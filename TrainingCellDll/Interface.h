@@ -18,6 +18,7 @@
 #pragma once
 #include "../TrainingCell/Headers/Checkers/Board.h"
 #include "../TrainingCell/Headers/Checkers/Agent.h"
+#include "../TrainingCell/Headers/Move.h"
 
 #ifdef TRAINING_CELL_EXPORTS
 #define TRAINING_CELL_API __declspec(dllexport)
@@ -227,7 +228,7 @@ extern "C"
 		/// <summary>
 		///	Pointer to the array of sub_moves
 		/// </summary>
-		TrainingCell::Checkers::SubMove* sub_moves{};
+		TrainingCell::SubMove* sub_moves{};
 
 		/// <summary>
 		///	Number of sub-moves in the array

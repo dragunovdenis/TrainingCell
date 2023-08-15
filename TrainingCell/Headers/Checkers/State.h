@@ -19,6 +19,9 @@
 #include <array>
 #include <vector>
 #include <msgpack.hpp>
+#include "../Checkerboard.h"
+#include "../Move.h"
+#include "../IState.h"
 
 namespace DeepLearning
 {
@@ -72,156 +75,8 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] StateScore diff(const StateScore& score_to_subtract) const;
 	};
 
-
-	/// <summary>
-	///	Representation of possible game statuses
-	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
-	};
-
-	/// <summary>
-	/// A data structure representing row and column occupied by a piece on the board
-	/// </summary>
-	struct PiecePosition
-	{
-		/// <summary>
-		///	Returns invalid position
-		/// </summary>
-		static PiecePosition create_invalid();
-
-		/// <summary>
-		/// Row occupied by a piece
-		/// </summary>
-		long long row {-1};
-
-		/// <summary>
-		/// Column occupied by a piece
-		/// </summary>
-		long long col {-1};
-
-		/// <summary>
-		///	Equality operator
-		/// </summary>
-		bool operator ==(const PiecePosition& pos) const;
-
-		/// <summary>
-		///	Inequality operator
-		/// </summary>
-		bool operator !=(const PiecePosition& pos) const;
-
-		/// <summary>
-		///	Returns true if the current position is a valid position on the checkers board (a valid black field on the board)
-		/// </summary>
-		[[nodiscard]] bool is_valid() const;
-
-		/// <summary>
-		///	Returns a piece position that is achieved from the current one by moving for the given (signed) number of steps
-		///	in the "right" or "left" diagonals
-		///	A move in the "right" diagonal is assumed to be the one when both row and column
-		///	coordinates are either simultaneously increase (for positive step) or decrease (for negative step).
-		///	A move in the "left" diagonal is when either row coordinate increases and column coordinate decreases (for positive step)
-		///	of vice versa (for negative step)
-		///	The returned position might be invalid (reside outside the board), use the corresponding method to check validity
-		/// </summary>
-		[[nodiscard]] PiecePosition move(const int step, bool rightDiagonal) const;
-
-		/// <summary>
-		///	Returns position on the checkers board that can be obtained from the current one by moving towards the
-		///	given "pointer" position by the given "step". "Pointer" position must be on the same diagonal as the current position
-		///	as well as be distinct from the current position
-		///	one otherwise exception will be thrown
-		/// </summary>
-		[[nodiscard]] PiecePosition move(const int step, const PiecePosition& pointer) const;
-
-		/// <summary>
-		///	Returns true if the given and current positions share same diagonal on the checkers board
-		/// </summary>
-		[[nodiscard]] bool is_same_diagonal(const PiecePosition& pos) const;
-	};
-
-	/// <summary>
-	///	The simplest move
-	/// </summary>
-	struct SubMove
-	{
-		/// <summary>
-		///	Start position of the piece that "moves"
-		/// </summary>
-		PiecePosition start;
-		/// <summary>
-		///	End position of the piece that "moves"
-		/// </summary>
-		PiecePosition end;
-		/// <summary>
-		/// Position of a captured piece (if valid)
-		/// </summary>
-		PiecePosition capture;
-
-		/// <summary>
-		///	Returns "true" if the move passes validation checks
-		/// </summary>
-		[[nodiscard]] bool is_valid() const;
-
-		/// <summary>
-		///	"Inverts" the sub-move, i.e. aligns the sub-move with "inverted" state
-		/// </summary>
-		void invert();
-
-		/// <summary>
-		///	Returns "inverted" sub-move
-		/// </summary>
-		[[nodiscard]] SubMove get_inverted() const;
-	};
-
-	/// <summary>
-	///	Representation of a compound "move" in the checkers game
-	/// </summary>
-	class Move
-	{
-	public:
-		/// <summary>
-		///	Component moves
-		/// </summary>
-		std::vector<SubMove> sub_moves {};
-
-		/// <summary>
-		///	Returns "true" if the current instance of a "move" has passed validation
-		/// </summary>
-		[[nodiscard]] bool is_valid() const;
-
-		/// <summary>
-		///	Appends the given move to the current one
-		/// </summary>
-		void append(const Move& move);
-
-		/// <summary>
-		///	Default constructor
-		/// </summary>
-		Move() = default;
-
-		/// <summary>
-		///	Constructs "move" from a single "sub-move"
-		/// </summary>
-		Move(const SubMove& sub_move);
-
-		/// <summary>
-		///	"Inverts" the move, i.e. aligns the sub-move with "inverted" state
-		/// </summary>
-		void invert();
-
-		/// <summary>
-		///	Returns "inverted" move
-		/// </summary>
-		[[nodiscard]] Move get_inverted() const;
-	};
-
-	constexpr int BoardRows = 8;
-	constexpr int BoardColumns = 8;
-	constexpr int FieldsInRow = BoardColumns / 2;
-	constexpr int StateSize = BoardRows * FieldsInRow;
+	constexpr int FieldsInRow = Checkerboard::Columns / 2;
+	constexpr int StateSize = Checkerboard::Rows * FieldsInRow;
 	
 	/// <summary>
 	///	Alias to make the messge-pack macros below happy
@@ -231,22 +86,34 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	/// A data structure to represent state of the checkers game
 	/// </summary>
-	class State : public State_array
+	class State : public State_array, public IState
 	{
 	private:
 		bool _inverted{};
+
+		/// <summary>
+		/// Calculates score of the state
+		/// </summary>
+		[[nodiscard]] StateScore calc_score() const;
+
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(State_array), _inverted)
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		State() = default;
+		State() : State_array() {}
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		explicit State(const State_array& state_array, const bool inverted = false);
+
+		/// <summary>
+		/// Size of the state.
+		/// Literally, number of elements in the "tensor" representation of the state
+		///</summary>
+		[[nodiscard]] std::size_t dim() const override;
 
 		/// <summary>
 		/// Returns "true" if the state is reversed with respect to its initial "orientation"
@@ -292,6 +159,11 @@ namespace TrainingCell::Checkers
 		void make_move(const Move& move, const bool remove_captured, const bool mark_trace = false);
 
 		/// <summary>
+		/// Returns tensor representation of the current state after given `move` was applied to it
+		/// </summary>
+		[[nodiscard]] DeepLearning::Tensor get_state(const Move& move) const override;
+
+		/// <summary>
 		///	Makes the move
 		/// </summary>
 		void make_move(const SubMove& sub_move, const bool remove_captured);
@@ -312,14 +184,31 @@ namespace TrainingCell::Checkers
 		void invert();
 
 		/// <summary>
-		///	Calculates score of the state
-		/// </summary>
-		[[nodiscard]] StateScore calc_score() const;
+		/// Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
+		/// in the form of integer vector
+		///// </summary>
+		[[nodiscard]] std::vector<int> get_inverted_std() const override;
+
+		/// <summary>
+		/// Calculates reward for the given pair of previous and next after-states represented with "raw" tensors
+		/// (those that can be obtained by calling `to_tensor` method below)
+		///</summary>
+		[[nodiscard]] double calc_reward(const DeepLearning::Tensor& prev_after_state, const DeepLearning::Tensor& next_after_state) const override;
 
 		/// <summary>
 		///	Converts the current state to tensor representation
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor to_tensor() const;
+		[[nodiscard]] DeepLearning::Tensor to_tensor() const override;
+
+		/// <summary>
+		/// Returns int vector representation of the state
+		/// </summary>
+		[[nodiscard]] std::vector<int> to_std_vector() const override;
+
+		/// <summary>
+		/// Assigns the current instance of state with the given vector representation
+		/// </summary>
+		void assign(const std::vector<int>& state_vect);
 
 		/// <summary>
 		///	Returns collection of available moves for the current state
@@ -397,12 +286,6 @@ namespace TrainingCell::Checkers
 		static Piece get_anti_piece(const Piece& piece);
 
 		/// <summary>
-		///	Returns the "inverted" position with respect to the given one
-		///	In the other words, this operation aligns the given position with the "inverted" state (see, State::invert())
-		/// </summary>
-		static PiecePosition invert(const PiecePosition& pos);
-
-		/// <summary>
 		///	Returns collection of all the possible non-capturing moves starting from the given position along the given diagonal
 		///	and the given direction
 		/// </summary>
@@ -430,9 +313,48 @@ namespace TrainingCell::Checkers
 		static std::vector<Move> get_moves(const State& current_state);
 
 		/// <summary>
-		/// Calculates reward based on the given initial and final state of the game
+		/// Returns a piece position that is achieved from the given one by moving for the given (signed) number of steps
+		/// in the "right" or "left" diagonals
+		/// A move in the "right" diagonal is assumed to be the one when both row and column
+		/// coordinates are either simultaneously increase (for positive step) or decrease (for negative step).
+		/// A move in the "left" diagonal is when either row coordinate increases and column coordinate decreases (for positive step)
+		/// of vice versa (for negative step)
+		/// The returned position might be invalid (reside outside the board), use the corresponding method to check validity
 		/// </summary>
-		static double calculate_reward(const State& init_state, const State& final_state);
+		static PiecePosition move(const PiecePosition& start_pos, const int step, bool rightDiagonal);
+
+		/// <summary>
+		/// Returns position on the checkers board that can be obtained from the current one by moving towards the
+		/// given "pointer" position by the given "step". "Pointer" position must be on the same diagonal as the current position
+		/// as well as be distinct from the current position
+		/// one otherwise exception will be thrown
+		/// </summary>
+		static PiecePosition move(const PiecePosition& start_pos, const int step, const PiecePosition& pointer);
+
+		/// <summary>
+		/// Returns true if the two given positions share same diagonal on the checkers board
+		/// </summary>
+		static bool is_same_diagonal(const PiecePosition& start_pos, const PiecePosition& pos);
+
+		/// <summary>
+		/// Returns true if the given position is a valid position on the checkers board (a valid black field on the board)
+		/// </summary>
+		static bool is_valid(const PiecePosition& pos);
+
+		/// <summary>
+		/// Returns "true" if the given sub-move passes validation checks
+		/// </summary>
+		static bool is_valid(const SubMove& sub_move);
+
+		/// <summary>
+		/// Returns "true" if the given instance of a "move" has passed validation
+		/// </summary>
+		static bool is_valid(const Move& move);
+
+		/// <summary>
+		/// Appends one of the given moves to another one
+		/// </summary>
+		static void append(Move& move_to_append_to, const Move& move);
 	};
 }
 

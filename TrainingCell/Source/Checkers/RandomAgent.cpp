@@ -20,12 +20,12 @@
 
 namespace TrainingCell::Checkers
 {
-	int RandomAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
+	int RandomAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
 		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
 	}
 
-	void RandomAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
+	void RandomAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)
 	{
 		//Just do nothing because this agent can't improve its performance
 	}

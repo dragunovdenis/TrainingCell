@@ -62,9 +62,9 @@ namespace TrainingCell::Checkers
 		double value{};
 
 		/// <summary>
-		/// After-sate resulted from the move
+		/// After-sate resulted from the move (in a form of tensor, see 'State::to_tensor()')
 		/// </summary>
-		State after_state{};
+		DeepLearning::CpuDC::tensor_t after_state{};
 	};
 
 	/// <summary>

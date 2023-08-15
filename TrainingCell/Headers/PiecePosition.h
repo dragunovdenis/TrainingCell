@@ -16,40 +16,39 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../IState.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
-	///	Representation of possible game statuses
+	/// Position of a piece on a checkerboard
 	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
-	};
-
-	/// <summary>
-	/// Minimal "interface" that each checkers agent must possess
-	/// </summary>
-	class IMinimalAgent
+	struct PiecePosition
 	{
-	public:
 		/// <summary>
-		/// Virtual destructor
+		/// Row occupied by a piece
 		/// </summary>
-		virtual ~IMinimalAgent() = default;
+		long long row{ -1 };
 
 		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent "prefers" to take given the current state
+		/// Column occupied by a piece
 		/// </summary>
-		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
+		long long col{ -1 };
 
 		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
+		/// Equality operator
 		/// </summary>
-		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
+		bool operator ==(const PiecePosition& pos) const;
+
+		/// <summary>
+		/// Inequality operator
+		/// </summary>
+		bool operator !=(const PiecePosition& pos) const;
+
+		/// <summary>
+		/// Returns the "inverted" position with respect to the current one
+		/// In the other words, this operation aligns the given position with the "inverted" state (see, State::invert())
+		/// </summary>
+		PiecePosition invert() const;
 	};
+
 }

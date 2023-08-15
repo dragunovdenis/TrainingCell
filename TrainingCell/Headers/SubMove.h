@@ -16,40 +16,36 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../IState.h"
+#include "PiecePosition.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
-	///	Representation of possible game statuses
+	/// The simplest move
 	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
-	};
-
-	/// <summary>
-	/// Minimal "interface" that each checkers agent must possess
-	/// </summary>
-	class IMinimalAgent
+	struct SubMove
 	{
-	public:
 		/// <summary>
-		/// Virtual destructor
+		/// Start position of the piece that "moves"
 		/// </summary>
-		virtual ~IMinimalAgent() = default;
+		PiecePosition start;
+		/// <summary>
+		/// End position of the piece that "moves"
+		/// </summary>
+		PiecePosition end;
+		/// <summary>
+		/// Position of a captured piece (if valid)
+		/// </summary>
+		PiecePosition capture;
 
 		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent "prefers" to take given the current state
+		/// "Inverts" the sub-move, i.e. aligns the sub-move with "inverted" state
 		/// </summary>
-		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
+		void invert();
 
 		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
+		/// Returns "inverted" sub-move
 		/// </summary>
-		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
+		[[nodiscard]] SubMove get_inverted() const;
 	};
 }

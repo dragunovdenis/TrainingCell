@@ -26,12 +26,12 @@ namespace TrainingCell::Checkers
 			throw std::exception("Invalid pointer to the neural network");
 	}
 
-	int TdlTrainingAdapter::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
+	int TdlTrainingAdapter::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
 		return _sub_agents[as_white].make_move(current_state, moves, _settings, *_net_ptr);
 	}
 
-	void TdlTrainingAdapter::game_over(const State& final_state, const GameResult& result, const bool as_white)
+	void TdlTrainingAdapter::game_over(const IState& final_state, const GameResult& result, const bool as_white)
 	{
 		_sub_agents[as_white].game_over(final_state, result, _settings, *_net_ptr);
 	}

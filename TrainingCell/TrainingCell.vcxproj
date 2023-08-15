@@ -15,6 +15,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\Checkerboard.h" />
     <ClInclude Include="Headers\Checkers\Agent.h" />
     <ClInclude Include="Headers\Checkers\AgentPack.h" />
     <ClInclude Include="Headers\Checkers\AgentTypeId.h" />
@@ -31,6 +32,10 @@
     <ClInclude Include="Headers\Checkers\TdlSettings.h" />
     <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
     <ClInclude Include="Headers\Checkers\State.h" />
+    <ClInclude Include="Headers\IState.h" />
+    <ClInclude Include="Headers\Move.h" />
+    <ClInclude Include="Headers\PiecePosition.h" />
+    <ClInclude Include="Headers\SubMove.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\Agent.cpp" />
@@ -47,6 +52,9 @@
     <ClCompile Include="Source\Checkers\TdlTrainingAdapter.cpp" />
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
     <ClCompile Include="Source\Checkers\State.cpp" />
+    <ClCompile Include="Source\Move.cpp" />
+    <ClCompile Include="Source\PiecePosition.cpp" />
+    <ClCompile Include="Source\SubMove.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -75,6 +75,21 @@
     <ClInclude Include="Headers\Checkers\TdlTrainingAdapter.h">
       <Filter>Header Files\Checkers\TDL</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\IState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkerboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\PiecePosition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\SubMove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Move.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\State.cpp">
@@ -118,6 +133,15 @@
     </ClCompile>
     <ClCompile Include="Source\Checkers\TdlTrainingAdapter.cpp">
       <Filter>Source Files\Checkers\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\PiecePosition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SubMove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Move.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

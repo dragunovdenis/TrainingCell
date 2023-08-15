@@ -17,6 +17,7 @@
 
 #pragma once
 #include "IMinimalAgent.h"
+#include "State.h"
 
 namespace TrainingCell::Checkers
 {
@@ -129,7 +130,7 @@ namespace TrainingCell::Checkers
 		/// <param name="publish_stats_callback">Callback to be called after each episode (game). Allows caller to get some intermediate information about the process</param>
 		/// <param name="cancel">Callback allowing caller to cancel the process</param>
 		/// <param name="error">Callback allowing caller to get some information about errors encountered</param>
-		void play(const int episodes, const int max_moves_without_capture = 200, const std::optional<State>& start_state = std::nullopt,
+		void play(const int episodes, const int max_moves_without_capture = 200, const IState* start_state = nullptr,
 		          PublishCheckersStateCallBack publish_state_callback = nullptr,
 		          PublishTrainingStatsCallBack publish_stats_callback = nullptr, CancelCallBack cancel = nullptr,
 		          ErrorMessageCallBack error = nullptr);

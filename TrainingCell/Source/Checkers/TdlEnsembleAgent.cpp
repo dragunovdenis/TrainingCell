@@ -74,7 +74,7 @@ namespace TrainingCell::Checkers
 		return _ensemble[id];
 	}
 
-	int TdlEnsembleAgent::make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white)
+	int TdlEnsembleAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
 		if (moves.empty())
 			return -1;
@@ -93,7 +93,7 @@ namespace TrainingCell::Checkers
 		return static_cast<int>(std::distance(votes.begin(), std::ranges::max_element(votes)));
 	}
 
-	void TdlEnsembleAgent::game_over(const State& final_state, const GameResult& result, const bool as_white)
+	void TdlEnsembleAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)
 	{
 		set_single_agent_mode(is_single_agent_mode());
 	}
@@ -126,12 +126,12 @@ namespace TrainingCell::Checkers
 			int _chosen_agent_id = -1;
 			MSGPACK_DEFINE(MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id);
 
-			int make_move(const State& current_state, const std::vector<Move>& moves, const bool as_white) override
+			int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override
 			{
 				throw std::exception("Not implemented");
 			};
 
-			void game_over(const State& final_state, const GameResult& result, const bool as_white) override
+			void game_over(const IState& final_state, const GameResult& result, const bool as_white) override
 			{
 				throw std::exception("Not implemented");
 			}

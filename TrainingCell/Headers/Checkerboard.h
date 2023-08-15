@@ -16,40 +16,16 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../IState.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
-	///	Representation of possible game statuses
-	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
-	};
-
-	/// <summary>
-	/// Minimal "interface" that each checkers agent must possess
-	/// </summary>
-	class IMinimalAgent
+	/// Checkerboard-related definitions
+	///</summary>
+	class Checkerboard
 	{
 	public:
-		/// <summary>
-		/// Virtual destructor
-		/// </summary>
-		virtual ~IMinimalAgent() = default;
-
-		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent "prefers" to take given the current state
-		/// </summary>
-		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
-
-		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
-		/// </summary>
-		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
+		static constexpr int Rows = 8;
+		static constexpr int Columns = Rows;
 	};
 }
