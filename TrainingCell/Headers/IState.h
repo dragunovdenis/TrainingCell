@@ -44,6 +44,13 @@ namespace TrainingCell
 		[[nodiscard]] virtual DeepLearning::Tensor get_state(const Move& move) const = 0;
 
 		/// <summary>
+		/// Makes the move
+		/// </summary>
+		/// <param name="move">Move to "make"</param>
+		/// <param name="remove_extra_markers">If "false", state will contain auxiliary markers "illustrating" details of the move</param>
+		virtual void make_move(const Move& move, const bool remove_extra_markers) = 0;
+
+		/// <summary>
 		///	Returns tensor representation of the current state
 		/// </summary>
 		[[nodiscard]] virtual DeepLearning::Tensor to_tensor() const = 0;
@@ -54,10 +61,25 @@ namespace TrainingCell
 		[[nodiscard]] virtual std::vector<int> to_std_vector() const = 0;
 
 		/// <summary>
-		///	Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
+		/// Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
 		/// in the form of integer vector
 		///// </summary>
 		[[nodiscard]] virtual std::vector<int> get_inverted_std() const = 0;
+
+		/// <summary>
+		/// Returns collection of available moves for the current state
+		/// </summary>
+		[[nodiscard]] virtual std::vector<Move> get_moves() const = 0;
+
+		/// <summary>
+		/// "Inverts" the state
+		/// </summary>
+		void virtual invert() = 0;
+
+		/// <summary>
+		/// Returns "true" if the state is reversed with respect to its initial "orientation" (the one it was created)
+		/// </summary>
+		[[nodiscard]] virtual bool is_inverted() const = 0;
 
 		/// <summary>
 		/// Calculates for the given pair of previous and next after-states represented with "raw" tensors
@@ -65,5 +87,10 @@ namespace TrainingCell
 		///</summary>
 		[[nodiscard]] virtual double calc_reward(const DeepLearning::Tensor& prev_after_state,
 			const DeepLearning::Tensor& next_after_state) const = 0;
+
+		/// <summary>
+		/// Returns copy of the current instance
+		/// </summary>
+		[[nodiscard]] virtual std::unique_ptr<IState> copy() const = 0;
 	};
 }

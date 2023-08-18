@@ -74,7 +74,7 @@ namespace TrainingCellTest
 			{
 				const auto moves = state.get_moves();
 				const auto move_id = agent.make_move(state, moves, true);
-				state.make_move(moves[move_id], true, false);
+				state.make_move(moves[move_id], true);
 				state.invert();
 			}
 			//Set some none-trivial search mode after iterations to save time

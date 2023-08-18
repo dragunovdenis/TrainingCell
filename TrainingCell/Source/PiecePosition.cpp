@@ -34,4 +34,9 @@ namespace TrainingCell
 	{
 		return PiecePosition{ Checkerboard::Rows - 1 - row,  Checkerboard::Columns - 1 - col };
 	}
+
+	bool PiecePosition::is_valid() const
+	{
+		return (col >= 0) && (col < Checkerboard::Columns) && (row >= 0) && (row < Checkerboard::Rows);
+	}
 }

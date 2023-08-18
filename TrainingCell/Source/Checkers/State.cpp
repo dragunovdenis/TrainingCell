@@ -176,13 +176,9 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	void State::assign(const std::vector<int>& state_vect)
+	std::unique_ptr<IState> State::copy() const
 	{
-		if (size() != state_vect.size())
-			throw std::exception("Inconsistent data");
-
-		std::ranges::transform(state_vect, begin(),
-			[](const auto& piece) { return static_cast<Piece>(piece); });
+		return std::make_unique<State>(*this);
 	}
 
 	std::vector<Move> State::get_moves() const
@@ -251,17 +247,17 @@ namespace TrainingCell::Checkers
 		return true;
 	}
 
-	void State::make_move(const Move& move, const bool remove_captured, const bool mark_trace)
+	void State::make_move(const Move& move, const bool remove_extra_markers)
 	{
 		if (!is_valid_move(move))
 			throw std::exception("Invalid move");
 
 		for (auto subMoveId = 0ull; subMoveId < move.sub_moves.size(); subMoveId++)
 		{
-			const auto capturePos = move.sub_moves[subMoveId].capture;
+			const auto& capturePos = move.sub_moves[subMoveId].capture;
 
 			if (Utils::is_valid(capturePos))
-				get_piece(capturePos) = remove_captured ? Piece::Space : Piece::AntiCaptured;
+				get_piece(capturePos) = remove_extra_markers ? Piece::Space : Piece::AntiCaptured;
 		}
 
 		auto piece_to_move = get_piece(move.sub_moves[0].start);
@@ -274,7 +270,7 @@ namespace TrainingCell::Checkers
 
 		get_piece(move.sub_moves.rbegin()[0].end) = piece_to_move;
 
-		if (mark_trace)
+		if (!remove_extra_markers)
 			for (auto subMoveId = 0ull; subMoveId < move.sub_moves.size(); subMoveId++)
 				get_piece(move.sub_moves[subMoveId].start) = Piece::TraceMarker;
 		else
@@ -284,7 +280,7 @@ namespace TrainingCell::Checkers
 	DeepLearning::Tensor State::get_state(const Move& move) const
 	{
 		auto result = *this;
-		result.make_move(move, /*remove_captured*/ true, /*mark_trace*/ false);
+		result.make_move(move, /*remove_extra_markers*/ true);
 		return result.to_tensor();
 	}
 
@@ -585,8 +581,7 @@ namespace TrainingCell::Checkers
 
 	bool Utils::is_valid(const PiecePosition& pos)
 	{
-		return pos.col >= 0 && pos.col < Checkerboard::Columns&& pos.row >= 0 && pos.row < Checkerboard::Rows &&
-			(pos.col % 2 == (pos.row % 2 == 0) ? 1 : 0);
+		return pos.is_valid() && (pos.col % 2 == (pos.row % 2 == 0) ? 1 : 0);
 	}
 
 	bool Utils::is_valid(const SubMove& sub_move)

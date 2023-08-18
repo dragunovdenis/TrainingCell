@@ -69,8 +69,7 @@ namespace TrainingCell::Checkers
 
 		TdlTrainingAdapter adapter(&_search_net.value(), get_search_settings());
 		Board board(&adapter, &adapter);
-		board.play(_td_search_iterations,
-			100 /*max moves without capture for a draw*/, &current_state);
+		board.play(_td_search_iterations, current_state, 100 /*max moves without capture for a draw*/);
 
 		return TdLambdaSubAgent::pick_move(current_state, moves, _search_net.value());
 	}

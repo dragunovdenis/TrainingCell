@@ -49,6 +49,11 @@ namespace TrainingCell
 		/// In the other words, this operation aligns the given position with the "inverted" state (see, State::invert())
 		/// </summary>
 		PiecePosition invert() const;
+
+		/// <summary>
+		/// Returns "true" if the current instance is valid
+		/// </summary>
+		bool is_valid() const;
 	};
 
 }

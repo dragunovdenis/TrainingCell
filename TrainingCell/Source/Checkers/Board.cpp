@@ -37,13 +37,18 @@ namespace TrainingCell::Checkers
 		return _agents[next_agent_id()];
 	}
 
+	IState& Board::state() const
+	{
+		return *_state_ptr;
+	}
+
 	bool Board::is_inverted() const
 	{
 		//Sanity check
-		if (_state.is_inverted() == is_agent_to_move_white())
+		if (state().is_inverted() == is_agent_to_move_white())
 			throw std::exception("Inconsistency between the agent at move and the current state");
 
-		return _state.is_inverted();
+		return state().is_inverted();
 	}
 
 	bool Board::is_agent_to_move_white() const
@@ -53,7 +58,7 @@ namespace TrainingCell::Checkers
 
 	void Board::take_turn()
 	{
-		_state.invert();//invert state because next time it will be given to the "opponent" agent
+		state().invert();//invert state because next time it will be given to the "opponent" agent
 		_agent_to_move_id = next_agent_id();
 	}
 
@@ -62,10 +67,10 @@ namespace TrainingCell::Checkers
 		return (_agent_to_move_id + 1) % 2;
 	}
 
-	void Board::reset_state()
+	void Board::reset_state(const IState& init_state)
 	{
 		_agent_to_move_id = 0;
-		_state = _start_state;
+		_state_ptr = init_state.copy();
 	}
 
 	void Board::reset_wins()
@@ -77,24 +82,24 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	/// Publishes current "state" if the corresponding call-back is assigned
 	/// </summary>
-	void publish_state(PublishCheckersStateCallBack publishCallback, const State& state, const Move& move, const IMinimalAgent* agent_to_play)
+	void publish_state(PublishCheckersStateCallBack publishCallback, const IState& state, const Move& move, const IMinimalAgent* agent_to_play)
 	{
 		if (publishCallback)
-			publishCallback(reinterpret_cast<const int*>(state.data()),
-				static_cast<int>(state.size()),
+		{
+			const auto vec = state.to_std_vector();
+			publishCallback(vec.data(),
+				static_cast<int>(vec.size()),
 				move.sub_moves.data(),
 				static_cast<int>(move.sub_moves.size()), agent_to_play);
+		}
 	}
 
-	void Board::play(const int episodes, const int max_moves_without_capture, const IState* start_state,
+	void Board::play(const int episodes, const IState& start_state, const int max_moves_without_capture,
 		PublishCheckersStateCallBack publish_state_callback,
 		PublishTrainingStatsCallBack publish_stats_callback,
 		CancelCallBack cancel,
 		ErrorMessageCallBack error)
 	{
-		if (start_state)
-			_start_state.assign(start_state->to_std_vector());
-
 		try
 		{
 			for (auto episode_id = 0; episode_id < episodes; episode_id++)
@@ -103,12 +108,14 @@ namespace TrainingCell::Checkers
 					return;
 
 				auto moves_without_capture = 0;
-				reset_state();
+				reset_state(start_state);
 				Move last_move{};
-				publish_state(publish_state_callback, _state, last_move, agent_to_move());
-				while (Utils::is_valid(last_move = make_move(publish_state_callback)) && moves_without_capture < max_moves_without_capture)
+				bool move_successful;
+				publish_state(publish_state_callback, state(), last_move, agent_to_move());
+				while (((move_successful = try_make_move(publish_state_callback, last_move))) &&
+					moves_without_capture < max_moves_without_capture)
 				{
-					if (Utils::is_valid(last_move.sub_moves[0].capture))
+					if (last_move.sub_moves[0].capture.is_valid())
 						moves_without_capture = 0;
 					else
 						moves_without_capture++;
@@ -117,21 +124,21 @@ namespace TrainingCell::Checkers
 						break;//this will be qualified as a "draw"
 				}
 
-				if (!Utils::is_valid(last_move)) //win case
+				if (!move_successful) //win case
 				{
 					if (_agent_to_move_id == 1)
 						_whitesWin++;
 					else
 						_blacksWin++;
 
-					agent_to_move()->game_over(_state, GameResult::Loss, is_agent_to_move_white());
-					agent_to_wait()->game_over(_state, GameResult::Victory, !is_agent_to_move_white());
+					agent_to_move()->game_over(state(), GameResult::Loss, is_agent_to_move_white());
+					agent_to_wait()->game_over(state(), GameResult::Victory, !is_agent_to_move_white());
 
 				}
 				else //draw case
 				{
-					agent_to_move()->game_over(_state, GameResult::Draw, is_agent_to_move_white());
-					agent_to_wait()->game_over(_state, GameResult::Draw, !is_agent_to_move_white());
+					agent_to_move()->game_over(state(), GameResult::Draw, is_agent_to_move_white());
+					agent_to_wait()->game_over(state(), GameResult::Draw, !is_agent_to_move_white());
 				}
 
 				if (publish_stats_callback != nullptr)
@@ -145,14 +152,14 @@ namespace TrainingCell::Checkers
 		}
 	}
 
-	Move Board::make_move(PublishCheckersStateCallBack publish)
+	bool Board::try_make_move(PublishCheckersStateCallBack publish, Move& out_move)
 	{
-		const auto moves = _state.get_moves();
+		const auto moves = state().get_moves();
 
 		if (moves.empty())
-			return {};//invalid move
+			return false;
 
-		const auto chosen_move_id = agent_to_move()->make_move(_state, moves, is_agent_to_move_white());
+		const auto chosen_move_id = agent_to_move()->make_move(state(), moves, is_agent_to_move_white());
 
 		if (chosen_move_id < 0 || chosen_move_id >= moves.size())
 			throw std::exception("Invalid move id");
@@ -161,21 +168,23 @@ namespace TrainingCell::Checkers
 
 		if (publish != nullptr)
 		{
-			auto state_copy = _state;
-			state_copy.make_move(move, false, true);
+			const auto state_copy_ptr = state().copy();
+			state_copy_ptr->make_move(move, false /*remove_extra_markers*/);
 			if (is_inverted())
-				state_copy.invert();
+				state_copy_ptr->invert();
 
 			const auto move_copy = is_inverted() ? move : move.get_inverted();
 
 			//At the moment, agents have not been swapped, so "agent-to-play" is actually the "agent-to-wait"
-			publish_state(publish, state_copy, move_copy, agent_to_wait());
+			publish_state(publish, *state_copy_ptr, move_copy, agent_to_wait());
 		}
 
-		_state.make_move(move, true);
+		state().make_move(move, true /*remove_extra_markers*/);
 		take_turn();
 
-		return move;
+		out_move = move;
+
+		return true;
 	}
 
 	int Board::get_whites_wins() const
@@ -191,7 +200,6 @@ namespace TrainingCell::Checkers
 	void Board::swap_agents()
 	{
 		std::swap(_agents[0], _agents[1]);
-		reset_state();
 		reset_wins();
 	}
 }

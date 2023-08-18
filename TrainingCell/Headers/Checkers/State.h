@@ -118,7 +118,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns "true" if the state is reversed with respect to its initial "orientation"
 		/// </summary>
-		[[nodiscard]] bool is_inverted() const;
+		[[nodiscard]] bool is_inverted() const override;
 
 		/// <summary>
 		///	Returns state that corresponds to the beginning of the game
@@ -154,9 +154,11 @@ namespace TrainingCell::Checkers
 		static long long piece_position_to_plain_id(const PiecePosition& position);
 
 		/// <summary>
-		///	Makes the move
+		/// Makes the move
 		/// </summary>
-		void make_move(const Move& move, const bool remove_captured, const bool mark_trace = false);
+		/// <param name="move">Move to "make"</param>
+		/// <param name="remove_extra_markers">If "false", state will contain auxiliary markers "illustrating" details of the move</param>
+		void make_move(const Move& move, const bool remove_extra_markers) override;
 
 		/// <summary>
 		/// Returns tensor representation of the current state after given `move` was applied to it
@@ -179,9 +181,9 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] State get_inverted() const;
 
 		/// <summary>
-		///	"Inverts" the state
+		/// "Inverts" the state
 		/// </summary>
-		void invert();
+		void invert() override;
 
 		/// <summary>
 		/// Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
@@ -206,14 +208,14 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] std::vector<int> to_std_vector() const override;
 
 		/// <summary>
-		/// Assigns the current instance of state with the given vector representation
+		/// Returns pointer to a copy of the current instance
 		/// </summary>
-		void assign(const std::vector<int>& state_vect);
+		[[nodiscard]] std::unique_ptr<IState> copy() const override;
 
 		/// <summary>
-		///	Returns collection of available moves for the current state
+		/// Returns collection of available moves for the current state
 		/// </summary>
-		[[nodiscard]] std::vector<Move> get_moves() const;
+		[[nodiscard]] std::vector<Move> get_moves() const override;
 
 		/// <summary>
 		/// Equality operator

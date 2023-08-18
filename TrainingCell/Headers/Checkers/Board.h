@@ -76,14 +76,14 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] IMinimalAgent* agent_to_wait() const;
 
 		/// <summary>
-		///	State of the board
+		/// Pointer to the current state of the board
 		/// </summary>
-		State _state{};
+		std::unique_ptr<IState> _state_ptr{};
 
 		/// <summary>
-		/// Start state for each new episode (game)
+		/// Returns reference to the current state
 		/// </summary>
-		State _start_state{State ::get_start_state()};
+		IState& state() const;
 
 		/// <summary>
 		///	A flag that indicates whether the state is "inverted" or not
@@ -106,14 +106,16 @@ namespace TrainingCell::Checkers
 		int _blacksWin{};
 
 		/// <summary>
-		/// Retrieves move from the "current" agent and changes the "current" agent
+		/// Tries to retrieve move from the "current" agent and updates the "current" state accordingly.
+		/// Returns "true" if such a move exists, in which case the corresponding "out" parameter will
+		/// be updated to contain the retrieved move, otherwise "false" is returned, which means that the game is over.
 		/// </summary>
-		Move make_move(PublishCheckersStateCallBack publish);
+		bool try_make_move(PublishCheckersStateCallBack publish, Move& out_move);
 
 		/// <summary>
 		/// Resets state of the board to the "initial one" (beginning of the game)
 		/// </summary>
-		void reset_state();
+		void reset_state(const IState& init_state);
 	public:
 		/// <summary>
 		///	Constructor
@@ -125,12 +127,12 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		/// <param name="episodes">Number of episodes (games) to play</param>
 		/// <param name="max_moves_without_capture">Defines maximal number of moves without a capture that will be qualified as a "draw"</param>
-		/// <param name="start_state">State from which each episode (game) should be started. Default value result in a "standard" start state of the board</param>
+		/// <param name="start_state">State from which each episode (game) should be started</param>
 		/// <param name="publish_state_callback">Callback to be called after each move. Allows caller to get some intermediate information about the process</param>
 		/// <param name="publish_stats_callback">Callback to be called after each episode (game). Allows caller to get some intermediate information about the process</param>
 		/// <param name="cancel">Callback allowing caller to cancel the process</param>
 		/// <param name="error">Callback allowing caller to get some information about errors encountered</param>
-		void play(const int episodes, const int max_moves_without_capture = 200, const IState* start_state = nullptr,
+		void play(const int episodes, const IState& start_state, const int max_moves_without_capture = 200,
 		          PublishCheckersStateCallBack publish_state_callback = nullptr,
 		          PublishTrainingStatsCallBack publish_stats_callback = nullptr, CancelCallBack cancel = nullptr,
 		          ErrorMessageCallBack error = nullptr);

@@ -72,11 +72,11 @@ namespace TrainingCell::Checkers
 		RandomAgent random_agent{};
 
 		Board board(agent_clone.get(), &random_agent);
-		board.play(episodes_to_play);
+		board.play(episodes_to_play, State::get_start_state());
 		const auto white_wins = board.get_whites_wins() * factor;
 
 		board.swap_agents();
-		board.play(episodes_to_play);
+		board.play(episodes_to_play, State::get_start_state());
 		const auto black_wins = board.get_blacks_wins() * factor;
 
 		return  PerformanceRec{ round_id, white_wins, black_wins, draw_percentage };
@@ -106,7 +106,7 @@ namespace TrainingCell::Checkers
 					auto agent_black_ptr = _agent_pointers[black_agent_id];
 
 					Board board(agent_white_ptr, agent_black_ptr);
-					board.play(episodes_cnt);
+					board.play(episodes_cnt, State::get_start_state());
 
 					const auto draw_percentage = (episodes_cnt - board.get_blacks_wins() - board.get_whites_wins()) * 1.0 / episodes_cnt;
 
@@ -141,7 +141,7 @@ namespace TrainingCell::Checkers
 			{
 				auto agent_ptr = _agent_pointers[agent_id];
 				Board board(agent_ptr, agent_ptr);
-				board.play(episodes_cnt);
+				board.play(episodes_cnt, State::get_start_state());
 				const auto draw_percentage = (episodes_cnt - board.get_blacks_wins() - board.get_whites_wins()) * 1.0 / episodes_cnt;
 				performance_scores[agent_id] = evaluate_performance(*agent_ptr, test_episodes, round_id, draw_percentage);
 			});
