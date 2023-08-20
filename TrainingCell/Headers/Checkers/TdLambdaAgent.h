@@ -17,7 +17,6 @@
 
 #pragma once
 #include "TdlAbstractAgent.h"
-#include "TdLambdaSubAgent.h"
 
 namespace TrainingCell::Checkers
 {
@@ -32,26 +31,6 @@ namespace TrainingCell::Checkers
 		/// Field to track version of the container and facilitate backward compatibility if needed
 		/// </summary>
 		int _msg_pack_version = 1;
-
-		/// <summary>
-		/// Array of sub-agents (the first one "plays" black pieces and the second one "plays" white pieces)
-		/// </summary>
-		std::vector<TdLambdaSubAgent> _sub_agents{ TdLambdaSubAgent{false} , TdLambdaSubAgent{true} };
-
-		/// <summary>
-		/// Can contain a search net if the TD-tree search mode is engaged 
-		/// </summary>
-		mutable std::optional<DeepLearning::Net<DeepLearning::CpuDC>> _search_net{};
-
-		/// <summary>
-		/// Returns settings that will be used in TD-tree search process
-		/// </summary>
-		TdlSettings get_search_settings() const;
-
-		/// <summary>
-		/// Runs TD-tree search and returns the "found" move (together with auxiliary data)
-		/// </summary>
-		MoveData run_search(const IState& current_state, const std::vector<Move>& moves) const;
 
 	public:
 
@@ -82,28 +61,6 @@ namespace TrainingCell::Checkers
 		/// <param name="name">Name of the agent</param>
 		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
 			const double lambda, const double gamma, const double alpha, const std::string& name = "AutoAgent");
-
-		/// <summary>
-		/// Assigns hyper-parameters of the agent from the given script
-		/// </summary>
-		void assign_hyperparams(const std::string& script_str);
-
-		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent wants to take given the current state
-		/// </summary>
-		int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override;
-
-		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
-		/// </summary>
-		void game_over(const IState& final_state, const GameResult& result, const bool as_white) override;
-
-		/// <summary>
-		/// Returns ID of the "best score" move, no training, no exploration
-		/// </summary>
-		[[nodiscard]] int pick_move_id(const IState& current_state, const std::vector<Move>& moves, const bool as_white) const;
 
 		/// <summary>
 		/// Returns type ID

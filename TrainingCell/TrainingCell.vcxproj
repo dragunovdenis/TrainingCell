@@ -22,6 +22,7 @@
     <ClInclude Include="Headers\Checkers\Board.h" />
     <ClInclude Include="Headers\Checkers\IMinimalAgent.h" />
     <ClInclude Include="Headers\Checkers\InteractiveAgent.h" />
+    <ClInclude Include="Headers\Checkers\MoveData.h" />
     <ClInclude Include="Headers\Checkers\RandomAgent.h" />
     <ClInclude Include="Headers\Checkers\TdlAbstractAgent.h" />
     <ClInclude Include="Headers\Checkers\TdlTrainingAdapter.h" />

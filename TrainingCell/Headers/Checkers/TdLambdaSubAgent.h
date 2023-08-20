@@ -16,7 +16,10 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "TdlAbstractAgent.h"
+#include "IMinimalAgent.h"
+#include "MoveData.h"
+#include "TdlSettings.h"
+#include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 
 namespace TrainingCell::Checkers
 {
