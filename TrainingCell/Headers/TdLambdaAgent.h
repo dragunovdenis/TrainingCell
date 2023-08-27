@@ -18,7 +18,7 @@
 #pragma once
 #include "TdlAbstractAgent.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	class TdlLegacyMsgPackAdapter;
 

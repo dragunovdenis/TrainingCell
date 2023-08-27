@@ -15,11 +15,11 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/TdLambdaAgent.h"
-#include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../../Headers/Checkers/TdlLegacyMsgPackAdapter.h"
+#include "../Headers/TdLambdaAgent.h"
+#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "../Headers/TdlLegacyMsgPackAdapter.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	TdLambdaAgent::TdLambdaAgent(const TdlLegacyMsgPackAdapter& legacyContainer)
 	{

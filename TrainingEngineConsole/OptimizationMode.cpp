@@ -27,6 +27,9 @@
 #include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include "../../DeepLearning/DeepLearning/StopWatch.h"
 
+using namespace TrainingCell;
+using namespace TrainingCell::Checkers;
+
 namespace Training::Modes
 {
 	/// <summary>
@@ -96,7 +99,7 @@ namespace Training::Modes
 	/// Returns initial value of parameters that will take part in the optimization process based on the optimization settings and
 	/// the given "sample agent"
 	/// </summary>
-	static PointAndConstraints get_init_point_and_restrictions(const ParameterFlags& args, const TrainingCell::Checkers::TdLambdaAgent& sample_agent)
+	static PointAndConstraints get_init_point_and_restrictions(const ParameterFlags& args, const TrainingCell::TdLambdaAgent& sample_agent)
 	{
 		PointAndConstraints result;
 		auto& point = result.point;
@@ -167,7 +170,7 @@ namespace Training::Modes
 	/// supplemented with the values of parameters taken from the given agent, to the given stream
 	/// </summary>
 	static void dump_parameters( std::ostream& stream, const std::vector<double>& parameter_values, const ParameterFlags& args,
-		const TrainingCell::Checkers::TdLambdaAgent& sample_agent)
+		const TrainingCell::TdLambdaAgent& sample_agent)
 	{
 		auto current_param_id = 0;
 

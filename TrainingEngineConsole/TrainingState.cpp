@@ -20,12 +20,17 @@
 #include <fstream>
 #include <sstream>
 #include <format>
-#include "../../DeepLearning/DeepLearning/Utilities.h"
-#include "Headers/Checkers/TdlEnsembleAgent.h"
+#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Headers/TdlEnsembleAgent.h"
+#include "Headers//TdLambdaAgent.h"
+
+
+using namespace TrainingCell;
+using namespace TrainingCell::Checkers;
 
 namespace Training
 {
-	void TrainingState::add_agent(const TrainingCell::Checkers::TdLambdaAgent& agent)
+	void TrainingState::add_agent(const TdLambdaAgent& agent)
 	{
 		_agents.push_back(agent);
 	}

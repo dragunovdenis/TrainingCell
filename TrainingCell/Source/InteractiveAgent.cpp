@@ -15,9 +15,9 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/InteractiveAgent.h"
+#include "../Headers/InteractiveAgent.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	InteractiveAgent::InteractiveAgent(const MakeMoveCallback& make_move_callback, const GameOverCallback& game_over_callback,
 		const bool play_for_whites) : _make_move_callback(make_move_callback),

@@ -19,7 +19,7 @@
 #include "IMinimalAgent.h"
 #include "TdLambdaSubAgent.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	/// Functionality allowing to train a neural net using TD-lambda approach

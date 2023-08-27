@@ -16,35 +16,18 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include <functional>
 #include "Agent.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	using MakeMoveCallback = std::function<int(const std::vector<int>&, const std::vector<Move>&)>;
-	using GameOverCallback = std::function<void(const std::vector<int>&, const GameResult&)>;
+	class Agent;
 
 	/// <summary>
-	///	Interface for a human player
-	/// </summary>
-	class InteractiveAgent : public Agent
+///	An agent that always take random moves from the collection of possible ones
+/// </summary>
+	class RandomAgent : public Agent
 	{
-		const MakeMoveCallback _make_move_callback{};
-		const GameOverCallback _game_over_callback{};
-		const bool _play_for_whites{};
 	public:
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		/// <param name="make_move_callback">Pointer to a method that
-		/// will be called when "make_move" method of the agent is called</param>
-		/// <param name="game_over_callback">Pointer to a method that
-		/// will be called when "game_over" method of the agent is called</param>
-		/// <param name="play_for_whites">Determines whether state and move parameters of the callback methods
-		/// should be inverted (if "false") or not (if "true")</param>
-		InteractiveAgent(const MakeMoveCallback& make_move_callback, const GameOverCallback& game_over_callback,
-			const bool play_for_whites);
-
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
@@ -79,6 +62,4 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		bool equal(const Agent& agent) const override;
 	};
-
 }
-

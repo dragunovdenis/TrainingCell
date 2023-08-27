@@ -15,11 +15,11 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/AgentPack.h"
-#include "../../Headers/Checkers/RandomAgent.h"
-#include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "../Headers/AgentPack.h"
+#include "../Headers/RandomAgent.h"
+#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	AgentPack::AgentPack(const AgentTypeId id, std::unique_ptr<Agent>&& agent_ptr) :
 	_agent_id(id), _agent_ptr(std::move(agent_ptr)) {}

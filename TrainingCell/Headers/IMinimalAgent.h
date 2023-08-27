@@ -15,24 +15,41 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/TdlTrainingAdapter.h"
+#pragma once
+#include "IState.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	TdlTrainingAdapter::TdlTrainingAdapter(DeepLearning::Net<DeepLearning::CpuDC>* net_ptr, const TdlSettings& settings) :
-		_net_ptr(net_ptr), _settings(settings)
-	{
-		if (!_net_ptr)
-			throw std::exception("Invalid pointer to the neural network");
-	}
+	/// <summary>
+	///	Representation of possible game statuses
+	/// </summary>
+	enum class GameResult : int {
+		Victory = 1,
+		Loss = -1,
+		Draw = 0,
+	};
 
-	int TdlTrainingAdapter::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
+	/// <summary>
+	/// Minimal "interface" that each checkers agent must possess
+	/// </summary>
+	class IMinimalAgent
 	{
-		return _sub_agents[as_white].make_move(current_state, moves, _settings, *_net_ptr);
-	}
+	public:
+		/// <summary>
+		/// Virtual destructor
+		/// </summary>
+		virtual ~IMinimalAgent() = default;
 
-	void TdlTrainingAdapter::game_over(const IState& final_state, const GameResult& result, const bool as_white)
-	{
-		_sub_agents[as_white].game_over(final_state, result, _settings, *_net_ptr);
-	}
+		/// <summary>
+		/// Returns index of a move from the given collection of available moves
+		/// that the agent "prefers" to take given the current state
+		/// </summary>
+		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
+
+		/// <summary>
+		/// The method is supposed to be called by the "training environment" when the current training episode is over
+		/// to notify the agent about the "final" state and the result of entire game (episode)
+		/// </summary>
+		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
+	};
 }

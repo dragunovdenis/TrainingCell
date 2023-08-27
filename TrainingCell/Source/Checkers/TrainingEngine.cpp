@@ -16,13 +16,13 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../../Headers/Checkers/TrainingEngine.h"
-#include "../../Headers/Checkers/RandomAgent.h"
+#include "../../Headers/RandomAgent.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
 #include "../../../DeepLearning/DeepLearning/StopWatch.h"
-#include "../../Headers/Checkers/Board.h"
+#include "../../Headers/Board.h"
+#include "../../Headers/Checkers/State.h"
 #include <numeric>
 #include <ppl.h>
-#include <format>
 
 namespace TrainingCell::Checkers
 {

@@ -15,10 +15,10 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/Agent.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
+#include "../Headers/Agent.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	void Agent::set_training_mode(const bool training_mode) { throw std::exception("Not implemented"); }
 

@@ -23,6 +23,9 @@
 #include "Headers/Checkers/TrainingEngine.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
 
+using namespace TrainingCell;
+using namespace TrainingCell::Checkers;
+
 namespace Training::Modes
 {
 	/// <summary>
@@ -55,11 +58,11 @@ namespace Training::Modes
 	/// <summary>
 	/// Tries to load ensemble from the given file on disk and returns it in case of success
 	/// </summary>
-	std::optional<TrainingCell::Checkers::TdlEnsembleAgent> try_load_ensemble(const std::filesystem::path& ensemble_path)
+	std::optional<TdlEnsembleAgent> try_load_ensemble(const std::filesystem::path& ensemble_path)
 	{
 		try
 		{
-			return TrainingCell::Checkers::TdlEnsembleAgent::load_from_file(ensemble_path);
+			return TdlEnsembleAgent::load_from_file(ensemble_path);
 		}
 		catch (...)
 		{

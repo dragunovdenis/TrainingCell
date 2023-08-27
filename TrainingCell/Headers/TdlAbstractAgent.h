@@ -19,10 +19,10 @@
 #include "Agent.h"
 #include "MoveData.h"
 #include "TdlSettings.h"
-#include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 #include "TdLambdaSubAgent.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	/// Enumerates auto training modes
@@ -313,5 +313,5 @@ namespace TrainingCell::Checkers
 	};
 }
 
-MSGPACK_ADD_ENUM(TrainingCell::Checkers::AutoTrainingSubMode)
-MSGPACK_ADD_ENUM(TrainingCell::Checkers::TreeSearchMethod)
+MSGPACK_ADD_ENUM(TrainingCell::AutoTrainingSubMode)
+MSGPACK_ADD_ENUM(TrainingCell::TreeSearchMethod)

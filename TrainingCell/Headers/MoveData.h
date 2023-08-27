@@ -16,40 +16,28 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../IState.h"
+#include "../../DeepLearning/DeepLearning/NeuralNet/DataContext.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
-	///	Representation of possible game statuses
+	/// Holds data related to a picked move
 	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
-	};
-
-	/// <summary>
-	/// Minimal "interface" that each checkers agent must possess
-	/// </summary>
-	class IMinimalAgent
+	struct MoveData
 	{
-	public:
 		/// <summary>
-		/// Virtual destructor
+		/// ID of the move
 		/// </summary>
-		virtual ~IMinimalAgent() = default;
+		int move_id{};
 
 		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent "prefers" to take given the current state
+		/// Value of the after-state
 		/// </summary>
-		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
+		double value{};
 
 		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
+		/// After-sate resulted from the move (in a form of tensor, see 'State::to_tensor()')
 		/// </summary>
-		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
+		DeepLearning::CpuDC::tensor_t after_state{};
 	};
 }

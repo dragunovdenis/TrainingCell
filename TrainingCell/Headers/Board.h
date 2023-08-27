@@ -17,9 +17,9 @@
 
 #pragma once
 #include "IMinimalAgent.h"
-#include "State.h"
+#include "IState.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	///	Callback to publish current state and move

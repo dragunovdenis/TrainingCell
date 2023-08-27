@@ -15,12 +15,12 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/TdlEnsembleAgent.h"
-#include "../../../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
-#include "../../Headers/Checkers/TdlLegacyMsgPackAdapter.h"
+#include "../Headers/TdlEnsembleAgent.h"
+#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "../Headers/TdlLegacyMsgPackAdapter.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	TdlEnsembleAgent::TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& name)
 	{

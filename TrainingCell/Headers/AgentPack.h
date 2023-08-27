@@ -22,7 +22,7 @@
 #include "TdlEnsembleAgent.h"
 #include <msgpack.hpp>
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	/// A wrapper for checkers agents to handle their message-pack serialization in a unified way

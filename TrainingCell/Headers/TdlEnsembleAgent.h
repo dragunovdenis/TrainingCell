@@ -18,7 +18,7 @@
 #pragma once
 #include "TdLambdaAgent.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	/// An ensemble of TdLambdaAgent-s

@@ -15,31 +15,39 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#pragma once
-#include <string>
+#include "../Headers/RandomAgent.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	/// <summary>
-	///	Enumerates different agent types
-	///	Used to handle message-pack serialization of agents through their base class (class Agent)
-	/// </summary>
-	enum class AgentTypeId : int
+	int RandomAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
-		UNKNOWN = 0,
-		RANDOM = 1,
-		INTERACTIVE = 2,
-		TDL = 3,
-		TDL_ENSEMBLE = 4,
-	};
+		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
+	}
 
-	/// <summary>
-	/// Converts given string to AgentTypeId
-	/// </summary>
-	AgentTypeId parse_agent_type_id(const std::string& str);
+	void RandomAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)
+	{
+		//Just do nothing because this agent can't improve its performance
+	}
 
-	/// <summary>
-	/// Returns string representation of the given agent type ID
-	/// </summary>
-	std::string to_string(const AgentTypeId& agent_type_id);
+	AgentTypeId RandomAgent::TYPE_ID()
+	{
+		return AgentTypeId::RANDOM;
+	}
+
+	AgentTypeId RandomAgent::get_type_id() const
+	{
+		return TYPE_ID();
+	}
+
+	bool RandomAgent::can_train() const
+	{
+		return false;
+	}
+
+	bool RandomAgent::equal(const Agent& agent) const
+	{
+		return false; //Random agent can't be equal to another agent by definition
+	}
+
 }

@@ -15,13 +15,13 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/TdlAbstractAgent.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
-#include "../../Headers/Checkers/TdlTrainingAdapter.h"
-#include "../../Headers/Checkers/Board.h"
+#include "../Headers/TdlAbstractAgent.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "../Headers/TdlTrainingAdapter.h"
+#include "../Headers/Board.h"
 #include <nlohmann/json.hpp>
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	bool TdlAbstractAgent::get_training_mode(const bool as_white) const
 	{
@@ -34,7 +34,7 @@ namespace TrainingCell::Checkers
 
 	void TdlAbstractAgent::initialize_net(const std::vector<std::size_t>& layer_dimensions)
 	{
-		if (layer_dimensions.empty() || layer_dimensions[0] != StateSize || layer_dimensions.rbegin()[0] != 1)
+		if (layer_dimensions.empty() || layer_dimensions.rbegin()[0] != 1)
 			throw std::exception("Invalid Net configuration");
 
 		std::vector activ_func_ids(layer_dimensions.size() - 1, DeepLearning::ActivationFunctionId::RELU);

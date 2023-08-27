@@ -16,11 +16,10 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "State.h"
 #include "AgentTypeId.h"
 #include "IMinimalAgent.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	///	Abstract checkers agent (interface)
@@ -108,6 +107,4 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] virtual std::unique_ptr<Agent> clone() const;
 	};
 }
-
-MSGPACK_ADD_ENUM(TrainingCell::Checkers::AgentTypeId)
 

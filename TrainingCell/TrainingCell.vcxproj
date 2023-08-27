@@ -15,47 +15,47 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\Agent.h" />
+    <ClInclude Include="Headers\AgentPack.h" />
+    <ClInclude Include="Headers\AgentTypeId.h" />
+    <ClInclude Include="Headers\Board.h" />
     <ClInclude Include="Headers\Checkerboard.h" />
-    <ClInclude Include="Headers\Checkers\Agent.h" />
-    <ClInclude Include="Headers\Checkers\AgentPack.h" />
-    <ClInclude Include="Headers\Checkers\AgentTypeId.h" />
-    <ClInclude Include="Headers\Checkers\Board.h" />
-    <ClInclude Include="Headers\Checkers\IMinimalAgent.h" />
-    <ClInclude Include="Headers\Checkers\InteractiveAgent.h" />
-    <ClInclude Include="Headers\Checkers\MoveData.h" />
-    <ClInclude Include="Headers\Checkers\RandomAgent.h" />
-    <ClInclude Include="Headers\Checkers\TdlAbstractAgent.h" />
-    <ClInclude Include="Headers\Checkers\TdlTrainingAdapter.h" />
-    <ClInclude Include="Headers\Checkers\TdLambdaAgent.h" />
-    <ClInclude Include="Headers\Checkers\TdLambdaSubAgent.h" />
-    <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h" />
-    <ClInclude Include="Headers\Checkers\TdlLegacyMsgPackAdapter.h" />
-    <ClInclude Include="Headers\Checkers\TdlSettings.h" />
     <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
     <ClInclude Include="Headers\Checkers\State.h" />
+    <ClInclude Include="Headers\IMinimalAgent.h" />
+    <ClInclude Include="Headers\InteractiveAgent.h" />
     <ClInclude Include="Headers\IState.h" />
     <ClInclude Include="Headers\Move.h" />
+    <ClInclude Include="Headers\MoveData.h" />
     <ClInclude Include="Headers\PiecePosition.h" />
+    <ClInclude Include="Headers\RandomAgent.h" />
     <ClInclude Include="Headers\SubMove.h" />
+    <ClInclude Include="Headers\TdlAbstractAgent.h" />
+    <ClInclude Include="Headers\TdLambdaAgent.h" />
+    <ClInclude Include="Headers\TdLambdaSubAgent.h" />
+    <ClInclude Include="Headers\TdlEnsembleAgent.h" />
+    <ClInclude Include="Headers\TdlLegacyMsgPackAdapter.h" />
+    <ClInclude Include="Headers\TdlSettings.h" />
+    <ClInclude Include="Headers\TdlTrainingAdapter.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Checkers\Agent.cpp" />
-    <ClCompile Include="Source\Checkers\AgentPack.cpp" />
-    <ClCompile Include="Source\Checkers\AgentTypeId.cpp" />
-    <ClCompile Include="Source\Checkers\Board.cpp" />
-    <ClCompile Include="Source\Checkers\InteractiveAgent.cpp" />
-    <ClCompile Include="Source\Checkers\RandomAgent.cpp" />
-    <ClCompile Include="Source\Checkers\TdlAbstractAgent.cpp" />
-    <ClCompile Include="Source\Checkers\TdLambdaAgent.cpp" />
-    <ClCompile Include="Source\Checkers\TdLambdaSubAgent.cpp" />
-    <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp" />
-    <ClCompile Include="Source\Checkers\TdlSettings.cpp" />
-    <ClCompile Include="Source\Checkers\TdlTrainingAdapter.cpp" />
+    <ClCompile Include="Source\Agent.cpp" />
+    <ClCompile Include="Source\AgentPack.cpp" />
+    <ClCompile Include="Source\AgentTypeId.cpp" />
+    <ClCompile Include="Source\Board.cpp" />
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
     <ClCompile Include="Source\Checkers\State.cpp" />
+    <ClCompile Include="Source\InteractiveAgent.cpp" />
     <ClCompile Include="Source\Move.cpp" />
     <ClCompile Include="Source\PiecePosition.cpp" />
+    <ClCompile Include="Source\RandomAgent.cpp" />
     <ClCompile Include="Source\SubMove.cpp" />
+    <ClCompile Include="Source\TdlAbstractAgent.cpp" />
+    <ClCompile Include="Source\TdLambdaAgent.cpp" />
+    <ClCompile Include="Source\TdLambdaSubAgent.cpp" />
+    <ClCompile Include="Source\TdlEnsembleAgent.cpp" />
+    <ClCompile Include="Source\TdlSettings.cpp" />
+    <ClCompile Include="Source\TdlTrainingAdapter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

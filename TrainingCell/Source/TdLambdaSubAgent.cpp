@@ -15,11 +15,11 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/TdLambdaSubAgent.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
+#include "../Headers/TdLambdaSubAgent.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
 #include <cmath>
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	MoveData TdLambdaSubAgent::pick_move(const IState& state, const std::vector<Move>& moves,
 		const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const

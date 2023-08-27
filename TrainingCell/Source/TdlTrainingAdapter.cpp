@@ -15,39 +15,24 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/RandomAgent.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
+#include "../Headers/TdlTrainingAdapter.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	int RandomAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
+	TdlTrainingAdapter::TdlTrainingAdapter(DeepLearning::Net<DeepLearning::CpuDC>* net_ptr, const TdlSettings& settings) :
+		_net_ptr(net_ptr), _settings(settings)
 	{
-		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
+		if (!_net_ptr)
+			throw std::exception("Invalid pointer to the neural network");
 	}
 
-	void RandomAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)
+	int TdlTrainingAdapter::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
 	{
-		//Just do nothing because this agent can't improve its performance
+		return _sub_agents[as_white].make_move(current_state, moves, _settings, *_net_ptr);
 	}
 
-	AgentTypeId RandomAgent::TYPE_ID()
+	void TdlTrainingAdapter::game_over(const IState& final_state, const GameResult& result, const bool as_white)
 	{
-		return AgentTypeId::RANDOM;
+		_sub_agents[as_white].game_over(final_state, result, _settings, *_net_ptr);
 	}
-
-	AgentTypeId RandomAgent::get_type_id() const
-	{
-		return TYPE_ID();
-	}
-
-	bool RandomAgent::can_train() const
-	{
-		return false;
-	}
-
-	bool RandomAgent::equal(const Agent& agent) const
-	{
-		return false; //Random agent can't be equal to another agent by definition
-	}
-
 }

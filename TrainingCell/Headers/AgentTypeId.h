@@ -15,37 +15,35 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/AgentTypeId.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
+#pragma once
+#include <string>
+#include <msgpack.hpp>
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	AgentTypeId parse_agent_type_id(const std::string& str)
+	/// <summary>
+	///	Enumerates different agent types
+	///	Used to handle message-pack serialization of agents through their base class (class Agent)
+	/// </summary>
+	enum class AgentTypeId : int
 	{
-		const auto str_normalized = DeepLearning::Utils::normalize_string(str);
+		UNKNOWN = 0,
+		RANDOM = 1,
+		INTERACTIVE = 2,
+		TDL = 3,
+		TDL_ENSEMBLE = 4,
+	};
 
-		for (auto id = static_cast<unsigned int>(AgentTypeId::UNKNOWN);
-			id <= static_cast<unsigned int>(AgentTypeId::TDL_ENSEMBLE); ++id)
-		{
-			const auto agent_id = static_cast<AgentTypeId>(id);
-			if (to_string(agent_id) == str_normalized)
-				return agent_id;
-		}
+	/// <summary>
+	/// Converts given string to AgentTypeId
+	/// </summary>
+	AgentTypeId parse_agent_type_id(const std::string& str);
 
-		return AgentTypeId::UNKNOWN;
-	}
-
-	std::string to_string(const AgentTypeId& agent_type_id)
-	{
-		switch (agent_type_id)
-		{
-			case AgentTypeId::TDL_ENSEMBLE : return "TDL_ENSEMBLE";
-			case AgentTypeId::INTERACTIVE  : return "INTERACTIVE";
-			case AgentTypeId::RANDOM       : return "RANDOM";
-			case AgentTypeId::TDL   	   : return "TDL";
-			case AgentTypeId::UNKNOWN      :
-			default                        : return "UNKNOWN";
-		}
-	}
-
+	/// <summary>
+	/// Returns string representation of the given agent type ID
+	/// </summary>
+	std::string to_string(const AgentTypeId& agent_type_id);
 }
+
+MSGPACK_ADD_ENUM(TrainingCell::AgentTypeId)
+

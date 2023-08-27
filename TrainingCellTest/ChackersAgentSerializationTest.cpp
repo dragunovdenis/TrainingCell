@@ -16,14 +16,16 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "CppUnitTest.h"
-#include "../TrainingCell/Headers/Checkers/Agent.h"
-#include "../TrainingCell/Headers/Checkers/TdLambdaAgent.h"
-#include "../TrainingCell/Headers/Checkers/TdlEnsembleAgent.h"
-#include "../TrainingCell/Headers/Checkers/AgentPack.h"
+#include "../TrainingCell/Headers/Agent.h"
+#include "../TrainingCell/Headers/Checkers/State.h"
+#include "../TrainingCell/Headers/TdLambdaAgent.h"
+#include "../TrainingCell/Headers/TdlEnsembleAgent.h"
+#include "../TrainingCell/Headers/AgentPack.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell::Checkers;
+using namespace TrainingCell;
 
 namespace TrainingCellTest
 {

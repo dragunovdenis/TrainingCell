@@ -15,29 +15,37 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#pragma once
-#include "../../../DeepLearning/DeepLearning/NeuralNet/DataContext.h"
+#include "../Headers/AgentTypeId.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	/// <summary>
-	/// Holds data related to a picked move
-	/// </summary>
-	struct MoveData
+	AgentTypeId parse_agent_type_id(const std::string& str)
 	{
-		/// <summary>
-		/// ID of the move
-		/// </summary>
-		int move_id{};
+		const auto str_normalized = DeepLearning::Utils::normalize_string(str);
 
-		/// <summary>
-		/// Value of the after-state
-		/// </summary>
-		double value{};
+		for (auto id = static_cast<unsigned int>(AgentTypeId::UNKNOWN);
+			id <= static_cast<unsigned int>(AgentTypeId::TDL_ENSEMBLE); ++id)
+		{
+			const auto agent_id = static_cast<AgentTypeId>(id);
+			if (to_string(agent_id) == str_normalized)
+				return agent_id;
+		}
 
-		/// <summary>
-		/// After-sate resulted from the move (in a form of tensor, see 'State::to_tensor()')
-		/// </summary>
-		DeepLearning::CpuDC::tensor_t after_state{};
-	};
+		return AgentTypeId::UNKNOWN;
+	}
+
+	std::string to_string(const AgentTypeId& agent_type_id)
+	{
+		switch (agent_type_id)
+		{
+			case AgentTypeId::TDL_ENSEMBLE : return "TDL_ENSEMBLE";
+			case AgentTypeId::INTERACTIVE  : return "INTERACTIVE";
+			case AgentTypeId::RANDOM       : return "RANDOM";
+			case AgentTypeId::TDL   	   : return "TDL";
+			case AgentTypeId::UNKNOWN      :
+			default                        : return "UNKNOWN";
+		}
+	}
+
 }

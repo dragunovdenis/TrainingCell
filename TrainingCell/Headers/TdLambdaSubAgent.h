@@ -19,9 +19,9 @@
 #include "IMinimalAgent.h"
 #include "MoveData.h"
 #include "TdlSettings.h"
-#include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	class AfterStateValueFunction;
 

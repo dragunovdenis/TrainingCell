@@ -18,9 +18,9 @@
 #pragma once
 #include <vector>
 #include <array>
-#include "Agent.h"
+#include "../Agent.h"
 #include <functional>
-#include "TdlEnsembleAgent.h"
+#include "../TdlEnsembleAgent.h"
 #include "msgpack.hpp"
 
 namespace TrainingCell::Checkers

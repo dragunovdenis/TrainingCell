@@ -18,11 +18,21 @@
 #pragma once
 #include "Agent.h"
 #include "AgentTypeId.h"
-#include "State.h"
-#include "../../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
+	/// <summary>
+	/// A mock to facilitate deserialization of legacy agents
+	/// </summary>
+	class StateMsgPackMock : public std::array<int, 32>
+	{
+	public:
+		using base = std::array<int, 32>;
+
+		MSGPACK_DEFINE(MSGPACK_BASE(base))
+	};
+
 	/// <summary>
 	/// Class that serves a single purpose: to load legacy agent from message-pack stream
 	/// </summary>
@@ -61,8 +71,8 @@ namespace TrainingCell::Checkers
 		double _reward_factor{ 1 };
 		bool _new_game{ true };
 		std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _z{};
-		State _prev_state{};
-		State _prev_afterstate{};
+		StateMsgPackMock _prev_state{};
+		StateMsgPackMock _prev_afterstate{};
 
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _z, _prev_state, _prev_afterstate, _new_game,
 			_exploration_epsilon, _training_mode, _lambda, _gamma, _alpha, _reward_factor)

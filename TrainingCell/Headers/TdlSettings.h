@@ -17,7 +17,7 @@
 
 #pragma once
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	/// Interface for TD(lambda) settings

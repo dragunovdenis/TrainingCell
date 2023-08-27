@@ -16,8 +16,8 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../TrainingCell/Headers/Checkers/Board.h"
-#include "../TrainingCell/Headers/Checkers/Agent.h"
+#include "../TrainingCell/Headers/Board.h"
+#include "../TrainingCell/Headers/Agent.h"
 #include "../TrainingCell/Headers/Move.h"
 
 #ifdef TRAINING_CELL_EXPORTS
@@ -26,16 +26,14 @@
 #define TRAINING_CELL_API __declspec(dllexport)
 #endif
 
+
 namespace TrainingCell
 {
-	namespace Checkers
-	{
-		class InteractiveAgent;
-		class RandomAgent;
-		class TdLambdaAgent;
-		class TdlEnsembleAgent;
-		class AgentPack;
-	}
+	class TdLambdaAgent;
+	class InteractiveAgent;
+	class RandomAgent;
+	class TdlEnsembleAgent;
+	class AgentPack;
 }
 
 /// <summary>
@@ -49,11 +47,11 @@ extern "C"
 	/// Run training for the given number of episodes
 	/// </summary>
 	TRAINING_CELL_API void RunCheckersTraining(
-		TrainingCell::Checkers::Agent* agent1,
-		TrainingCell::Checkers::Agent* agent2,
-		int episodes,  TrainingCell::Checkers::PublishCheckersStateCallBack publishStateCallBack,
-		TrainingCell::Checkers::PublishTrainingStatsCallBack publishStatsCallBack, TrainingCell::Checkers::CancelCallBack cancellationCallBack,
-		TrainingCell::Checkers::ErrorMessageCallBack errorCallBack);
+		TrainingCell::Agent* agent1,
+		TrainingCell::Agent* agent2,
+		int episodes,  TrainingCell::PublishCheckersStateCallBack publishStateCallBack,
+		TrainingCell::PublishTrainingStatsCallBack publishStatsCallBack, TrainingCell::CancelCallBack cancellationCallBack,
+		TrainingCell::ErrorMessageCallBack errorCallBack);
 
 #pragma region Random agent
 	/// <summary>
@@ -64,7 +62,7 @@ extern "C"
 	/// <summary>
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
-	TRAINING_CELL_API bool FreeCheckersRandomAgent(const TrainingCell::Checkers::RandomAgent* agent_ptr);
+	TRAINING_CELL_API bool FreeCheckersRandomAgent(const TrainingCell::RandomAgent* agent_ptr);
 #pragma endregion Random Agent
 #pragma region Td(Lammbda)-Agent
 	/// <summary>
@@ -84,88 +82,88 @@ extern "C"
 	/// Returns pointer to a copy of the TD(lambda) agent pointed by the given pointer
 	/// Returns "null" if failed
 	/// </summary>
-	TRAINING_CELL_API void* CheckersTdLambdaAgentCreateCopy(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API void* CheckersTdLambdaAgentCreateCopy(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Returns true if the TD(lambda) agents pointed by the two given pointers are equal
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentsAreEqual(const TrainingCell::Checkers::TdLambdaAgent* agent0_ptr,
-		const TrainingCell::Checkers::TdLambdaAgent* agent1_ptr);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentsAreEqual(const TrainingCell::TdLambdaAgent* agent0_ptr,
+		const TrainingCell::TdLambdaAgent* agent1_ptr);
 
 	/// <summary>
 	/// Updates exploration probability parameter of TD(lambda) agent represented with its pointer
 	///	Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetEpsilon(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double exploration_epsilon);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetEpsilon(TrainingCell::TdLambdaAgent* agent_ptr, const double exploration_epsilon);
 
 	/// <summary>
 	/// Returns exploration probability of TD(lambda) agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API double CheckersTdLambdaAgentGetEpsilon(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API double CheckersTdLambdaAgentGetEpsilon(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Updates "lambda" parameter of TD(lambda) agent represented with its pointer
 	///	Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetLambda(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double lambda);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetLambda(TrainingCell::TdLambdaAgent* agent_ptr, const double lambda);
 
 	/// <summary>
 	/// Returns "lambda" parameter of TD(lambda) agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API double CheckersTdLambdaAgentGetLambda(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API double CheckersTdLambdaAgentGetLambda(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Updates "gamma" (reward discount) parameter of TD(lambda) agent represented with its pointer
 	///	Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetGamma(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double gamma);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetGamma(TrainingCell::TdLambdaAgent* agent_ptr, const double gamma);
 
 	/// <summary>
 	/// Returns "gamma" (reward discount) parameter of TD(lambda) agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API double CheckersTdLambdaAgentGetGamma(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API double CheckersTdLambdaAgentGetGamma(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Updates learning rate parameter of TD(lambda) agent represented with its pointer
 	///	Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetLearningRate(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double alpha);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetLearningRate(TrainingCell::TdLambdaAgent* agent_ptr, const double alpha);
 
 	/// <summary>
 	/// Returns learning rate parameter of TD(lambda) agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API double CheckersTdLambdaAgentGetLearningRate(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Updates "reward factor" parameter of TD(lambda) agent represented with its pointer
 	/// Returns "true" if succeeded
 	/// "Reward factor" serves to scale value of internal reward function of the agent
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetRewardFactor(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const double reward_factor);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetRewardFactor(TrainingCell::TdLambdaAgent* agent_ptr, const double reward_factor);
 
 	/// <summary>
 	/// Returns "reward factor" parameter of TD(lambda) agent represented with its pointer
 	/// "Reward factor" serves to scale value of internal reward function of the agent
 	/// Returns "NaN" if failed
 	/// </summary>
-	TRAINING_CELL_API double CheckersTdLambdaAgentGetRewardFactor(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API double CheckersTdLambdaAgentGetRewardFactor(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Updates "search depth" parameter of TD(lambda) agent represented with its pointer
 	/// Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchDepth(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const int search_depth);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchDepth(TrainingCell::TdLambdaAgent* agent_ptr, const int search_depth);
 
 	/// <summary>
 	/// Returns "search depth" parameter of TD(lambda) agent represented with its pointer
 	/// Returns "-1" if failed
 	/// </summary>
-	TRAINING_CELL_API int CheckersTdLambdaAgentGetSearchDepth(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API int CheckersTdLambdaAgentGetSearchDepth(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Returns neural net dimensions of TD(lambda) agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentGetNetDimensions(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr,
+	TRAINING_CELL_API bool CheckersTdLambdaAgentGetNetDimensions(const TrainingCell::TdLambdaAgent* agent_ptr,
 		const GetArrayCallBack acquireDimensionsCallBack);
 
 	/// <summary>
@@ -177,46 +175,46 @@ extern "C"
 	/// <summary>
 	/// Returns "true" if the two agents represented with their pointers are equal
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentEqual(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr1, const TrainingCell::Checkers::TdLambdaAgent* agent_ptr2);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentEqual(const TrainingCell::TdLambdaAgent* agent_ptr1, const TrainingCell::TdLambdaAgent* agent_ptr2);
 
 	/// <summary>
 	/// Tries to save the given TD(lambda) agent represented with its pointer to the given file on disk
 	///	Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSaveToFile(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const char* path);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSaveToFile(const TrainingCell::TdLambdaAgent* agent_ptr, const char* path);
 
 	/// <summary>
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
-	TRAINING_CELL_API bool FreeCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API bool FreeCheckersTdLambdaAgent(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Allocates agent-pack for the given TD(lambda) agent and returns pointer to it (or null-pointer if something went wrong)
 	/// </summary>
-	TRAINING_CELL_API void* PackCheckersTdLambdaAgent(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API void* PackCheckersTdLambdaAgent(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Returns "1" if the given agent has its tree search functionality on, "0" if the search mode is off.
 	/// Returned value other than "0" or "1" indicates an error.
 	/// </summary>
-	TRAINING_CELL_API char CheckersTdLambdaAgentGetSearchMode(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API char CheckersTdLambdaAgentGetSearchMode(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Sets search mode of the given agent, returns true is succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchMode(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const bool search_mode);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchMode(TrainingCell::TdLambdaAgent* agent_ptr, const bool search_mode);
 
 	/// <summary>
 	/// Returns number of search iterations to be done if tree search mode is on
 	/// Negative returned number indicates an error
 	/// </summary>
-	TRAINING_CELL_API int CheckersTdLambdaAgentGetSearchModeIterations(const TrainingCell::Checkers::TdLambdaAgent* agent_ptr);
+	TRAINING_CELL_API int CheckersTdLambdaAgentGetSearchModeIterations(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
 	/// Sets number of search iterations to be done if tree search mode is on
 	/// Returns "true" in case of success
 	/// </summary>
-	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchModeIterations(TrainingCell::Checkers::TdLambdaAgent* agent_ptr, const int search_iterations);
+	TRAINING_CELL_API bool CheckersTdLambdaAgentSetSearchModeIterations(TrainingCell::TdLambdaAgent* agent_ptr, const int search_iterations);
 
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
@@ -254,7 +252,7 @@ extern "C"
 	/// <summary>
 	/// Disposes the agent pointed by the given pointer
 	/// </summary>
-	TRAINING_CELL_API bool FreeCheckersInteractiveAgent(const TrainingCell::Checkers::InteractiveAgent* agent_ptr);
+	TRAINING_CELL_API bool FreeCheckersInteractiveAgent(const TrainingCell::InteractiveAgent* agent_ptr);
 
 #pragma endregion Interactive Agent
 #pragma region Agent
@@ -262,49 +260,49 @@ extern "C"
 	/// Updates training mode parameter of an agent represented with its pointer
 	/// Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool CheckersAgentSetTrainingMode(TrainingCell::Checkers::Agent* agent_ptr, const bool training_mode);
+	TRAINING_CELL_API bool CheckersAgentSetTrainingMode(TrainingCell::Agent* agent_ptr, const bool training_mode);
 
 	/// <summary>
 	/// Returns training mode parameter of an agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API char CheckersAgentGetTrainingMode(const TrainingCell::Checkers::Agent* agent_ptr);
+	TRAINING_CELL_API char CheckersAgentGetTrainingMode(const TrainingCell::Agent* agent_ptr);
 
 	/// <summary>
 	/// Returns "can train" flag of an agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API char CheckersAgentGetCanTrainFlag(const TrainingCell::Checkers::Agent* agent_ptr);
+	TRAINING_CELL_API char CheckersAgentGetCanTrainFlag(const TrainingCell::Agent* agent_ptr);
 
 	/// <summary>
 	/// Returns name of the agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API const char* CheckersAgentGetName(const TrainingCell::Checkers::Agent* agent_ptr);
+	TRAINING_CELL_API const char* CheckersAgentGetName(const TrainingCell::Agent* agent_ptr);
 
 	/// <summary>
 	/// Sets name to the agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API bool CheckersAgentSetName(TrainingCell::Checkers::Agent* agent_ptr, const char* name);
+	TRAINING_CELL_API bool CheckersAgentSetName(TrainingCell::Agent* agent_ptr, const char* name);
 
 	/// <summary>
 	/// Returns string identifier of the agent represented with its pointer
 	/// </summary>
-	TRAINING_CELL_API const char* CheckersAgentGetId(const TrainingCell::Checkers::Agent* agent_ptr);
+	TRAINING_CELL_API const char* CheckersAgentGetId(const TrainingCell::Agent* agent_ptr);
 
 	/// <summary>
 	/// Returns number of records in the record-book of the agent
 	/// </summary>
-	TRAINING_CELL_API int CheckersAgentGetRecordsCount(const TrainingCell::Checkers::Agent* agent_ptr);
+	TRAINING_CELL_API int CheckersAgentGetRecordsCount(const TrainingCell::Agent* agent_ptr);
 
 	/// <summary>
 	/// Returns pointer to the string record (from the record book of the given agent) with the given id or null-pointer if
 	/// the id is invalid
 	/// </summary>
-	TRAINING_CELL_API const char* CheckersAgentGetRecordById(const TrainingCell::Checkers::Agent* agent_ptr, const int record_id);
+	TRAINING_CELL_API const char* CheckersAgentGetRecordById(const TrainingCell::Agent* agent_ptr, const int record_id);
 
 	/// <summary>
 	/// Adds given record to the record book of the given agent
 	/// </summary>
 	/// <returns>Index of the added record in the record book</returns>
-	TRAINING_CELL_API int CheckersAgentAddRecord(TrainingCell::Checkers::Agent* agent_ptr, const char* record);
+	TRAINING_CELL_API int CheckersAgentAddRecord(TrainingCell::Agent* agent_ptr, const char* record);
 #pragma endregion Agent
 #pragma region AgentPack
 	/// <summary>
@@ -315,19 +313,19 @@ extern "C"
 	/// <summary>
 	/// Saves agent-pack pointed by the given pointer to the given file on disk
 	/// </summary>
-	TRAINING_CELL_API bool CheckersAgentPackSaveToFile(const TrainingCell::Checkers::AgentPack* agent_pack_ptr, const char* path);
+	TRAINING_CELL_API bool CheckersAgentPackSaveToFile(const TrainingCell::AgentPack* agent_pack_ptr, const char* path);
 
 	/// <summary>
 	/// Frees instance of the agent-pack pointed by the given pointer
 	/// </summary>
-	TRAINING_CELL_API bool CheckersAgentPackFree(const TrainingCell::Checkers::AgentPack* agent_pack_ptr);
+	TRAINING_CELL_API bool CheckersAgentPackFree(const TrainingCell::AgentPack* agent_pack_ptr);
 
 	/// <summary>
 	/// Returns pointer to the "packed" agent (TrainingCell::Checkers::Agent*)
 	/// </summary>
 	/// <param name="agent_pack_ptr"></param>
 	/// <returns></returns>
-	TRAINING_CELL_API void* CheckersAgentPackGetAgentPtr(TrainingCell::Checkers::AgentPack* agent_pack_ptr);
+	TRAINING_CELL_API void* CheckersAgentPackGetAgentPtr(TrainingCell::AgentPack* agent_pack_ptr);
 #pragma endregion AgentPack
 #pragma region TdlEnsembleAgent
 
@@ -336,18 +334,18 @@ extern "C"
 	/// </summary>
 	/// <param name="agent_count">Number of agents in the given collection</param>
 	/// <param name="agent_collection">Collection of pointers to TdLambdaInstances</param>
-	TRAINING_CELL_API void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::Checkers::TdLambdaAgent** agent_collection);
+	TRAINING_CELL_API void* ConstructCheckersTdlEnsembleAgent(const int agent_count, const TrainingCell::TdLambdaAgent** agent_collection);
 
 	/// <summary>
 	/// Frees the instance of ensemble collection represented with the given pointer
 	///	Returns "true" if succeeded
 	/// </summary>
-	TRAINING_CELL_API bool FreeCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr);
+	TRAINING_CELL_API bool FreeCheckersTdlEnsembleAgent(const TrainingCell::TdlEnsembleAgent* agent_ptr);
 
 	/// <summary>
 	/// Saves the given instance of ensemble agent to the given file on disc (returns "true" if succeeded)
 	/// </summary>
-	TRAINING_CELL_API bool SaveCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const char* file_path);
+	TRAINING_CELL_API bool SaveCheckersTdlEnsembleAgent(const TrainingCell::TdlEnsembleAgent* agent_ptr, const char* file_path);
 
 	/// <summary>
 	/// Loads ensemble agent from the given file on disk
@@ -360,14 +358,14 @@ extern "C"
 	/// </summary>
 	/// <param name="agent_ptr">Pointer to an instance of TdlEnsembleAgent</param>
 	/// <returns></returns>
-	TRAINING_CELL_API int CheckersTdlEnsembleAgentGetSize(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr);
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentGetSize(const TrainingCell::TdlEnsembleAgent* agent_ptr);
 
 	/// <summary>
 	/// Returns string identifier of a sub-agent of the given ensemble with the given index
 	/// </summary>
 	/// <param name="agent_ptr">Pointer to an ensemble agent</param>
 	/// <param name="agent_id">Index of sub-agent to infer identifier from</param>
-	TRAINING_CELL_API const char* CheckersTdlEnsembleAgentGetSubAgentId(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const int agent_id);
+	TRAINING_CELL_API const char* CheckersTdlEnsembleAgentGetSubAgentId(const TrainingCell::TdlEnsembleAgent* agent_ptr, const int agent_id);
 
 	/// <summary>
 	/// Adds given agent to the given ensemble and returns index of the added agent in the underlying collection of agents
@@ -375,8 +373,8 @@ extern "C"
 	/// </summary>
 	/// <param name="ensemble_agent_ptr">Ensemble to add agent to</param>
 	/// <param name="agent_to_add_ptr">Agent, copy of which will be added to the ensemble</param>
-	TRAINING_CELL_API int CheckersTdlEnsembleAgentAdd(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
-		const TrainingCell::Checkers::TdLambdaAgent* agent_to_add_ptr);
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentAdd(TrainingCell::TdlEnsembleAgent* ensemble_agent_ptr,
+		const TrainingCell::TdLambdaAgent* agent_to_add_ptr);
 
 	/// <summary>
 	/// Removes a sub-agent with the given index (in the underlying collection of agents in the ensemble)
@@ -384,29 +382,29 @@ extern "C"
 	/// </summary>
 	/// <param name="ensemble_agent_ptr">Ensemble to be modified</param>
 	/// <param name="sub_agent_id">Index of the sub-agent to be removed from the ensemble</param>
-	TRAINING_CELL_API bool CheckersTdlEnsembleAgentRemove(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+	TRAINING_CELL_API bool CheckersTdlEnsembleAgentRemove(TrainingCell::TdlEnsembleAgent* ensemble_agent_ptr,
 		const int sub_agent_id);
 
 	/// <summary>
 	/// Sets "single agent model" for the given instance of ensemble agent
 	/// and returns actual index of a "chosen" sub-agent (or "-1" depending on the input parameter)
 	/// </summary>
-	TRAINING_CELL_API int CheckersTdlEnsembleAgentSetSingleAgentMode(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr,
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentSetSingleAgentMode(TrainingCell::TdlEnsembleAgent* ensemble_agent_ptr,
 		const bool set_single_agent_mode);
 
 	/// <summary>
 	/// Returns index of the single agent in case "single agent mode" is on of "-2" otherwise
 	/// </summary>
-	TRAINING_CELL_API int CheckersTdlEnsembleAgentGetSingleAgentId(TrainingCell::Checkers::TdlEnsembleAgent* ensemble_agent_ptr);
+	TRAINING_CELL_API int CheckersTdlEnsembleAgentGetSingleAgentId(TrainingCell::TdlEnsembleAgent* ensemble_agent_ptr);
 
 	/// <summary>
 	/// Allocates agent-pack for the given TD(lambda)-ensemble agent and returns pointer to it (or null-pointer if something went wrong)
 	/// </summary>
-	TRAINING_CELL_API void* PackCheckersTdlEnsembleAgent(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr);
+	TRAINING_CELL_API void* PackCheckersTdlEnsembleAgent(const TrainingCell::TdlEnsembleAgent* agent_ptr);
 
 	/// <summary>
 	/// Returns pointer to constant instance of the sub-agent with the given id
 	/// </summary>
-	TRAINING_CELL_API const void* CheckersTdlEnsembleAgentGetSubAgentPtr(const TrainingCell::Checkers::TdlEnsembleAgent* agent_ptr, const int sub_agent_id);
+	TRAINING_CELL_API const void* CheckersTdlEnsembleAgentGetSubAgentPtr(const TrainingCell::TdlEnsembleAgent* agent_ptr, const int sub_agent_id);
 #pragma endregion TdlEnsembleAgent
 }

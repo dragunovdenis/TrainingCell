@@ -19,61 +19,19 @@
     <Filter Include="Source Files\Checkers">
       <UniqueIdentifier>{753f16b3-380a-4bae-a7c2-a105d6c3e84a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Checkers\TDL">
-      <UniqueIdentifier>{d4c82825-52eb-4fee-98ec-dac3304fff64}</UniqueIdentifier>
+    <Filter Include="Source Files\TDL">
+      <UniqueIdentifier>{61e53bd7-29ef-41fa-a21f-c10847060c2b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Checkers\TDL">
-      <UniqueIdentifier>{8dca9af0-2988-407c-94f0-bb3e709f17c7}</UniqueIdentifier>
+    <Filter Include="Header Files\TDL">
+      <UniqueIdentifier>{7d8887ec-7430-4aef-b03b-f91885967755}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\Checkers\Agent.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\Checkers\State.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\Board.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\AgentPack.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\RandomAgent.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\InteractiveAgent.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Checkers\TrainingEngine.h">
       <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\AgentTypeId.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdLambdaAgent.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdLambdaSubAgent.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdlAbstractAgent.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdlLegacyMsgPackAdapter.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdlEnsembleAgent.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\IMinimalAgent.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdlSettings.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Checkers\TdlTrainingAdapter.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
     </ClInclude>
     <ClInclude Include="Headers\IState.h">
       <Filter>Header Files</Filter>
@@ -90,52 +48,58 @@
     <ClInclude Include="Headers\Move.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Checkers\MoveData.h">
-      <Filter>Header Files\Checkers\TDL</Filter>
+    <ClInclude Include="Headers\Agent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IMinimalAgent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\AgentTypeId.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\InteractiveAgent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\RandomAgent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Board.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\AgentPack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TdlTrainingAdapter.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TdlAbstractAgent.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TdLambdaAgent.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TdLambdaSubAgent.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TdlEnsembleAgent.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TdlLegacyMsgPackAdapter.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\TdlSettings.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\MoveData.h">
+      <Filter>Header Files\TDL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\State.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Checkers\Agent.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\Board.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\AgentPack.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\RandomAgent.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\InteractiveAgent.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp">
       <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\AgentTypeId.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TdLambdaAgent.cpp">
-      <Filter>Source Files\Checkers\TDL</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TdLambdaSubAgent.cpp">
-      <Filter>Source Files\Checkers\TDL</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TdlAbstractAgent.cpp">
-      <Filter>Source Files\Checkers\TDL</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TdlEnsembleAgent.cpp">
-      <Filter>Source Files\Checkers\TDL</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TdlSettings.cpp">
-      <Filter>Source Files\Checkers\TDL</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TdlTrainingAdapter.cpp">
-      <Filter>Source Files\Checkers\TDL</Filter>
     </ClCompile>
     <ClCompile Include="Source\PiecePosition.cpp">
       <Filter>Source Files</Filter>
@@ -145,6 +109,42 @@
     </ClCompile>
     <ClCompile Include="Source\Move.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Agent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AgentTypeId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\InteractiveAgent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\RandomAgent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Board.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\AgentPack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TdlAbstractAgent.cpp">
+      <Filter>Source Files\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TdLambdaAgent.cpp">
+      <Filter>Source Files\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TdLambdaSubAgent.cpp">
+      <Filter>Source Files\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TdlEnsembleAgent.cpp">
+      <Filter>Source Files\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TdlSettings.cpp">
+      <Filter>Source Files\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TdlTrainingAdapter.cpp">
+      <Filter>Source Files\TDL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

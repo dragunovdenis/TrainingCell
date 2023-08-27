@@ -18,10 +18,8 @@
 #pragma once
 #include <filesystem>
 #include <msgpack.hpp>
-#include "Headers/Checkers/TdLambdaAgent.h"
+#include "Headers/TdLambdaAgent.h"
 #include "Headers/Checkers/TrainingEngine.h"
-
-using namespace TrainingCell::Checkers;
 
 namespace Training
 {
@@ -34,22 +32,22 @@ namespace Training
 		/// <summary>
 		/// Collections of agents that undergo training
 		/// </summary>
-		std::vector<TdLambdaAgent> _agents{};
+		std::vector<TrainingCell::TdLambdaAgent> _agents{};
 
 		/// <summary>
 		/// Collection of averaged performance records (presumably one per round)
 		/// </summary>
-		std::vector<TrainingEngine::PerformanceRec> _performances{};
+		std::vector<TrainingCell::Checkers::TrainingEngine::PerformanceRec> _performances{};
 
 		/// <summary>
 		/// Collections of agents that have been copied from the regular collection of agents on the "registration" of "best score"
 		/// </summary>
-		std::vector<TdLambdaAgent> _agents_best_performance{};
+		std::vector<TrainingCell::TdLambdaAgent> _agents_best_performance{};
 
 		/// <summary>
 		/// Best performance records for each agent in the collection of "best score" agents
 		/// </summary>
-		std::vector<TrainingEngine::PerformanceRec> _best_performance {};
+		std::vector<TrainingCell::Checkers::TrainingEngine::PerformanceRec> _best_performance {};
 
 		/// <summary>
 		/// Index of the current round
@@ -70,7 +68,7 @@ namespace Training
 		/// If the given score if higher than the "best score", the corresponding collection of "best agents" and the "best score"
 		/// get updated accordingly. 
 		/// </summary>
-		void register_performance(const std::vector<TrainingEngine::PerformanceRec>& performance);
+		void register_performance(const std::vector<TrainingCell::Checkers::TrainingEngine::PerformanceRec>& performance);
 	public:
 		/// <summary>
 		/// Constructs collection of agents from the given "script-string"
@@ -90,23 +88,24 @@ namespace Training
 		/// <summary>
 		/// Adds the given agent to the corresponding collection
 		/// </summary>
-		void add_agent(const TdLambdaAgent& agent);
+		void add_agent(const TrainingCell::TdLambdaAgent& agent);
 
 		/// <summary>
 		/// Adds performance record to the corresponding collection
 		/// Returns average performance record
 		/// </summary>
-		TrainingEngine::PerformanceRec add_performance_record(const std::vector<TrainingEngine::PerformanceRec>& performance);
+		TrainingCell::Checkers::TrainingEngine::PerformanceRec add_performance_record(
+			const std::vector<TrainingCell::Checkers::TrainingEngine::PerformanceRec>& performance);
 
 		/// <summary>
 		/// Sub-script operator
 		/// </summary>
-		TdLambdaAgent& operator [](const std::size_t id);
+		TrainingCell::TdLambdaAgent& operator [](const std::size_t id);
 
 		/// <summary>
 		/// Sub-script operator (constant version)
 		/// </summary>
-		const TdLambdaAgent& operator [](const std::size_t id) const;
+		const TrainingCell::TdLambdaAgent& operator [](const std::size_t id) const;
 
 		/// <summary>
 		/// Returns number of agents in the corresponding collection
@@ -147,7 +146,7 @@ namespace Training
 		/// <summary>
 		/// Read-only access to the collection of performances
 		/// </summary>
-		[[nodiscard]] const std::vector<TrainingEngine::PerformanceRec>& get_performances() const;
+		[[nodiscard]] const std::vector<TrainingCell::Checkers::TrainingEngine::PerformanceRec>& get_performances() const;
 
 		/// <summary>
 		/// Saves performance report to the given file
