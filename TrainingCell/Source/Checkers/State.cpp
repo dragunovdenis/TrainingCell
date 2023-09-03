@@ -299,6 +299,11 @@ namespace TrainingCell::Checkers
 		return !(*this == another_state);
 	}
 
+	std::unique_ptr<IState> State::yield() const
+	{
+		return copy();
+	}
+
 	bool Utils::is_allay_piece(const Piece piece)
 	{
 		return piece == Piece::Man || piece == Piece::King;

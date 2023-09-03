@@ -42,7 +42,7 @@ namespace TrainingCell
 
 		TdlLegacyMsgPackAdapter() = default;
 
-		int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override
+		int make_move(const IActionEvaluator& evaluator, const bool as_white) override
 		{
 			throw std::exception("Not implemented");
 		};

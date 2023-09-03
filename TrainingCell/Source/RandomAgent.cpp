@@ -20,9 +20,9 @@
 
 namespace TrainingCell
 {
-	int RandomAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
+	int RandomAgent::make_move(const IActionEvaluator& evaluator, const bool as_white)
 	{
-		return DeepLearning::Utils::get_random_int(0, static_cast<int>(moves.size() - 1));
+		return DeepLearning::Utils::get_random_int(0, evaluator.get_actions_count() - 1);
 	}
 
 	void RandomAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)

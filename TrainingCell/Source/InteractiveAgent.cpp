@@ -27,23 +27,23 @@ namespace TrainingCell
 			throw std::exception("Invalid callback pointers");
 	}
 
-	int InteractiveAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
+	int InteractiveAgent::make_move(const IActionEvaluator& evaluator, const bool as_white)
 	{
 		//Sanity check
 		if (as_white != _play_for_whites)
 			throw std::exception("Inconsistency encountered");
 
 		if (_play_for_whites)
-			return _make_move_callback(current_state.to_std_vector(), moves);
+			return _make_move_callback(evaluator.to_std_vector(), evaluator.actions());
 
-		std::vector<Move> moves_inverted(moves.size());
+		std::vector<Move> moves_inverted(evaluator.actions().size());
 
-		std::ranges::transform(moves, moves_inverted.begin(), [](const auto m)
+		std::ranges::transform(evaluator.actions(), moves_inverted.begin(), [](const auto m)
 			{
 				return m.get_inverted();
 			});
 
-		return _make_move_callback(current_state.get_inverted_std(), moves_inverted);
+		return _make_move_callback(evaluator.get_inverted_std(), moves_inverted);
 	}
 
 	void InteractiveAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)

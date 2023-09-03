@@ -17,6 +17,7 @@
 
 #pragma once
 #include "IState.h"
+#include "IActionEvaluator.h"
 
 namespace TrainingCell
 {
@@ -44,7 +45,7 @@ namespace TrainingCell
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent "prefers" to take given the current state
 		/// </summary>
-		virtual int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) = 0;
+		virtual int make_move(const IActionEvaluator& evaluator, const bool as_white) = 0;
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over

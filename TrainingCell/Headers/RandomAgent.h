@@ -32,7 +32,7 @@ namespace TrainingCell
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent wants to take given the current state
 		/// </summary>
-		int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override;
+		int make_move(const IActionEvaluator& evaluator, const bool as_white) override;
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over

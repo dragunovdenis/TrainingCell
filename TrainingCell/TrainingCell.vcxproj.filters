@@ -93,6 +93,15 @@
     <ClInclude Include="Headers\MoveData.h">
       <Filter>Header Files\TDL</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\IActionEvaluator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\ActionEvaluator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IStateSeed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\State.cpp">
@@ -145,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="Source\TdlTrainingAdapter.cpp">
       <Filter>Source Files\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\ActionEvaluator.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

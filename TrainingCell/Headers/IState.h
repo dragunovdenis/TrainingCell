@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
+#include "IStateSeed.h"
 #include "Move.h"
 #include "../../DeepLearning/DeepLearning/Math/Tensor.h"
 
@@ -24,14 +25,9 @@ namespace TrainingCell
 	/// <summary>
 	/// General interface for an "environment state"
 	///</summary>
-	class IState
+	class IState : public IStateSeed
 	{
 	public:
-		/// <summary>
-		/// Destructor
-		///</summary>
-		virtual ~IState() = default;
-
 		/// <summary>
 		/// Size of the state.
 		/// Literally, number of elements in the "tensor" representation of the state

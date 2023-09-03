@@ -58,7 +58,7 @@ namespace TrainingCell
 		/// <summary>
 		/// See summary of the base class declaration
 		/// </summary>
-		int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override;
+		int make_move(const IActionEvaluator& evaluator, const bool as_white) override;
 
 		/// <summary>
 		/// See summary of the base class declaration

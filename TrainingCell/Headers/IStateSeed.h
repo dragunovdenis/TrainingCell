@@ -15,24 +15,28 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Headers/TdlTrainingAdapter.h"
+#pragma once
+#include <memory>
 
 namespace TrainingCell
 {
-	TdlTrainingAdapter::TdlTrainingAdapter(DeepLearning::Net<DeepLearning::CpuDC>* net_ptr, const TdlSettings& settings) :
-		_net_ptr(net_ptr), _settings(settings)
-	{
-		if (!_net_ptr)
-			throw std::exception("Invalid pointer to the neural network");
-	}
+	class IState;
 
-	int TdlTrainingAdapter::make_move(const IActionEvaluator& evaluator, const bool as_white)
+	/// <summary>
+	/// An auxiliary interface allowing to get a copy of an "IState" instance 
+	/// </summary>
+	class IStateSeed
 	{
-		return _sub_agents[as_white].make_move(evaluator, _settings, *_net_ptr);
-	}
+	public:
+		/// <summary>
+		/// Destructor
+		/// </summary>
+		virtual ~IStateSeed() = default;
 
-	void TdlTrainingAdapter::game_over(const IState& final_state, const GameResult& result, const bool as_white)
-	{
-		_sub_agents[as_white].game_over(final_state, result, _settings, *_net_ptr);
-	}
+		/// <summary>
+		/// Returns an instance of "IState" 
+		/// </summary>
+		[[nodiscard]] virtual std::unique_ptr<IState> yield() const = 0;
+	};
+
 }

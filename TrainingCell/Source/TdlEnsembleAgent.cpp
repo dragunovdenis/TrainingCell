@@ -74,21 +74,21 @@ namespace TrainingCell
 		return _ensemble[id];
 	}
 
-	int TdlEnsembleAgent::make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white)
+	int TdlEnsembleAgent::make_move(const IActionEvaluator& evaluator, const bool as_white)
 	{
-		if (moves.empty())
+		if (evaluator.get_actions_count() <= 0)
 			return -1;
 
-		if (moves.size() == 1)
+		if (evaluator.get_actions_count() == 1)
 			return 0; // the choice is obvious
 
 		if (is_single_agent_mode())
-			return _ensemble[_chosen_agent_id].pick_move_id(current_state, moves, as_white);
+			return _ensemble[_chosen_agent_id].pick_move_id(evaluator, as_white);
 
-		std::vector votes(moves.size(), 0);
+		std::vector votes(evaluator.get_actions_count(), 0);
 
 		for (const auto& a : _ensemble)
-			++votes[a.pick_move_id(current_state, moves, as_white)];
+			++votes[a.pick_move_id(evaluator, as_white)];
 
 		return static_cast<int>(std::distance(votes.begin(), std::ranges::max_element(votes)));
 	}
@@ -126,7 +126,7 @@ namespace TrainingCell
 			int _chosen_agent_id = -1;
 			MSGPACK_DEFINE(MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id);
 
-			int make_move(const IState& current_state, const std::vector<Move>& moves, const bool as_white) override
+			int make_move(const IActionEvaluator& evaluator, const bool as_white) override
 			{
 				throw std::exception("Not implemented");
 			};

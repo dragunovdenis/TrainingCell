@@ -18,6 +18,7 @@
 #pragma once
 #include "IMinimalAgent.h"
 #include "IState.h"
+#include "IStateSeed.h"
 
 namespace TrainingCell
 {
@@ -113,9 +114,9 @@ namespace TrainingCell
 		bool try_make_move(PublishCheckersStateCallBack publish, Move& out_move);
 
 		/// <summary>
-		/// Resets state of the board to the "initial one" (beginning of the game)
+		/// Resets state of the board to the "initial one" yielded by the given "seed"
 		/// </summary>
-		void reset_state(const IState& init_state);
+		void reset_state(const IStateSeed& seed);
 	public:
 		/// <summary>
 		///	Constructor
@@ -132,7 +133,7 @@ namespace TrainingCell
 		/// <param name="publish_stats_callback">Callback to be called after each episode (game). Allows caller to get some intermediate information about the process</param>
 		/// <param name="cancel">Callback allowing caller to cancel the process</param>
 		/// <param name="error">Callback allowing caller to get some information about errors encountered</param>
-		void play(const int episodes, const IState& start_state, const int max_moves_without_capture = 200,
+		void play(const int episodes, const IStateSeed& start_state, const int max_moves_without_capture = 200,
 		          PublishCheckersStateCallBack publish_state_callback = nullptr,
 		          PublishTrainingStatsCallBack publish_stats_callback = nullptr, CancelCallBack cancel = nullptr,
 		          ErrorMessageCallBack error = nullptr);

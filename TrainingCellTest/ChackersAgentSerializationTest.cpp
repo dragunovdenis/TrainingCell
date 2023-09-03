@@ -22,6 +22,7 @@
 #include "../TrainingCell/Headers/TdlEnsembleAgent.h"
 #include "../TrainingCell/Headers/AgentPack.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "../TrainingCell/Headers/ActionEvaluator.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell::Checkers;
@@ -75,7 +76,7 @@ namespace TrainingCellTest
 			for (auto iter_id = 0; iter_id < iter_count; ++iter_id)
 			{
 				const auto moves = state.get_moves();
-				const auto move_id = agent.make_move(state, moves, true);
+				const auto move_id = agent.make_move(ActionEvaluator(&state, &moves), true);
 				state.make_move(moves[move_id], true);
 				state.invert();
 			}

@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "..\Headers\Board.h"
+#include "../Headers/ActionEvaluator.h"
 
 namespace TrainingCell
 {
@@ -67,10 +68,10 @@ namespace TrainingCell
 		return (_agent_to_move_id + 1) % 2;
 	}
 
-	void Board::reset_state(const IState& init_state)
+	void Board::reset_state(const IStateSeed& seed)
 	{
 		_agent_to_move_id = 0;
-		_state_ptr = init_state.copy();
+		_state_ptr = seed.yield();
 	}
 
 	void Board::reset_wins()
@@ -94,7 +95,7 @@ namespace TrainingCell
 		}
 	}
 
-	void Board::play(const int episodes, const IState& start_state, const int max_moves_without_capture,
+	void Board::play(const int episodes, const IStateSeed& start_state, const int max_moves_without_capture,
 		PublishCheckersStateCallBack publish_state_callback,
 		PublishTrainingStatsCallBack publish_stats_callback,
 		CancelCallBack cancel,
@@ -159,7 +160,8 @@ namespace TrainingCell
 		if (moves.empty())
 			return false;
 
-		const auto chosen_move_id = agent_to_move()->make_move(state(), moves, is_agent_to_move_white());
+		const auto chosen_move_id = agent_to_move()->make_move(
+			ActionEvaluator(&state(), &moves), is_agent_to_move_white());
 
 		if (chosen_move_id < 0 || chosen_move_id >= moves.size())
 			throw std::exception("Invalid move id");

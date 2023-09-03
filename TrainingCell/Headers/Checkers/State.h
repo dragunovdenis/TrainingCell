@@ -226,6 +226,11 @@ namespace TrainingCell::Checkers
 		/// Inequality operator
 		/// </summary>
 		bool operator !=(const State& another_state) const;
+
+		/// <summary>
+		/// Returns a copy of the current state <see cref="IStateSeed"/>
+		/// </summary>
+		[[nodiscard]] std::unique_ptr<IState> yield() const override;
 	};
 
 	/// <summary>
