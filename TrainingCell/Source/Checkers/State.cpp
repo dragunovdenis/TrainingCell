@@ -15,8 +15,9 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/State.h"
 #include <algorithm>
+#include "../../Headers/Checkers/State.h"
+#include "../../Headers/Checkers/StateHandle.h"
 #include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
 
 namespace TrainingCell::Checkers
@@ -53,11 +54,6 @@ namespace TrainingCell::Checkers
 
 	State::State(const State_array& state_array, const bool inverted) : State_array(state_array), _inverted(inverted)
 	{}
-
-	std::size_t State::dim() const
-	{
-		return size();
-	}
 
 	bool State::is_inverted() const
 	{
@@ -170,15 +166,9 @@ namespace TrainingCell::Checkers
 	[[nodiscard]] std::vector<int> State::to_std_vector() const
 	{
 		std::vector<int> result(size());
-		std::ranges::transform(*this, result.begin(),
-			[](const auto& piece) { return static_cast<int>(piece); });
+		std::memcpy(result.data(), data(), size() * sizeof(int));
 
 		return result;
-	}
-
-	std::unique_ptr<IState> State::copy() const
-	{
-		return std::make_unique<State>(*this);
 	}
 
 	std::vector<Move> State::get_moves() const
@@ -247,7 +237,7 @@ namespace TrainingCell::Checkers
 		return true;
 	}
 
-	void State::make_move(const Move& move, const bool remove_extra_markers)
+	void State::make_move(const Move& move, const bool remove_captured)
 	{
 		if (!is_valid_move(move))
 			throw std::exception("Invalid move");
@@ -257,7 +247,7 @@ namespace TrainingCell::Checkers
 			const auto& capturePos = move.sub_moves[subMoveId].capture;
 
 			if (Utils::is_valid(capturePos))
-				get_piece(capturePos) = remove_extra_markers ? Piece::Space : Piece::AntiCaptured;
+				get_piece(capturePos) = remove_captured ? Piece::Space : Piece::AntiCaptured;
 		}
 
 		auto piece_to_move = get_piece(move.sub_moves[0].start);
@@ -269,12 +259,12 @@ namespace TrainingCell::Checkers
 			piece_to_move = Piece::King;
 
 		get_piece(move.sub_moves.rbegin()[0].end) = piece_to_move;
+		get_piece(move.sub_moves[0].start) = Piece::Space;
+	}
 
-		if (!remove_extra_markers)
-			for (auto subMoveId = 0ull; subMoveId < move.sub_moves.size(); subMoveId++)
-				get_piece(move.sub_moves[subMoveId].start) = Piece::TraceMarker;
-		else
-			get_piece(move.sub_moves[0].start) = Piece::Space;
+	void State::make_move(const Move& move)
+	{
+		make_move(move, true);
 	}
 
 	DeepLearning::Tensor State::get_state(const Move& move) const
@@ -301,7 +291,7 @@ namespace TrainingCell::Checkers
 
 	std::unique_ptr<IState> State::yield() const
 	{
-		return copy();
+		return std::make_unique<StateHandle>(*this);
 	}
 
 	bool Utils::is_allay_piece(const Piece piece)

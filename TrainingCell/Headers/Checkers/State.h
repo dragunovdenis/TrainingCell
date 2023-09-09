@@ -21,7 +21,7 @@
 #include <msgpack.hpp>
 #include "../Checkerboard.h"
 #include "../Move.h"
-#include "../IState.h"
+#include "../IStateSeed.h"
 
 namespace DeepLearning
 {
@@ -77,7 +77,7 @@ namespace TrainingCell::Checkers
 
 	constexpr int FieldsInRow = Checkerboard::Columns / 2;
 	constexpr int StateSize = Checkerboard::Rows * FieldsInRow;
-	
+
 	/// <summary>
 	///	Alias to make the messge-pack macros below happy
 	/// </summary>
@@ -86,7 +86,7 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	/// A data structure to represent state of the checkers game
 	/// </summary>
-	class State : public State_array, public IState
+	class State : public State_array, public IStateSeed
 	{
 	private:
 		bool _inverted{};
@@ -110,15 +110,9 @@ namespace TrainingCell::Checkers
 		explicit State(const State_array& state_array, const bool inverted = false);
 
 		/// <summary>
-		/// Size of the state.
-		/// Literally, number of elements in the "tensor" representation of the state
-		///</summary>
-		[[nodiscard]] std::size_t dim() const override;
-
-		/// <summary>
 		/// Returns "true" if the state is reversed with respect to its initial "orientation"
 		/// </summary>
-		[[nodiscard]] bool is_inverted() const override;
+		[[nodiscard]] bool is_inverted() const;
 
 		/// <summary>
 		///	Returns state that corresponds to the beginning of the game
@@ -157,13 +151,19 @@ namespace TrainingCell::Checkers
 		/// Makes the move
 		/// </summary>
 		/// <param name="move">Move to "make"</param>
-		/// <param name="remove_extra_markers">If "false", state will contain auxiliary markers "illustrating" details of the move</param>
-		void make_move(const Move& move, const bool remove_extra_markers) override;
+		/// <param name="remove_captured">If "false", state will contain auxiliary markers "illustrating" details of the move</param>
+		void make_move(const Move& move, const bool remove_captured);
+
+		/// <summary>
+		/// Makes the move
+		/// </summary>
+		/// <param name="move">Move to "make"</param>
+		void make_move(const Move& move);
 
 		/// <summary>
 		/// Returns tensor representation of the current state after given `move` was applied to it
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor get_state(const Move& move) const override;
+		[[nodiscard]] DeepLearning::Tensor get_state(const Move& move) const;
 
 		/// <summary>
 		///	Makes the move
@@ -183,39 +183,34 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// "Inverts" the state
 		/// </summary>
-		void invert() override;
+		void invert();
 
 		/// <summary>
 		/// Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
 		/// in the form of integer vector
 		///// </summary>
-		[[nodiscard]] std::vector<int> get_inverted_std() const override;
+		[[nodiscard]] std::vector<int> get_inverted_std() const;
 
 		/// <summary>
 		/// Calculates reward for the given pair of previous and next after-states represented with "raw" tensors
 		/// (those that can be obtained by calling `to_tensor` method below)
 		///</summary>
-		[[nodiscard]] double calc_reward(const DeepLearning::Tensor& prev_after_state, const DeepLearning::Tensor& next_after_state) const override;
+		[[nodiscard]] double calc_reward(const DeepLearning::Tensor& prev_after_state, const DeepLearning::Tensor& next_after_state) const;
 
 		/// <summary>
 		///	Converts the current state to tensor representation
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor to_tensor() const override;
+		[[nodiscard]] DeepLearning::Tensor to_tensor() const;
 
 		/// <summary>
 		/// Returns int vector representation of the state
 		/// </summary>
-		[[nodiscard]] std::vector<int> to_std_vector() const override;
-
-		/// <summary>
-		/// Returns pointer to a copy of the current instance
-		/// </summary>
-		[[nodiscard]] std::unique_ptr<IState> copy() const override;
+		[[nodiscard]] std::vector<int> to_std_vector() const;
 
 		/// <summary>
 		/// Returns collection of available moves for the current state
 		/// </summary>
-		[[nodiscard]] std::vector<Move> get_moves() const override;
+		[[nodiscard]] std::vector<Move> get_moves() const;
 
 		/// <summary>
 		/// Equality operator
@@ -228,7 +223,7 @@ namespace TrainingCell::Checkers
 		bool operator !=(const State& another_state) const;
 
 		/// <summary>
-		/// Returns a copy of the current state <see cref="IStateSeed"/>
+		/// Returns "handle" to a copy of the current state <see cref="IStateSeed"/>
 		/// </summary>
 		[[nodiscard]] std::unique_ptr<IState> yield() const override;
 	};

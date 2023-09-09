@@ -16,9 +16,10 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
+#include <array>
 #include "IMinimalAgent.h"
-#include "IState.h"
 #include "IStateSeed.h"
+#include "IState.h"
 
 namespace TrainingCell
 {
@@ -107,16 +108,18 @@ namespace TrainingCell
 		int _blacksWin{};
 
 		/// <summary>
-		/// Tries to retrieve move from the "current" agent and updates the "current" state accordingly.
-		/// Returns "true" if such a move exists, in which case the corresponding "out" parameter will
-		/// be updated to contain the retrieved move, otherwise "false" is returned, which means that the game is over.
+		/// Retrieve move from the "current" agent and updates the "current" state accordingly.
+		/// Returns "true" if the taken move was a "capture" one.
+		/// It is a responsibility of the caller to ensure that it is possible to make a move
+		/// in the "current state" before calling the method.
 		/// </summary>
-		bool try_make_move(PublishCheckersStateCallBack publish, Move& out_move);
+		bool make_move(IState& state_handle, PublishCheckersStateCallBack publish);
 
 		/// <summary>
-		/// Resets state of the board to the "initial one" yielded by the given "seed"
+		/// Resets state of the board to the "initial one" yielded by the given "seed".
+		/// Returns reference to the updated state.
 		/// </summary>
-		void reset_state(const IStateSeed& seed);
+		IState& reset_state(const IStateSeed& seed);
 	public:
 		/// <summary>
 		///	Constructor

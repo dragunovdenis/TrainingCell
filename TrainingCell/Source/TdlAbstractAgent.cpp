@@ -18,7 +18,6 @@
 #include "../Headers/TdlAbstractAgent.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
 #include "../Headers/TdlTrainingAdapter.h"
-#include "../Headers/ActionEvaluator.h"
 #include "../Headers/Board.h"
 #include <nlohmann/json.hpp>
 
@@ -169,24 +168,24 @@ namespace TrainingCell
 		initialize_net(layer_dimensions);
 	}
 
-	int TdlAbstractAgent::make_move(const IActionEvaluator& evaluator, const bool as_white)
+	int TdlAbstractAgent::make_move(const IStateReadOnly& state, const bool as_white)
 	{
 		if (_search_method == TreeSearchMethod::TD_SEARCH)
 		{
-			auto move_data = run_search(evaluator);
+			auto move_data = run_search(state);
 
 			if (get_training_mode())
 				//If the agent is in a "training" mode then we force it to "make a move" suggested by the search procedure
-				return _sub_agents[as_white].make_move(evaluator, std::move(move_data), *this, _net);
+				return _sub_agents[as_white].make_move(state, std::move(move_data), *this, _net);
 
 			//Otherwise we just immediately output what search procedure has come up with
 			return move_data.move_id;
 		}
 
-		return _sub_agents[as_white].make_move(evaluator, *this, _net);
+		return _sub_agents[as_white].make_move(state, *this, _net);
 	}
 
-	void TdlAbstractAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)
+	void TdlAbstractAgent::game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white)
 	{
 		if (_search_method != TreeSearchMethod::NONE)
 			//in the current implementation search net should be reset at the end of each episode
@@ -195,12 +194,12 @@ namespace TrainingCell
 		_sub_agents[as_white].game_over(final_state, result, *this, _net);
 	}
 
-	int TdlAbstractAgent::pick_move_id(const IActionEvaluator& evaluator, const bool as_white) const
+	int TdlAbstractAgent::pick_move_id(const IStateReadOnly& state, const bool as_white) const
 	{
 		if (_search_method == TreeSearchMethod::TD_SEARCH)
-			return run_search(evaluator).move_id;
+			return run_search(state).move_id;
 
-		return TdLambdaSubAgent::pick_move(evaluator, _net).move_id;
+		return TdLambdaSubAgent::pick_move(state, _net).move_id;
 	}
 
 	void TdlAbstractAgent::assign_hyperparams(const std::string& script_str)
@@ -338,15 +337,15 @@ namespace TrainingCell
 		return result;
 	}
 
-	MoveData TdlAbstractAgent::run_search(const IActionEvaluator& evaluator) const
+	MoveData TdlAbstractAgent::run_search(const IStateReadOnly& state) const
 	{
 		if (!_search_net)
 			_search_net = std::make_optional(_net); // copy the current net if search net is not defined
 
 		TdlTrainingAdapter adapter(&_search_net.value(), get_search_settings());
 		Board board(&adapter, &adapter);
-		board.play(_td_search_iterations, evaluator.current_state_seed(), 100 /*max moves without capture for a draw*/);
+		board.play(_td_search_iterations, state.current_state_seed(), 100 /*max moves without capture for a draw*/);
 
-		return TdLambdaSubAgent::pick_move(evaluator, _search_net.value());
+		return TdLambdaSubAgent::pick_move(state, _search_net.value());
 	}
 }

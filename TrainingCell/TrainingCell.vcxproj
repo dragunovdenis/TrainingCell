@@ -15,15 +15,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\ActionEvaluator.h" />
     <ClInclude Include="Headers\Agent.h" />
     <ClInclude Include="Headers\AgentPack.h" />
     <ClInclude Include="Headers\AgentTypeId.h" />
     <ClInclude Include="Headers\Board.h" />
     <ClInclude Include="Headers\Checkerboard.h" />
+    <ClInclude Include="Headers\Checkers\StateHandle.h" />
     <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
     <ClInclude Include="Headers\Checkers\State.h" />
-    <ClInclude Include="Headers\IActionEvaluator.h" />
+    <ClInclude Include="Headers\IStateReadOnly.h" />
+    <ClInclude Include="Headers\IMinimalStateReadonly.h" />
     <ClInclude Include="Headers\IMinimalAgent.h" />
     <ClInclude Include="Headers\InteractiveAgent.h" />
     <ClInclude Include="Headers\IState.h" />
@@ -42,11 +43,11 @@
     <ClInclude Include="Headers\TdlTrainingAdapter.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\ActionEvaluator.cpp" />
     <ClCompile Include="Source\Agent.cpp" />
     <ClCompile Include="Source\AgentPack.cpp" />
     <ClCompile Include="Source\AgentTypeId.cpp" />
     <ClCompile Include="Source\Board.cpp" />
+    <ClCompile Include="Source\Checkers\StateHandle.cpp" />
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
     <ClCompile Include="Source\Checkers\State.cpp" />
     <ClCompile Include="Source\InteractiveAgent.cpp" />

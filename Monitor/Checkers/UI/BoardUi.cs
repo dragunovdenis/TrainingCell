@@ -336,6 +336,23 @@ namespace Monitor.Checkers.UI
         public bool CanEditAgent => InactiveAgent is TdLambdaAgent;
 
         /// <summary>
+        /// Adds extra symbols to the state to trace the series of given sub-moves (representing a move)
+        /// </summary>
+        private static void AddMoveTrace(int[] state, CheckersSubMove[] subMoves, bool whiteMove)
+        {
+            if (subMoves == null)
+                return;
+
+            foreach (var move in subMoves)
+            {
+                if (move.Capture.IsValid())
+                    state[PiecePositionToStateItemId(move.Capture)] = whiteMove ? BlackCapturedPieceId : WhiteCapturedPieceId;
+
+                state[PiecePositionToStateItemId(move.Start)] = whiteMove ? WhitePieceTraceId : BlackPieceTraceId;
+            }
+        }
+
+        /// <summary>
         /// Starts checkers game with the agents of the two given types (asynchronously) and returns immediately
         /// Returns true if the previous playing task is complete and the current one is successfully started
         /// </summary>
@@ -373,6 +390,8 @@ namespace Monitor.Checkers.UI
                                 if (movePause > 0) Thread.Sleep(movePause);
 
                                 InactiveAgent = (agentToMovePtr == agentWhite.Ptr) ? agentBlack : agentWhite;
+
+                                AddMoveTrace(state, subMoves, InactiveAgent == agentWhite);
 
                                 _uiThreadDispatcher.Invoke(() =>
                                 {
@@ -446,31 +465,50 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Outputs row and column representation for the state item given by its ID
         /// </summary>
-        void StateItemIdToRowAndCol(int stateItemId, out int rowId, out int colId)
+        private static CheckersPiecePosition StateItemIdToPiecePosition(int stateItemId)
         {
-            rowId = stateItemId / BlackFieldsInRow;
-            colId = 2 * (stateItemId % BlackFieldsInRow);
+            var result = new CheckersPiecePosition()
+            {
+                Row = stateItemId / BlackFieldsInRow,
+                Col = 2 * (stateItemId % BlackFieldsInRow),
+            };
 
-            if (rowId % 2 == 0)
-                colId++;
+            if (result.Row % 2 == 0)
+                result.Col++;
+
+            return result;
         }
+
+        /// <summary>
+        /// Output state ID of the given piece position
+        /// </summary>
+        private static int PiecePositionToStateItemId(CheckersPiecePosition position)
+        {
+            var temp = position.Col - (position.Row % 2 == 0 ? 1 : 0);
+            return (int)(position.Row * BlackFieldsInRow + temp / 2);
+        }
+
+        private const int WhiteCapturedPieceId = 3;
+        private const int BlackCapturedPieceId = -3;
+        private const int WhitePieceTraceId = 4;
+        private const int BlackPieceTraceId = -4;
 
         /// <summary>
         /// Converts index of a checkers piece (that we receive in the "state" collection) into the fill color that should be
         /// used when drawing the piece on the board
         /// </summary>
-        Brush PieceIdToColor(int pieceId)
+        private Brush PieceIdToColor(int pieceId)
         {
             switch (pieceId)
             {
                 case 1: return Brushes.Wheat;
                 case 2: return Brushes.Wheat;
-                case 3: return Brushes.Wheat;
-                case 4: return null;
+                case WhiteCapturedPieceId: return Brushes.Wheat;
+                case WhitePieceTraceId: return null;
                 case -1: return Brushes.Black;
                 case -2: return Brushes.Black;
-                case -3: return Brushes.Black;
-                case -4: return null;
+                case BlackCapturedPieceId: return Brushes.Black;
+                case BlackPieceTraceId: return null;
                 default: throw new Exception("Unknown piece identifier");
             }
         }
@@ -478,7 +516,7 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Returns "true" is the given identifier represents a King piece
         /// </summary>
-        bool IsKingPiece(int pieceId)
+        private bool IsKingPiece(int pieceId)
         {
             return pieceId == 2 || pieceId == -2;
         }
@@ -486,7 +524,7 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Returns "true" if the given identifier represents a Man piece
         /// </summary>
-        bool IsManPiece(int pieceId)
+        private bool IsManPiece(int pieceId)
         {
             return pieceId == 1 || pieceId == -1;
         }
@@ -549,7 +587,7 @@ namespace Monitor.Checkers.UI
         /// <param name="rowId">Field row</param>
         /// <param name="offset">Offset that should added to booth coordinates of the returned corner</param>
         /// <returns></returns>
-        Point GetTopLeftCorner(long colId, long rowId, double offset)
+        private Point GetTopLeftCorner(long colId, long rowId, double offset)
         {
             return new Point(colId * _fieldSide + _topLeftX + offset, rowId * _fieldSide + _topLeftY + offset);
         }
@@ -574,8 +612,8 @@ namespace Monitor.Checkers.UI
                 if (pieceId == 0)
                     continue;
 
-                StateItemIdToRowAndCol(stateItemId, out var rowId, out var colId);
-                var topLeft = GetTopLeftCorner(colId, rowId, shrink);
+                var position = StateItemIdToPiecePosition(stateItemId);
+                var topLeft = GetTopLeftCorner(position.Col, position.Row, shrink);
 
                 DrawShape<Ellipse>(topLeft.X, topLeft.Y, fieldSizeShrunk, fieldSizeShrunk,
                     Brushes.BlueViolet, PieceIdToColor(pieceId), _canvas);

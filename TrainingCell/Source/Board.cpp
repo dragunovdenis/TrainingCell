@@ -16,7 +16,6 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "..\Headers\Board.h"
-#include "../Headers/ActionEvaluator.h"
 
 namespace TrainingCell
 {
@@ -59,7 +58,6 @@ namespace TrainingCell
 
 	void Board::take_turn()
 	{
-		state().invert();//invert state because next time it will be given to the "opponent" agent
 		_agent_to_move_id = next_agent_id();
 	}
 
@@ -68,10 +66,11 @@ namespace TrainingCell
 		return (_agent_to_move_id + 1) % 2;
 	}
 
-	void Board::reset_state(const IStateSeed& seed)
+	IState& Board::reset_state(const IStateSeed& seed)
 	{
 		_agent_to_move_id = 0;
 		_state_ptr = seed.yield();
+		return *_state_ptr;
 	}
 
 	void Board::reset_wins()
@@ -83,14 +82,11 @@ namespace TrainingCell
 	/// <summary>
 	/// Publishes current "state" if the corresponding call-back is assigned
 	/// </summary>
-	void publish_state(PublishCheckersStateCallBack publishCallback, const IState& state, const Move& move, const IMinimalAgent* agent_to_play)
+	void publish_state(PublishCheckersStateCallBack publishCallback, const std::vector<int>& state, const Move& move, const IMinimalAgent* agent_to_play)
 	{
 		if (publishCallback)
 		{
-			const auto vec = state.to_std_vector();
-			publishCallback(vec.data(),
-				static_cast<int>(vec.size()),
-				move.sub_moves.data(),
+			publishCallback(state.data(), static_cast<int>(state.size()), move.sub_moves.data(),
 				static_cast<int>(move.sub_moves.size()), agent_to_play);
 		}
 	}
@@ -109,37 +105,34 @@ namespace TrainingCell
 					return;
 
 				auto moves_without_capture = 0;
-				reset_state(start_state);
-				Move last_move{};
-				bool move_successful;
-				publish_state(publish_state_callback, state(), last_move, agent_to_move());
-				while (((move_successful = try_make_move(publish_state_callback, last_move))) &&
-					moves_without_capture < max_moves_without_capture)
+				auto& state = reset_state(start_state);
+
+				//bool move_successful;
+				publish_state(publish_state_callback, state.to_std_vector(), Move{}, agent_to_move());
+				while (state.get_moves_count() > 0 && moves_without_capture <= max_moves_without_capture)
 				{
-					if (last_move.sub_moves[0].capture.is_valid())
-						moves_without_capture = 0;
-					else
-						moves_without_capture++;
+					const auto is_capture_move = make_move(state, publish_state_callback);
+					moves_without_capture = is_capture_move ? 0 : (moves_without_capture + 1);
 
 					if (cancel != nullptr && cancel())
 						break;//this will be qualified as a "draw"
 				}
 
-				if (!move_successful) //win case
+				if (state.get_moves_count() <= 0) //win case
 				{
 					if (_agent_to_move_id == 1)
 						_whitesWin++;
 					else
 						_blacksWin++;
 
-					agent_to_move()->game_over(state(), GameResult::Loss, is_agent_to_move_white());
-					agent_to_wait()->game_over(state(), GameResult::Victory, !is_agent_to_move_white());
+					agent_to_move()->game_over(state, GameResult::Loss, is_agent_to_move_white());
+					agent_to_wait()->game_over(state, GameResult::Victory, !is_agent_to_move_white());
 
 				}
 				else //draw case
 				{
-					agent_to_move()->game_over(state(), GameResult::Draw, is_agent_to_move_white());
-					agent_to_wait()->game_over(state(), GameResult::Draw, !is_agent_to_move_white());
+					agent_to_move()->game_over(state, GameResult::Draw, is_agent_to_move_white());
+					agent_to_wait()->game_over(state, GameResult::Draw, !is_agent_to_move_white());
 				}
 
 				if (publish_stats_callback != nullptr)
@@ -153,40 +146,29 @@ namespace TrainingCell
 		}
 	}
 
-	bool Board::try_make_move(PublishCheckersStateCallBack publish, Move& out_move)
+	bool Board::make_move(IState& state_handle, PublishCheckersStateCallBack publish)
 	{
-		const auto moves = state().get_moves();
+		const auto chosen_move_id = agent_to_move()->make_move(state_handle, is_agent_to_move_white());
 
-		if (moves.empty())
-			return false;
-
-		const auto chosen_move_id = agent_to_move()->make_move(
-			ActionEvaluator(&state(), &moves), is_agent_to_move_white());
-
-		if (chosen_move_id < 0 || chosen_move_id >= moves.size())
+		// sanity check
+		if (chosen_move_id < 0 || chosen_move_id >= state_handle.get_moves_count())
 			throw std::exception("Invalid move id");
-
-		const auto& move = moves[chosen_move_id];
 
 		if (publish != nullptr)
 		{
-			const auto state_copy_ptr = state().copy();
-			state_copy_ptr->make_move(move, false /*remove_extra_markers*/);
-			if (is_inverted())
-				state_copy_ptr->invert();
-
-			const auto move_copy = is_inverted() ? move : move.get_inverted();
+			const auto move = state_handle.get_all_moves()[chosen_move_id];
+			const auto move_adjusted = is_inverted() ? move.get_inverted() : move;
+			const auto state_std = is_inverted() ? state_handle.get_inverted_std(chosen_move_id) : state_handle.to_std_vector(chosen_move_id);
 
 			//At the moment, agents have not been swapped, so "agent-to-play" is actually the "agent-to-wait"
-			publish_state(publish, *state_copy_ptr, move_copy, agent_to_wait());
+			publish_state(publish, state_std, move_adjusted, agent_to_wait());
 		}
 
-		state().make_move(move, true /*remove_extra_markers*/);
+		const auto is_capture_move = state_handle.is_capture_action(chosen_move_id);
+		state_handle.move_invert_reset(chosen_move_id);
 		take_turn();
 
-		out_move = move;
-
-		return true;
+		return is_capture_move;
 	}
 
 	int Board::get_whites_wins() const

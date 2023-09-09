@@ -42,12 +42,12 @@ namespace TrainingCell
 
 		TdlLegacyMsgPackAdapter() = default;
 
-		int make_move(const IActionEvaluator& evaluator, const bool as_white) override
+		int make_move(const IStateReadOnly& state, const bool as_white) override
 		{
 			throw std::exception("Not implemented");
 		};
 
-		void game_over(const IState& final_state, const GameResult& result, const bool as_white) override
+		void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) override
 		{
 			throw std::exception("Not implemented");
 		}

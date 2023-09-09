@@ -33,9 +33,6 @@
     <ClInclude Include="Headers\Checkers\TrainingEngine.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\IState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\Checkerboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -93,13 +90,19 @@
     <ClInclude Include="Headers\MoveData.h">
       <Filter>Header Files\TDL</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\IActionEvaluator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\ActionEvaluator.h">
+    <ClInclude Include="Headers\IStateReadOnly.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Headers\IStateSeed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Checkers\StateHandle.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IMinimalStateReadonly.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -155,8 +158,8 @@
     <ClCompile Include="Source\TdlTrainingAdapter.cpp">
       <Filter>Source Files\TDL</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ActionEvaluator.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Source\Checkers\StateHandle.cpp">
+      <Filter>Source Files\Checkers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

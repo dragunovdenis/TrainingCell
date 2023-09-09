@@ -16,41 +16,49 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "IActionEvaluator.h"
-#include "IState.h"
 
-namespace TrainingCell
+#include "State.h"
+#include "../IState.h"
+#include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
+
+namespace TrainingCell::Checkers
 {
 	/// <summary>
-	/// Implementation of action evaluator interface for the case of checkerboard games
+	/// Implementation "IState" interface for the case of checkers game
 	/// </summary>
-	class ActionEvaluator : public IActionEvaluator
+	class StateHandle : public IState
 	{
 		/// <summary>
-		/// Pointer to a state
+		/// The state.
 		/// </summary>
-		const IState* const _state_ptr{};
+		State _state{};
 
 		/// <summary>
-		/// Pointer to a collection of actions
+		/// Collection of "available" actions.
 		/// </summary>
-		const std::vector<Move>* const _actions_ptr{};
+		std::vector<Move> _actions{};
 
 	public:
+
+		/// <summary>
+		/// Deleted default constructor
+		/// </summary>
+		StateHandle() = delete;
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		ActionEvaluator(const IState* const state_ptr, const std::vector<Move>* const actions_ptr);
+		StateHandle(State state);
 
 		/// <summary>
 		/// See documentation os the base class
 		/// </summary>
-		[[nodiscard]] int get_actions_count() const override;
+		[[nodiscard]] int get_moves_count() const override;
 
 		/// <summary>
 		/// See documentation os the base class
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor evaluate(const int action_id) const override;
+		[[nodiscard]] DeepLearning::Tensor evaluate(const int move_id) const override;
 
 		/// <summary>
 		/// See documentation os the base class
@@ -71,7 +79,7 @@ namespace TrainingCell
 		/// <summary>
 		/// See documentation os the base class
 		/// </summary>
-		[[nodiscard]] const std::vector<Move>& actions() const override;
+		[[nodiscard]] const std::vector<Move> get_all_moves() const override;
 
 		/// <summary>
 		/// See documentation os the base class
@@ -81,7 +89,31 @@ namespace TrainingCell
 		/// <summary>
 		/// See documentation os the base class
 		/// </summary>
+		[[nodiscard]] std::vector<int> to_std_vector(const int move_id) const override;
+
+		/// <summary>
+		/// See documentation os the base class
+		/// </summary>
 		[[nodiscard]] std::vector<int> get_inverted_std() const override;
 
+		/// <summary>
+		/// See documentation os the base class
+		/// </summary>
+		[[nodiscard]] std::vector<int> get_inverted_std(const int move_id) const override;
+
+		/// <summary>
+		/// See documentation os the base class
+		/// </summary>
+		[[nodiscard]] bool is_capture_action(const int action_id) const override;
+
+		/// <summary>
+		/// See documentation os the base class
+		/// </summary>
+		[[nodiscard]] bool is_inverted() const override;
+
+		/// <summary>
+		/// See documentation os the base class
+		/// </summary>
+		void move_invert_reset(const int action_id) override;
 	};
 }

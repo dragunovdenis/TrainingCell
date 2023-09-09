@@ -16,25 +16,48 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "IStateReadOnly.h"
+
+namespace DeepLearning
+{
+	class Tensor;
+}
 
 namespace TrainingCell
 {
 	/// <summary>
-	/// An interface that is supposed to be a "middleman" between actual environment's
-	/// state on the one side and the "board" with agents on the other side, allowing us to hide
-	/// moves (as explicit instructions telling how exactly a state should be transformed
-	/// during the "move") "under the hood" and work with their indices instead.
+	/// An interface providing an agent with a "minimal" read-only access to an environment's state
 	/// </summary>
-	class IState : public IStateReadOnly
+	class IMinimalStateReadonly
 	{
 	public:
+		/// <summary>
+		/// Virtual destructor
+		/// </summary>
+		virtual ~IMinimalStateReadonly() = default;
 
 		/// <summary>
-		/// "Applies" move with the given ID to the state,
-		/// inverts the state and updates cache of available moves.
+		/// Returns number of available moves to take in the current state of environment.
+		/// It is assumed that integer values from "0" to "moves count" - 1  all represent
+		/// valid ID's of the available moves.
+		/// </summary>
+		[[nodiscard]] virtual int get_moves_count() const = 0;
+
+		/// <summary>
+		/// Returns tensor representation of the current state after a move with the given ID was "taken".
 		/// It is a responsibility of the caller to ensure validness of the provided "move ID".
 		/// </summary>
-		virtual void move_invert_reset(const int move_id) = 0;
+		[[nodiscard]] virtual DeepLearning::Tensor evaluate(const int move_id) const = 0;
+
+		/// <summary>
+		/// Returns tensor representation of the current state (without any move "taken").
+		/// </summary>
+		[[nodiscard]] virtual DeepLearning::Tensor evaluate() const = 0;
+
+		/// <summary>
+		/// For the given pair of previous and next after-states represented with "raw" tensors,
+		/// calculates reward "suggested" by the difference between the states.
+		///</summary>
+		[[nodiscard]] virtual double calc_reward(const DeepLearning::Tensor& prev_after_state,
+			const DeepLearning::Tensor& next_after_state) const = 0;
 	};
 }

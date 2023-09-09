@@ -16,8 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "IState.h"
-#include "IActionEvaluator.h"
+#include "IStateReadOnly.h"
 
 namespace TrainingCell
 {
@@ -45,12 +44,12 @@ namespace TrainingCell
 		/// Returns index of a move from the given collection of available moves
 		/// that the agent "prefers" to take given the current state
 		/// </summary>
-		virtual int make_move(const IActionEvaluator& evaluator, const bool as_white) = 0;
+		virtual int make_move(const IStateReadOnly& state, const bool as_white) = 0;
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
-		virtual void game_over(const IState& final_state, const GameResult& result, const bool as_white) = 0;
+		virtual void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) = 0;
 	};
 }

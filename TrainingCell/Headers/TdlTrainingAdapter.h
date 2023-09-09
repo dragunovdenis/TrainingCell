@@ -58,11 +58,11 @@ namespace TrainingCell
 		/// <summary>
 		/// See summary of the base class declaration
 		/// </summary>
-		int make_move(const IActionEvaluator& evaluator, const bool as_white) override;
+		int make_move(const IStateReadOnly& state, const bool as_white) override;
 
 		/// <summary>
 		/// See summary of the base class declaration
 		/// </summary>
-		void game_over(const IState& final_state, const GameResult& result, const bool as_white) override;
+		void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) override;
 	};
 }

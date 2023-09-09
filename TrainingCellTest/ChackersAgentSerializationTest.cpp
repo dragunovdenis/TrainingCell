@@ -22,7 +22,7 @@
 #include "../TrainingCell/Headers/TdlEnsembleAgent.h"
 #include "../TrainingCell/Headers/AgentPack.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../TrainingCell/Headers/ActionEvaluator.h"
+#include "../TrainingCell/Headers/Checkers/StateHandle.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell::Checkers;
@@ -73,12 +73,12 @@ namespace TrainingCellTest
 			//Do some number of iterations but not call "game over" method so that all
 			//the auxiliary data of the agent is nontrivial
 			constexpr int iter_count = 10;
+			auto state_handle = StateHandle(state);
 			for (auto iter_id = 0; iter_id < iter_count; ++iter_id)
 			{
 				const auto moves = state.get_moves();
-				const auto move_id = agent.make_move(ActionEvaluator(&state, &moves), true);
-				state.make_move(moves[move_id], true);
-				state.invert();
+				const auto move_id = agent.make_move(state_handle, true);
+				state_handle.move_invert_reset(move_id);
 			}
 			//Set some none-trivial search mode after iterations to save time
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);

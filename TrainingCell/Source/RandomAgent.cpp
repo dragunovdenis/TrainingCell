@@ -20,12 +20,12 @@
 
 namespace TrainingCell
 {
-	int RandomAgent::make_move(const IActionEvaluator& evaluator, const bool as_white)
+	int RandomAgent::make_move(const IStateReadOnly& state, const bool as_white)
 	{
-		return DeepLearning::Utils::get_random_int(0, evaluator.get_actions_count() - 1);
+		return DeepLearning::Utils::get_random_int(0, state.get_moves_count() - 1);
 	}
 
-	void RandomAgent::game_over(const IState& final_state, const GameResult& result, const bool as_white)
+	void RandomAgent::game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white)
 	{
 		//Just do nothing because this agent can't improve its performance
 	}
