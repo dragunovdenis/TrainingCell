@@ -23,11 +23,6 @@
 #include "../Move.h"
 #include "../IStateSeed.h"
 
-namespace DeepLearning
-{
-	class Tensor;
-}
-
 namespace TrainingCell::Checkers
 {
 	/// <summary>
@@ -161,9 +156,15 @@ namespace TrainingCell::Checkers
 		void make_move(const Move& move);
 
 		/// <summary>
-		/// Returns tensor representation of the current state after given `move` was applied to it
+		/// Returns "int-vector" representation of the current state after given `move` was "applied" to it.
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor get_state(const Move& move) const;
+		[[nodiscard]] std::vector<int> get_vector(const Move& move) const;
+
+		/// <summary>
+		/// Returns "int-vector" representation of the current state after it
+		/// was first "transformed" by the given `move` and then inverted.
+		/// </summary>
+		[[nodiscard]] std::vector<int> get_vector_inverted(const Move& move) const;
 
 		/// <summary>
 		///	Makes the move
@@ -171,12 +172,12 @@ namespace TrainingCell::Checkers
 		void make_move(const SubMove& sub_move, const bool remove_captured);
 
 		/// <summary>
-		///	Returns "true" if the given move is valid in the context of the current state
+		/// Returns "true" if the given move is valid in the context of the current state
 		/// </summary>
 		[[nodiscard]] bool is_valid_move(const Move& move) const;
 
 		/// <summary>
-		///	Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
+		/// Returns an "inverted" state, i.e., the current state, as it is seen by the opponent (an agent playing "anti" pieces)
 		/// </summary>
 		[[nodiscard]] State get_inverted() const;
 
@@ -186,26 +187,21 @@ namespace TrainingCell::Checkers
 		void invert();
 
 		/// <summary>
-		/// Returns an "inverted" state, i.e. a state that it is seen by the opponent (an agent playing "anti" pieces)
-		/// in the form of integer vector
+		/// Returns an "inverted" state, i.e., the current state, as is it is seen by the opponent (an agent playing "anti" pieces)
+		/// in the form of "int-vector".
 		///// </summary>
-		[[nodiscard]] std::vector<int> get_inverted_std() const;
+		[[nodiscard]] std::vector<int> get_vector_inverted() const;
 
 		/// <summary>
 		/// Calculates reward for the given pair of previous and next after-states represented with "raw" tensors
 		/// (those that can be obtained by calling `to_tensor` method below)
 		///</summary>
-		[[nodiscard]] double calc_reward(const DeepLearning::Tensor& prev_after_state, const DeepLearning::Tensor& next_after_state) const;
+		[[nodiscard]] static double calc_reward(const std::vector<int>& prev_state, const std::vector<int>& next_state);
 
 		/// <summary>
-		///	Converts the current state to tensor representation
+		/// Returns "int-vector" representation of the state
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor to_tensor() const;
-
-		/// <summary>
-		/// Returns int vector representation of the state
-		/// </summary>
-		[[nodiscard]] std::vector<int> to_std_vector() const;
+		[[nodiscard]] std::vector<int> to_vector() const;
 
 		/// <summary>
 		/// Returns collection of available moves for the current state
@@ -283,13 +279,14 @@ namespace TrainingCell::Checkers
 		static bool is_trace_marker(const Piece piece);
 
 		/// <summary>
-		///	Returns "anti"-piece for the given one
+		/// Returns "anti"-piece for the given one
 		/// </summary>
-		static Piece get_anti_piece(const Piece& piece);
+		template <class P>
+		static P get_anti_piece(const P& piece);
 
 		/// <summary>
-		///	Returns collection of all the possible non-capturing moves starting from the given position along the given diagonal
-		///	and the given direction
+		/// Returns collection of all the possible non-capturing moves starting from the given position along the given diagonal
+		/// and the given direction
 		/// </summary>
 		static std::vector<SubMove> get_non_capturing_moves(const State& current_state, const PiecePosition& pos,
 			const bool right_diagonal, const bool positive_direction);

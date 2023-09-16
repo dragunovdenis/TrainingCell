@@ -18,7 +18,6 @@
 #include <algorithm>
 #include "../../Headers/Checkers/State.h"
 #include "../../Headers/Checkers/StateHandle.h"
-#include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
 
 namespace TrainingCell::Checkers
 {
@@ -94,11 +93,11 @@ namespace TrainingCell::Checkers
 		return PiecePosition{ rowId, colId };
 	}
 
-	long long State::piece_position_to_plain_id(const PiecePosition& position)
+	/// <summary>
+	/// Piece position to plain ID conversion without check of validity for the argument
+	/// </summary>
+	long long piece_position_to_plain_id_unsafe(const PiecePosition& position)
 	{
-		if (!Utils::is_valid(position))
-			throw std::exception("Invalid input");
-
 		const auto temp = position.col - ((position.row % 2) == 0);
 
 		if ((temp % 2) != 0)//sanity check, this situation must be handled withing the "is_valid" method
@@ -107,23 +106,42 @@ namespace TrainingCell::Checkers
 		return position.row * FieldsInRow + temp / 2;
 	}
 
-	void State::invert()
+	long long State::piece_position_to_plain_id(const PiecePosition& position)
 	{
-		const auto sz = size();
-		const auto half_size = sz / 2;
+		if (!Utils::is_valid(position))
+			throw std::exception("Invalid input");
+
+		return piece_position_to_plain_id_unsafe(position);
+	}
+
+	/// <summary>
+	/// Internal implementation of state inversion
+	/// </summary>
+	/// <param name="state_array">State represented as an array</param>
+	/// <param name="size">Size of the array. It is assumed to be even number.</param>
+	template <class T>
+	void invert_internal(T* state_array, const std::size_t size)
+	{
+		const auto half_size = size / 2;
 		for (auto field_id = 0ull; field_id < half_size; field_id++)
 		{
-			const auto temp = (*this)[field_id];
-			(*this)[field_id] = Utils::get_anti_piece((*this)[sz - 1 - field_id]);
-			(*this)[sz - 1 - field_id] = Utils::get_anti_piece(temp);
+			const auto temp = state_array[field_id];
+			state_array[field_id] = Utils::get_anti_piece(state_array[size - 1 - field_id]);
+			state_array[size - 1 - field_id] = Utils::get_anti_piece(temp);
 		}
+	}
 
+	void State::invert()
+	{
+		invert_internal(data(), size());
 		_inverted = !_inverted;
 	}
 
-	std::vector<int> State::get_inverted_std() const
+	std::vector<int> State::get_vector_inverted() const
 	{
-		return get_inverted().to_std_vector();
+		auto result = to_vector();
+		invert_internal(result.data(), result.size());
+		return result;
 	}
 
 	template <class S>
@@ -143,10 +161,10 @@ namespace TrainingCell::Checkers
 		return calc_score_internal(*this);
 	}
 
-	double State::calc_reward(const DeepLearning::Tensor& prev_after_state, const DeepLearning::Tensor& next_after_state) const
+	double State::calc_reward(const std::vector<int>& prev_state, const std::vector<int>& next_state)
 	{
-		const auto prev_score = calc_score_internal(prev_after_state);
-		const auto next_score = calc_score_internal(next_after_state);
+		const auto prev_score = calc_score_internal(prev_state);
+		const auto next_score = calc_score_internal(next_state);
 		const auto diff_score = next_score.diff(prev_score);
 
 		return (2.0 * diff_score[Piece::King] +
@@ -155,15 +173,7 @@ namespace TrainingCell::Checkers
 			2.0 * diff_score[Piece::AntiKing]) / 50.0;
 	}
 
-	DeepLearning::Tensor State::to_tensor() const
-	{
-		DeepLearning::Tensor result(1, 1, size(), false);
-		std::ranges::transform(*this, result.begin(), 
-			[](const auto& piece) { return static_cast<double>(piece); });
-		return result;
-	}
-
-	[[nodiscard]] std::vector<int> State::to_std_vector() const
+	[[nodiscard]] std::vector<int> State::to_vector() const
 	{
 		std::vector<int> result(size());
 		std::memcpy(result.data(), data(), size() * sizeof(int));
@@ -237,29 +247,42 @@ namespace TrainingCell::Checkers
 		return true;
 	}
 
-	void State::make_move(const Move& move, const bool remove_captured)
+	/// <summary>
+	/// "Applies" given move to the state represented by the given array.
+	/// It is a responsibility of the caller to ensure that the given array represents a valid state (in terms of size, for example)
+	/// as well as to ensure that the given move is valid.
+	/// </summary>
+	template <class T>
+	void make_move_internal(const Move& move, T* arr, const bool remove_captured)
 	{
-		if (!is_valid_move(move))
-			throw std::exception("Invalid move");
-
 		for (auto subMoveId = 0ull; subMoveId < move.sub_moves.size(); subMoveId++)
 		{
 			const auto& capturePos = move.sub_moves[subMoveId].capture;
 
 			if (Utils::is_valid(capturePos))
-				get_piece(capturePos) = remove_captured ? Piece::Space : Piece::AntiCaptured;
+				arr[piece_position_to_plain_id_unsafe(capturePos)] = static_cast<T>(remove_captured ? Piece::Space : Piece::AntiCaptured);
 		}
 
-		auto piece_to_move = get_piece(move.sub_moves[0].start);
+		auto piece_to_move = arr[piece_position_to_plain_id_unsafe(move.sub_moves[0].start)];
 
 		//if our piece if a "Man" and during the move we have visited the last row of the board than
 		//our pieced becomes a "King"
-		if (piece_to_move == Piece::Man &&
+		if (piece_to_move == static_cast<T>(Piece::Man) &&
 			std::ranges::any_of(move.sub_moves, [](const auto& x) { return x.end.row == Checkerboard::Rows - 1; }))
-			piece_to_move = Piece::King;
+			piece_to_move = static_cast<T>(Piece::King);
 
-		get_piece(move.sub_moves.rbegin()[0].end) = piece_to_move;
-		get_piece(move.sub_moves[0].start) = Piece::Space;
+		arr[piece_position_to_plain_id_unsafe(move.sub_moves.rbegin()[0].end)] = piece_to_move;
+		arr[piece_position_to_plain_id_unsafe(move.sub_moves[0].start)] = static_cast<T>(Piece::Space);
+	}
+
+	void State::make_move(const Move& move, const bool remove_captured)
+	{
+#ifdef DIAGNOSTICS
+		if (!is_valid_move(move))
+			throw std::exception("Invalid move");
+#endif
+
+		make_move_internal(move, data(), remove_captured);
 	}
 
 	void State::make_move(const Move& move)
@@ -267,11 +290,18 @@ namespace TrainingCell::Checkers
 		make_move(move, true);
 	}
 
-	DeepLearning::Tensor State::get_state(const Move& move) const
+	std::vector<int> State::get_vector(const Move& move) const
 	{
-		auto result = *this;
-		result.make_move(move, /*remove_extra_markers*/ true);
-		return result.to_tensor();
+		auto result = to_vector();
+		make_move_internal(move, result.data(), true /*remove captured*/);
+		return result;
+	}
+
+	std::vector<int> State::get_vector_inverted(const Move& move) const
+	{
+		auto result = get_vector(move);
+		invert_internal(result.data(), result.size());
+		return result;
 	}
 
 	void State::make_move(const SubMove& sub_move, const bool remove_captured)
@@ -324,9 +354,10 @@ namespace TrainingCell::Checkers
 		return piece == Piece::TraceMarker || piece == Piece::AntiTraceMarker;
 	}
 
-	Piece Utils::get_anti_piece(const Piece& piece)
+	template <class P>
+	P Utils::get_anti_piece(const P& piece)
 	{
-		return static_cast<Piece>(-static_cast<int>(piece));
+		return static_cast<P>(-static_cast<int>(piece));
 	}
 
 	std::vector<SubMove> Utils::get_capturing_moves(const State& current_state, const PiecePosition& pos,

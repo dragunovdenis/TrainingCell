@@ -88,11 +88,6 @@ namespace TrainingCell
 		IState& state() const;
 
 		/// <summary>
-		///	A flag that indicates whether the state is "inverted" or not
-		/// </summary>
-		[[nodiscard]] bool is_inverted() const;
-
-		/// <summary>
 		/// Returns true it the current "agent-to-move" is that one that plays white pieces
 		/// </summary>
 		[[nodiscard]] bool is_agent_to_move_white() const;

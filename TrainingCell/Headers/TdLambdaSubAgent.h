@@ -63,7 +63,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Previous state
 		/// </summary>
-		DeepLearning::CpuDC::tensor_t _prev_state{};
+		std::vector<int> _prev_state{};
 
 		/// <summary>
 		/// Previous afterstate

@@ -92,9 +92,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ChackersAgentSerializationTest.cpp" />
+    <ClCompile Include="CheckersAgentSerializationTest.cpp" />
     <ClCompile Include="CheckersAgentTrainingTest.cpp" />
     <ClCompile Include="CheckersStateTest.cpp" />
+    <ClCompile Include="CheckersTestUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TrainingCell\TrainingCell.vcxproj">
@@ -115,6 +116,9 @@
     <None Include="TestData\TdlTrainingRegression\agent1_trained.tda">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CheckersTestUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

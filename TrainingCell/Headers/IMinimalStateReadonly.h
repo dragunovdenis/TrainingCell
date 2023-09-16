@@ -16,11 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-
-namespace DeepLearning
-{
-	class Tensor;
-}
+#include <vector>
 
 namespace TrainingCell
 {
@@ -43,21 +39,21 @@ namespace TrainingCell
 		[[nodiscard]] virtual int get_moves_count() const = 0;
 
 		/// <summary>
-		/// Returns tensor representation of the current state after a move with the given ID was "taken".
+		/// Returns "int-vector" representation of the current state after a move with the given ID was "applied" to it.
 		/// It is a responsibility of the caller to ensure validness of the provided "move ID".
 		/// </summary>
-		[[nodiscard]] virtual DeepLearning::Tensor evaluate(const int move_id) const = 0;
+		[[nodiscard]] virtual std::vector<int> evaluate(const int move_id) const = 0;
 
 		/// <summary>
-		/// Returns tensor representation of the current state (without any move "taken").
+		/// Returns "int-vector" representation of the current state (without any move "applied").
 		/// </summary>
-		[[nodiscard]] virtual DeepLearning::Tensor evaluate() const = 0;
+		[[nodiscard]] virtual std::vector<int> evaluate() const = 0;
 
 		/// <summary>
-		/// For the given pair of previous and next after-states represented with "raw" tensors,
+		/// For the given pair of previous and next states represented with "int-vectors",
 		/// calculates reward "suggested" by the difference between the states.
 		///</summary>
-		[[nodiscard]] virtual double calc_reward(const DeepLearning::Tensor& prev_after_state,
-			const DeepLearning::Tensor& next_after_state) const = 0;
+		[[nodiscard]] virtual double calc_reward(const std::vector<int>& prev_state,
+		                                         const std::vector<int>& next_state) const = 0;
 	};
 }

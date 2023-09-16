@@ -42,15 +42,6 @@ namespace TrainingCell
 		return *_state_ptr;
 	}
 
-	bool Board::is_inverted() const
-	{
-		//Sanity check
-		if (state().is_inverted() == is_agent_to_move_white())
-			throw std::exception("Inconsistency between the agent at move and the current state");
-
-		return state().is_inverted();
-	}
-
 	bool Board::is_agent_to_move_white() const
 	{
 		return _agent_to_move_id == 0;
@@ -108,7 +99,7 @@ namespace TrainingCell
 				auto& state = reset_state(start_state);
 
 				//bool move_successful;
-				publish_state(publish_state_callback, state.to_std_vector(), Move{}, agent_to_move());
+				publish_state(publish_state_callback, state.evaluate(), Move{}, agent_to_move());
 				while (state.get_moves_count() > 0 && moves_without_capture <= max_moves_without_capture)
 				{
 					const auto is_capture_move = make_move(state, publish_state_callback);
@@ -157,8 +148,9 @@ namespace TrainingCell
 		if (publish != nullptr)
 		{
 			const auto move = state_handle.get_all_moves()[chosen_move_id];
-			const auto move_adjusted = is_inverted() ? move.get_inverted() : move;
-			const auto state_std = is_inverted() ? state_handle.get_inverted_std(chosen_move_id) : state_handle.to_std_vector(chosen_move_id);
+			const auto move_adjusted = state_handle.is_inverted() ? move.get_inverted() : move;
+			const auto state_std = state_handle.is_inverted() ?
+				state_handle.evaluate_inverted(chosen_move_id) : state_handle.evaluate(chosen_move_id);
 
 			//At the moment, agents have not been swapped, so "agent-to-play" is actually the "agent-to-wait"
 			publish_state(publish, state_std, move_adjusted, agent_to_wait());

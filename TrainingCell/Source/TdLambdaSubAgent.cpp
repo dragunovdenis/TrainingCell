@@ -57,7 +57,9 @@ namespace TrainingCell
 	MoveData TdLambdaSubAgent::evaluate(const IMinimalStateReadonly& state,
 	                                    const int move_id, const DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
-		auto afterstate = state.evaluate(move_id);
+		const auto afterstate_std = state.evaluate(move_id);
+		DeepLearning::Tensor afterstate(1, 1, afterstate_std.size(), false /*assign zero*/);
+		std::ranges::copy(afterstate_std, afterstate.begin());
 		const auto value = net.act(afterstate)(0, 0, 0);
 		return { move_id,  value, std::move(afterstate) };
 	}

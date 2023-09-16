@@ -24,10 +24,13 @@
     <ClCompile Include="CheckersAgentTrainingTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ChackersAgentSerializationTest.cpp">
+    <ClCompile Include="CheckersAgentSerializationTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CheckersStateTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckersTestUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -45,5 +48,10 @@
     <None Include="TestData\TdlTrainingRegression\agent1_trained.tda">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CheckersTestUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

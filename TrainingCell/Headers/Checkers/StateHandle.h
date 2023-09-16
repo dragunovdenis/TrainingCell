@@ -51,69 +51,64 @@ namespace TrainingCell::Checkers
 		StateHandle(State state);
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
 		[[nodiscard]] int get_moves_count() const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor evaluate(const int move_id) const override;
+		[[nodiscard]] std::vector<int> evaluate(const int move_id) const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
-		[[nodiscard]] DeepLearning::Tensor evaluate() const override;
+		[[nodiscard]] std::vector<int> evaluate() const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
-		[[nodiscard]] double calc_reward(const DeepLearning::Tensor& prev_after_state,
-			const DeepLearning::Tensor& next_after_state) const override;
+		[[nodiscard]] double calc_reward(const std::vector<int>& prev_state,
+		                                 const std::vector<int>& next_state) const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
 		[[nodiscard]] const IStateSeed& current_state_seed() const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
 		[[nodiscard]] const std::vector<Move> get_all_moves() const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
-		[[nodiscard]] std::vector<int> to_std_vector() const override;
+		[[nodiscard]] std::vector<int> evaluate_inverted() const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
-		[[nodiscard]] std::vector<int> to_std_vector(const int move_id) const override;
+		[[nodiscard]] std::vector<int> evaluate_inverted(const int move_id) const override;
 
 		/// <summary>
-		/// See documentation os the base class
-		/// </summary>
-		[[nodiscard]] std::vector<int> get_inverted_std() const override;
-
-		/// <summary>
-		/// See documentation os the base class
-		/// </summary>
-		[[nodiscard]] std::vector<int> get_inverted_std(const int move_id) const override;
-
-		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
 		[[nodiscard]] bool is_capture_action(const int action_id) const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
 		[[nodiscard]] bool is_inverted() const override;
 
 		/// <summary>
-		/// See documentation os the base class
+		/// See documentation of the base class
 		/// </summary>
 		void move_invert_reset(const int action_id) override;
+
+		/// <summary>
+		/// Returns copy of the underlying "state" structure (presumably, for diagnostics purposes; not a part of "general" interface)
+		/// </summary>
+		State get_state() const;
 	};
 }

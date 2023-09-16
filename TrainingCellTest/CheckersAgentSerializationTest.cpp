@@ -15,6 +15,7 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include "CheckersTestUtils.h"
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/Agent.h"
 #include "../TrainingCell/Headers/Checkers/State.h"
@@ -22,7 +23,6 @@
 #include "../TrainingCell/Headers/TdlEnsembleAgent.h"
 #include "../TrainingCell/Headers/AgentPack.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../TrainingCell/Headers/Checkers/StateHandle.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell::Checkers;
@@ -68,18 +68,9 @@ namespace TrainingCellTest
 			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "some_name");
 			//set some non-default values
 			agent.set_reward_factor(0.375);
-			auto state = State::get_start_state();
 
-			//Do some number of iterations but not call "game over" method so that all
-			//the auxiliary data of the agent is nontrivial
-			constexpr int iter_count = 10;
-			auto state_handle = StateHandle(state);
-			for (auto iter_id = 0; iter_id < iter_count; ++iter_id)
-			{
-				const auto moves = state.get_moves();
-				const auto move_id = agent.make_move(state_handle, true);
-				state_handle.move_invert_reset(move_id);
-			}
+			CheckersTestUtils::play(15, agent);
+
 			//Set some none-trivial search mode after iterations to save time
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
 			agent.set_td_search_iterations(1234);

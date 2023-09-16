@@ -15,6 +15,7 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#include "CheckersTestUtils.h"
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/Checkers/State.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
@@ -28,10 +29,10 @@ namespace TrainingCellTest
 	{
 		TEST_METHOD(StartStateTest)
 		{
-			//Act
+			// Act
 			const auto start_state = State::get_start_state();
 
-			//Assert
+			// Assert
 			Assert::IsTrue(std::all_of(start_state.begin(), start_state.begin() + 12, [](const Piece& pc)
 				{
 					return pc == Piece::Man;
@@ -52,14 +53,14 @@ namespace TrainingCellTest
 
 		TEST_METHOD(InversionTest)
 		{
-			//Arrange
+			// Arrange
 			const auto state = State::get_start_state();
 
-			//Act
+			// Act
 			const auto inverted_state = state.get_inverted();
 			const auto double_inverted = state.get_inverted().get_inverted();
 
-			//Assert
+			// Assert
 			for (auto pos_id = 0ull; pos_id < state.size(); ++pos_id)
 			{
 				Assert::IsTrue(state[pos_id] == Utils::get_anti_piece(inverted_state[state.size() - 1 - pos_id]),
@@ -72,15 +73,64 @@ namespace TrainingCellTest
 
 		TEST_METHOD(StateSerializationTest)
 		{
-			//Arrange
+			// Arrange
 			const auto state = State::get_start_state().get_inverted();
 			Assert::IsTrue(state.is_inverted(), L"State is supposed to be inverted");
 
-			//Act
+			// Act
 			const auto state_from_stream = DeepLearning::MsgPack::unpack<State>(DeepLearning::MsgPack::pack(state));
 
-			//Assert
+			// Assert
 			Assert::IsTrue(state == state_from_stream, L"States are supposed to be equal");
+		}
+
+		TEST_METHOD(GetVectorTest)
+		{
+			// Arrange
+			const auto random_state = CheckersTestUtils::get_random_state();
+
+			const auto moves = random_state.get_moves();
+
+			// Sanity check
+			Assert::IsTrue(moves.size() > 0, L"Empty collection of available moves");
+
+			for (const auto& move : moves)
+			{
+				// Act
+				const auto state_vector = random_state.get_vector(move);
+
+				// Assert
+				auto state_copy = random_state;
+				state_copy.make_move(move);
+				const auto reference_vector = state_copy.to_vector();
+
+				Assert::IsTrue(state_vector == reference_vector, L"Vectors are not the same");
+			}
+		}
+
+		TEST_METHOD(GetVectorInvertedTest)
+		{
+			// Arrange
+			const auto random_state = CheckersTestUtils::get_random_state();
+
+			const auto moves = random_state.get_moves();
+
+			// Sanity check
+			Assert::IsTrue(moves.size() > 0, L"Empty collection of available moves");
+
+			for (const auto& move : moves)
+			{
+				// Act
+				const auto state_vector = random_state.get_vector_inverted(move);
+
+				// Assert
+				auto state_copy = random_state;
+				state_copy.make_move(move);
+				state_copy.invert();
+				const auto reference_vector = state_copy.to_vector();
+
+				Assert::IsTrue(state_vector == reference_vector, L"Vectors are not the same");
+			}
 		}
 	};
 }

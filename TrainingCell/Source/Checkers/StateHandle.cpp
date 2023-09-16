@@ -30,20 +30,20 @@ namespace TrainingCell::Checkers
 		return static_cast<int>(_actions.size());
 	}
 
-	DeepLearning::Tensor StateHandle::evaluate(const int move_id) const
+	std::vector<int> StateHandle::evaluate(const int move_id) const
 	{
-		return _state.get_state(_actions[move_id]);
+		return _state.get_vector(_actions[move_id]);
 	}
 
-	DeepLearning::Tensor StateHandle::evaluate() const
+	std::vector<int> StateHandle::evaluate() const
 	{
-		return _state.to_tensor();
+		return _state.to_vector();
 	}
 
-	double StateHandle::calc_reward(const DeepLearning::Tensor& prev_after_state,
-		const DeepLearning::Tensor& next_after_state) const
+	double StateHandle::calc_reward(const std::vector<int>& prev_state,
+	                                const std::vector<int>& next_state) const
 	{
-		return _state.calc_reward(prev_after_state, next_after_state);
+		return State::calc_reward(prev_state, next_state);
 	}
 
 	const IStateSeed& StateHandle::current_state_seed() const
@@ -56,29 +56,14 @@ namespace TrainingCell::Checkers
 		return _actions;
 	}
 
-	std::vector<int> StateHandle::to_std_vector() const
+	std::vector<int> StateHandle::evaluate_inverted() const
 	{
-		return _state.to_std_vector();
+		return _state.get_vector_inverted();
 	}
 
-	std::vector<int> StateHandle::to_std_vector(const int move_id) const
+	std::vector<int> StateHandle::evaluate_inverted(const int move_id) const
 	{
-		auto state_copy = _state;
-		state_copy.make_move(_actions[move_id], true /*remove captured*/);
-		return state_copy.to_std_vector();
-	}
-
-	std::vector<int> StateHandle::get_inverted_std() const
-	{
-		return _state.get_inverted_std();
-	}
-
-	std::vector<int> StateHandle::get_inverted_std(const int move_id) const
-	{
-		auto state_copy = _state;
-		state_copy.make_move(_actions[move_id], true /*remove captured*/);
-		state_copy.invert();
-		return state_copy.to_std_vector();
+		return _state.get_vector_inverted(_actions[move_id]);
 	}
 
 	bool StateHandle::is_capture_action(const int action_id) const
@@ -96,5 +81,10 @@ namespace TrainingCell::Checkers
 		_state.make_move(_actions[action_id], true);
 		_state.invert();
 		_actions = _state.get_moves();
+	}
+
+	State StateHandle::get_state() const
+	{
+		return _state;
 	}
 }
