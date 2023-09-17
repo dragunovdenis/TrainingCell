@@ -63,7 +63,7 @@ namespace TrainingCellTest
 			// Assert
 			for (auto pos_id = 0ull; pos_id < state.size(); ++pos_id)
 			{
-				Assert::IsTrue(state[pos_id] == Utils::get_anti_piece(inverted_state[state.size() - 1 - pos_id]),
+				Assert::IsTrue(state[pos_id] == State::get_anti_piece(inverted_state[state.size() - 1 - pos_id]),
 					L"Unexpected piece at the current position");
 			}
 

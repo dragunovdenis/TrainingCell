@@ -87,15 +87,198 @@ namespace TrainingCell::Checkers
 		bool _inverted{};
 
 		/// <summary>
-		/// Calculates score of the state
+		/// Calculates score of the state.
 		/// </summary>
 		[[nodiscard]] StateScore calc_score() const;
+
+		/// <summary>
+		/// Returns "true" if the given piece represents either "Man" or "King".
+		/// </summary>
+		static bool is_allay_piece(const Piece piece);
+
+		/// <summary>
+		/// Returns "true" if the given piece is not a "space" or (anti-)captured.
+		/// </summary>
+		static bool is_alive(const Piece piece);
+
+		/// <summary>
+		/// Returns "true" if the given piece is (anti-)captured.
+		/// </summary>
+		static bool is_dead(const Piece piece);
+
+		/// <summary>
+		/// Returns "true" if the given piece is (anti-)king.
+		/// </summary>
+		static bool is_king(const Piece piece);
+
+		/// <summary>
+		/// Returns "true" if the given piece represents an opponent's piece ("AntiMan" or "AntiKing").
+		/// </summary>
+		static bool is_opponent_piece(const Piece piece);
+
+		/// <summary>
+		/// Returns "true" if the given piece represents (anti-)trace marker.
+		/// </summary>
+		static bool is_trace_marker(const Piece piece);
+
+		/// <summary>
+		/// Returns collection of capturing moves that we can get for the given state,
+		/// the given position of a piece on the board, along the given diagonal and in the given direction.
+		/// Only "single capture" moves are considered.
+		/// </summary>
+		/// <param name="current_state">State.</param>
+		/// <param name="pos">Position of "Man" or "King" on the board (in the state "coordinate" system).</param>
+		/// <param name="right_diagonal">Direction along which we count capturing moves.</param>
+		/// <param name="positive_direction">Direction on the diagonal in which we search for capturing moves.</param>
+		static std::vector<SubMove> get_capturing_moves(const State& current_state, const PiecePosition& pos,
+			const bool right_diagonal, const bool positive_direction);
+
+		/// <summary>
+		/// Returns all the possible capturing moves for the given "ally" piece (represented with its position in the given "state").
+		/// </summary>
+		static std::vector<Move> get_capturing_moves(const State& current_state, const PiecePosition& start_pos);
+
+		/// <summary>
+		/// Returns collection of all the possible non-capturing moves starting from the given position along the given diagonal
+		/// and in the given direction.
+		/// </summary>
+		static std::vector<SubMove> get_non_capturing_moves(const State& current_state, const PiecePosition& pos,
+			const bool right_diagonal, const bool positive_direction);
+
+		/// <summary>
+		/// Returns collection of all the possible non-capturing moves starting from the given position.
+		/// </summary>
+		static std::vector<Move> get_non_capturing_moves(const State& current_state, const PiecePosition& start_pos);
+
+		/// <summary>
+		/// Returns collection of all the capturing moves available for the given state.
+		/// </summary>
+		static std::vector<Move> get_capturing_moves(const State& current_state);
+
+		/// <summary>
+		/// Returns collection of all the non-capturing moves available for the given state.
+		/// </summary>
+		static std::vector<Move> get_non_capturing_moves(const State& current_state);
+
+		/// <summary>
+		/// Returns all the available moves for the given state.
+		/// </summary>
+		static std::vector<Move> get_moves(const State& current_state);
+
+		/// <summary>
+		/// Returns a piece position that is achieved from the given one by moving for the given (signed) number of steps
+		/// along the "right" or "left" diagonals. A move in the "right" diagonal is assumed to be the one when both row and column
+		/// coordinates are either simultaneously increase (for positive direction) or decrease (for negative direction).
+		/// A move along the "left" diagonal is when either row coordinate increases and column coordinate decreases (for positive direction)
+		/// of vice versa (for negative direction). The returned position might be invalid (reside outside the board),
+		/// use the corresponding method to check validity.
+		/// </summary>
+		static PiecePosition move(const PiecePosition& start_pos, const int step, bool rightDiagonal);
+
+		/// <summary>
+		/// Returns position on the checkers board that can be obtained from the current one by moving towards the
+		/// given "pointer" position via the given "step". "Pointer" position must be on the same diagonal as the current position
+		/// as well as be distinct from the current position, otherwise exception will be thrown.
+		/// </summary>
+		static PiecePosition move(const PiecePosition& start_pos, const int step, const PiecePosition& pointer);
+
+		/// <summary>
+		/// Returns "true" if the two given positions share same diagonal on the checkers board.
+		/// </summary>
+		static bool is_same_diagonal(const PiecePosition& start_pos, const PiecePosition& pos);
+
+		/// <summary>
+		/// Returns "true" if the given position is a valid position on the checkers board (a valid black field on the board).
+		/// </summary>
+		static bool is_valid(const PiecePosition& pos);
+
+		/// <summary>
+		/// Returns "true" if the given sub-move passes validation checks.
+		/// </summary>
+		static bool is_valid(const SubMove& sub_move);
+
+		/// <summary>
+		/// Returns "true" if the given instance of a "move" passes validation.
+		/// </summary>
+		static bool is_valid(const Move& move);
+
+		/// <summary>
+		/// Appends one of the given moves to another one.
+		/// </summary>
+		static void append(Move& move_to_append_to, const Move& move);
+
+		/// <summary>
+		/// "Applies" given move to the state represented by the given array.
+		/// It is a responsibility of the caller to ensure that the given array represents a valid state (in terms of size, for example)
+		/// as well as to ensure that the given move is valid.
+		/// </summary>
+		template <class T>
+		static void make_move_internal(const Move& move, T* arr, const bool remove_captured);
+
+		/// <summary>
+		/// Internal implementation of a state inversion.
+		/// </summary>
+		/// <param name="state_array">State represented as an array.</param>
+		/// <param name="size">Size of the array. It is assumed to be an even number.</param>
+		template <class T>
+		static void invert_internal(T* state_array, const std::size_t size);
+
+		/// <summary>
+		/// Piece position-to-plain ID conversion without check of validity for the argument.
+		/// </summary>
+		static long long piece_position_to_plain_id_unsafe(const PiecePosition& position);
+
+		/// <summary>
+		/// Returns score of the given state.
+		/// </summary>
+		template <class S>
+		static StateScore calc_score_internal(const S& state);
+
+		/// <summary>
+		///	"Applies" the given sub-move to the current state.
+		/// </summary>
+		void make_move(const SubMove& sub_move, const bool remove_captured);
+
+		/// <summary>
+		/// Returns "true" if the given move is valid in the context of the current state.
+		/// </summary>
+		[[nodiscard]] bool is_valid_move(const Move& move) const;
+
+		/// <summary>
+		///	Access the status of a single field through the general board position.
+		///	The position must be valid, otherwise exception will be thrown
+		/// </summary>
+		[[nodiscard]] Piece get_piece(const PiecePosition& position) const;
+
+		/// <summary>
+		/// Access to field through the general board position.
+		/// The position must be valid, otherwise an exception will be thrown.
+		/// </summary>
+		[[nodiscard]] Piece& get_piece(const PiecePosition& position);
+
+		/// <summary>
+		/// Converts the given ID of a field into a column-row index pair.
+		/// </summary>
+		static PiecePosition plain_id_to_piece_position(const long long plain_id);
+
+		/// <summary>
+		/// Converts the given position of a piece on the checkerboard into
+		/// the corresponding field ID.
+		/// </summary>
+		static long long piece_position_to_plain_id(const PiecePosition& position);
+
+		/// <summary>
+		/// "Applies" the given move to the current state. It is a responsibility of the caller to ensure validity of the move.
+		/// </summary>
+		/// <param name="move">Move to "apply",</param>
+		/// <param name="remove_captured">If "false", the resulting state will contain auxiliary markers "illustrating" details of the move.</param>
+		void make_move(const Move& move, const bool remove_captured);
 
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(State_array), _inverted)
 
 		/// <summary>
-		/// Constructor
+		/// Constructor.
 		/// </summary>
 		State() : State_array() {}
 
@@ -105,54 +288,19 @@ namespace TrainingCell::Checkers
 		explicit State(const State_array& state_array, const bool inverted = false);
 
 		/// <summary>
-		/// Returns "true" if the state is reversed with respect to its initial "orientation"
+		/// Returns "true" if the current state is reversed with respect to its initial "orientation".
 		/// </summary>
 		[[nodiscard]] bool is_inverted() const;
 
 		/// <summary>
-		///	Returns state that corresponds to the beginning of the game
+		/// Returns "start state: for the checkers game.
 		/// </summary>
 		static State get_start_state();
 
 		/// <summary>
-		/// Method to remove captured pieces from the state (board)
+		/// "Applies" the given move to the current state.
 		/// </summary>
-		void remove_captured_pieces();
-
-		/// <summary>
-		///	Access the status of a single field through the general board position.
-		///	The position must be valid, otherwise exception will be thrown
-		/// </summary>
-		[[nodiscard]] Piece get_piece(const PiecePosition& position) const;
-
-		/// <summary>
-		///	Access the status of a single field through the general board position.
-		///	The position must be valid, otherwise exception will be thrown
-		/// </summary>
-		[[nodiscard]] Piece& get_piece(const PiecePosition& position);
-
-		/// <summary>
-		///	Converts the given id of a field in the "sense" of CheckersState structure into a column-row index pair
-		/// </summary>
-		static PiecePosition plain_id_to_piece_position(const long long plain_id);
-
-		/// <summary>
-		///	Converts the given position of a piece on the checkers board into
-		///	the corresponding field index of CheckersState structure
-		/// </summary>
-		static long long piece_position_to_plain_id(const PiecePosition& position);
-
-		/// <summary>
-		/// Makes the move
-		/// </summary>
-		/// <param name="move">Move to "make"</param>
-		/// <param name="remove_captured">If "false", state will contain auxiliary markers "illustrating" details of the move</param>
-		void make_move(const Move& move, const bool remove_captured);
-
-		/// <summary>
-		/// Makes the move
-		/// </summary>
-		/// <param name="move">Move to "make"</param>
+		/// <param name="move">Move to "apply".</param>
 		void make_move(const Move& move);
 
 		/// <summary>
@@ -167,193 +315,56 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] std::vector<int> get_vector_inverted(const Move& move) const;
 
 		/// <summary>
-		///	Makes the move
-		/// </summary>
-		void make_move(const SubMove& sub_move, const bool remove_captured);
-
-		/// <summary>
-		/// Returns "true" if the given move is valid in the context of the current state
-		/// </summary>
-		[[nodiscard]] bool is_valid_move(const Move& move) const;
-
-		/// <summary>
-		/// Returns an "inverted" state, i.e., the current state, as it is seen by the opponent (an agent playing "anti" pieces)
+		/// Returns an "inverted" state, i.e., the current state, as it is seen by the opponent (an agent playing "anti" pieces).
 		/// </summary>
 		[[nodiscard]] State get_inverted() const;
 
 		/// <summary>
-		/// "Inverts" the state
+		/// "Inverts" the current state.
 		/// </summary>
 		void invert();
 
 		/// <summary>
-		/// Returns an "inverted" state, i.e., the current state, as is it is seen by the opponent (an agent playing "anti" pieces)
+		/// Returns an "inverted" state, i.e., the current state, as it is seen by the opponent (an agent playing "anti" pieces)
 		/// in the form of "int-vector".
 		///// </summary>
 		[[nodiscard]] std::vector<int> get_vector_inverted() const;
 
 		/// <summary>
-		/// Calculates reward for the given pair of previous and next after-states represented with "raw" tensors
-		/// (those that can be obtained by calling `to_tensor` method below)
+		/// Calculates reward for the given pair of previous and next states represented with the given "int-vectors".
 		///</summary>
 		[[nodiscard]] static double calc_reward(const std::vector<int>& prev_state, const std::vector<int>& next_state);
 
 		/// <summary>
-		/// Returns "int-vector" representation of the state
+		/// Returns "int-vector" representation of the state.
 		/// </summary>
 		[[nodiscard]] std::vector<int> to_vector() const;
 
 		/// <summary>
-		/// Returns collection of available moves for the current state
+		/// Returns collection of available moves for the current state.
 		/// </summary>
 		[[nodiscard]] std::vector<Move> get_moves() const;
 
 		/// <summary>
-		/// Equality operator
+		/// Equality operator.
 		/// </summary>
 		bool operator ==(const State& another_state) const;
 
 		/// <summary>
-		/// Inequality operator
+		/// Inequality operator.
 		/// </summary>
 		bool operator !=(const State& another_state) const;
 
 		/// <summary>
-		/// Returns "handle" to a copy of the current state <see cref="IStateSeed"/>
+		/// Returns "handle" to a copy of the current state <see cref="StateHandle"/>.
 		/// </summary>
 		[[nodiscard]] std::unique_ptr<IState> yield() const override;
-	};
-
-	/// <summary>
-	/// Functionality to handle training of checkers agent
-	/// </summary>
-	class Utils
-	{
-		/// <summary>
-		///	Returns collection of capturing moves that we can get for the given state,
-		///	the given position of a piece on the board, along the given diagonal and in the given direction
-		///	Only "single capture" moves are considered
-		/// </summary>
-		/// <param name="current_state">State</param>
-		/// <param name="pos">Position of "Man" or "King" on the board (in the state indexing system)</param>
-		/// <param name="right_diagonal">Direction along which we count capturing moves</param>
-		/// <param name="positive_direction">Direction on the diagonal in which we search for capturing moves</param>
-		static std::vector<SubMove> get_capturing_moves(const State& current_state, const PiecePosition& pos,
-		                                 const bool right_diagonal, const bool positive_direction);
 
 		/// <summary>
-		///	Returns all the possible capturing moves for the given "ally" piece (represented with its position in the given state structure)
-		///	and the current state
-		/// </summary>
-		static std::vector<Move> get_capturing_moves(const State& current_state, const PiecePosition& start_pos);
-
-	public:
-		/// <summary>
-		///	Returns "true" if the given piece represents either "Man" or "King"
-		/// </summary>
-		static bool is_allay_piece(const Piece piece);
-
-		/// <summary>
-		///	Returns "true" if the given piece is not "space" or (anti-)captured
-		/// </summary>
-		static bool is_alive(const Piece piece);
-
-		/// <summary>
-		///	Returns "true" if the given piece is (anti-)captured
-		/// </summary>
-		static bool is_dead(const Piece piece);
-
-		/// <summary>
-		///	Returns "true" if the given piece is (anti-)king
-		/// </summary>
-		static bool is_king(const Piece piece);
-
-		/// <summary>
-		///	Returns "true" if the given piece represents an opponent's piece ("AntiMan" or "AntiKing")
-		/// </summary>
-		static bool is_opponent_piece(const Piece piece);
-
-		/// <summary>
-		///	Returns "true" if the given piece represents (anti-)trace marker
-		/// </summary>
-		static bool is_trace_marker(const Piece piece);
-
-		/// <summary>
-		/// Returns "anti"-piece for the given one
+		/// Returns "anti"-piece for the given one.
 		/// </summary>
 		template <class P>
 		static P get_anti_piece(const P& piece);
-
-		/// <summary>
-		/// Returns collection of all the possible non-capturing moves starting from the given position along the given diagonal
-		/// and the given direction
-		/// </summary>
-		static std::vector<SubMove> get_non_capturing_moves(const State& current_state, const PiecePosition& pos,
-			const bool right_diagonal, const bool positive_direction);
-
-		/// <summary>
-		///	Returns collection of all the possible non-capturing moves starting from the given position
-		/// </summary>
-		static std::vector<Move> get_non_capturing_moves(const State& current_state, const PiecePosition& start_pos);
-
-		/// <summary>
-		///	Returns collection of all the capturing moves available for the given state
-		/// </summary>
-		static std::vector<Move> get_capturing_moves(const State& current_state);
-
-		/// <summary>
-		///	Returns collection of all the n0n-capturing moves available for the given state
-		/// </summary>
-		static std::vector<Move> get_non_capturing_moves(const State& current_state);
-
-		/// <summary>
-		///	Returns all the available moves for the given state
-		/// </summary>
-		static std::vector<Move> get_moves(const State& current_state);
-
-		/// <summary>
-		/// Returns a piece position that is achieved from the given one by moving for the given (signed) number of steps
-		/// in the "right" or "left" diagonals
-		/// A move in the "right" diagonal is assumed to be the one when both row and column
-		/// coordinates are either simultaneously increase (for positive step) or decrease (for negative step).
-		/// A move in the "left" diagonal is when either row coordinate increases and column coordinate decreases (for positive step)
-		/// of vice versa (for negative step)
-		/// The returned position might be invalid (reside outside the board), use the corresponding method to check validity
-		/// </summary>
-		static PiecePosition move(const PiecePosition& start_pos, const int step, bool rightDiagonal);
-
-		/// <summary>
-		/// Returns position on the checkers board that can be obtained from the current one by moving towards the
-		/// given "pointer" position by the given "step". "Pointer" position must be on the same diagonal as the current position
-		/// as well as be distinct from the current position
-		/// one otherwise exception will be thrown
-		/// </summary>
-		static PiecePosition move(const PiecePosition& start_pos, const int step, const PiecePosition& pointer);
-
-		/// <summary>
-		/// Returns true if the two given positions share same diagonal on the checkers board
-		/// </summary>
-		static bool is_same_diagonal(const PiecePosition& start_pos, const PiecePosition& pos);
-
-		/// <summary>
-		/// Returns true if the given position is a valid position on the checkers board (a valid black field on the board)
-		/// </summary>
-		static bool is_valid(const PiecePosition& pos);
-
-		/// <summary>
-		/// Returns "true" if the given sub-move passes validation checks
-		/// </summary>
-		static bool is_valid(const SubMove& sub_move);
-
-		/// <summary>
-		/// Returns "true" if the given instance of a "move" has passed validation
-		/// </summary>
-		static bool is_valid(const Move& move);
-
-		/// <summary>
-		/// Appends one of the given moves to another one
-		/// </summary>
-		static void append(Move& move_to_append_to, const Move& move);
 	};
 }
 

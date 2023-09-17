@@ -78,7 +78,7 @@ namespace TrainingCell::Checkers
 
 	void StateHandle::move_invert_reset(const int action_id)
 	{
-		_state.make_move(_actions[action_id], true);
+		_state.make_move(_actions[action_id]);
 		_state.invert();
 		_actions = _state.get_moves();
 	}

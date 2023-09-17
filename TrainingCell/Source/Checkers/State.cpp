@@ -42,15 +42,6 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	void State::remove_captured_pieces()
-	{
-		for (auto id = 0ull; id < size(); id++)
-		{
-			if ((*this)[id] == Piece::Captured)
-				(*this)[id] = Piece::Space;
-		}
-	}
-
 	State::State(const State_array& state_array, const bool inverted) : State_array(state_array), _inverted(inverted)
 	{}
 
@@ -93,10 +84,7 @@ namespace TrainingCell::Checkers
 		return PiecePosition{ rowId, colId };
 	}
 
-	/// <summary>
-	/// Piece position to plain ID conversion without check of validity for the argument
-	/// </summary>
-	long long piece_position_to_plain_id_unsafe(const PiecePosition& position)
+	long long State::piece_position_to_plain_id_unsafe(const PiecePosition& position)
 	{
 		const auto temp = position.col - ((position.row % 2) == 0);
 
@@ -108,26 +96,21 @@ namespace TrainingCell::Checkers
 
 	long long State::piece_position_to_plain_id(const PiecePosition& position)
 	{
-		if (!Utils::is_valid(position))
+		if (!is_valid(position))
 			throw std::exception("Invalid input");
 
 		return piece_position_to_plain_id_unsafe(position);
 	}
 
-	/// <summary>
-	/// Internal implementation of state inversion
-	/// </summary>
-	/// <param name="state_array">State represented as an array</param>
-	/// <param name="size">Size of the array. It is assumed to be even number.</param>
 	template <class T>
-	void invert_internal(T* state_array, const std::size_t size)
+	void State::invert_internal(T* state_array, const std::size_t size)
 	{
 		const auto half_size = size / 2;
 		for (auto field_id = 0ull; field_id < half_size; field_id++)
 		{
 			const auto temp = state_array[field_id];
-			state_array[field_id] = Utils::get_anti_piece(state_array[size - 1 - field_id]);
-			state_array[size - 1 - field_id] = Utils::get_anti_piece(temp);
+			state_array[field_id] = State::get_anti_piece(state_array[size - 1 - field_id]);
+			state_array[size - 1 - field_id] = State::get_anti_piece(temp);
 		}
 	}
 
@@ -145,7 +128,7 @@ namespace TrainingCell::Checkers
 	}
 
 	template <class S>
-	StateScore calc_score_internal(const S& state)
+	StateScore State::calc_score_internal(const S& state)
 	{
 		StateScore result{};
 		std::ranges::for_each(state, [&result](const auto& piece)
@@ -183,7 +166,7 @@ namespace TrainingCell::Checkers
 
 	std::vector<Move> State::get_moves() const
 	{
-		return Utils::get_moves(*this);
+		return get_moves(*this);
 	}
 
 	State State::get_inverted() const
@@ -195,18 +178,18 @@ namespace TrainingCell::Checkers
 
 	bool State::is_valid_move(const Move& move) const
 	{
-		if (!Utils::is_valid(move))
+		if (!is_valid(move))
 			return false;
 
 		const auto piece = get_piece(move.sub_moves[0].start);
-		if (!Utils::is_allay_piece(piece))
+		if (!is_allay_piece(piece))
 			return false;
 
 		for (auto subMoveId = 0ull; subMoveId < move.sub_moves.size(); subMoveId++)
 		{
 			const auto capture = move.sub_moves[subMoveId].capture;
 
-			if (Utils::is_valid(capture) && !Utils::is_opponent_piece(get_piece(capture)))
+			if (is_valid(capture) && !is_opponent_piece(get_piece(capture)))
 				return false;
 
 			auto temp = move.sub_moves[subMoveId].start;
@@ -214,7 +197,7 @@ namespace TrainingCell::Checkers
 
 			if (piece == Piece::Man)
 			{
-				if (Utils::is_valid(capture))
+				if (is_valid(capture))
 				{
 					if (std::abs(temp.row - end.row) != 2 || std::abs(temp.col - end.col) != 2)
 						return false;
@@ -228,38 +211,33 @@ namespace TrainingCell::Checkers
 
 			do
 			{
-				temp = Utils::move(temp, 1, end);
+				temp = State::move(temp, 1, end);
 				const auto currentPiece = get_piece(temp);
 				//if it is an "opponent" piece then it must be the one captured
-				if ((Utils::is_opponent_piece(currentPiece) && move.sub_moves[subMoveId].capture != temp) ||
+				if ((is_opponent_piece(currentPiece) && move.sub_moves[subMoveId].capture != temp) ||
 					//if it is the "ally" piece then it must be the one that is "moving", because, in principle,
 					//moving piece can cross its initial position during the move (even multiple times)
-					(Utils::is_allay_piece(currentPiece) && temp != move.sub_moves[0].start) ||
+					(is_allay_piece(currentPiece) && temp != move.sub_moves[0].start) ||
 					//we also assume that the "board" is free of "diagnostics stuff"
-					(currentPiece != Piece::Space && !Utils::is_opponent_piece(currentPiece) && !Utils::is_allay_piece(currentPiece)))
+					(currentPiece != Piece::Space && !is_opponent_piece(currentPiece) && !is_allay_piece(currentPiece)))
 					return false;
-			} while (temp != end || !Utils::is_valid(temp));
+			} while (temp != end || !is_valid(temp));
 
-			if (!Utils::is_valid(temp))
+			if (!is_valid(temp))
 				return false;
 		}
 
 		return true;
 	}
 
-	/// <summary>
-	/// "Applies" given move to the state represented by the given array.
-	/// It is a responsibility of the caller to ensure that the given array represents a valid state (in terms of size, for example)
-	/// as well as to ensure that the given move is valid.
-	/// </summary>
 	template <class T>
-	void make_move_internal(const Move& move, T* arr, const bool remove_captured)
+	void State::make_move_internal(const Move& move, T* arr, const bool remove_captured)
 	{
 		for (auto subMoveId = 0ull; subMoveId < move.sub_moves.size(); subMoveId++)
 		{
 			const auto& capturePos = move.sub_moves[subMoveId].capture;
 
-			if (Utils::is_valid(capturePos))
+			if (is_valid(capturePos))
 				arr[piece_position_to_plain_id_unsafe(capturePos)] = static_cast<T>(remove_captured ? Piece::Space : Piece::AntiCaptured);
 		}
 
@@ -324,46 +302,46 @@ namespace TrainingCell::Checkers
 		return std::make_unique<StateHandle>(*this);
 	}
 
-	bool Utils::is_allay_piece(const Piece piece)
+	bool State::is_allay_piece(const Piece piece)
 	{
 		return piece == Piece::Man || piece == Piece::King;
 	}
 
-	bool Utils::is_alive(const Piece piece)
+	bool State::is_alive(const Piece piece)
 	{
 		return is_allay_piece(piece) || is_opponent_piece(piece);
 	}
 
-	bool Utils::is_dead(const Piece piece)
+	bool State::is_dead(const Piece piece)
 	{
 		return piece == Piece::AntiCaptured || piece == Piece::Captured;
 	}
 
-	bool Utils::is_king(const Piece piece)
+	bool State::is_king(const Piece piece)
 	{
 		return piece == Piece::AntiKing || piece == Piece::King;
 	}
 
-	bool Utils::is_opponent_piece(const Piece piece)
+	bool State::is_opponent_piece(const Piece piece)
 	{
 		return is_allay_piece(get_anti_piece(piece));
 	}
 
-	bool Utils::is_trace_marker(const Piece piece)
+	bool State::is_trace_marker(const Piece piece)
 	{
 		return piece == Piece::TraceMarker || piece == Piece::AntiTraceMarker;
 	}
 
 	template <class P>
-	P Utils::get_anti_piece(const P& piece)
+	P State::get_anti_piece(const P& piece)
 	{
 		return static_cast<P>(-static_cast<int>(piece));
 	}
 
-	std::vector<SubMove> Utils::get_capturing_moves(const State& current_state, const PiecePosition& pos,
+	std::vector<SubMove> State::get_capturing_moves(const State& current_state, const PiecePosition& pos,
 		const bool right_diagonal, const bool positive_direction)
 	{
-		if (!Utils::is_valid(pos))
+		if (!is_valid(pos))
 			throw std::exception("Invalid current position");
 
 		if (!is_allay_piece(current_state.get_piece(pos)))
@@ -403,7 +381,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<SubMove> Utils::get_non_capturing_moves(const State& current_state, const PiecePosition& pos,
+	std::vector<SubMove> State::get_non_capturing_moves(const State& current_state, const PiecePosition& pos,
 		const bool right_diagonal, const bool positive_direction)
 	{
 		if (!is_valid(pos))
@@ -434,7 +412,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 	
-	std::vector<Move> Utils::get_capturing_moves(const State& current_state, const PiecePosition& start_pos)
+	std::vector<Move> State::get_capturing_moves(const State& current_state, const PiecePosition& start_pos)
 	{
 		if (!is_valid(start_pos))
 			throw std::exception("Invalid start position");
@@ -492,7 +470,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<Move> Utils::get_non_capturing_moves(const State& current_state, const PiecePosition& start_pos)
+	std::vector<Move> State::get_non_capturing_moves(const State& current_state, const PiecePosition& start_pos)
 	{
 		if (!is_valid(start_pos))
 			throw std::exception("Invalid start position");
@@ -522,7 +500,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<Move> Utils::get_capturing_moves(const State& current_state)
+	std::vector<Move> State::get_capturing_moves(const State& current_state)
 	{
 		std::vector<Move> result{};
 
@@ -542,7 +520,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<Move> Utils::get_non_capturing_moves(const State& current_state)
+	std::vector<Move> State::get_non_capturing_moves(const State& current_state)
 	{
 		std::vector<Move> result{};
 
@@ -562,7 +540,7 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<Move> Utils::get_moves(const State& current_state)
+	std::vector<Move> State::get_moves(const State& current_state)
 	{
 		auto capturing_moves = get_capturing_moves(current_state);
 
@@ -572,7 +550,7 @@ namespace TrainingCell::Checkers
 		return get_non_capturing_moves(current_state);
 	}
 
-	PiecePosition Utils::move(const PiecePosition& start_pos, const int step, bool rightDiagonal)
+	PiecePosition State::move(const PiecePosition& start_pos, const int step, bool rightDiagonal)
 	{
 		return PiecePosition{ start_pos.row + step, rightDiagonal ? start_pos.col + step : start_pos.col - step };
 	}
@@ -586,7 +564,7 @@ namespace TrainingCell::Checkers
 		return val > 0 ? 1 : (val < 0 ? -1 : 0);
 	}
 
-	PiecePosition Utils::move(const PiecePosition& start_pos, const int step, const PiecePosition& pointer)
+	PiecePosition State::move(const PiecePosition& start_pos, const int step, const PiecePosition& pointer)
 	{
 		if (!is_same_diagonal(start_pos, pointer))
 			throw std::exception("The pointer must be on the same diagonal");
@@ -600,17 +578,17 @@ namespace TrainingCell::Checkers
 		return PiecePosition{ start_pos.row + row_dir * step, start_pos.col + col_dir * step };
 	}
 
-	bool Utils::is_same_diagonal(const PiecePosition& start_pos, const PiecePosition& pos)
+	bool State::is_same_diagonal(const PiecePosition& start_pos, const PiecePosition& pos)
 	{
 		return std::abs(start_pos.row - pos.row) == std::abs(start_pos.col - pos.col);
 	}
 
-	bool Utils::is_valid(const PiecePosition& pos)
+	bool State::is_valid(const PiecePosition& pos)
 	{
 		return pos.is_valid() && (pos.col % 2 == (pos.row % 2 == 0) ? 1 : 0);
 	}
 
-	bool Utils::is_valid(const SubMove& sub_move)
+	bool State::is_valid(const SubMove& sub_move)
 	{
 		return sub_move.start != sub_move.end && sub_move.start != sub_move.capture &&
 			sub_move.end != sub_move.capture && is_same_diagonal(sub_move.start, sub_move.end) &&
@@ -618,16 +596,16 @@ namespace TrainingCell::Checkers
 				is_same_diagonal(sub_move.end, sub_move.capture)));
 	}
 
-	bool Utils::is_valid(const Move& move)
+	bool State::is_valid(const Move& move)
 	{
 		const auto& sub_moves = move.sub_moves;
 
-		if (sub_moves.empty() || std::ranges::any_of(sub_moves, [](const auto& x) { return !Utils::is_valid(x); }))
+		if (sub_moves.empty() || std::ranges::any_of(sub_moves, [](const auto& x) { return !State::is_valid(x); }))
 			return false;
 
 		//The only case when number of captured pieces can differ from the number of sub-moves
 		//is when there is only single sub-move and nothing is captured
-		if (sub_moves.size() > 1 && std::ranges::any_of(sub_moves, [](const auto& x) { return !Utils::is_valid(x.capture); }))
+		if (sub_moves.size() > 1 && std::ranges::any_of(sub_moves, [](const auto& x) { return !State::is_valid(x.capture); }))
 			return false;
 
 		for (auto subMoveId = 1ull; subMoveId < sub_moves.size(); subMoveId++)
@@ -639,7 +617,7 @@ namespace TrainingCell::Checkers
 		return true;
 	}
 
-	void Utils::append(Move& move_to_append_to, const Move& move)
+	void State::append(Move& move_to_append_to, const Move& move)
 	{
 		if (!is_valid(move))
 			throw std::exception("Invalid move to append");
