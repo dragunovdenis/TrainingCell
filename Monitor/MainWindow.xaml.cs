@@ -113,8 +113,8 @@ namespace Monitor
         {
             get
             {
-                return MainTabControl.Items.Cast<TabItem>().
-                    Count(x => x.Content is TrainControl) < Environment.ProcessorCount;
+                return MainTabControl.Items.Cast<TabItem>().Count(x => x.Content is TrainControl) <
+                       Environment.ProcessorCount;
             }
         }
 
@@ -159,7 +159,8 @@ namespace Monitor
         /// <summary>
         /// Handler for the "enquire extra agent" event
         /// </summary>
-        private void TrainControlOnOnEnquireExtraAgents(TrainControl sender, ConcurrentBag<ITdLambdaAgentReadOnly> collectionToAddTo)
+        private void TrainControlOnOnEnquireExtraAgents(TrainControl sender,
+            ConcurrentBag<ITdLambdaAgentReadOnly> collectionToAddTo)
         {
             if (collectionToAddTo == null || sender == null)
                 throw new Exception("Invalid input");
@@ -220,6 +221,14 @@ namespace Monitor
         private void EditAgentButton_OnClick(object sender, RoutedEventArgs e)
         {
             _checkersUi.EditInactiveAgent();
+        }
+
+        private void MenuAbout_OnClick(object sender, RoutedEventArgs e)
+        {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.Owner = this; // this refers to the main window
+            aboutWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            aboutWindow.ShowDialog();       
         }
     }
 }

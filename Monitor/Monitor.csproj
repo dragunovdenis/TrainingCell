@@ -8,7 +8,9 @@
     <Configurations>Debug;IntelCompiler2022;Release</Configurations>
     <AssemblyTitle>Monitor</AssemblyTitle>
     <Product>Monitor</Product>
-    <Copyright>Copyright ©  2023</Copyright>
+    <Copyright>Copyright © 2023 Denys Dragunov, dragunovdenis@gmail.com</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -22,6 +24,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>TrainingCell.ico</ApplicationIcon>
+    <UseWPF>False</UseWPF>
+    <AssemblyName>TrainingCellApp</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'IntelCompiler2022|x64'">
     <OutputPath>..\$(Platform)\$(Configuration)\</OutputPath>
@@ -29,6 +33,9 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="AboutDialog.xaml" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -58,6 +65,9 @@
     <Compile Update="Checkers\UI\TrainControl.xaml.cs">
       <DependentUpon>TrainControl.xaml</DependentUpon>
     </Compile>
+    <Page Include="AboutDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Checkers\UI\EnsembleAgentControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
