@@ -25,6 +25,12 @@
     <Filter Include="Header Files\TDL">
       <UniqueIdentifier>{7d8887ec-7430-4aef-b03b-f91885967755}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Chess">
+      <UniqueIdentifier>{ff6a6060-bf44-42e5-86f3-5d55955de53a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Chess">
+      <UniqueIdentifier>{1039cc38-5a78-41c4-ad34-f74f30ba7157}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Checkers\State.h">
@@ -105,6 +111,18 @@
     <ClInclude Include="Headers\IMinimalStateReadonly.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Chess\PieceController.h">
+      <Filter>Header Files\Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Chess\AttackController.h">
+      <Filter>Header Files\Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Chess\ChessState.h">
+      <Filter>Header Files\Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Chess\PosController.h">
+      <Filter>Header Files\Chess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\State.cpp">
@@ -160,6 +178,18 @@
     </ClCompile>
     <ClCompile Include="Source\Checkers\StateHandle.cpp">
       <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Chess\PieceController.cpp">
+      <Filter>Source Files\Chess</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Chess\AttackController.cpp">
+      <Filter>Source Files\Chess</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Chess\PosController.cpp">
+      <Filter>Source Files\Chess</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Chess\ChessState.cpp">
+      <Filter>Source Files\Chess</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

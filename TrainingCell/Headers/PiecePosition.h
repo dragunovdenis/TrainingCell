@@ -51,9 +51,29 @@ namespace TrainingCell
 		PiecePosition invert() const;
 
 		/// <summary>
-		/// Returns "true" if the current instance is valid
+		/// Returns "true" if the current instance is valid.
 		/// </summary>
 		bool is_valid() const;
+
+		/// <summary>
+		/// Compound addition operator.
+		/// </summary>
+		PiecePosition& operator +=(const PiecePosition& pos);
+
+		/// <summary>
+		/// Compound subtraction operator.
+		/// </summary>
+		PiecePosition& operator -=(const PiecePosition& pos);
 	};
+
+	/// <summary>
+	/// Addition operator.
+	/// </summary>
+	PiecePosition operator+(PiecePosition pos1, const PiecePosition& pos2);
+
+	/// <summary>
+	/// Subtraction operator.
+	/// </summary>
+	PiecePosition operator-(PiecePosition pos1, const PiecePosition& pos2);
 
 }

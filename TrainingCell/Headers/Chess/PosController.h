@@ -15,54 +15,23 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Headers/PiecePosition.h"
-#include "../Headers/Checkerboard.h"
+#pragma once
 
-namespace TrainingCell
+#include "../PiecePosition.h"
+
+namespace TrainingCell::Chess
 {
-	bool PiecePosition::operator ==(const PiecePosition& pos) const
+	class PosController
 	{
-		return row == pos.row && col == pos.col;
-	}
+	public:
+		/// <summary>
+		/// Returns linear index representation for the current position. Check for validness is on the caller.
+		/// </summary>
+		static long long to_linear(const PiecePosition& pos);
 
-	bool PiecePosition::operator !=(const PiecePosition& pos) const
-	{
-		return !(*this == pos);
-	}
-
-	PiecePosition PiecePosition::invert() const
-	{
-		return PiecePosition{ Checkerboard::Rows - 1 - row,  Checkerboard::Columns - 1 - col };
-	}
-
-	bool PiecePosition::is_valid() const
-	{
-		return (col >= 0) && (col < Checkerboard::Columns) && (row >= 0) && (row < Checkerboard::Rows);
-	}
-
-	PiecePosition& PiecePosition::operator+=(const PiecePosition& pos)
-	{
-		col += pos.col;
-		row += pos.row;
-
-		return *this;
-	}
-
-	PiecePosition& PiecePosition::operator-=(const PiecePosition& pos)
-	{
-		col -= pos.col;
-		row -= pos.row;
-
-		return *this;
-	}
-
-	PiecePosition operator+(PiecePosition pos1, const PiecePosition& pos2)
-	{
-		return pos1 += pos2;
-	}
-
-	PiecePosition operator-(PiecePosition pos1, const PiecePosition& pos2)
-	{
-		return pos1 -= pos2;
-	}
+		/// <summary>
+		/// Constructs an instance from the given linear position.
+		/// </summary>
+		static PiecePosition from_linear(const long long lin_id);
+	};
 }

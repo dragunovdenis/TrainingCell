@@ -25,7 +25,17 @@ namespace TrainingCell
 	class Checkerboard
 	{
 	public:
-		static constexpr int Rows = 8;
-		static constexpr int Columns = Rows;
+		/// <summary>
+		/// Number of rows on the board
+		/// </summary>
+		static constexpr long long Rows = 8;
+		/// <summary>
+		/// Number of columns on the board
+		/// </summary>
+		static constexpr long long Columns = Rows;
+		/// <summary>
+		/// Total number of fields on the board
+		/// </summary>
+		static constexpr long long FieldsCount = Rows * Columns;
 	};
 }

@@ -96,6 +96,7 @@
     <ClCompile Include="CheckersAgentTrainingTest.cpp" />
     <ClCompile Include="CheckersStateTest.cpp" />
     <ClCompile Include="CheckersTestUtils.cpp" />
+    <ClCompile Include="ChessStateTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TrainingCell\TrainingCell.vcxproj">
