@@ -20,12 +20,8 @@
 #include <functional>
 
 #include "AttackController.h"
+#include "ChessMove.h"
 #include "../Checkerboard.h"
-
-namespace TrainingCell
-{
-	struct PiecePosition;
-}
 
 namespace TrainingCell::Chess
 {
@@ -34,59 +30,6 @@ namespace TrainingCell::Chess
 	/// </summary>
 	class ChessState
 	{
-	public:
-
-		/// <summary>
-		/// A move instruction.
-		/// </summary>
-		class Move
-		{
-			/// <summary>
-			/// Only ChessState can construct a valid "move".
-			/// </summary>
-			friend class ChessState;
-
-			/// <summary>
-			/// Index of the "start" field.
-			/// </summary>
-			int start_field_id{ -1 };
-
-			/// <summary>
-			/// Index of the "finish" field.
-			/// </summary>
-			int finish_field_id{ -1 };
-
-			/// <summary>
-			/// If nonzero, defines "rank" of the piece (that moves) once it arrives to the "final" position (to do the "Pawn Promotion").
-			///	Should be ignored if zero.
-			/// </summary>
-			int final_rank{ 0 };
-
-			/// <summary>
-			/// Returns position of the "start" field.
-			/// </summary>
-			[[nodiscard]] PiecePosition get_start() const;
-
-			/// <summary>
-			/// Returns position of the "finish" field.
-			/// </summary>
-			[[nodiscard]] PiecePosition get_finish() const;
-
-			/// <summary>
-			/// Constructor.
-			/// </summary>
-			Move(const int start_field_id, const int finish_field_id, const int final_rank = 0);
-
-		public:
-
-			/// <summary>
-			/// Constructor.
-			/// </summary>
-			Move() = default;
-
-		};
-
-	private:
 		/// <summary>
 		/// Representation of a single checkerboard field.
 		/// </summary>
@@ -134,6 +77,11 @@ namespace TrainingCell::Chess
 		/// A flag to track if the current state is inverted with respect to the initial state.
 		/// </summary>
 		bool _is_inverted {false};
+
+		/// <summary>
+		/// An instance of attack controller.
+		/// </summary>
+		AttackController _attack_controller{};
 
 		/// <summary>
 		/// "Commits" attacks suggested by the given collection with respect to the given position on the board.
@@ -187,7 +135,7 @@ namespace TrainingCell::Chess
 		/// </summary>
 		/// <param name="king_field_id">Index of the field where "King" piece is located.</param>
 		/// <param name="moves">Collection to append to.</param>
-		void append_king_moves(const int king_field_id, std::vector<Move>& moves) const;
+		void append_king_moves(const int king_field_id, std::vector<ChessMove>& moves) const;
 
 		/// <summary>
 		/// Appends moves of the pawn located on the field with the given ID to the given collection of moves.
@@ -196,7 +144,7 @@ namespace TrainingCell::Chess
 		/// <param name="pawn_field_id">Index of a field where an "ally pawn" piece is located.</param>
 		/// <param name="moves">Collection of moves to append to.</param>
 		/// <param name="king_pos">Current position of the "ally king".</param>
-		void append_pawn_moves_basic(const int pawn_field_id, std::vector<Move>& moves, const PiecePosition& king_pos) const;
+		void append_pawn_moves_basic(const int pawn_field_id, std::vector<ChessMove>& moves, const PiecePosition& king_pos) const;
 
 		/// <summary>
 		/// Appends moves of the pawn located on the field with the given ID to the given collection of moves.
@@ -205,14 +153,14 @@ namespace TrainingCell::Chess
 		/// <param name="pawn_field_id">Index of a field where an "ally pawn" piece is located.</param>
 		/// <param name="moves">Collection of moves to append to.</param>
 		/// <param name="king_pos">Current position of the "ally king".</param>
-		void append_pawn_moves(const int pawn_field_id, std::vector<Move>& moves, const PiecePosition& king_pos) const;
+		void append_pawn_moves(const int pawn_field_id, std::vector<ChessMove>& moves, const PiecePosition& king_pos) const;
 
 		/// <summary>
 		/// Append moves generated according ot the given
 		/// collection of attack directions and the start
 		/// position to the given collection of moves.
 		/// </summary>
-		void append_moves(const int start_field_id, std::vector<Move>& moves,
+		void append_moves(const int start_field_id, std::vector<ChessMove>& moves,
 			const std::vector<AttackController::Direction>& attack_directions, const PiecePosition& king_pos) const;
 
 		/// <summary>
@@ -222,7 +170,7 @@ namespace TrainingCell::Chess
 		///	it is possible in principle to continue moving in the same direction.
 		/// </summary>
 		bool validate_and_append_move(const PiecePosition& start_pos, const PiecePosition& finish_pos,
-			std::vector<Move>& moves, const PiecePosition& king_pos) const;
+			std::vector<ChessMove>& moves, const PiecePosition& king_pos) const;
 
 		/// <summary>
 		/// Returns "true" if there is an "ally" piece on the field with the given ID.
@@ -259,12 +207,12 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns collection of moves available in the current state.
 		/// </summary>
-		[[nodiscard]] std::vector<ChessState::Move> get_moves() const;
+		[[nodiscard]] std::vector<ChessMove> get_moves() const;
 
 		/// <summary>
 		/// Applies given "move" to the current board state.
 		/// </summary>
-		void make_move(const Move& move);
+		void make_move(const ChessMove& move);
 
 		/// <summary>
 		/// Inverts the current state so that "ally" and "rival" pieces "swap sides".
@@ -279,7 +227,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns a plain vector representation of the current state after applying the given move to it.
 		/// </summary>
-		[[nodiscard]] std::vector<int> get_vector(const Move& move) const;
+		[[nodiscard]] std::vector<int> get_vector(const ChessMove& move) const;
 
 		/// <summary>
 		/// Returns a plain vector representation of a state inverted to the current one.
@@ -289,7 +237,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns a plain vector representation of a state which is inverted to the current one subjected to the given move.
 		/// </summary>
-		[[nodiscard]] std::vector<int> get_vector_inverted(const Move& move) const;
+		[[nodiscard]] std::vector<int> get_vector_inverted(const ChessMove& move) const;
 
 		/// <summary>
 		/// Returns "true" if the current state is inverted with respect to the initial state. Otherwise "false" is returned.
@@ -299,7 +247,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns "true" if the given move is a capture move. Throws an exception if the given move is invalid.
 		/// </summary>
-		[[nodiscard]] bool _is_capture_move(const Move& move) const;
+		[[nodiscard]] bool _is_capture_move(const ChessMove& move) const;
 
 		/// <summary>
 		/// Constructor from the given checkerboard state.

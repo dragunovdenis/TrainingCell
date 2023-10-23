@@ -17,18 +17,17 @@
 
 #include "../../Headers/Chess/ChessState.h"
 #include "../../Headers/Chess/PieceController.h"
-#include "../../Headers/Chess/AttackController.h"
 #include "../../Headers/Chess/PosController.h"
 #include <algorithm>
 
 namespace TrainingCell::Chess
 {
-	std::vector<ChessState::Move> ChessState::get_moves() const
+	std::vector<ChessMove> ChessState::get_moves() const
 	{
 		const auto king_field_id = locate_king();
 		const auto king_pos = PosController::from_linear(king_field_id);
 
-		std::vector<Move> result{};
+		std::vector<ChessMove> result{};
 		append_king_moves(king_field_id, result);
 
 		for (auto field_id = 0; field_id < Checkerboard::FieldsCount; ++field_id)
@@ -37,17 +36,20 @@ namespace TrainingCell::Chess
 				continue;
 
 			if (is_pawn(field_id))
+			{
 				append_pawn_moves(field_id, result, king_pos);
+				continue;
+			}
 
 			const auto& attack_directions =
-				AttackController::get_attack_directions(_data[field_id].piece);
+				_attack_controller.get_attack_directions(_data[field_id].piece);
 			append_moves(field_id, result, attack_directions, king_pos);
 		}
 
 		return result;
 	}
 
-	void ChessState::make_move(const Move& move)
+	void ChessState::make_move(const ChessMove& move)
 	{
 		make_move(move.get_start(), move.get_finish());
 	}
@@ -92,7 +94,7 @@ namespace TrainingCell::Chess
 		return result;
 	}
 
-	std::vector<int> ChessState::get_vector_inverted(const Move& move) const
+	std::vector<int> ChessState::get_vector_inverted(const ChessMove& move) const
 	{
 		auto result = get_vector(move);
 		invert_state_vector(result);
@@ -104,7 +106,7 @@ namespace TrainingCell::Chess
 		return _is_inverted;
 	}
 
-	bool ChessState::_is_capture_move(const Move& move) const
+	bool ChessState::_is_capture_move(const ChessMove& move) const
 	{
 		if (!is_ally(move.start_field_id) || is_ally(move.finish_field_id))
 			throw std::exception("Invalid move");
@@ -132,10 +134,10 @@ namespace TrainingCell::Chess
 
 	ChessState ChessState::create_start_state()
 	{
-		return ChessState(PieceController::get_init_board_state());
+		return ChessState{ PieceController::get_init_board_state() };
 	}
 
-	std::vector<int> ChessState::get_vector(const Move& move) const
+	std::vector<int> ChessState::get_vector(const ChessMove& move) const
 	{
 		// A sanity check
 		if (!is_ally(move.start_field_id) || is_ally(move.finish_field_id))
@@ -164,15 +166,15 @@ namespace TrainingCell::Chess
 		if (PieceController::is_ally_piece(finish_field.piece))
 			throw std::exception("Can't capture an ally");
 
-		commit_attack(AttackController::decode_long_range_attack_directions(start_field.rival_attack), start, true /*rival*/);
+		commit_attack(_attack_controller.decode_long_range_attack_directions(start_field.rival_attack), start, true /*rival*/);
 
 		const auto attacks_to_withdraw = PieceController::is_rival_piece(finish_field.piece) ?
-			AttackController::get_attack_directions(finish_field.piece) :
-			AttackController::decode_long_range_attack_directions(finish_field.rival_attack);
+			_attack_controller.get_attack_directions(finish_field.piece) :
+			_attack_controller.decode_long_range_attack_directions(finish_field.rival_attack);
 
 		withdraw_attack(attacks_to_withdraw, finish, true /*rival*/);
 
-		commit_attack(AttackController::get_attack_directions(start_field.piece), finish, false /*rival*/);
+		commit_attack(_attack_controller.get_attack_directions(start_field.piece), finish, false /*rival*/);
 
 		finish_field.piece = PieceController::extract_min_piece_rank(start_field.piece);
 		start_field.piece = PieceController::Space;
@@ -247,15 +249,15 @@ namespace TrainingCell::Chess
 			if (!next_field_pos.is_valid())
 				continue;
 
-			auto& next_field = _data[PosController::to_linear(next_field_pos)];
-			operation(next_field, attack.token);
+			auto next_field_id = PosController::to_linear(next_field_pos);
+			operation(_data[next_field_id], attack.token);
 
 			if (attack.is_long_range())
 			{
-				while (PieceController::is_space(next_field.piece) && (next_field_pos += attack.dir).is_valid())
+				while (PieceController::is_space(_data[next_field_id].piece) && (next_field_pos += attack.dir).is_valid())
 				{
-					next_field = _data[PosController::to_linear(next_field_pos)];
-					operation(next_field, attack.token);
+					next_field_id = PosController::to_linear(next_field_pos);
+					operation(_data[next_field_id], attack.token);
 				}
 			}
 		}
@@ -276,13 +278,13 @@ namespace TrainingCell::Chess
 		auto result = _data[PosController::to_linear(focus_field_pos)].rival_attack;
 
 		const auto attack_directions_to_commit =
-			AttackController::decode_long_range_attack_directions(start_field.rival_attack);
+			_attack_controller.decode_long_range_attack_directions(start_field.rival_attack);
 
 		result |= get_rival_attack_on_field(attack_directions_to_commit, move_start_pos, focus_field_pos);
 
 		const auto attack_directions_to_withdraw = PieceController::is_rival_piece(finish_field.piece) ?
-			AttackController::get_attack_directions(finish_field.piece) :
-			AttackController::decode_long_range_attack_directions(finish_field.rival_attack);
+			_attack_controller.get_attack_directions(finish_field.piece) :
+			_attack_controller.decode_long_range_attack_directions(finish_field.rival_attack);
 
 		result &= !get_rival_attack_on_field(attack_directions_to_withdraw, move_finish_pos, focus_field_pos);
 
@@ -330,7 +332,7 @@ namespace TrainingCell::Chess
 				continue;
 
 			const auto attack_directions =
-				AttackController::get_attack_directions(field_data_ref.piece);
+				_attack_controller.get_attack_directions(field_data_ref.piece);
 			const auto rival_attack = PieceController::is_rival_piece(field_data_ref.piece);
 			const auto current_pos = PosController::from_linear(field_id);
 
@@ -338,21 +340,7 @@ namespace TrainingCell::Chess
 		}
 	}
 
-	PiecePosition ChessState::Move::get_start() const
-	{
-		return PosController::from_linear(start_field_id);
-	}
-
-	PiecePosition ChessState::Move::get_finish() const
-	{
-		return PosController::from_linear(finish_field_id);
-	}
-
-	ChessState::Move::Move(const int start_field_id, const int finish_field_id, const int final_rank) :
-	start_field_id(start_field_id), finish_field_id(finish_field_id), final_rank(final_rank)
-	{}
-
-	void ChessState::append_king_moves(const int king_field_id, std::vector<Move>& moves) const
+	void ChessState::append_king_moves(const int king_field_id, std::vector<ChessMove>& moves) const
 	{
 		const auto& king_field = _data[king_field_id];
 
@@ -362,7 +350,7 @@ namespace TrainingCell::Chess
 
 		const auto start_pos = PosController::from_linear(king_field_id);
 
-		const auto& attack_directions = AttackController::get_king_attack_directions();
+		const auto& attack_directions = _attack_controller.get_king_attack_directions();
 
 		for (const auto& attack_dir : attack_directions)
 		{
@@ -371,7 +359,7 @@ namespace TrainingCell::Chess
 			if (!finish_field_pos.is_valid() || is_threatened(finish_field_id) || is_ally(finish_field_id))
 				continue;
 
-			moves.push_back(Move(king_field_id, static_cast<int>(finish_field_id)));
+			moves.push_back(ChessMove(king_field_id, static_cast<int>(finish_field_id)));
 		}
 
 		// Handle the "Castle" move
@@ -386,7 +374,7 @@ namespace TrainingCell::Chess
 			is_space(3) && !is_threatened(3))
 		{
 			// Long castling
-			moves.push_back(Move(king_field_id, king_field_id - 2));
+			moves.push_back(ChessMove(king_field_id, king_field_id - 2));
 		}
 
 		// Check "short castling"
@@ -395,12 +383,12 @@ namespace TrainingCell::Chess
 			is_space(7) && !is_threatened(7))
 		{
 			// Short castling
-			moves.push_back(Move(king_field_id, king_field_id + 2));
+			moves.push_back(ChessMove(king_field_id, king_field_id + 2));
 		}
 	}
 
 	void ChessState::append_pawn_moves_basic(const int pawn_field_id,
-		std::vector<Move>& moves, const PiecePosition& king_pos) const
+		std::vector<ChessMove>& moves, const PiecePosition& king_pos) const
 	{
 		const auto& pawn_field = _data[pawn_field_id];
 
@@ -408,15 +396,24 @@ namespace TrainingCell::Chess
 		if (!PieceController::is_pawn(pawn_field.piece))
 			throw std::exception("There is not 'Pawn'");
 
-		const auto& attack_directions = AttackController::get_pawn_attack_directions();
-
-		append_moves(pawn_field_id, moves, attack_directions, king_pos);
-
-		// Now handle "pawn-specific" moves
+		const auto& attack_directions = _attack_controller.get_pawn_attack_directions();
 
 		const auto start_pos = PosController::from_linear(pawn_field_id);
-		auto finish_pos = start_pos;
 
+		for (const auto& attack_dir : attack_directions)
+		{
+			const auto finish_pos = start_pos + attack_dir.dir;
+
+			if (!finish_pos.is_valid())
+				continue;
+
+			const auto finish_pos_lin = PosController::to_linear(finish_pos);
+			if (is_rival(finish_pos_lin))
+				moves.push_back(ChessMove(pawn_field_id, static_cast<int>(finish_pos_lin)));
+		}
+
+		// Now handle "pawn-specific" moves
+		auto finish_pos = start_pos;
 		const auto possible_steps_forward_count = finish_pos.row == 1 ? 2 : 1;
 
 		for (auto step_counter = 0; step_counter < possible_steps_forward_count; ++step_counter)
@@ -433,7 +430,7 @@ namespace TrainingCell::Chess
 				const auto rival_attack_on_king = predict_rival_attack(start_pos, finish_pos, king_pos);
 
 				if (rival_attack_on_king == 0)
-					moves.push_back(Move(pawn_field_id,static_cast<int>(next_field_id)));
+					moves.push_back(ChessMove(pawn_field_id,static_cast<int>(next_field_id)));
 			}
 			else
 				return;
@@ -446,7 +443,7 @@ namespace TrainingCell::Chess
 		PieceController::Knight,
 		PieceController::Rook };
 
-	void ChessState::append_pawn_moves(const int pawn_field_id, std::vector<Move>& moves,
+	void ChessState::append_pawn_moves(const int pawn_field_id, std::vector<ChessMove>& moves,
 		const PiecePosition& king_pos) const
 	{
 		const auto start_pos = PosController::from_linear(pawn_field_id);
@@ -457,15 +454,15 @@ namespace TrainingCell::Chess
 			return;
 		}
 
-		std::vector<Move> temp_moves;
+		std::vector<ChessMove> temp_moves;
 		append_pawn_moves_basic(pawn_field_id, temp_moves, king_pos);
 
 		for (const auto& temp_move : temp_moves)
 			for (const auto promo_option : PromotionOptions)
-				moves.push_back(Move(temp_move.start_field_id, temp_move.finish_field_id, promo_option));
+				moves.push_back(ChessMove(temp_move.start_field_id, temp_move.finish_field_id, promo_option));
 	}
 
-	void ChessState::append_moves(const int start_field_id, std::vector<Move>& moves,
+	void ChessState::append_moves(const int start_field_id, std::vector<ChessMove>& moves,
 	                              const std::vector<AttackController::Direction>& attack_directions, const PiecePosition& king_pos) const
 	{
 		const auto start_pos = PosController::from_linear(start_field_id);
@@ -485,7 +482,7 @@ namespace TrainingCell::Chess
 	}
 
 	bool ChessState::validate_and_append_move(const PiecePosition& start_pos, const PiecePosition& finish_pos,
-		std::vector<Move>& moves, const PiecePosition& king_pos) const
+		std::vector<ChessMove>& moves, const PiecePosition& king_pos) const
 	{
 		if (!finish_pos.is_valid())
 			return false; // we are outside the board
@@ -499,7 +496,7 @@ namespace TrainingCell::Chess
 		if (rival_attack_on_king != 0)
 			return true; // although this move results in "check" it still makes sense to try to move in the same direction (if possible)
 
-		moves.push_back(Move(static_cast<int>(PosController::to_linear(start_pos)),
+		moves.push_back(ChessMove(static_cast<int>(PosController::to_linear(start_pos)),
 			static_cast<int>(finish_field_id)));
 
 		// if it is a "capture move", we can't continue moving in the same

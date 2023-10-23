@@ -24,6 +24,7 @@
     <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
     <ClInclude Include="Headers\Checkers\State.h" />
     <ClInclude Include="Headers\Chess\AttackController.h" />
+    <ClInclude Include="Headers\Chess\ChessMove.h" />
     <ClInclude Include="Headers\Chess\PieceController.h" />
     <ClInclude Include="Headers\Chess\PosController.h" />
     <ClInclude Include="Headers\Chess\ChessState.h" />
@@ -55,6 +56,7 @@
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
     <ClCompile Include="Source\Checkers\State.cpp" />
     <ClCompile Include="Source\Chess\AttackController.cpp" />
+    <ClCompile Include="Source\Chess\ChessMove.cpp" />
     <ClCompile Include="Source\Chess\ChessState.cpp" />
     <ClCompile Include="Source\Chess\PieceController.cpp" />
     <ClCompile Include="Source\Chess\PosController.cpp" />

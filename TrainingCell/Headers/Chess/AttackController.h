@@ -37,6 +37,16 @@ namespace TrainingCell::Chess
 		/// </summary>
 		static constexpr int LongRangeDirGroupMask = (1 << BitsPerDirectionGroup) - 1;
 
+		/// <summary>
+		/// Total number of bits used by the controller.
+		/// </summary>
+		static constexpr int TotalBitsCount = 3 * BitsPerDirectionGroup;
+
+		/// <summary>
+		/// Mask covering all the bits used by the controller
+		/// </summary>
+		static constexpr int BitMask = (1 << TotalBitsCount) - 1;
+
 	public:
 
 		/// <summary>
@@ -72,39 +82,34 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns collection of all the possible attack move directions for the given piece represented with its token.
 		/// </summary>
-		static const std::vector<Direction>& get_attack_directions(const int piece_rank_token);
+		const std::vector<Direction>& get_attack_directions(const int piece_rank_token) const;
 
 		/// <summary>
 		/// Returns "king" attack directions.
 		/// </summary>
-		static const std::vector<Direction>& get_king_attack_directions();
+		const std::vector<Direction>& get_king_attack_directions() const;
 
 		/// <summary>
 		/// Returns "positive pawn" attack directions.
 		/// </summary>
-		static const std::vector<Direction>& get_pawn_attack_directions();
+		const std::vector<Direction>& get_pawn_attack_directions() const;
 
 		/// <summary>
-		/// Decodes given encoded iterative attack directions;
+		/// Decodes only long range attack directions from the given encoded attack directions.
 		/// </summary>
-		static std::vector<Direction> decode_long_range_attack_directions(const int encoded_attack_directions);
+		std::vector<Direction> decode_long_range_attack_directions(const int encoded_attack_directions) const;
 
 		/// <summary>
-		/// Total number of bits used by the controller.
+		/// Constructor.
 		/// </summary>
-		static constexpr int TotalBitsCount = 3 * BitsPerDirectionGroup;
-
-		/// <summary>
-		/// Mask covering all the bits used by the controller
-		/// </summary>
-		static constexpr int BitMask = (1 << TotalBitsCount) - 1;
+		AttackController() = default;
 
 	private:
 
 		/// <summary>
 		/// All the possible long-range straight attack directions.
 		/// </summary>
-		static constexpr std::vector<Direction> QueenDirections{
+		std::vector<Direction> _queen_directions{
 			{ { 1, 0 }, 1 << 0 },
 			{ { -1, 0 }, 1 << 1 },
 			{ { 0, 1 }, 1 << 2 },
@@ -118,7 +123,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// All the possible short-range attack directions.
 		/// </summary>
-		static constexpr std::vector<Direction> KingDirections{
+		std::vector<Direction> _king_directions{
 			{ { 1, 0 }, 1 << BitsPerDirectionGroup },
 			{ { -1, 0 }, 1 << (BitsPerDirectionGroup + 1) },
 			{ { 0, 1 }, 1 << (BitsPerDirectionGroup + 2) },
@@ -132,7 +137,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// All the possible knight attack directions.
 		/// </summary>
-		static constexpr std::vector<Direction> KnightDirections{
+		std::vector<Direction> _knight_directions{
 			{ { 1, 2 }, 1 << (2 * BitsPerDirectionGroup) },
 			{ { -1, -2 }, 1 << (2 * BitsPerDirectionGroup + 1) },
 			{ { 2, 1 }, 1 << (2 * BitsPerDirectionGroup + 2) },
@@ -146,33 +151,37 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Collection of pawn attack directions.
 		/// </summary>
-		inline static const std::vector<Direction> PawnDirections{
-				KingDirections[4],
-				KingDirections[7] };
+		std::vector<Direction> _pawn_directions{
+			_king_directions[4],
+			_king_directions[7]
+		};
 
 		/// <summary>
 		/// Collection of anti-pawn attack directions.
 		/// </summary>
-		inline static const std::vector<Direction> AntiPawnDirections{
-				KingDirections[5],
-				KingDirections[6] };
+		std::vector<Direction> _anti_pawn_directions{
+				_king_directions[5],
+				_king_directions[6]
+		};
 
 		/// <summary>
 		/// Collection of bishop attack directions.
 		/// </summary>
-		inline static const std::vector<Direction> BishopDirections{
-				QueenDirections[4],
-				QueenDirections[5],
-				QueenDirections[6],
-				QueenDirections[7] };
+		std::vector<Direction> _bishop_directions{
+				_queen_directions[4],
+				_queen_directions[5],
+				_queen_directions[6],
+				_queen_directions[7]
+		};
 
 		/// <summary>
 		/// Collection of rook attack directions.
 		/// </summary>
-		inline static const std::vector<Direction> RookDirections{
-				QueenDirections[0],
-				QueenDirections[1],
-				QueenDirections[2],
-				QueenDirections[3] };
+		std::vector<Direction> _rook_directions{
+				_queen_directions[0],
+				_queen_directions[1],
+				_queen_directions[2],
+				_queen_directions[3]
+		};
 	};
 }

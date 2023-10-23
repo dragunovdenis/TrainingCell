@@ -21,12 +21,12 @@ namespace TrainingCell::Chess
 {
 	int PieceController::anti(const int piece_token)
 	{
-		return -piece_token;
+		return is_space(piece_token) ? piece_token : (piece_token ^ AntiPieceFlag);
 	}
 
 	std::array<int, Checkerboard::FieldsCount> PieceController::get_init_board_state()
 	{
-		return std::array<int, Checkerboard::FieldsCount>{
+		return std::array{
 				InitRook, Knight, Bishop, Queen, InitKing, Bishop, Knight, InitRook,
 				Pawn, Pawn, Pawn, Pawn, Pawn, Pawn, Pawn, Pawn,
 				Space, Space, Space, Space, Space, Space, Space, Space,
@@ -40,12 +40,12 @@ namespace TrainingCell::Chess
 
 	bool PieceController::is_ally_piece(const int piece_token)
 	{
-		return  piece_token > Space;
+		return  is_piece(piece_token) && (piece_token & AntiPieceFlag) == 0;
 	}
 
-	bool PieceController::is_rival_piece(const int piece)
+	bool PieceController::is_rival_piece(const int piece_token)
 	{
-		return piece < - Space;
+		return (piece_token & AntiPieceFlag) != 0;
 	}
 
 	bool PieceController::is_space(const int piece_token)
@@ -55,17 +55,17 @@ namespace TrainingCell::Chess
 
 	bool PieceController::is_piece(const int piece_token)
 	{
-		return piece_token == Space;
+		return piece_token != Space;
 	}
 
 	bool PieceController::is_king(const int piece_token)
 	{
-		return piece_token > 0 && extract_min_piece_rank(piece_token) == King;
+		return is_ally_piece(piece_token) && extract_min_piece_rank(piece_token) == King;
 	}
 
 	bool PieceController::is_pawn(const int piece_token)
 	{
-		return piece_token > 0 && extract_min_piece_rank(piece_token) == Pawn;
+		return is_ally_piece(piece_token) && extract_min_piece_rank(piece_token) == Pawn;
 	}
 
 	bool PieceController::is_in_init_pos(const int piece_token)
@@ -85,7 +85,7 @@ namespace TrainingCell::Chess
 
 	int PieceController::extract_min_signed_piece_rank(const int piece_token)
 	{
-		return piece_token & -MinBitMask;
+		return piece_token & (MinBitMask | AntiPieceFlag);
 	}
 
 	int PieceController::extract_full_piece_rank(const int piece_token)

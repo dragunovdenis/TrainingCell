@@ -65,38 +65,39 @@ namespace TrainingCell::Chess
 		return out_param == static_cast<int>((end.col - start.col) * dir.col);
 	}
 
-	const std::vector<AttackController::Direction>& AttackController::get_attack_directions(const int piece_rank_token)
+	const std::vector<AttackController::Direction>& AttackController::get_attack_directions(const int piece_rank_token) const
 	{
 		switch (PieceController::extract_min_piece_rank(piece_rank_token))
 		{
-			case PieceController::Pawn:	return piece_rank_token > 0 ? PawnDirections : AntiPawnDirections;
-			case PieceController::Bishop: return BishopDirections;
-			case PieceController::Rook: return RookDirections;
-			case PieceController::Knight: return KnightDirections;
-			case PieceController::Queen: return QueenDirections;
-			case PieceController::King: return KingDirections;
-			default:throw std::exception("Unknown piece token");
+		case PieceController::Pawn:	return PieceController::is_ally_piece(piece_rank_token) ? _pawn_directions : _anti_pawn_directions;
+			case PieceController::Bishop: return _bishop_directions;
+			case PieceController::Rook: return _rook_directions;
+			case PieceController::Knight: return _knight_directions;
+			case PieceController::Queen: return _queen_directions;
+			case PieceController::King: return _king_directions;
+			default:
+				throw std::exception("Unknown piece token");
 		}
 	}
 
-	const std::vector<AttackController::Direction>& AttackController::get_king_attack_directions()
+	const std::vector<AttackController::Direction>& AttackController::get_king_attack_directions() const
 	{
-		return KingDirections;
+		return _king_directions;
 	}
 
-	const std::vector<AttackController::Direction>& AttackController::get_pawn_attack_directions()
+	const std::vector<AttackController::Direction>& AttackController::get_pawn_attack_directions() const
 	{
-		return PawnDirections;
+		return _pawn_directions;
 	}
 
-	std::vector<AttackController::Direction> AttackController::decode_long_range_attack_directions(const int encoded_attack_directions)
+	std::vector<AttackController::Direction> AttackController::decode_long_range_attack_directions(const int encoded_attack_directions) const
 	{
-		if ((encoded_attack_directions & LongRangeDirGroupMask) != encoded_attack_directions)
-			throw std::exception("Only iterative attack directions are expected to be encoded in the input data");
-
 		std::vector<Direction> result;
 
-		for (const auto& dir : QueenDirections)
+		if ((encoded_attack_directions & LongRangeDirGroupMask) == 0)
+			return result;
+
+		for (const auto& dir : _queen_directions)
 		{
 			if ((dir.token & encoded_attack_directions) != 0)
 				result.push_back(dir);

@@ -40,7 +40,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Number of bits reserved for flags.
 		/// </summary>
-		static constexpr int FlagBitsCount = 2;
+		static constexpr int FlagBitsCount = 3;
 
 		/// <summary>
 		/// A flag telling that the piece is in its initial position
@@ -52,6 +52,11 @@ namespace TrainingCell::Chess
 		/// </summary>
 		static constexpr int EnPassantFlag = InitialPositionFlag << 1;
 
+		/// <summary>
+		/// A flag to mark ani-pieces
+		/// </summary>
+		static constexpr int AntiPieceFlag = InitialPositionFlag << 2;
+
 	public:
 
 		/// <summary>
@@ -62,7 +67,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Mask to cover all the bits of the piece rank token including the sign bit.
 		/// </summary>
-		static constexpr int BitMask = (1 << TotalBitsCount) - 1 + (1 << 31);
+		static constexpr int BitMask = (1 << TotalBitsCount) - 1;
 
 		/// <summary>
 		/// Piece ranks
@@ -100,7 +105,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns "true" if the given piece is a "rival" one (i.e., has negative integer token)
 		/// </summary>
-		static bool is_rival_piece(const int piece);
+		static bool is_rival_piece(const int piece_token);
 
 		/// <summary>
 		/// Returns "true" if the given piece is a "space" (i.e., has zero integer token)
