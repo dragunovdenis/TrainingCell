@@ -17,10 +17,13 @@
 
 #include "CheckersTestUtils.h"
 #include "CppUnitTest.h"
-#include "../TrainingCell/Headers/Checkers/State.h"
+#include "../TrainingCell/Headers/Checkers/CheckersState.h"
+#include "../TrainingCell/Headers/Move.h"
+#include "../TrainingCell/Headers/Checkers/CheckersMove.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace TrainingCell;
 using namespace TrainingCell::Checkers;
 
 namespace TrainingCellTest
@@ -30,7 +33,7 @@ namespace TrainingCellTest
 		TEST_METHOD(StartStateTest)
 		{
 			// Act
-			const auto start_state = State::get_start_state();
+			const auto start_state = CheckersState::get_start_state();
 
 			// Assert
 			Assert::IsTrue(std::all_of(start_state.begin(), start_state.begin() + 12, [](const Piece& pc)
@@ -54,7 +57,7 @@ namespace TrainingCellTest
 		TEST_METHOD(InversionTest)
 		{
 			// Arrange
-			const auto state = State::get_start_state();
+			const auto state = CheckersState::get_start_state();
 
 			// Act
 			const auto inverted_state = state.get_inverted();
@@ -63,7 +66,7 @@ namespace TrainingCellTest
 			// Assert
 			for (auto pos_id = 0ull; pos_id < state.size(); ++pos_id)
 			{
-				Assert::IsTrue(state[pos_id] == State::get_anti_piece(inverted_state[state.size() - 1 - pos_id]),
+				Assert::IsTrue(state[pos_id] == CheckersState::get_anti_piece(inverted_state[state.size() - 1 - pos_id]),
 					L"Unexpected piece at the current position");
 			}
 
@@ -74,11 +77,11 @@ namespace TrainingCellTest
 		TEST_METHOD(StateSerializationTest)
 		{
 			// Arrange
-			const auto state = State::get_start_state().get_inverted();
+			const auto state = CheckersState::get_start_state().get_inverted();
 			Assert::IsTrue(state.is_inverted(), L"State is supposed to be inverted");
 
 			// Act
-			const auto state_from_stream = DeepLearning::MsgPack::unpack<State>(DeepLearning::MsgPack::pack(state));
+			const auto state_from_stream = DeepLearning::MsgPack::unpack<CheckersState>(DeepLearning::MsgPack::pack(state));
 
 			// Assert
 			Assert::IsTrue(state == state_from_stream, L"States are supposed to be equal");
@@ -132,5 +135,76 @@ namespace TrainingCellTest
 				Assert::IsTrue(state_vector == reference_vector, L"Vectors are not the same");
 			}
 		}
+
+		/// <summary>
+		/// General method to run move conversion test.
+		/// </summary>
+		/// <param name="gen_move"></param>
+		static void run_checkers_move_to_general_move_conversion_test(const Move& gen_move)
+		{
+			// Act
+			const CheckersMove conversion_to_checkers_move(gen_move);
+			const auto conversion_back_to_gen_move = conversion_to_checkers_move.to_move();
+
+			// Assert
+			Assert::IsTrue(gen_move.sub_moves == conversion_back_to_gen_move.sub_moves,
+				L"Initial and restored moves are not the same");
+		}
+
+		TEST_METHOD(CheckersMoveToGeneralMoveMultipleCapturesConversionTest)
+		{
+			// Arrange
+			const auto gen_move = Move{
+				{
+					{ {0, 0}, {3, 3}, {2, 2}},
+					{ {3, 3}, {5, 5}, {4, 4}},
+					{ {5, 5}, {7, 3}, {6, 4}},
+					{ {7, 3}, {4, 0}, {5, 1}},
+					{ {4, 0}, {2, 2}, {3, 1}},
+					{ {2, 2}, {0, 4}, {1, 3}},
+					{ {0, 4}, {3, 7}, {2, 6}},
+				} };
+
+			// Act and assert
+			run_checkers_move_to_general_move_conversion_test(gen_move);
+		}
+
+		TEST_METHOD(CheckersMoveToGeneralMoveNoCaptureConversionTest)
+		{
+			// Arrange
+			const auto gen_move = Move{
+				{
+					{ {0, 0}, {3, 3}},
+				} };
+
+			// Act and assert
+			run_checkers_move_to_general_move_conversion_test(gen_move);
+		}
+
+		TEST_METHOD(CheckersMoveToGeneralMoveSingleCaptureConversionTest)
+		{
+			// Arrange
+			const auto gen_move = Move{
+				{
+					{ {0, 0}, {3, 3}, {2, 2}},
+				} };
+
+			// Act and assert
+			run_checkers_move_to_general_move_conversion_test(gen_move);
+		}
+
+		TEST_METHOD(CheckersMoveToGeneralMoveDoubleInlineCaptureConversionTest)
+		{
+			// Arrange
+			const auto gen_move = Move{
+				{
+					{ {7, 2}, {5, 4}, {6, 3}},
+					{ {5, 4}, {2, 7}, {3, 6}},
+				} };
+
+			// Act and assert
+			run_checkers_move_to_general_move_conversion_test(gen_move);
+		}
+
 	};
 }

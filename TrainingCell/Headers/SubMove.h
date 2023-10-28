@@ -47,5 +47,15 @@ namespace TrainingCell
 		/// Returns "inverted" sub-move
 		/// </summary>
 		[[nodiscard]] SubMove get_inverted() const;
+
+		/// <summary>
+		/// Equality operator.
+		/// </summary>
+		bool operator ==(const SubMove& other_sub_move) const;
+
+		/// <summary>
+		/// Inequality operator.
+		/// </summary>
+		bool operator !=(const SubMove& other_sub_move) const;
 	};
 }

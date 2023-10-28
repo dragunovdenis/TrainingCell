@@ -25,6 +25,10 @@ namespace TrainingCell
 		sub_moves.push_back(sub_move);
 	}
 
+	Move::Move(const std::vector<SubMove>& sub_moves) :
+	sub_moves(sub_moves)
+	{}
+
 	void Move::invert()
 	{
 		for (auto& sub_move : sub_moves)

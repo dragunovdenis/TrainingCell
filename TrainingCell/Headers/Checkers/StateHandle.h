@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "State.h"
+#include "CheckersState.h"
 #include "../IState.h"
 #include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
 
@@ -31,12 +31,12 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// The state.
 		/// </summary>
-		State _state{};
+		CheckersState _state{};
 
 		/// <summary>
 		/// Collection of "available" actions.
 		/// </summary>
-		std::vector<Move> _actions{};
+		std::vector<CheckersMove> _actions{};
 
 	public:
 
@@ -48,7 +48,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		StateHandle(State state);
+		StateHandle(CheckersState state);
 
 		/// <summary>
 		/// See documentation of the base class
@@ -109,6 +109,6 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns copy of the underlying "state" structure (presumably, for diagnostics purposes; not a part of "general" interface)
 		/// </summary>
-		State get_state() const;
+		CheckersState get_state() const;
 	};
 }

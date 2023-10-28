@@ -64,6 +64,11 @@ namespace TrainingCell
 		/// Compound subtraction operator.
 		/// </summary>
 		PiecePosition& operator -=(const PiecePosition& pos);
+
+		/// <summary>
+		/// Compound division by integer number operator.
+		/// </summary>
+		PiecePosition& operator /= (const long long divisor);
 	};
 
 	/// <summary>
@@ -75,5 +80,11 @@ namespace TrainingCell
 	/// Subtraction operator.
 	/// </summary>
 	PiecePosition operator-(PiecePosition pos1, const PiecePosition& pos2);
+
+	/// <summary>
+	/// Division by integer number operator.
+	/// </summary>
+	PiecePosition operator / (PiecePosition pos, const long long divisor);
+
 
 }

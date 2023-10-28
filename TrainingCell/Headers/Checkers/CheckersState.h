@@ -20,7 +20,7 @@
 #include <vector>
 #include <msgpack.hpp>
 #include "../Checkerboard.h"
-#include "../Move.h"
+#include "CheckersMove.h"
 #include "../IStateSeed.h"
 
 namespace TrainingCell::Checkers
@@ -81,9 +81,8 @@ namespace TrainingCell::Checkers
 	/// <summary>
 	/// A data structure to represent state of the checkers game
 	/// </summary>
-	class State : public State_array, public IStateSeed
+	class CheckersState : public State_array, public IStateSeed
 	{
-	private:
 		bool _inverted{};
 
 		/// <summary>
@@ -130,40 +129,43 @@ namespace TrainingCell::Checkers
 		/// <param name="pos">Position of "Man" or "King" on the board (in the state "coordinate" system).</param>
 		/// <param name="right_diagonal">Direction along which we count capturing moves.</param>
 		/// <param name="positive_direction">Direction on the diagonal in which we search for capturing moves.</param>
-		static std::vector<SubMove> get_capturing_moves(const State& current_state, const PiecePosition& pos,
-			const bool right_diagonal, const bool positive_direction);
+		static std::vector<CheckersMove> get_capturing_moves(const CheckersState& current_state,
+		                                                     const PiecePosition& pos,
+		                                                     const bool right_diagonal, const bool positive_direction);
 
 		/// <summary>
 		/// Returns all the possible capturing moves for the given "ally" piece (represented with its position in the given "state").
 		/// </summary>
-		static std::vector<Move> get_capturing_moves(const State& current_state, const PiecePosition& start_pos);
+		static std::vector<CheckersMove> get_capturing_moves(const CheckersState& current_state,
+		                                                     const PiecePosition& start_pos);
 
 		/// <summary>
 		/// Returns collection of all the possible non-capturing moves starting from the given position along the given diagonal
 		/// and in the given direction.
 		/// </summary>
-		static std::vector<SubMove> get_non_capturing_moves(const State& current_state, const PiecePosition& pos,
+		static std::vector<CheckersMove> get_non_capturing_moves(const CheckersState& current_state, const PiecePosition& pos,
 			const bool right_diagonal, const bool positive_direction);
 
 		/// <summary>
 		/// Returns collection of all the possible non-capturing moves starting from the given position.
 		/// </summary>
-		static std::vector<Move> get_non_capturing_moves(const State& current_state, const PiecePosition& start_pos);
+		static std::vector<CheckersMove> get_non_capturing_moves(const CheckersState& current_state,
+		                                                         const PiecePosition& start_pos);
 
 		/// <summary>
 		/// Returns collection of all the capturing moves available for the given state.
 		/// </summary>
-		static std::vector<Move> get_capturing_moves(const State& current_state);
+		static std::vector<CheckersMove> get_capturing_moves(const CheckersState& current_state);
 
 		/// <summary>
 		/// Returns collection of all the non-capturing moves available for the given state.
 		/// </summary>
-		static std::vector<Move> get_non_capturing_moves(const State& current_state);
+		static std::vector<CheckersMove> get_non_capturing_moves(const CheckersState& current_state);
 
 		/// <summary>
 		/// Returns all the available moves for the given state.
 		/// </summary>
-		static std::vector<Move> get_moves(const State& current_state);
+		static std::vector<CheckersMove> get_moves(const CheckersState& current_state);
 
 		/// <summary>
 		/// Returns a piece position that is achieved from the given one by moving for the given (signed) number of steps
@@ -198,14 +200,9 @@ namespace TrainingCell::Checkers
 		static bool is_valid(const SubMove& sub_move);
 
 		/// <summary>
-		/// Returns "true" if the given instance of a "move" passes validation.
+		/// Returns "true" if the given collection of "sub-move"-s passes validation.
 		/// </summary>
-		static bool is_valid(const Move& move);
-
-		/// <summary>
-		/// Appends one of the given moves to another one.
-		/// </summary>
-		static void append(Move& move_to_append_to, const Move& move);
+		static bool is_valid(const std::vector<SubMove>& sub_moves);
 
 		/// <summary>
 		/// "Applies" given move to the state represented by the given array.
@@ -213,7 +210,7 @@ namespace TrainingCell::Checkers
 		/// as well as to ensure that the given move is valid.
 		/// </summary>
 		template <class T>
-		static void make_move_internal(const Move& move, T* arr, const bool remove_captured);
+		static void make_move_internal(const CheckersMove& move, T* arr, const bool remove_captured);
 
 		/// <summary>
 		/// Internal implementation of a state inversion.
@@ -235,14 +232,9 @@ namespace TrainingCell::Checkers
 		static StateScore calc_score_internal(const S& state);
 
 		/// <summary>
-		///	"Applies" the given sub-move to the current state.
+		/// Returns "true" if the given collection of "sub-move"-s passes validation test in the context of the current state.
 		/// </summary>
-		void make_move(const SubMove& sub_move, const bool remove_captured);
-
-		/// <summary>
-		/// Returns "true" if the given move is valid in the context of the current state.
-		/// </summary>
-		[[nodiscard]] bool is_valid_move(const Move& move) const;
+		[[nodiscard]] bool is_valid_move(const std::vector<SubMove>& sub_moves) const;
 
 		/// <summary>
 		///	Access the status of a single field through the general board position.
@@ -272,7 +264,7 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		/// <param name="move">Move to "apply",</param>
 		/// <param name="remove_captured">If "false", the resulting state will contain auxiliary markers "illustrating" details of the move.</param>
-		void make_move(const Move& move, const bool remove_captured);
+		void make_move(const CheckersMove& move, const bool remove_captured);
 
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(State_array), _inverted)
@@ -280,12 +272,12 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		State() : State_array() {}
+		CheckersState() : State_array() {}
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		explicit State(const State_array& state_array, const bool inverted = false);
+		explicit CheckersState(const State_array& state_array, const bool inverted = false);
 
 		/// <summary>
 		/// Returns "true" if the current state is reversed with respect to its initial "orientation".
@@ -295,29 +287,29 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns "start state: for the checkers game.
 		/// </summary>
-		static State get_start_state();
+		static CheckersState get_start_state();
 
 		/// <summary>
 		/// "Applies" the given move to the current state.
 		/// </summary>
 		/// <param name="move">Move to "apply".</param>
-		void make_move(const Move& move);
+		void make_move(const CheckersMove& move);
 
 		/// <summary>
 		/// Returns "int-vector" representation of the current state after given `move` was "applied" to it.
 		/// </summary>
-		[[nodiscard]] std::vector<int> get_vector(const Move& move) const;
+		[[nodiscard]] std::vector<int> get_vector(const CheckersMove& move) const;
 
 		/// <summary>
 		/// Returns "int-vector" representation of the current state after it
 		/// was first "transformed" by the given `move` and then inverted.
 		/// </summary>
-		[[nodiscard]] std::vector<int> get_vector_inverted(const Move& move) const;
+		[[nodiscard]] std::vector<int> get_vector_inverted(const CheckersMove& move) const;
 
 		/// <summary>
 		/// Returns an "inverted" state, i.e., the current state, as it is seen by the opponent (an agent playing "anti" pieces).
 		/// </summary>
-		[[nodiscard]] State get_inverted() const;
+		[[nodiscard]] CheckersState get_inverted() const;
 
 		/// <summary>
 		/// "Inverts" the current state.
@@ -343,17 +335,17 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns collection of available moves for the current state.
 		/// </summary>
-		[[nodiscard]] std::vector<Move> get_moves() const;
+		[[nodiscard]] std::vector<CheckersMove> get_moves() const;
 
 		/// <summary>
 		/// Equality operator.
 		/// </summary>
-		bool operator ==(const State& another_state) const;
+		bool operator ==(const CheckersState& another_state) const;
 
 		/// <summary>
 		/// Inequality operator.
 		/// </summary>
-		bool operator !=(const State& another_state) const;
+		bool operator !=(const CheckersState& another_state) const;
 
 		/// <summary>
 		/// Returns "handle" to a copy of the current state <see cref="StateHandle"/>.

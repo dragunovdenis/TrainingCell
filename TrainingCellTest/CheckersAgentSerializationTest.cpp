@@ -18,7 +18,7 @@
 #include "CheckersTestUtils.h"
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/Agent.h"
-#include "../TrainingCell/Headers/Checkers/State.h"
+#include "../TrainingCell/Headers/Checkers/CheckersState.h"
 #include "../TrainingCell/Headers/TdLambdaAgent.h"
 #include "../TrainingCell/Headers/TdlEnsembleAgent.h"
 #include "../TrainingCell/Headers/AgentPack.h"

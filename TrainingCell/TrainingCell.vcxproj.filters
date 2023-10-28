@@ -33,7 +33,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\Checkers\State.h">
+    <ClInclude Include="Headers\Checkers\CheckersState.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Checkers\TrainingEngine.h">
@@ -126,9 +126,12 @@
     <ClInclude Include="Headers\Chess\ChessMove.h">
       <Filter>Header Files\Chess</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Checkers\CheckersMove.h">
+      <Filter>Header Files\Checkers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Checkers\State.cpp">
+    <ClCompile Include="Source\Checkers\CheckersState.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp">
@@ -196,6 +199,9 @@
     </ClCompile>
     <ClCompile Include="Source\Chess\ChessMove.cpp">
       <Filter>Source Files\Chess</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Checkers\CheckersMove.cpp">
+      <Filter>Source Files\Checkers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

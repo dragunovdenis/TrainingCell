@@ -17,43 +17,80 @@
 
 #pragma once
 #include <vector>
-#include "SubMove.h"
+#include "../PiecePosition.h"
 
 namespace TrainingCell
 {
+	struct Move;
+	struct SubMove;
+}
+
+namespace TrainingCell::Checkers
+{
+
+
 	/// <summary>
-	/// Representation of a compound "move" in the checkers game
+	/// Move instruction for checkers.
 	/// </summary>
-	struct Move
+	class CheckersMove
 	{
-		/// <summary>
-		/// Component moves
-		/// </summary>
-		std::vector<SubMove> sub_moves{};
+		friend class CheckersState;
 
 		/// <summary>
-		/// Default constructor
+		/// Start position of the move.
 		/// </summary>
-		Move() = default;
+		PiecePosition start{};
 
 		/// <summary>
-		/// Constructs "move" from a single "sub-move"
+		/// Finish position of the move.
 		/// </summary>
-		Move(const SubMove& sub_move);
+		PiecePosition finish{};
+
+		/// <summary>
+		/// Coordinate of captured pieces ordered from start position to the finish position of the move.
+		/// </summary>
+		std::vector<PiecePosition> captures{};
+
+		/// <summary>
+		/// Appends "continuation" to the current move.
+		/// </summary>
+		void continue_with(const CheckersMove& continuation);
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		Move(const std::vector<SubMove>& sub_moves);
+		CheckersMove(const PiecePosition& start, const PiecePosition& finish);
 
 		/// <summary>
-		/// "Inverts" the move, i.e. aligns the sub-move with "inverted" state
+		/// Constructor.
 		/// </summary>
-		void invert();
+		CheckersMove(const PiecePosition& start, const PiecePosition& finish, const std::vector<PiecePosition>& captures);
 
 		/// <summary>
-		/// Returns "inverted" move
+		/// Converts the move into a collection of sub-moves.
 		/// </summary>
-		[[nodiscard]] Move get_inverted() const;
+		std::vector<SubMove> to_sub_moves() const;
+
+	public:
+
+		/// <summary>
+		/// Converts the instance to "general move".
+		/// </summary>
+		Move to_move() const;
+
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
+		CheckersMove() = default;
+
+		/// <summary>
+		/// Returns "true" if collection of capturing positions is not empty.
+		/// </summary>
+		bool is_capturing() const;
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		CheckersMove(const Move& source);
 	};
 }

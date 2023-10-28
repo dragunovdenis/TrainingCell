@@ -24,7 +24,7 @@ namespace TrainingCell
 
 namespace TrainingCell::Checkers
 {
-	class State;
+	class CheckersState;
 }
 
 namespace TrainingCellTest
@@ -39,13 +39,13 @@ namespace TrainingCellTest
 		/// <summary>
 		/// Returns "random" state.
 		/// </summary>
-		static TrainingCell::Checkers::State get_random_state();
+		static TrainingCell::Checkers::CheckersState get_random_state();
 
 		/// <summary>
 		/// Makes the given agent to play the given number of moves starting from the "initial" state of the checkers board.
 		/// Returns resulting state.
 		/// </summary>
-		static TrainingCell::Checkers::State play(const int moves_count, TrainingCell::IMinimalAgent& agent);
+		static TrainingCell::Checkers::CheckersState play(const int moves_count, TrainingCell::IMinimalAgent& agent);
 	};
 }
 

@@ -25,15 +25,15 @@ using namespace TrainingCell::Checkers;
 
 namespace TrainingCellTest
 {
-	State CheckersTestUtils::get_random_state()
+	CheckersState CheckersTestUtils::get_random_state()
 	{
 		TrainingCell::RandomAgent random_agent;
 		return play(15, random_agent);
 	}
 
-	State CheckersTestUtils::play(const int moves_count, TrainingCell::IMinimalAgent& agent)
+	CheckersState CheckersTestUtils::play(const int moves_count, TrainingCell::IMinimalAgent& agent)
 	{
-		auto state_handle = StateHandle(State::get_start_state());
+		auto state_handle = StateHandle(CheckersState::get_start_state());
 		for (auto iter_id = 0; iter_id < moves_count; ++iter_id)
 		{
 			const auto move_id = agent.make_move(state_handle, state_handle.is_inverted());

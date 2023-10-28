@@ -21,7 +21,7 @@
 #include "../TrainingCell/Headers/RandomAgent.h"
 #include "../TrainingCell/Headers/TdLambdaAgent.h"
 #include "../TrainingCell/Headers/TdlEnsembleAgent.h"
-#include "../TrainingCell/Headers/Checkers/State.h"
+#include "../TrainingCell/Headers/Checkers/CheckersState.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include <ppl.h>
 
@@ -66,12 +66,12 @@ namespace TrainingCellTest
 			RandomAgent r_agent;
 			auto board = mode == TrainingMode::WHITE ? Board(&agent_to_train, &r_agent) : ((mode == TrainingMode::BLACK) ?
 				Board(&r_agent, &agent_to_train) : Board(&agent_to_train, &agent_to_train));
-			board.play(episodes_with_exploration, State::get_start_state());
+			board.play(episodes_with_exploration, CheckersState::get_start_state());
 			agent_to_train.set_exploration_probability(-1);
 			agent_to_train.set_learning_rate(0.01);
-			board.play(2000, State::get_start_state());
+			board.play(2000, CheckersState::get_start_state());
 			agent_to_train.set_learning_rate(0.001);
-			board.play(2000, State::get_start_state());
+			board.play(2000, CheckersState::get_start_state());
 		}
 
 		/// <summary>
@@ -86,7 +86,7 @@ namespace TrainingCellTest
 			RandomAgent r_agent;
 			auto board = as_white ? Board(&agent , &r_agent) : Board(&r_agent, &agent);
 			constexpr auto episodes = 1000;
-			board.play(episodes, State::get_start_state());
+			board.play(episodes, CheckersState::get_start_state());
 
 			return (as_white ? board.get_whites_wins() : board.get_blacks_wins()) * 1.0 / episodes;
 		}
@@ -213,7 +213,7 @@ namespace TrainingCellTest
 
 			//Act
 			Board board(&agent0, &agent1);
-			board.play(200, State::get_start_state());
+			board.play(200, CheckersState::get_start_state());
 
 			//Assert
 			Assert::IsTrue(agent0 == agent0_trained, L"0th agent does not coincide with the reference");

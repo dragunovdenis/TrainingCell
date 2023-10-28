@@ -20,9 +20,10 @@
     <ClInclude Include="Headers\AgentTypeId.h" />
     <ClInclude Include="Headers\Board.h" />
     <ClInclude Include="Headers\Checkerboard.h" />
+    <ClInclude Include="Headers\Checkers\CheckersMove.h" />
     <ClInclude Include="Headers\Checkers\StateHandle.h" />
     <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
-    <ClInclude Include="Headers\Checkers\State.h" />
+    <ClInclude Include="Headers\Checkers\CheckersState.h" />
     <ClInclude Include="Headers\Chess\AttackController.h" />
     <ClInclude Include="Headers\Chess\ChessMove.h" />
     <ClInclude Include="Headers\Chess\PieceController.h" />
@@ -52,9 +53,10 @@
     <ClCompile Include="Source\AgentPack.cpp" />
     <ClCompile Include="Source\AgentTypeId.cpp" />
     <ClCompile Include="Source\Board.cpp" />
+    <ClCompile Include="Source\Checkers\CheckersMove.cpp" />
     <ClCompile Include="Source\Checkers\StateHandle.cpp" />
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
-    <ClCompile Include="Source\Checkers\State.cpp" />
+    <ClCompile Include="Source\Checkers\CheckersState.cpp" />
     <ClCompile Include="Source\Chess\AttackController.cpp" />
     <ClCompile Include="Source\Chess\ChessMove.cpp" />
     <ClCompile Include="Source\Chess\ChessState.cpp" />

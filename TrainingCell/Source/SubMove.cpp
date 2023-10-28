@@ -32,4 +32,16 @@ namespace TrainingCell
 		result.invert();
 		return result;
 	}
+
+	bool SubMove::operator==(const SubMove& other_sub_move) const
+	{
+		return start == other_sub_move.start &&
+			   end == other_sub_move.end &&
+			   capture == other_sub_move.capture;
+	}
+
+	bool SubMove::operator!=(const SubMove& other_sub_move) const
+	{
+		return !(*this == other_sub_move);
+	}
 }

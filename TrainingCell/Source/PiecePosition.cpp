@@ -56,6 +56,14 @@ namespace TrainingCell
 		return *this;
 	}
 
+	PiecePosition& PiecePosition::operator/=(const long long divisor)
+	{
+		row /= divisor;
+		col /= divisor;
+
+		return *this;
+	}
+
 	PiecePosition operator+(PiecePosition pos1, const PiecePosition& pos2)
 	{
 		return pos1 += pos2;
@@ -64,5 +72,10 @@ namespace TrainingCell
 	PiecePosition operator-(PiecePosition pos1, const PiecePosition& pos2)
 	{
 		return pos1 -= pos2;
+	}
+
+	PiecePosition operator/(PiecePosition pos, const long long divisor)
+	{
+		return pos /= divisor;
 	}
 }

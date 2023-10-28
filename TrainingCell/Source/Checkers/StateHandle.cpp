@@ -16,11 +16,10 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../../Headers/Checkers/StateHandle.h"
-#include "../../Headers/Checkers/State.h"
 
 namespace TrainingCell::Checkers
 {
-	StateHandle::StateHandle(State state) : _state(std::move(state))
+	StateHandle::StateHandle(CheckersState state) : _state(std::move(state))
 	{
 		_actions = _state.get_moves();
 	}
@@ -43,7 +42,7 @@ namespace TrainingCell::Checkers
 	double StateHandle::calc_reward(const std::vector<int>& prev_state,
 	                                const std::vector<int>& next_state) const
 	{
-		return State::calc_reward(prev_state, next_state);
+		return CheckersState::calc_reward(prev_state, next_state);
 	}
 
 	const IStateSeed& StateHandle::current_state_seed() const
@@ -53,7 +52,12 @@ namespace TrainingCell::Checkers
 
 	const std::vector<Move> StateHandle::get_all_moves() const
 	{
-		return _actions;
+		std::vector<Move> result(_actions.size());
+
+		std::ranges::transform(_actions, result.begin(),
+			[](const auto& chk_move) { return chk_move.to_move(); });
+
+		return result;
 	}
 
 	std::vector<int> StateHandle::evaluate_inverted() const
@@ -68,7 +72,7 @@ namespace TrainingCell::Checkers
 
 	bool StateHandle::is_capture_action(const int action_id) const
 	{
-		return _actions[action_id].sub_moves[0].capture.is_valid();
+		return _actions[action_id].is_capturing();
 	}
 
 	bool StateHandle::is_inverted() const
@@ -83,7 +87,7 @@ namespace TrainingCell::Checkers
 		_actions = _state.get_moves();
 	}
 
-	State StateHandle::get_state() const
+	CheckersState StateHandle::get_state() const
 	{
 		return _state;
 	}

@@ -17,7 +17,7 @@
 
 #include "Interface.h"
 #include "../TrainingCell/Headers/AgentPack.h"
-#include "../TrainingCell/Headers/Checkers/State.h"
+#include "../TrainingCell/Headers/Checkers/CheckersState.h"
 #include "../TrainingCell/Headers/RandomAgent.h"
 #include "../TrainingCell/Headers/InteractiveAgent.h"
 
@@ -42,7 +42,7 @@ void RunCheckersTraining(TrainingCell::Agent* const agent1,
 	TrainingCell::ErrorMessageCallBack errorCallBack)
 {
 	TrainingCell::Board board(agent1, agent2);
-	board.play(episodes, TrainingCell::Checkers::State::get_start_state(),
+	board.play(episodes, TrainingCell::Checkers::CheckersState::get_start_state(),
 		200, publishStateCallBack, publishStatsCallBack,
 		cancellationCallBack, errorCallBack);
 }
