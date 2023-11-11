@@ -20,7 +20,7 @@
 namespace TrainingCell
 {
 
-	Move::Move(const SubMove& sub_move)
+	Move::Move(const SubMove& sub_move, const int final_rank) : final_rank(final_rank)
 	{
 		sub_moves.push_back(sub_move);
 	}

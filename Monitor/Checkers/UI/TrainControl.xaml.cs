@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using static Monitor.Checkers.DllWrapper;
 
 namespace Monitor.Checkers.UI
 {
@@ -163,8 +164,8 @@ namespace Monitor.Checkers.UI
                 int blackWinsPrev = 0;
                 int totalGamersPrev = 0;
 
-                DllWrapper.RunCheckersTraining(
-                    WhiteAgent.Ptr, BlackAgent.Ptr, EpisodesToPlay,
+                DllWrapper.RunTraining(
+                    WhiteAgent.Ptr, BlackAgent.Ptr, EpisodesToPlay, GameKind.Checkers,
                     null,
                     (whiteWinsLocal, blackWinsLocal, totalGamesLocal) =>
                     {

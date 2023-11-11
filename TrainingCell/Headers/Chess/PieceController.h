@@ -16,8 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include <array>
-#include "../Checkerboard.h"
+#include <vector>
 
 namespace TrainingCell::Chess
 {
@@ -143,10 +142,8 @@ namespace TrainingCell::Chess
 		static int extract_min_piece_rank(const int piece_token);
 
 		/// <summary>
-		/// Extracts minimal signed piece "rank" token from the given "full" rank token. 
+		/// Extracts minimal signed piece "rank" token from the given "full" rank token.
 		/// </summary>
-		/// <param name="piece_token"></param>
-		/// <returns></returns>
 		static int extract_min_signed_piece_rank(const int piece_token);
 		
 		/// <summary>
@@ -158,7 +155,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns array representation of "checkerboard" with the chess pieces in the initial position on it.
 		/// </summary>
-		static std::array<int, Checkerboard::FieldsCount> get_init_board_state();
+		static std::vector<int> get_init_board_state();
 
 
 	};

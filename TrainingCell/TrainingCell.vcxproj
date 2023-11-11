@@ -29,6 +29,7 @@
     <ClInclude Include="Headers\Chess\PieceController.h" />
     <ClInclude Include="Headers\Chess\PosController.h" />
     <ClInclude Include="Headers\Chess\ChessState.h" />
+    <ClInclude Include="Headers\Chess\StateHandle.h" />
     <ClInclude Include="Headers\IStateReadOnly.h" />
     <ClInclude Include="Headers\IMinimalStateReadonly.h" />
     <ClInclude Include="Headers\IMinimalAgent.h" />
@@ -39,6 +40,7 @@
     <ClInclude Include="Headers\MoveData.h" />
     <ClInclude Include="Headers\PiecePosition.h" />
     <ClInclude Include="Headers\RandomAgent.h" />
+    <ClInclude Include="Headers\StateHandleGeneral.h" />
     <ClInclude Include="Headers\SubMove.h" />
     <ClInclude Include="Headers\TdlAbstractAgent.h" />
     <ClInclude Include="Headers\TdLambdaAgent.h" />
@@ -54,7 +56,6 @@
     <ClCompile Include="Source\AgentTypeId.cpp" />
     <ClCompile Include="Source\Board.cpp" />
     <ClCompile Include="Source\Checkers\CheckersMove.cpp" />
-    <ClCompile Include="Source\Checkers\StateHandle.cpp" />
     <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
     <ClCompile Include="Source\Checkers\CheckersState.cpp" />
     <ClCompile Include="Source\Chess\AttackController.cpp" />
@@ -66,6 +67,7 @@
     <ClCompile Include="Source\Move.cpp" />
     <ClCompile Include="Source\PiecePosition.cpp" />
     <ClCompile Include="Source\RandomAgent.cpp" />
+    <ClCompile Include="Source\StateHandleGeneral.cpp" />
     <ClCompile Include="Source\SubMove.cpp" />
     <ClCompile Include="Source\TdlAbstractAgent.cpp" />
     <ClCompile Include="Source\TdLambdaAgent.cpp" />

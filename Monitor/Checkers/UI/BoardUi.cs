@@ -29,6 +29,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Monitor.Visualization;
+using Monitor.Visualization.PieceControllers;
+using static Monitor.Checkers.DllWrapper;
 
 namespace Monitor.Checkers.UI
 {
@@ -61,10 +64,7 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Returns true if the current instance represents a valid checkers piece position
         /// </summary>
-        public bool IsValid()
-        {
-            return Row >= 0 && Row < BoardUi.CheckerRows && Col >= 0 && Col < BoardUi.CheckerRows;
-        }
+        public bool IsValid => Row >= 0 && Row < BoardUi.CheckerRows && Col >= 0 && Col < BoardUi.CheckerRows;
 
         /// <summary>
         /// Returns "true" if the current position is equal to the given one
@@ -121,8 +121,7 @@ namespace Monitor.Checkers.UI
     {
         public const int CheckerRows = 8;
         public const int CheckerColumns = 8;
-        private const int BlackFieldsInRow = 4;
-        private const int StateSize = CheckerRows * BlackFieldsInRow;
+        private const int StateSize = CheckerRows * CheckerColumns;
 
         double _boardSide;
         double _fieldSide;
@@ -144,6 +143,8 @@ namespace Monitor.Checkers.UI
         /// Dispatcher of the UI thread
         /// </summary>
         private readonly Dispatcher _uiThreadDispatcher;
+
+        private readonly IPieceController _pieceController =  new CheckersPieceController();
 
         /// <summary>
         /// Provides means to cancel ongoing playing
@@ -190,7 +191,9 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private Task<int> RequestUserMove(int[] state, CheckersMove[] possibleMoves)
         {
-            if (_state == null) _state = state;
+            if (state.Length != StateSize)
+                throw new Exception("Invalid size of the state");
+
             _userMoveRequest = new MoveRequest(possibleMoves);
             Draw();
             return _userMoveRequest.UserMoveResult.Task;
@@ -212,9 +215,16 @@ namespace Monitor.Checkers.UI
                 case AgentType.Interactive:
                     return new InteractiveAgent((state, moves) =>
                     {
+                        if (state.Length != StateSize)
+                            throw new Exception("Invalid size of the state");
+
                         var movePromise = _uiThreadDispatcher.Invoke(() => RequestUserMove(state, moves));
                         return movePromise.Result;
-                    }, (state, result) => { }, playWhites);
+                    }, (state, result) =>
+                    {
+                        if (state.Length != StateSize)
+                            throw new Exception("Invalid size of the state");
+                    }, playWhites);
                 default: throw new Exception("Unknown agent type");
             }
         }
@@ -264,7 +274,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         public void LoadWhiteAgent()
         {
-            Play(BoardUi.AgentType.AgentPack, BoardUi.AgentType.Interactive, 100);
+            Play(AgentType.AgentPack, AgentType.Interactive, 100);
         }
 
         /// <summary>
@@ -273,7 +283,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         public void LoadBlackAgent()
         {
-            Play(BoardUi.AgentType.Interactive, BoardUi.AgentType.AgentPack, 100);
+            Play(AgentType.Interactive, AgentType.AgentPack, 100);
         }
 
         /// <summary>
@@ -338,17 +348,17 @@ namespace Monitor.Checkers.UI
         /// <summary>
         /// Adds extra symbols to the state to trace the series of given sub-moves (representing a move)
         /// </summary>
-        private static void AddMoveTrace(int[] state, CheckersSubMove[] subMoves, bool whiteMove)
+        private void AddMoveTrace(int[] state, CheckersSubMove[] subMoves, bool whiteMove)
         {
             if (subMoves == null)
                 return;
 
             foreach (var move in subMoves)
             {
-                if (move.Capture.IsValid())
-                    state[PiecePositionToStateItemId(move.Capture)] = whiteMove ? BlackCapturedPieceId : WhiteCapturedPieceId;
+                if (move.Capture.IsValid)
+                    state[PiecePositionToStateItemId(move.Capture)] = _pieceController.GetCapturedPieceId(whiteMove);
 
-                state[PiecePositionToStateItemId(move.Start)] = whiteMove ? WhitePieceTraceId : BlackPieceTraceId;
+                state[PiecePositionToStateItemId(move.Start)] = _pieceController.GetPieceTraceId(whiteMove);
             }
         }
 
@@ -378,10 +388,13 @@ namespace Monitor.Checkers.UI
                             return;
 
                         var timePoint = DateTime.Now;
-                        DllWrapper.RunCheckersTraining(
-                            agentWhite.Ptr, agentBlack.Ptr, episodes,
+                        var res = DllWrapper.RunTraining(
+                            agentWhite.Ptr, agentBlack.Ptr, episodes, GameKind.Checkers,
                             (state, size, subMoves, subMovesCount, agentToMovePtr) =>
                             {
+                                if (size != StateSize)
+                                    throw new Exception("Invalid size of the state");
+
                                 var timePointNext = DateTime.Now;
                                 var elapsedTime = timePointNext - timePoint; 
                                 PreviousMoveTime = elapsedTime.ToString(@"hh\:mm\:ss");
@@ -421,6 +434,9 @@ namespace Monitor.Checkers.UI
                                     MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK);
                                 }));
 
+                        if (res != 0)
+                            throw new Exception("Playing failed");
+
                         InactiveAgent = null;
                         PreviousMoveTime = "";
                     }
@@ -441,42 +457,15 @@ namespace Monitor.Checkers.UI
         private readonly Canvas _canvas = null;
 
         /// <summary>
-        /// Draws a "shape" (ellipse, rectangle...) with the given position and radius on the given canvas
-        /// </summary>
-        private static void DrawShape<S>(double x, double y, double width, double height,
-            Brush borderColor, Brush fillColor, Canvas cv)
-            where S : Shape, new()
-        {
-            var shape = new S()
-            {
-                Width = width,
-                Height = height,
-                Stroke = borderColor,
-                Fill = fillColor,
-                StrokeThickness = fillColor == null ? 4 : 1,
-            };
-
-            cv.Children.Add(shape);
-
-            shape.SetValue(Canvas.LeftProperty, x);
-            shape.SetValue(Canvas.TopProperty, y);
-        }
-
-        /// <summary>
         /// Outputs row and column representation for the state item given by its ID
         /// </summary>
         private static CheckersPiecePosition StateItemIdToPiecePosition(int stateItemId)
         {
-            var result = new CheckersPiecePosition()
+            return new CheckersPiecePosition()
             {
-                Row = stateItemId / BlackFieldsInRow,
-                Col = 2 * (stateItemId % BlackFieldsInRow),
+                Row = stateItemId / CheckerColumns,
+                Col = stateItemId % CheckerColumns,
             };
-
-            if (result.Row % 2 == 0)
-                result.Col++;
-
-            return result;
         }
 
         /// <summary>
@@ -484,49 +473,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         private static int PiecePositionToStateItemId(CheckersPiecePosition position)
         {
-            var temp = position.Col - (position.Row % 2 == 0 ? 1 : 0);
-            return (int)(position.Row * BlackFieldsInRow + temp / 2);
-        }
-
-        private const int WhiteCapturedPieceId = 3;
-        private const int BlackCapturedPieceId = -3;
-        private const int WhitePieceTraceId = 4;
-        private const int BlackPieceTraceId = -4;
-
-        /// <summary>
-        /// Converts index of a checkers piece (that we receive in the "state" collection) into the fill color that should be
-        /// used when drawing the piece on the board
-        /// </summary>
-        private Brush PieceIdToColor(int pieceId)
-        {
-            switch (pieceId)
-            {
-                case 1: return Brushes.Wheat;
-                case 2: return Brushes.Wheat;
-                case WhiteCapturedPieceId: return Brushes.Wheat;
-                case WhitePieceTraceId: return null;
-                case -1: return Brushes.Black;
-                case -2: return Brushes.Black;
-                case BlackCapturedPieceId: return Brushes.Black;
-                case BlackPieceTraceId: return null;
-                default: throw new Exception("Unknown piece identifier");
-            }
-        }
-
-        /// <summary>
-        /// Returns "true" is the given identifier represents a King piece
-        /// </summary>
-        private bool IsKingPiece(int pieceId)
-        {
-            return pieceId == 2 || pieceId == -2;
-        }
-
-        /// <summary>
-        /// Returns "true" if the given identifier represents a Man piece
-        /// </summary>
-        private bool IsManPiece(int pieceId)
-        {
-            return pieceId == 1 || pieceId == -1;
+            return (int)(position.Row * CheckerColumns + position.Col);
         }
 
         /// <summary>
@@ -585,7 +532,7 @@ namespace Monitor.Checkers.UI
         /// </summary>
         /// <param name="colId">Field column</param>
         /// <param name="rowId">Field row</param>
-        /// <param name="offset">Offset that should added to booth coordinates of the returned corner</param>
+        /// <param name="offset">Offset that should be added to booth coordinates of the returned corner</param>
         /// <returns></returns>
         private Point GetTopLeftCorner(long colId, long rowId, double offset)
         {
@@ -602,30 +549,13 @@ namespace Monitor.Checkers.UI
 
             UpdateBoardDimensions();
 
-            var shrink = 0.1 * _fieldSide;
-            var fieldSizeShrunk = _fieldSide - 2 * shrink;
-
             for (var stateItemId = 0; stateItemId < state.Length; stateItemId++)
             {
                 var pieceId = state[stateItemId];
 
-                if (pieceId == 0)
-                    continue;
-
                 var position = StateItemIdToPiecePosition(stateItemId);
-                var topLeft = GetTopLeftCorner(position.Col, position.Row, shrink);
-
-                DrawShape<Ellipse>(topLeft.X, topLeft.Y, fieldSizeShrunk, fieldSizeShrunk,
-                    Brushes.BlueViolet, PieceIdToColor(pieceId), _canvas);
-
-                if (!IsKingPiece(pieceId) && ! IsManPiece(pieceId))
-                    continue;
-
-                var shift = fieldSizeShrunk / 4;
-
-                DrawShape<Ellipse>(topLeft.X + shift, topLeft.Y + shift,
-                    fieldSizeShrunk / 2, fieldSizeShrunk / 2,
-                    Brushes.BlueViolet, IsKingPiece(pieceId) ? Brushes.Red : Brushes.Green, _canvas);
+                var topLeft = GetTopLeftCorner(position.Col, position.Row, 0);
+                _pieceController.DrawPiece(_canvas, topLeft, _fieldSide, pieceId);
             }
         }
 
@@ -654,7 +584,7 @@ namespace Monitor.Checkers.UI
             {
                 var topLeft = GetTopLeftCorner(colId, rowId, 0);
                 var isDarkField = (rowId % 2 == 0) ? (colId % 2 == 1) : (colId % 2 == 0);
-                DrawShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
+                CanvasDrawingUtils.DrawShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
                     Brushes.Black, isDarkField ? Brushes.SaddleBrown : Brushes.BurlyWood, _canvas);
             }
 
@@ -664,26 +594,16 @@ namespace Monitor.Checkers.UI
                 {
                     var start = move.SubMoves[0].Start;
                     var topLeftStart = GetTopLeftCorner(start.Col, start.Row, 0);
-                    DrawShape<Rectangle>(topLeftStart.X, topLeftStart.Y, _fieldSide, _fieldSide,
+                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftStart.X, topLeftStart.Y, _fieldSide, _fieldSide,
                         _selectedField.IsEqualTo(start) ? Brushes.Red : Brushes.Yellow, null, _canvas);
                 }
 
                 var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(_selectedField);
                 foreach (var move in possibleMovesForCurrentPosition)
                 {
-                    foreach (var subMove in move.SubMoves)
-                    {
-                        var startCenter = GetTopLeftCorner(subMove.Start.Col, subMove.Start.Row, _fieldSide / 2);
-                        var endCenter = GetTopLeftCorner(subMove.End.Col, subMove.End.Row, _fieldSide / 2);
-
-                        var line = new Line() { X1 = startCenter.X, Y1 = startCenter.Y,
-                            X2 = endCenter.X, Y2 = endCenter.Y, Stroke = Brushes.Black, StrokeThickness = 1 };
-                        _canvas.Children.Add(line);
-                    }
-
                     var end = move.SubMoves.Last().End;
                     var topLeftEnd = GetTopLeftCorner(end.Col, end.Row, 0);
-                    DrawShape<Rectangle>(topLeftEnd.X, topLeftEnd.Y, _fieldSide, _fieldSide,
+                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftEnd.X, topLeftEnd.Y, _fieldSide, _fieldSide,
                         Brushes.GreenYellow, null, _canvas);
                 }
             }
@@ -709,7 +629,7 @@ namespace Monitor.Checkers.UI
             _canvas.MouseDown += CanvasOnMouseDown;
             Draw();
         }
-
+        
         /// <summary>
         /// Event handler
         /// </summary>

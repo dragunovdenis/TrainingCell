@@ -64,6 +64,11 @@ namespace TrainingCell
 		return *this;
 	}
 
+	PiecePosition PiecePosition::operator-() const
+	{
+		return { -row, -col };
+	}
+
 	PiecePosition operator+(PiecePosition pos1, const PiecePosition& pos2)
 	{
 		return pos1 += pos2;

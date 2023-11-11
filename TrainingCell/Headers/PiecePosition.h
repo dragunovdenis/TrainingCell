@@ -69,6 +69,11 @@ namespace TrainingCell
 		/// Compound division by integer number operator.
 		/// </summary>
 		PiecePosition& operator /= (const long long divisor);
+
+		/// <summary>
+		/// Negation operator.
+		/// </summary>
+		PiecePosition operator -() const;
 	};
 
 	/// <summary>

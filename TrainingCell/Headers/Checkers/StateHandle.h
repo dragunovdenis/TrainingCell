@@ -18,97 +18,17 @@
 #pragma once
 
 #include "CheckersState.h"
-#include "../IState.h"
-#include "../../../DeepLearning/DeepLearning/Math/Tensor.h"
+#include "../StateHandleGeneral.h"
+
+namespace TrainingCell
+{
+	extern template class StateHandleGeneral<Checkers::CheckersState>;
+}
 
 namespace TrainingCell::Checkers
 {
 	/// <summary>
-	/// Implementation "IState" interface for the case of checkers game
+	/// Implementation of "IState" interface for the case of checkers game
 	/// </summary>
-	class StateHandle : public IState
-	{
-		/// <summary>
-		/// The state.
-		/// </summary>
-		CheckersState _state{};
-
-		/// <summary>
-		/// Collection of "available" actions.
-		/// </summary>
-		std::vector<CheckersMove> _actions{};
-
-	public:
-
-		/// <summary>
-		/// Deleted default constructor
-		/// </summary>
-		StateHandle() = delete;
-
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		StateHandle(CheckersState state);
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] int get_moves_count() const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] std::vector<int> evaluate(const int move_id) const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] std::vector<int> evaluate() const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] double calc_reward(const std::vector<int>& prev_state,
-		                                 const std::vector<int>& next_state) const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] const IStateSeed& current_state_seed() const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] const std::vector<Move> get_all_moves() const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] std::vector<int> evaluate_inverted() const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] std::vector<int> evaluate_inverted(const int move_id) const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] bool is_capture_action(const int action_id) const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		[[nodiscard]] bool is_inverted() const override;
-
-		/// <summary>
-		/// See documentation of the base class
-		/// </summary>
-		void move_invert_reset(const int action_id) override;
-
-		/// <summary>
-		/// Returns copy of the underlying "state" structure (presumably, for diagnostics purposes; not a part of "general" interface)
-		/// </summary>
-		CheckersState get_state() const;
-	};
+	using StateHandle = StateHandleGeneral<CheckersState>;
 }

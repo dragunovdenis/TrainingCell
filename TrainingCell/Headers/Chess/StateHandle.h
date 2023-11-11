@@ -15,38 +15,20 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Chess/ChessMove.h"
-#include "../../Headers/Chess/PosController.h"
-#include "../../Headers/Move.h"
+#pragma once
+
+#include "ChessState.h"
+#include "../StateHandleGeneral.h"
+
+namespace TrainingCell
+{
+	extern template class StateHandleGeneral<Chess::ChessState>;
+}
 
 namespace TrainingCell::Chess
 {
-	PiecePosition ChessMove::get_start() const
-	{
-		return PosController::from_linear(start_field_id);
-	}
-
-	PiecePosition ChessMove::get_finish() const
-	{
-		return PosController::from_linear(finish_field_id);
-	}
-
-	int ChessMove::get_final_piece_rank(const int start_piece_rank) const
-	{
-		return final_rank != 0 ? final_rank : start_piece_rank;
-	}
-
-	ChessMove::ChessMove(const int start_field_id, const int finish_field_id, const bool captures, const int final_rank) :
-		start_field_id(start_field_id), finish_field_id(finish_field_id), captures(captures), final_rank(final_rank)
-	{}
-
-	bool ChessMove::is_capturing() const
-	{
-		return captures;
-	}
-
-	Move ChessMove::to_move() const
-	{
-		return Move{ {PosController::from_linear(start_field_id), PosController::from_linear(finish_field_id)}, final_rank };
-	}
+	/// <summary>
+	/// Implementation of "IState" interface for the case of checkers game
+	/// </summary>
+	using StateHandle = StateHandleGeneral<Chess::ChessState>;
 }

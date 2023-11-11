@@ -42,16 +42,14 @@ namespace TrainingCell
 		[[nodiscard]] virtual const std::vector<Move> get_all_moves() const = 0;
 
 		/// <summary>
-		/// Returns an "inverted" representation of the current state, i.e. a state as it is seen by the opponent (an agent playing "anti" pieces),
-		/// in the form of "int-vector".
+		/// Returns UI-suitable vector representation of the current state.
 		/// </summary>
-		[[nodiscard]] virtual std::vector<int> evaluate_inverted() const = 0;
+		[[nodiscard]] virtual std::vector<int> evaluate_ui() const = 0;
 
 		/// <summary>
-		/// Returns an "inverted" representation of the current state after a move with the given ID was "applied" to it.
-		/// It is a responsibility of the caller to ensure validness of the provided "move ID".
+		/// Returns UI-suitable vector representation of the state inverted to the current one. 
 		/// </summary>
-		[[nodiscard]] virtual std::vector<int> evaluate_inverted(const int move_id) const = 0;
+		[[nodiscard]] virtual std::vector<int> evaluate_ui_inverted() const = 0;
 
 		/// <summary>
 		/// Returns "true" the given move (represented with its ID) is a "capture" move.

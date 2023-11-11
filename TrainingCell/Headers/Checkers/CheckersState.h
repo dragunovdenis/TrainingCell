@@ -260,6 +260,11 @@ namespace TrainingCell::Checkers
 		static long long piece_position_to_plain_id(const PiecePosition& position);
 
 		/// <summary>
+		/// Returns 64 elements long representation of the given state vector.
+		/// </summary>
+		static std::vector<int> expand_to_64(const std::vector<int>& state_vec);
+
+		/// <summary>
 		/// "Applies" the given move to the current state. It is a responsibility of the caller to ensure validity of the move.
 		/// </summary>
 		/// <param name="move">Move to "apply",</param>
@@ -268,6 +273,8 @@ namespace TrainingCell::Checkers
 
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(State_array), _inverted)
+
+		using Move = CheckersMove;
 
 		/// <summary>
 		/// Constructor.
@@ -301,7 +308,7 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] std::vector<int> get_vector(const CheckersMove& move) const;
 
 		/// <summary>
-		/// Returns "int-vector" representation of the current state after it
+		/// Returns 64 element long "int-vector" representation of the current state after it
 		/// was first "transformed" by the given `move` and then inverted.
 		/// </summary>
 		[[nodiscard]] std::vector<int> get_vector_inverted(const CheckersMove& move) const;
@@ -331,6 +338,16 @@ namespace TrainingCell::Checkers
 		/// Returns "int-vector" representation of the state.
 		/// </summary>
 		[[nodiscard]] std::vector<int> to_vector() const;
+
+		/// <summary>
+		/// Returns a 64 elements long "int-vector" representation of the state.
+		/// </summary>
+		[[nodiscard]] std::vector<int> to_vector_64() const;
+
+		/// <summary>
+		/// Returns a 64 elements long "int-vector" representation of the state inverted to the current one.
+		/// </summary>
+		[[nodiscard]] std::vector<int> to_vector_64_inverted() const;
 
 		/// <summary>
 		/// Returns collection of available moves for the current state.

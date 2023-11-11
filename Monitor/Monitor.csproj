@@ -47,6 +47,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <EmbeddedResource Include="Images\Chess\-2.png" />
+    <EmbeddedResource Include="Images\Chess\-6.png" />
+    <EmbeddedResource Include="Images\Chess\-3.png" />
+    <EmbeddedResource Include="Images\Chess\-1.png" />
+    <EmbeddedResource Include="Images\Chess\-5.png" />
+    <EmbeddedResource Include="Images\Chess\-4.png" />
+    <EmbeddedResource Include="Images\Chess\2.png" />
+    <EmbeddedResource Include="Images\Chess\6.png" />
+    <EmbeddedResource Include="Images\Chess\3.png" />
+    <EmbeddedResource Include="Images\Chess\1.png" />
+    <EmbeddedResource Include="Images\Chess\5.png" />
+    <EmbeddedResource Include="Images\Chess\4.png" />
     <Compile Update="Checkers\UI\EnsembleAgentControl.xaml.cs">
       <DependentUpon>EnsembleAgentControl.xaml</DependentUpon>
     </Compile>

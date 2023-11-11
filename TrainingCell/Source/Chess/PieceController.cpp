@@ -24,17 +24,17 @@ namespace TrainingCell::Chess
 		return is_space(piece_token) ? piece_token : (piece_token ^ AntiPieceFlag);
 	}
 
-	std::array<int, Checkerboard::FieldsCount> PieceController::get_init_board_state()
+	std::vector<int> PieceController::get_init_board_state()
 	{
-		return std::array{
-				InitRook, Knight, Bishop, Queen, InitKing, Bishop, Knight, InitRook,
+		return std::vector{
+				InitRook, Knight, Bishop, InitKing, Queen, Bishop, Knight, InitRook,
 				Pawn, Pawn, Pawn, Pawn, Pawn, Pawn, Pawn, Pawn,
 				Space, Space, Space, Space, Space, Space, Space, Space,
 				Space, Space, Space, Space, Space, Space, Space, Space,
 				Space, Space, Space, Space, Space, Space, Space, Space,
 				Space, Space, Space, Space, Space, Space, Space, Space,
 				anti(Pawn), anti(Pawn), anti(Pawn), anti(Pawn), anti(Pawn), anti(Pawn), anti(Pawn), anti(Pawn),
-				anti(InitRook), anti(Knight), anti(Bishop), anti(InitKing), anti(Queen), anti(Bishop), anti(Knight), anti(InitRook) 
+				anti(InitRook), anti(Knight), anti(Bishop), anti(InitKing), anti(Queen), anti(Bishop), anti(Knight), anti(InitRook)
 		};
 	}
 
@@ -85,7 +85,8 @@ namespace TrainingCell::Chess
 
 	int PieceController::extract_min_signed_piece_rank(const int piece_token)
 	{
-		return piece_token & (MinBitMask | AntiPieceFlag);
+		const auto result_unsigned = extract_min_piece_rank(piece_token);
+		return result_unsigned | (piece_token & AntiPieceFlag);
 	}
 
 	int PieceController::extract_full_piece_rank(const int piece_token)

@@ -15,42 +15,52 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/StateHandle.h"
+#include <algorithm>
+#include "../Headers/StateHandleGeneral.h"
+#include "../Headers/Checkers/CheckersState.h"
+#include "../Headers/Chess/ChessState.h"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
-	StateHandle::StateHandle(CheckersState state) : _state(std::move(state))
+	template <class S>
+	StateHandleGeneral<S>::StateHandleGeneral(S state) : _state(std::move(state))
 	{
 		_actions = _state.get_moves();
 	}
 
-	int StateHandle::get_moves_count() const
+	template <class S>
+	int StateHandleGeneral<S>::get_moves_count() const
 	{
 		return static_cast<int>(_actions.size());
 	}
 
-	std::vector<int> StateHandle::evaluate(const int move_id) const
+	template <class S>
+	std::vector<int> StateHandleGeneral<S>::evaluate(const int move_id) const
 	{
 		return _state.get_vector(_actions[move_id]);
 	}
 
-	std::vector<int> StateHandle::evaluate() const
+	template <class S>
+	std::vector<int> StateHandleGeneral<S>::evaluate() const
 	{
 		return _state.to_vector();
 	}
 
-	double StateHandle::calc_reward(const std::vector<int>& prev_state,
-	                                const std::vector<int>& next_state) const
+	template <class S>
+	double StateHandleGeneral<S>::calc_reward(const std::vector<int>& prev_state,
+		const std::vector<int>& next_state) const
 	{
-		return CheckersState::calc_reward(prev_state, next_state);
+		return S::calc_reward(prev_state, next_state);
 	}
 
-	const IStateSeed& StateHandle::current_state_seed() const
+	template <class S>
+	const IStateSeed& StateHandleGeneral<S>::current_state_seed() const
 	{
 		return _state;
 	}
 
-	const std::vector<Move> StateHandle::get_all_moves() const
+	template <class S>
+	const std::vector<Move> StateHandleGeneral<S>::get_all_moves() const
 	{
 		std::vector<Move> result(_actions.size());
 
@@ -59,36 +69,44 @@ namespace TrainingCell::Checkers
 
 		return result;
 	}
-
-	std::vector<int> StateHandle::evaluate_inverted() const
-	{
-		return _state.get_vector_inverted();
-	}
-
-	std::vector<int> StateHandle::evaluate_inverted(const int move_id) const
-	{
-		return _state.get_vector_inverted(_actions[move_id]);
-	}
-
-	bool StateHandle::is_capture_action(const int action_id) const
+	template <class S>
+	bool StateHandleGeneral<S>::is_capture_action(const int action_id) const
 	{
 		return _actions[action_id].is_capturing();
 	}
 
-	bool StateHandle::is_inverted() const
+	template <class S>
+	bool StateHandleGeneral<S>::is_inverted() const
 	{
 		return _state.is_inverted();
 	}
 
-	void StateHandle::move_invert_reset(const int action_id)
+	template <class S>
+	void StateHandleGeneral<S>::move_invert_reset(const int action_id)
 	{
 		_state.make_move(_actions[action_id]);
 		_state.invert();
 		_actions = _state.get_moves();
 	}
 
-	CheckersState StateHandle::get_state() const
+	template <class S>
+	S StateHandleGeneral<S>::get_state() const
 	{
 		return _state;
 	}
+
+	template <class S>
+	std::vector<int> StateHandleGeneral<S>::evaluate_ui() const
+	{
+		return _state.to_vector_64();
+	}
+
+	template <class S>
+	std::vector<int> StateHandleGeneral<S>::evaluate_ui_inverted() const
+	{
+		return _state.to_vector_64_inverted();
+	}
+
+	template class StateHandleGeneral<Checkers::CheckersState>;
+	template class StateHandleGeneral<Chess::ChessState>;
 }

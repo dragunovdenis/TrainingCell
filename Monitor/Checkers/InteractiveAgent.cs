@@ -37,9 +37,9 @@ namespace Monitor.Checkers
         internal delegate void GameOverDelegate(int[] state, int result);
 
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private readonly DllWrapper.CheckersMakeMoveCallBack _makeMoveAdapter;
+        private readonly DllWrapper.MakeMoveCallBack _makeMoveAdapter;
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private readonly DllWrapper.CheckersGameOverCallBack _gameOverAdapter;
+        private readonly DllWrapper.GameOverCallBack _gameOverAdapter;
 
         private IntPtr _ptr;
 

@@ -34,7 +34,7 @@ namespace TrainingCell
 			throw std::exception("Inconsistency encountered");
 
 		if (_play_for_whites)
-			return _make_move_callback(state.evaluate(), state.get_all_moves());
+			return _make_move_callback(state.evaluate_ui(), state.get_all_moves());
 
 		std::vector<Move> moves_inverted(state.get_all_moves().size());
 
@@ -43,7 +43,7 @@ namespace TrainingCell
 				return m.get_inverted();
 			});
 
-		return _make_move_callback(state.evaluate_inverted(), moves_inverted);
+		return _make_move_callback(state.evaluate_ui_inverted(), moves_inverted);
 	}
 
 	void InteractiveAgent::game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white)
@@ -53,9 +53,9 @@ namespace TrainingCell
 			throw std::exception("Inconsistency encountered");
 
 		if (_play_for_whites)
-			_game_over_callback(final_state.evaluate(), result);
+			_game_over_callback(final_state.evaluate_ui(), result);
 
-		_game_over_callback(final_state.evaluate_inverted(), result);
+		_game_over_callback(final_state.evaluate_ui_inverted(), result);
 	}
 
 	AgentTypeId InteractiveAgent::TYPE_ID()

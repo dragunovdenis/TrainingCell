@@ -18,6 +18,11 @@
 #pragma once
 #include "../PiecePosition.h"
 
+namespace TrainingCell
+{
+	struct Move;
+}
+
 namespace TrainingCell::Chess
 {
 	/// <summary>
@@ -41,6 +46,11 @@ namespace TrainingCell::Chess
 		int finish_field_id{ -1 };
 
 		/// <summary>
+		/// Flag indicating if the current move "captures".
+		/// </summary>
+		bool captures{};
+
+		/// <summary>
 		/// If nonzero, defines "rank" of the piece (that moves) once it arrives to the "final" position (to do the "Pawn Promotion").
 		/// Should be ignored if zero.
 		/// </summary>
@@ -57,9 +67,14 @@ namespace TrainingCell::Chess
 		[[nodiscard]] PiecePosition get_finish() const;
 
 		/// <summary>
+		/// Deduces rank of the moving piece after applying the current move.
+		/// </summary>
+		[[nodiscard]] int get_final_piece_rank(const int start_piece_rank) const;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
-		ChessMove(const int start_field_id, const int finish_field_id, const int final_rank = 0);
+		ChessMove(const int start_field_id, const int finish_field_id, const bool captures, const int final_rank = 0);
 
 	public:
 
@@ -67,6 +82,16 @@ namespace TrainingCell::Chess
 		/// Constructor.
 		/// </summary>
 		ChessMove() = default;
+
+		/// <summary>
+		/// Returns "true" if the move "captures".
+		/// </summary>
+		bool is_capturing() const;
+
+		/// <summary>
+		/// Convertor to "general move".
+		/// </summary>
+		Move to_move() const;
 	};
 
 }

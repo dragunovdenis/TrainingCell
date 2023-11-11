@@ -164,6 +164,29 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
+	std::vector<int> CheckersState::expand_to_64(const std::vector<int>& state_vec)
+	{
+		std::vector<int> result(state_vec.size() * 2, 0);
+
+		for (auto element_id = 0ull; element_id < state_vec.size(); ++element_id)
+		{
+			const auto pos = plain_id_to_piece_position(element_id);
+			result[pos.row * Checkerboard::Columns + pos.col] = state_vec[element_id];
+		}
+
+		return result;
+	}
+
+	std::vector<int> CheckersState::to_vector_64() const
+	{
+		return expand_to_64(to_vector());
+	}
+
+	std::vector<int> CheckersState::to_vector_64_inverted() const
+	{
+		return expand_to_64(get_vector_inverted());
+	}
+
 	std::vector<CheckersMove> CheckersState::get_moves() const
 	{
 		return get_moves(*this);

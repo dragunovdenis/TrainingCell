@@ -1,4 +1,4 @@
-//Copyright (c) 2023 Denys Dragunov, dragunovdenis@gmail.com
+﻿//Copyright (c) 2023 Denys Dragunov, dragunovdenis@gmail.com
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
 //in the Software without restriction, including without limitation the rights
@@ -15,38 +15,29 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Chess/ChessMove.h"
-#include "../../Headers/Chess/PosController.h"
-#include "../../Headers/Move.h"
+using System.Windows;
+using System.Windows.Controls;
 
-namespace TrainingCell::Chess
+namespace Monitor.Visualization.PieceControllers
 {
-	PiecePosition ChessMove::get_start() const
-	{
-		return PosController::from_linear(start_field_id);
-	}
+    /// <summary>
+    /// Interface to a piece visualization controller
+    /// </summary>
+    internal interface IPieceController
+    {
+        /// <summary>
+        /// Method to visualize a piece that corresponds to the given ID on a field defined with the coordinates of its top left corner and the size.
+        /// </summary>
+        void DrawPiece(Canvas canvas, Point topLeft, double fieldSize, int pieceId);
 
-	PiecePosition ChessMove::get_finish() const
-	{
-		return PosController::from_linear(finish_field_id);
-	}
+        /// <summary>
+        /// Returns "piece ID" that the current instance of controller will visualize as a "captured" piece of the corresponding color.
+        /// </summary>
+        int GetCapturedPieceId(bool white);
 
-	int ChessMove::get_final_piece_rank(const int start_piece_rank) const
-	{
-		return final_rank != 0 ? final_rank : start_piece_rank;
-	}
-
-	ChessMove::ChessMove(const int start_field_id, const int finish_field_id, const bool captures, const int final_rank) :
-		start_field_id(start_field_id), finish_field_id(finish_field_id), captures(captures), final_rank(final_rank)
-	{}
-
-	bool ChessMove::is_capturing() const
-	{
-		return captures;
-	}
-
-	Move ChessMove::to_move() const
-	{
-		return Move{ {PosController::from_linear(start_field_id), PosController::from_linear(finish_field_id)}, final_rank };
-	}
+        /// <summary>
+        /// Returns "piece ID" that the current instance of controller will visualize as a "piece trace" of the corresponding color.
+        /// </summary>
+        int GetPieceTraceId(bool white);
+    }
 }

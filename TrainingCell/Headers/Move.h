@@ -27,6 +27,11 @@ namespace TrainingCell
 	struct Move
 	{
 		/// <summary>
+		/// If nonzero, indicates piece rank after move is done.
+		/// </summary>
+		int final_rank{ 0 };
+
+		/// <summary>
 		/// Component moves
 		/// </summary>
 		std::vector<SubMove> sub_moves{};
@@ -39,7 +44,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Constructs "move" from a single "sub-move"
 		/// </summary>
-		Move(const SubMove& sub_move);
+		Move(const SubMove& sub_move, const int final_rank = 0);
 
 		/// <summary>
 		/// Constructor.

@@ -69,12 +69,12 @@ namespace TrainingCell::Chess
 	{
 		switch (PieceController::extract_min_piece_rank(piece_rank_token))
 		{
-		case PieceController::Pawn:	return PieceController::is_ally_piece(piece_rank_token) ? _pawn_directions : _anti_pawn_directions;
+			case PieceController::Pawn:   return _pawn_directions;
 			case PieceController::Bishop: return _bishop_directions;
-			case PieceController::Rook: return _rook_directions;
+			case PieceController::Rook:   return _rook_directions;
 			case PieceController::Knight: return _knight_directions;
-			case PieceController::Queen: return _queen_directions;
-			case PieceController::King: return _king_directions;
+			case PieceController::Queen:  return _queen_directions;
+			case PieceController::King:   return _king_directions;
 			default:
 				throw std::exception("Unknown piece token");
 		}
@@ -104,5 +104,12 @@ namespace TrainingCell::Chess
 		}
 
 		return result;
+	}
+
+	int AttackController::compress_attack_directions(const int encoded_attack_directions)
+	{
+		return (encoded_attack_directions & LongRangeDirGroupMask) |
+			((encoded_attack_directions & ShortRangeDirGroupMask) != 0) << BitsPerDirectionGroup |
+			((encoded_attack_directions & KnightDirGroupMask) != 0) << (BitsPerDirectionGroup + 1);
 	}
 }

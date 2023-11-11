@@ -38,6 +38,16 @@ namespace TrainingCell::Chess
 		static constexpr int LongRangeDirGroupMask = (1 << BitsPerDirectionGroup) - 1;
 
 		/// <summary>
+		/// The second group - non-iterative straight directions (pawn, king).
+		/// </summary>
+		static constexpr int ShortRangeDirGroupMask = LongRangeDirGroupMask << BitsPerDirectionGroup;
+
+		/// <summary>
+		/// The third group - knight directions.
+		/// </summary>
+		static constexpr int KnightDirGroupMask = ShortRangeDirGroupMask << BitsPerDirectionGroup;
+
+		/// <summary>
 		/// Total number of bits used by the controller.
 		/// </summary>
 		static constexpr int TotalBitsCount = 3 * BitsPerDirectionGroup;
@@ -48,6 +58,11 @@ namespace TrainingCell::Chess
 		static constexpr int BitMask = (1 << TotalBitsCount) - 1;
 
 	public:
+
+		/// <summary>
+		/// Number of bits in a compressed version of "attack directions" integer.
+		/// </summary>
+		static constexpr int TotalCompressedBits = BitsPerDirectionGroup + 2;
 
 		/// <summary>
 		/// Represents direction of a move.
@@ -98,6 +113,12 @@ namespace TrainingCell::Chess
 		/// Decodes only long range attack directions from the given encoded attack directions.
 		/// </summary>
 		std::vector<Direction> decode_long_range_attack_directions(const int encoded_attack_directions) const;
+
+		/// <summary>
+		/// Returns a "compressed" version of the attack directions encoded as lowest 24 bits of the input integer.
+		/// The compression is non-invertible. It is supposed to be used in diagnostics purposes only.  
+		/// </summary>
+		static int compress_attack_directions(const int encoded_attack_directions);
 
 		/// <summary>
 		/// Constructor.

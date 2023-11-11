@@ -26,7 +26,7 @@ namespace TrainingCell
 	/// <summary>
 	///	Callback to publish current state and move
 	/// </summary>
-	typedef void (*PublishCheckersStateCallBack)(const int* state, const int state_size,
+	typedef void (*PublishStateCallBack)(const int* state, const int state_size,
 	                                             const SubMove* sub_moves, const int sub_moves_count, const IMinimalAgent* agent_to_play);
 
 	/// <summary>
@@ -108,7 +108,7 @@ namespace TrainingCell
 		/// It is a responsibility of the caller to ensure that it is possible to make a move
 		/// in the "current state" before calling the method.
 		/// </summary>
-		bool make_move(IState& state_handle, PublishCheckersStateCallBack publish);
+		bool make_move(IState& state_handle, PublishStateCallBack publish);
 
 		/// <summary>
 		/// Resets state of the board to the "initial one" yielded by the given "seed".
@@ -132,7 +132,7 @@ namespace TrainingCell
 		/// <param name="cancel">Callback allowing caller to cancel the process</param>
 		/// <param name="error">Callback allowing caller to get some information about errors encountered</param>
 		void play(const int episodes, const IStateSeed& start_state, const int max_moves_without_capture = 200,
-		          PublishCheckersStateCallBack publish_state_callback = nullptr,
+		          PublishStateCallBack publish_state_callback = nullptr,
 		          PublishTrainingStatsCallBack publish_stats_callback = nullptr, CancelCallBack cancel = nullptr,
 		          ErrorMessageCallBack error = nullptr);
 

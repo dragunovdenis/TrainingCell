@@ -129,6 +129,12 @@
     <ClInclude Include="Headers\Checkers\CheckersMove.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\StateHandleGeneral.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Chess\StateHandle.h">
+      <Filter>Header Files\Chess</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\CheckersState.cpp">
@@ -182,9 +188,6 @@
     <ClCompile Include="Source\TdlTrainingAdapter.cpp">
       <Filter>Source Files\TDL</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Checkers\StateHandle.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Chess\PieceController.cpp">
       <Filter>Source Files\Chess</Filter>
     </ClCompile>
@@ -202,6 +205,9 @@
     </ClCompile>
     <ClCompile Include="Source\Checkers\CheckersMove.cpp">
       <Filter>Source Files\Checkers</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StateHandleGeneral.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

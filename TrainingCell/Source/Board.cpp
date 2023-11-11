@@ -73,7 +73,7 @@ namespace TrainingCell
 	/// <summary>
 	/// Publishes current "state" if the corresponding call-back is assigned
 	/// </summary>
-	void publish_state(PublishCheckersStateCallBack publishCallback, const std::vector<int>& state, const Move& move, const IMinimalAgent* agent_to_play)
+	void publish_state(PublishStateCallBack publishCallback, const std::vector<int>& state, const Move& move, const IMinimalAgent* agent_to_play)
 	{
 		if (publishCallback)
 		{
@@ -83,7 +83,7 @@ namespace TrainingCell
 	}
 
 	void Board::play(const int episodes, const IStateSeed& start_state, const int max_moves_without_capture,
-		PublishCheckersStateCallBack publish_state_callback,
+		PublishStateCallBack publish_state_callback,
 		PublishTrainingStatsCallBack publish_stats_callback,
 		CancelCallBack cancel,
 		ErrorMessageCallBack error)
@@ -98,8 +98,7 @@ namespace TrainingCell
 				auto moves_without_capture = 0;
 				auto& state = reset_state(start_state);
 
-				//bool move_successful;
-				publish_state(publish_state_callback, state.evaluate(), Move{}, agent_to_move());
+				publish_state(publish_state_callback, state.evaluate_ui(), Move{}, agent_to_move());
 				while (state.get_moves_count() > 0 && moves_without_capture <= max_moves_without_capture)
 				{
 					const auto is_capture_move = make_move(state, publish_state_callback);
@@ -137,7 +136,7 @@ namespace TrainingCell
 		}
 	}
 
-	bool Board::make_move(IState& state_handle, PublishCheckersStateCallBack publish)
+	bool Board::make_move(IState& state_handle, PublishStateCallBack publish)
 	{
 		const auto chosen_move_id = agent_to_move()->make_move(state_handle, is_agent_to_move_white());
 
@@ -145,19 +144,22 @@ namespace TrainingCell
 		if (chosen_move_id < 0 || chosen_move_id >= state_handle.get_moves_count())
 			throw std::exception("Invalid move id");
 
-		if (publish != nullptr)
+		const auto is_capture_move = state_handle.is_capture_action(chosen_move_id);
+
+		if (publish == nullptr)
+			state_handle.move_invert_reset(chosen_move_id);
+		else
 		{
 			const auto move = state_handle.get_all_moves()[chosen_move_id];
 			const auto move_adjusted = state_handle.is_inverted() ? move.get_inverted() : move;
+			state_handle.move_invert_reset(chosen_move_id);
 			const auto state_std = state_handle.is_inverted() ?
-				state_handle.evaluate_inverted(chosen_move_id) : state_handle.evaluate(chosen_move_id);
+				state_handle.evaluate_ui_inverted() : state_handle.evaluate_ui();
 
 			//At the moment, agents have not been swapped, so "agent-to-play" is actually the "agent-to-wait"
 			publish_state(publish, state_std, move_adjusted, agent_to_wait());
 		}
 
-		const auto is_capture_move = state_handle.is_capture_action(chosen_move_id);
-		state_handle.move_invert_reset(chosen_move_id);
 		take_turn();
 
 		return is_capture_move;

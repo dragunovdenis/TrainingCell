@@ -22,13 +22,14 @@
 #include "AttackController.h"
 #include "ChessMove.h"
 #include "../Checkerboard.h"
+#include "../IStateSeed.h"
 
 namespace TrainingCell::Chess
 {
 	/// <summary>
 	///	Represents checkerboard with extra "attack" information on it.
 	/// </summary>
-	class ChessState
+	class ChessState : public IStateSeed
 	{
 		/// <summary>
 		/// Representation of a single checkerboard field.
@@ -69,6 +70,22 @@ namespace TrainingCell::Chess
 			/// Swaps "ally" and "rival" attack tokens.
 			/// </summary>
 			void swap_attack_tokens();
+
+			/// <summary>
+			/// Returns an integer representation of itself (in "regular" or "debug" forms depending on the template parameter).
+			/// </summary>
+			template <bool D = false>
+			int to_int() const;
+
+			/// <summary>
+			/// Equality operator.
+			/// </summary>
+			bool operator ==(const Field& other_field) const;
+
+			/// <summary>
+			/// Inequality operator.
+			/// </summary>
+			bool operator !=(const Field& other_field) const;
 		};
 
 		std::array<Field, Checkerboard::FieldsCount> _data;
@@ -97,13 +114,15 @@ namespace TrainingCell::Chess
 		/// "Commits" or "withdraws" attacks suggested by the given collection with respect
 		/// to the given position of the board depending on the operation callback. 
 		/// </summary>
-		void process_attack(const std::vector<AttackController::Direction>& attack_directions, const PiecePosition& position,
+		void process_attack(const std::vector<AttackController::Direction>& attack_directions, const PiecePosition& position, const bool negate_dir,
 			const std::function<void(Field&, const int)>& operation);
 
 		/// <summary>
-		/// Returns rival attack marker of the "focus_field" after a move with the given start and finish positions is done.
+		/// Returns "true" if the given "king" position is threatened after the move with the given start and finish positions is done.
 		/// </summary>
-		[[nodiscard]] int predict_rival_attack(const PiecePosition& move_start_pos, const PiecePosition& move_finish_pos, const PiecePosition& focus_field_pos) const;
+		[[nodiscard]] bool is_king_threatened_after_move(const PiecePosition& move_start_pos,
+		                                                 const PiecePosition& move_finish_pos,
+		                                                 const PiecePosition& king_field_pos) const;
 
 		/// <summary>
 		/// Returns attack token of a single attack direction from the given collection that affects the given "focus field" when applied from the given "source position".
@@ -111,19 +130,24 @@ namespace TrainingCell::Chess
 		///	IMPORTANT: it is assumed that only one attack direction from the given collection can point towards the given focus field.
 		///	It is responsibility of a caller to ensure that both given positions are valid positions on a checkerboard.
 		/// </summary>
-		[[nodiscard]] int get_rival_attack_on_field(const std::vector<AttackController::Direction>& attack_directions,
+		[[nodiscard]] int get_rival_attack_on_field(const std::vector<AttackController::Direction>& rival_attack_directions,
 		                                            const PiecePosition& source_position, const PiecePosition& focus_field_pos) const;
 
 		/// <summary>
 		/// Builds the attack field from the given board state.
 		/// </summary>
-		void build(const std::array<int, Checkerboard::FieldsCount>& board_state);
+		void build(const std::vector<int>& board_state);
 
 		/// <summary>
-		/// Moves an "ally" piece from the given "start" position to the given "stop" position.
-		///	Updates attack field accordingly.
+		/// Makes the given move.
+		/// Updates the attack field accordingly.
 		/// </summary>
-		void make_move(const PiecePosition& start, const PiecePosition& finish);
+		void make_move_and_update_attack_field(const ChessMove& move);
+
+		/// <summary>
+		/// Applies given move to the given state vector.
+		/// </summary>
+		static void make_move(std::vector<int>& state_vector, const ChessMove& move);
 
 		/// <summary>
 		/// Returns field index of the "ally" king. Throws exception if the king can't be located.
@@ -188,6 +212,11 @@ namespace TrainingCell::Chess
 		[[nodiscard]] bool is_space(const long long field_id) const;
 
 		/// <summary>
+		/// Returns "true" if the field with the given ID is empty and not threatened.
+		/// </summary>
+		[[nodiscard]] bool is_space_and_not_threatened(const long long field_id) const;
+
+		/// <summary>
 		/// Returns "true" if the field with the given ID is threatened by a rival piece.
 		/// </summary>
 		[[nodiscard]] bool is_threatened(const long long field_id) const;
@@ -202,7 +231,20 @@ namespace TrainingCell::Chess
 		/// </summary>
 		[[nodiscard]] bool is_pawn(const long long field_id) const;
 
+		/// <summary>
+		/// Returns "true" if the given move is a "castling" move.
+		/// </summary>
+		[[nodiscard]] bool is_castling_move(const ChessMove& move) const;
+
+		/// <summary>
+		/// Returns "true" if the given move is a "compound" one, i.e., consists of two moves,
+		/// in which case the corresponding reference parameter will be initialized as the second component of the move.
+		/// </summary>
+		[[nodiscard]] bool is_compound_move(const ChessMove& move, ChessMove& second_component) const;
+
 	public:
+
+		using Move = ChessMove;
 
 		/// <summary>
 		/// Returns collection of moves available in the current state.
@@ -222,6 +264,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns a plain vector representation of the current state.
 		/// </summary>
+		template <bool D = false>
 		[[nodiscard]] std::vector<int> to_vector() const;
 
 		/// <summary>
@@ -252,12 +295,42 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Constructor from the given checkerboard state.
 		/// </summary>
-		ChessState(const std::array<int, Checkerboard::FieldsCount>& board_state);
+		ChessState(const std::vector<int>& board_state, const bool inverted = false);
+
+		/// <summary>
+		/// Equality operator.
+		/// </summary>
+		bool operator ==(const ChessState& other_state) const;
+
+		/// <summary>
+		/// Inequality operator.
+		/// </summary>
+		bool operator !=(const ChessState& other_state) const;
 
 		/// <summary>
 		/// Returns an instance of chess state in the initial configuration (in terms of chess game).
 		/// </summary>
-		static ChessState create_start_state();
+		static ChessState get_start_state();
+
+		/// <summary>
+		/// Calculates reward for the given pair of previous and next states represented with the given "int-vectors".
+		///</summary>
+		static double calc_reward(const std::vector<int>& prev_state, const std::vector<int>& next_state);
+
+		/// <summary>
+		/// Returns an instance of "IState" 
+		/// </summary>
+		[[nodiscard]] std::unique_ptr<IState> yield() const override;
+
+		/// <summary>
+		/// Returns a 64 elements long "int-vector" representation of the state.
+		/// </summary>
+		[[nodiscard]] std::vector<int> to_vector_64() const;
+
+		/// <summary>
+		/// Returns a 64 elements long "int-vector" representation of the state inverted to the current one.
+		/// </summary>
+		[[nodiscard]] std::vector<int> to_vector_64_inverted() const;
 	};
 }
 
