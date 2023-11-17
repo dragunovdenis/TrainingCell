@@ -52,7 +52,7 @@ extern "C"
 		TrainingCell::Agent* agent2,
 		int gameKind,
 		int episodes,  TrainingCell::PublishStateCallBack publishStateCallBack,
-		TrainingCell::PublishTrainingStatsCallBack publishStatsCallBack, TrainingCell::CancelCallBack cancellationCallBack,
+		TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack, TrainingCell::CancelCallBack cancellationCallBack,
 		TrainingCell::ErrorMessageCallBack errorCallBack);
 
 #pragma region Random agent

@@ -15,6 +15,7 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using Monitor.Checkers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,6 +33,12 @@ namespace Monitor.Visualization.PieceControllers
         private const int BlackCapturedPieceId = -3;
         private const int WhitePieceTraceId = 4;
         private const int BlackPieceTraceId = -4;
+
+        /// <summary>
+        /// See the summary of the interface method.
+        /// </summary>
+        public DllWrapper.GameKind GetGameKind => DllWrapper.GameKind.Checkers;
+
 
         /// <summary>
         /// Converts index of a checkers piece (that we receive in the "state" collection) into the fill color that should be

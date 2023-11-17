@@ -15,6 +15,7 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using Monitor.Checkers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +33,11 @@ namespace Monitor.Visualization.PieceControllers
     /// </summary>
     internal class ChessPieceController : IPieceController
     {
+        /// <summary>
+        /// See the summary of the interface method.
+        /// </summary>
+        public DllWrapper.GameKind GetGameKind => DllWrapper.GameKind.Chess;
+
         /// <summary>
         /// Representation of a single chess field with all the related data/
         /// </summary>

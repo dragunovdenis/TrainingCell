@@ -17,6 +17,7 @@
 
 using System.Windows;
 using System.Windows.Controls;
+using Monitor.Checkers;
 
 namespace Monitor.Visualization.PieceControllers
 {
@@ -39,5 +40,10 @@ namespace Monitor.Visualization.PieceControllers
         /// Returns "piece ID" that the current instance of controller will visualize as a "piece trace" of the corresponding color.
         /// </summary>
         int GetPieceTraceId(bool white);
+
+        /// <summary>
+        /// Kind of the game the controller can facilitate.
+        /// </summary>
+        DllWrapper.GameKind GetGameKind { get; }
     }
 }

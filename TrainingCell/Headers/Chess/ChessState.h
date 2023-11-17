@@ -24,6 +24,11 @@
 #include "../Checkerboard.h"
 #include "../IStateSeed.h"
 
+namespace TrainingCellTest
+{
+	class ChessStateTest;
+}
+
 namespace TrainingCell::Chess
 {
 	/// <summary>
@@ -31,6 +36,8 @@ namespace TrainingCell::Chess
 	/// </summary>
 	class ChessState : public IStateSeed
 	{
+		friend class TrainingCellTest::ChessStateTest; // for diagnostics purposes
+
 		/// <summary>
 		/// Representation of a single checkerboard field.
 		/// </summary>
@@ -202,6 +209,16 @@ namespace TrainingCell::Chess
 		[[nodiscard]] bool is_ally(const long long field_id) const;
 
 		/// <summary>
+		/// Returns "true" if there is a piece on the field with the given ID.
+		/// </summary>
+		[[nodiscard]] bool is_piece(const long long field_id) const;
+
+		/// <summary>
+		/// Returns minimal rank of a piece on the field with the given ID.
+		/// </summary>
+		[[nodiscard]] int min_piece_rank(const long long field_id) const;
+
+		/// <summary>
 		/// Returns "true" if there is an "rival" piece on the field with the given ID.
 		/// </summary>
 		[[nodiscard]] bool is_rival(const long long field_id) const;
@@ -242,6 +259,11 @@ namespace TrainingCell::Chess
 		/// </summary>
 		[[nodiscard]] bool is_compound_move(const ChessMove& move, ChessMove& second_component) const;
 
+		/// <summary>
+		/// Returns "true" if the given move is a pawn promotion.
+		/// </summary>
+		[[nodiscard]] bool is_promotion(const ChessMove& move) const;
+
 	public:
 
 		using Move = ChessMove;
@@ -250,6 +272,12 @@ namespace TrainingCell::Chess
 		/// Returns collection of moves available in the current state.
 		/// </summary>
 		[[nodiscard]] std::vector<ChessMove> get_moves() const;
+
+		/// <summary>
+		/// Fills the given collection with moves available in the current state.
+		/// Returns "true" if the current state is a "draw".
+		/// </summary>
+		bool get_moves(std::vector<ChessMove>& out_result) const;
 
 		/// <summary>
 		/// Applies given "move" to the current board state.

@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
+#include "PieceController.h"
 #include "../PiecePosition.h"
 
 namespace TrainingCell
@@ -74,7 +75,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		ChessMove(const int start_field_id, const int finish_field_id, const bool captures, const int final_rank = 0);
+		ChessMove(const int start_field_id, const int finish_field_id, const bool captures, const int final_rank = PieceController::Space);
 
 	public:
 

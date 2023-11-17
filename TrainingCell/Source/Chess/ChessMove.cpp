@@ -33,7 +33,7 @@ namespace TrainingCell::Chess
 
 	int ChessMove::get_final_piece_rank(const int start_piece_rank) const
 	{
-		return final_rank != 0 ? final_rank : start_piece_rank;
+		return final_rank != PieceController::Space ? final_rank : start_piece_rank;
 	}
 
 	ChessMove::ChessMove(const int start_field_id, const int finish_field_id, const bool captures, const int final_rank) :

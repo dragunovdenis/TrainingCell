@@ -170,30 +170,30 @@ namespace Monitor.Checkers.UI
                     (whiteWinsLocal, blackWinsLocal, totalGamesLocal) =>
                     {
                         result.TotalEpisodes = totalGamesLocal;
-                        result.BlackWins = blackWinsLocal;
-                        result.WhiteWins = whiteWinsLocal;
+                        result.BlackWins += blackWinsLocal ? 1 : 0;
+                        result.WhiteWins += whiteWinsLocal ? 1 : 0;
 
                         if (totalGamesLocal % 1000 == 0 || totalGamesLocal == EpisodesToPlay)
                         {
                             var gamesPlayedSinceLastReport = totalGamesLocal - totalGamersPrev;
-                            var whiteWinsPercentsSinceLastReport = (whiteWinsLocal - whiteWinsPrev) * 100.0 /
+                            var whiteWinsPercentsSinceLastReport = (result.WhiteWins - whiteWinsPrev) * 100.0 /
                                                                    gamesPlayedSinceLastReport;
-                            var blackWinsPercentsSinceLastReport = (blackWinsLocal - blackWinsPrev) * 100.0 /
+                            var blackWinsPercentsSinceLastReport = (result.BlackWins - blackWinsPrev) * 100.0 /
                                                                    gamesPlayedSinceLastReport;
                             var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
                                                                        blackWinsPercentsSinceLastReport);
 
                             totalGamersPrev = totalGamesLocal;
-                            whiteWinsPrev = whiteWinsLocal;
-                            blackWinsPrev = blackWinsLocal;
+                            whiteWinsPrev = result.WhiteWins;
+                            blackWinsPrev = result.BlackWins;
 
                             var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
                             timePrev = DateTime.Now;
 
                             var infoLine =
-                                $"White Wins total/inst. %: {whiteWinsLocal}/{whiteWinsPercentsSinceLastReport:F1}; " +
-                                $"Black Wins total/inst. %: {blackWinsLocal}/{blackWinsPercentsSinceLastReport:F1}; " +
-                                $"Draws total/inst. %: {totalGamesLocal - whiteWinsLocal - blackWinsLocal}/{drawsPercentsFromLastReport:F1}; " +
+                                $"White Wins total/inst. %: {result.WhiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
+                                $"Black Wins total/inst. %: {result.BlackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
+                                $"Draws total/inst. %: {totalGamesLocal - result.WhiteWins - result.BlackWins}/{drawsPercentsFromLastReport:F1}; " +
                                 $"Total Games: {totalGamesLocal}; Elapsed time: {elapsedTimeSec:F1} sec.";
 
                             result.DispatcherOp?.Wait();

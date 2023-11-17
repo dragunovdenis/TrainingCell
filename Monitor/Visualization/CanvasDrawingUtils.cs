@@ -15,9 +15,12 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System.IO;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace Monitor.Visualization
 {
@@ -47,5 +50,45 @@ namespace Monitor.Visualization
             shape.SetValue(Canvas.LeftProperty, x);
             shape.SetValue(Canvas.TopProperty, y);
         }
+
+        /// <summary>
+        /// Saves content of the given canvas to the file with the given name in png format.
+        /// </summary>
+        public static void SaveCanvasToPng(Canvas canvas, string filename)
+        {
+            RenderTargetBitmap bitmap = new RenderTargetBitmap((int)canvas.ActualWidth, (int)canvas.ActualHeight,
+                96d, 96d, PixelFormats.Pbgra32);
+            bitmap.Render(canvas);
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using (FileStream stream = new FileStream(filename, FileMode.Create))
+            {
+                encoder.Save(stream);
+            }
+        }
+
+        /// <summary>
+        /// Dumps current state of the canvas to the specified folder on disk.
+        /// </summary>
+        private void DumpCanvas(string folderPath, Canvas canvas, bool whiteWon, bool blackWon, int totalGamers)
+        {
+            if (whiteWon && blackWon)
+            {
+                SaveCanvasToPng(canvas, Path.Combine(folderPath, $"stale_mate_screen{totalGamers}.png"));
+            }
+            else if (whiteWon)
+            {
+                SaveCanvasToPng(canvas, Path.Combine(folderPath, $"white_won_screen{totalGamers}.png"));
+            }
+            else if (blackWon)
+            {
+                SaveCanvasToPng(canvas, Path.Combine(folderPath, $"black_won_screen{totalGamers}.png"));
+            }
+            else
+            {
+                SaveCanvasToPng(canvas, Path.Combine(folderPath, $"draw_screen{totalGamers}.png"));
+            }
+        }
+
     }
 }

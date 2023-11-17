@@ -26,69 +26,89 @@ namespace TrainingCellTest
 {
 	TEST_CLASS(ChessStateTest)
 	{
-		TEST_METHOD(ToVectorConversionComplexTest)
+		template <class F>
+		static void run_standard_game_play_test(const F& functor)
 		{
 			// Arrange
-			// Arrange
-			constexpr auto rounds_to_do = 1000;
-			auto state = ChessState::get_start_state();
+			constexpr auto episodes_to_play = 500;
 
 			// Act
 			std::vector<ChessMove> available_moves;
-			int round_id = 0;
+			int castling_moves_executed = 0;
+			int stalemates = 0;
+			int checkmates = 0;
+			int promotions = 0;
 
-			while (round_id < rounds_to_do && !(available_moves = state.get_moves()).empty())
+			for (auto episode_id = 0; episode_id < episodes_to_play; ++episode_id)
 			{
-				const auto move_id = DeepLearning::Utils::get_random_int(0,
-					static_cast<int>(available_moves.size() - 1));
-				const auto& move = available_moves[move_id];
+				auto state = ChessState::get_start_state();
+				int round_id = 0;
+				while (round_id < 1000 && !state.get_moves(available_moves) && !available_moves.empty())
+				{
+					const auto move_id = DeepLearning::Utils::get_random_int(0,
+							static_cast<int>(available_moves.size() - 1));
 
-				const auto vector_with_move = state.get_vector(move);
-				const auto vector_with_move_inverted = state.get_vector_inverted(move);
+					const auto& move = available_moves[move_id];
 
-				state.make_move(move);
-				const auto vector_with_move_reference = state.to_vector();
-				state.invert();
-				const auto vector_with_move_inverted_reference = state.to_vector();
+					// count some exotic moves to be sure that test covers them
+					castling_moves_executed += state.is_castling_move(move);
+					promotions += state.is_promotion(move);
 
-				Assert::IsTrue(vector_with_move == vector_with_move_reference,
-					L"Vectors must be the same");
-				Assert::IsTrue(vector_with_move_inverted == vector_with_move_inverted_reference,
-					L"Vectors must be the same (inverted case)");
+					functor(state, move);
 
-				round_id++;
+					round_id++;
+				}
+
+				const auto draw = state.get_moves(available_moves);
+				stalemates += draw && available_moves.empty();
+				checkmates += !draw && available_moves.empty();
+
+				Assert::IsTrue(round_id >= 4, 
+					(std::wstring(L"It is impossible to play a game for less than four moves: ") +
+						std::to_wstring(round_id)).c_str());
 			}
 
-			Assert::IsTrue(round_id > 5, L"It is impossible to complete the game for less than 5 moves");
+			Logger::WriteMessage((std::string("Castling moves : ") + std::to_string(castling_moves_executed) + "\n").c_str());
+			Logger::WriteMessage((std::string("Stalemates : ") + std::to_string(stalemates) + "\n").c_str());
+			Logger::WriteMessage((std::string("Checkmates : ") + std::to_string(checkmates) + "\n").c_str());
+			Logger::WriteMessage((std::string("Promotions : ") + std::to_string(promotions) + "\n").c_str());
+			Assert::IsTrue(castling_moves_executed >= episodes_to_play * 0.03, L"Too few castling moves..");
+			Assert::IsTrue(stalemates >= episodes_to_play * 0.03, L"Too few stalemates.");
+			Assert::IsTrue(checkmates >= episodes_to_play * 0.1, L"Too few checkmates.");
+			Assert::IsTrue(promotions >= episodes_to_play, L"Too few promotions.");
+		}
+
+		TEST_METHOD(ToVectorConversionComplexTest)
+		{
+			run_standard_game_play_test([](ChessState& state, const ChessMove& move)
+				{
+					const auto vector_with_move = state.get_vector(move);
+					const auto vector_with_move_inverted = state.get_vector_inverted(move);
+
+					state.make_move(move);
+					const auto vector_with_move_reference = state.to_vector();
+					state.invert();
+					const auto vector_with_move_inverted_reference = state.to_vector();
+
+					Assert::IsTrue(vector_with_move == vector_with_move_reference,
+						L"Vectors must be the same");
+					Assert::IsTrue(vector_with_move_inverted == vector_with_move_inverted_reference,
+						L"Vectors must be the same (inverted case)");
+				});
 		}
 
 		TEST_METHOD(AttackFieldValidationTest)
 		{
-			// Arrange
-			constexpr auto rounds_to_do = 1000;
-			auto state = ChessState::get_start_state();
+			run_standard_game_play_test([](ChessState& state, const ChessMove& move)
+				{
+					state.make_move(move);
+					const ChessState check_state(state.to_vector(), state.is_inverted());
 
-			// Act
-			std::vector<ChessMove> available_moves;
-			int round_id = 0;
+					Assert::IsTrue(state == check_state,
+						L"States are supposed to be the same");
 
-			while (round_id < rounds_to_do && !(available_moves = state.get_moves()).empty())
-			{
-				const auto move_id = DeepLearning::Utils::get_random_int(0,
-					static_cast<int>(available_moves.size() - 1));
-				const auto& move = available_moves[move_id];
-
-				state.make_move(move);
-				const ChessState check_state(state.to_vector(), state.is_inverted());
-
-				Assert::IsTrue(state == check_state,
-					L"States are supposed to be the same");
-
-				state.invert();
-				round_id++;
-			}
-
-			Assert::IsTrue(round_id > 5, L"It is impossible to complete the game for less than 5 moves");
+					state.invert();
+				});
 		}
 	};
 }

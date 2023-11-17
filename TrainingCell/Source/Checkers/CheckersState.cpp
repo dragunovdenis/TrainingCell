@@ -189,7 +189,15 @@ namespace TrainingCell::Checkers
 
 	std::vector<CheckersMove> CheckersState::get_moves() const
 	{
-		return get_moves(*this);
+		std::vector<CheckersMove> result;
+		get_moves(*this, result);
+		return result;
+	}
+
+	bool CheckersState::get_moves(std::vector<CheckersMove>& out_result) const
+	{
+		get_moves(*this, out_result);
+		return false; // it is never a draw in checkers.
 	}
 
 	CheckersState CheckersState::get_inverted() const
@@ -516,9 +524,9 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	std::vector<CheckersMove> CheckersState::get_capturing_moves(const CheckersState& current_state)
+	void CheckersState::get_capturing_moves(const CheckersState& current_state, std::vector<CheckersMove>& out_result)
 	{
-		std::vector<CheckersMove> result{};
+		out_result.clear();
 
 		for (auto field_id = 0; field_id < static_cast<int>(current_state.size()); field_id++)
 		{
@@ -530,15 +538,13 @@ namespace TrainingCell::Checkers
 			if (moves.empty())
 				continue;
 
-			result.insert(result.end(), moves.begin(), moves.end());
+			out_result.insert(out_result.end(), moves.begin(), moves.end());
 		}
-
-		return result;
 	}
 
-	std::vector<CheckersMove> CheckersState::get_non_capturing_moves(const CheckersState& current_state)
+	void CheckersState::get_non_capturing_moves(const CheckersState& current_state, std::vector<CheckersMove>& out_result)
 	{
-		std::vector<CheckersMove> result{};
+		out_result.clear();
 
 		for (auto field_id = 0; field_id < static_cast<int>(current_state.size()); field_id++)
 		{
@@ -550,20 +556,18 @@ namespace TrainingCell::Checkers
 			if (moves.empty())
 				continue;
 
-			result.insert(result.end(), moves.begin(), moves.end());
+			out_result.insert(out_result.end(), moves.begin(), moves.end());
 		}
-
-		return result;
 	}
 
-	std::vector<CheckersMove> CheckersState::get_moves(const CheckersState& current_state)
+	void CheckersState::get_moves(const CheckersState& current_state, std::vector<CheckersMove>& out_result)
 	{
-		auto capturing_moves = get_capturing_moves(current_state);
+		get_capturing_moves(current_state, out_result);
 
-		if (!capturing_moves.empty())
-			return capturing_moves;
+		if (!out_result.empty())
+			return;
 
-		return get_non_capturing_moves(current_state);
+		get_non_capturing_moves(current_state, out_result);
 	}
 
 	PiecePosition CheckersState::move(const PiecePosition& start_pos, const int step, bool rightDiagonal)

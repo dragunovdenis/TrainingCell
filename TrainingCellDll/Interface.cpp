@@ -39,7 +39,7 @@ int RunTraining(TrainingCell::Agent* const agent1,
 	TrainingCell::Agent* const agent2,
 	int episodes, int gameKind,
 	TrainingCell::PublishStateCallBack publishStateCallBack,
-	TrainingCell::PublishTrainingStatsCallBack publishStatsCallBack,
+	TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack,
 	TrainingCell::CancelCallBack cancellationCallBack,
 	TrainingCell::ErrorMessageCallBack errorCallBack)
 {

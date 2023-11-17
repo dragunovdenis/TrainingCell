@@ -153,19 +153,19 @@ namespace TrainingCell::Checkers
 		                                                         const PiecePosition& start_pos);
 
 		/// <summary>
-		/// Returns collection of all the capturing moves available for the given state.
+		/// Fills the given collection with all the capturing moves available for the given state.
 		/// </summary>
-		static std::vector<CheckersMove> get_capturing_moves(const CheckersState& current_state);
+		static void get_capturing_moves(const CheckersState& current_state, std::vector<CheckersMove>& out_result);
 
 		/// <summary>
-		/// Returns collection of all the non-capturing moves available for the given state.
+		/// Fills the given collection with all the non-capturing moves available for the given state.
 		/// </summary>
-		static std::vector<CheckersMove> get_non_capturing_moves(const CheckersState& current_state);
+		static void get_non_capturing_moves(const CheckersState& current_state, std::vector<CheckersMove>& out_result);
 
 		/// <summary>
-		/// Returns all the available moves for the given state.
+		/// Fills the given collection with all the available moves for the given state.
 		/// </summary>
-		static std::vector<CheckersMove> get_moves(const CheckersState& current_state);
+		static void get_moves(const CheckersState& current_state, std::vector<CheckersMove>& out_result);
 
 		/// <summary>
 		/// Returns a piece position that is achieved from the given one by moving for the given (signed) number of steps
@@ -353,6 +353,12 @@ namespace TrainingCell::Checkers
 		/// Returns collection of available moves for the current state.
 		/// </summary>
 		[[nodiscard]] std::vector<CheckersMove> get_moves() const;
+
+		/// <summary>
+		/// Fills the given collection with available moves for the current state.
+		/// Returns "true" if the current state is a "draw".
+		/// </summary>
+		bool get_moves(std::vector<CheckersMove>& out_result) const;
 
 		/// <summary>
 		/// Equality operator.

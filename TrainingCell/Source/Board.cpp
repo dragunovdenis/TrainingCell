@@ -84,7 +84,7 @@ namespace TrainingCell
 
 	void Board::play(const int episodes, const IStateSeed& start_state, const int max_moves_without_capture,
 		PublishStateCallBack publish_state_callback,
-		PublishTrainingStatsCallBack publish_stats_callback,
+		PublishEndEpisodeStatsCallBack publish_end_episode_stats_callback,
 		CancelCallBack cancel,
 		ErrorMessageCallBack error)
 	{
@@ -99,7 +99,8 @@ namespace TrainingCell
 				auto& state = reset_state(start_state);
 
 				publish_state(publish_state_callback, state.evaluate_ui(), Move{}, agent_to_move());
-				while (state.get_moves_count() > 0 && moves_without_capture <= max_moves_without_capture)
+				while (state.get_moves_count() > 0 && moves_without_capture <= max_moves_without_capture &&
+					!state.is_draw())
 				{
 					const auto is_capture_move = make_move(state, publish_state_callback);
 					moves_without_capture = is_capture_move ? 0 : (moves_without_capture + 1);
@@ -108,12 +109,20 @@ namespace TrainingCell
 						break;//this will be qualified as a "draw"
 				}
 
-				if (state.get_moves_count() <= 0) //win case
+				bool white_won = false;
+				bool black_won = false;
+				if (state.get_moves_count() <= 0 && !state.is_draw()) //win case
 				{
 					if (_agent_to_move_id == 1)
+					{
 						_whitesWin++;
+						white_won = true;
+					}
 					else
+					{
 						_blacksWin++;
+						black_won = true;
+					}
 
 					agent_to_move()->game_over(state, GameResult::Loss, is_agent_to_move_white());
 					agent_to_wait()->game_over(state, GameResult::Victory, !is_agent_to_move_white());
@@ -121,12 +130,14 @@ namespace TrainingCell
 				}
 				else //draw case
 				{
+					white_won = black_won = state.get_moves_count() == 0; // to be able to distinguish between two kinds of draws.
+
 					agent_to_move()->game_over(state, GameResult::Draw, is_agent_to_move_white());
 					agent_to_wait()->game_over(state, GameResult::Draw, !is_agent_to_move_white());
 				}
 
-				if (publish_stats_callback != nullptr)
-					publish_stats_callback(_whitesWin, _blacksWin, episode_id + 1);
+				if (publish_end_episode_stats_callback != nullptr)
+					publish_end_episode_stats_callback(white_won, black_won, episode_id + 1);
 			}
 		}
 		catch (std::exception& e)

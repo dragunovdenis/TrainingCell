@@ -387,9 +387,13 @@ namespace Monitor.Checkers.UI
                         if (agentWhite == null || agentBlack == null)
                             return;
 
+                        int whiteWinsCounter = 0;
+                        int blackWinsCounter = 0;
+                        int staleMatesCounter = 0;
+
                         var timePoint = DateTime.Now;
                         var res = DllWrapper.RunTraining(
-                            agentWhite.Ptr, agentBlack.Ptr, episodes, GameKind.Checkers,
+                            agentWhite.Ptr, agentBlack.Ptr, episodes, _pieceController.GetGameKind,
                             (state, size, subMoves, subMovesCount, agentToMovePtr) =>
                             {
                                 if (size != StateSize)
@@ -412,16 +416,21 @@ namespace Monitor.Checkers.UI
                                     Draw();
                                 });
                             },
-                            (whiteWins, blackWins, totalGamers) =>
+                            (whiteWon, blackWon, totalGamers) =>
                             {
                                 InactiveAgent = null;
                                 _uiThreadDispatcher.Invoke(() =>
                                 {
+                                    whiteWinsCounter += (whiteWon & !blackWon) ? 1 : 0;
+                                    blackWinsCounter += (blackWon & !whiteWon) ? 1 : 0;
+                                    staleMatesCounter += (whiteWon & blackWon) ? 1 : 0;
+
                                     _state = null;
                                     InfoEvent?.Invoke(new List<string>()
                                     {
-                                        "Whites Won: " + whiteWins,
-                                        "Blacks Won: " + blackWins,
+                                        "Whites Won: " + whiteWinsCounter,
+                                        "Blacks Won: " + blackWinsCounter,
+                                        "Stalemates: " + staleMatesCounter,
                                         "Total Games: " + totalGamers,
                                     });
                                     Draw();

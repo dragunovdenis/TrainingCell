@@ -61,6 +61,11 @@ namespace TrainingCell
 		/// Returns "true" if the state is "inverted".
 		/// </summary>
 		[[nodiscard]] virtual bool is_inverted() const = 0;
+
+		/// <summary>
+		/// Returns "true" if the current state is a draw.
+		/// </summary>
+		[[nodiscard]] virtual bool is_draw() const = 0;
 	};
 }
 

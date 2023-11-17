@@ -25,29 +25,52 @@ namespace TrainingCell::Chess
 {
 	std::vector<ChessMove> ChessState::get_moves() const
 	{
+		std::vector<ChessMove> result;
+		get_moves(result);
+		return result;
+	}
+
+	bool ChessState::get_moves(std::vector<ChessMove>& out_result) const
+	{
+		out_result.clear();
+
 		const auto king_field_id = locate_king();
 		const auto king_pos = PosController::from_linear(king_field_id);
 
-		std::vector<ChessMove> result{};
-		append_king_moves(king_field_id, result);
+		append_king_moves(king_field_id, out_result);
+
+		int piece_score_sum = 0;
+		int alive_pieces_cnt = 0;
 
 		for (auto field_id = 0; field_id < Checkerboard::FieldsCount; ++field_id)
 		{
-			if (!is_ally(field_id) || is_king(field_id))
+
+			alive_pieces_cnt += is_piece(field_id);
+			piece_score_sum += min_piece_rank(field_id);
+
+			if (!is_ally(field_id) || king_field_id == field_id)
 				continue;
 
 			if (is_pawn(field_id))
 			{
-				append_pawn_moves(field_id, result, king_pos);
+				append_pawn_moves(field_id, out_result, king_pos);
 				continue;
 			}
 
 			const auto& attack_directions =
 				_attack_controller.get_attack_directions(_data[field_id].piece);
-			append_moves(field_id, result, attack_directions, king_pos);
+			append_moves(field_id, out_result, attack_directions, king_pos);
 		}
 
-		return result;
+		piece_score_sum -= 2 * PieceController::King;
+		const auto stale_mate = out_result.empty() && !is_threatened(king_field_id);
+
+		return stale_mate ||
+			    // technical draw
+			    (alive_pieces_cnt <= 3 &&
+			    (piece_score_sum == 0 ||
+				piece_score_sum == PieceController::Bishop ||
+				piece_score_sum == PieceController::Knight));
 	}
 
 	void ChessState::make_move(const ChessMove& move)
@@ -654,6 +677,16 @@ namespace TrainingCell::Chess
 		return PieceController::is_ally_piece(_data[field_id].piece);
 	}
 
+	bool ChessState::is_piece(const long long field_id) const
+	{
+		return PieceController::is_piece(_data[field_id].piece);
+	}
+
+	int ChessState::min_piece_rank(const long long field_id) const
+	{
+		return PieceController::extract_min_piece_rank(_data[field_id].piece);
+	}
+
 	bool ChessState::is_rival(const long long field_id) const
 	{
 		return PieceController::is_rival_piece(_data[field_id].piece);
@@ -701,5 +734,18 @@ namespace TrainingCell::Chess
 		}
 
 		return false;
+	}
+
+	bool ChessState::is_promotion(const ChessMove& move) const
+	{
+		if (move.final_rank == PieceController::Space)
+			return false;
+
+		if (!is_pawn(move.start_field_id) ||
+			move.get_start().row != Checkerboard::Rows - 2 ||
+			move.get_finish().row != Checkerboard::Rows - 1)
+			throw std::exception("Invalid promotion move");
+
+		return true;
 	}
 }

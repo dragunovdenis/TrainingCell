@@ -52,7 +52,11 @@ namespace Monitor.Checkers
         /// Checkers statistics report delegate
         /// </summary>
         public delegate void PublishGameStatsCallBack(
-            int whiteWins, int blackWins, int totalGames);
+            [MarshalAs(UnmanagedType.U1)]
+            bool whiteWon,
+            [MarshalAs(UnmanagedType.U1)]
+            bool blackWon,
+            int totalGames);
 
         /// <summary>
         /// Cancellation delegate
