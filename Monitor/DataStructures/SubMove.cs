@@ -15,14 +15,30 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Windows;
+using System.Runtime.InteropServices;
 
-namespace Monitor
+namespace Monitor.DataStructures
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Data transferring structure to contain checkers sub-move information
+    /// Must be kept in sync with the corresponding twin structure on the c++ side
     /// </summary>
-    public partial class App : Application
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct SubMove
     {
+        /// <summary>
+        /// Position on the checkers board where the sub-move started
+        /// </summary>
+        public PiecePosition Start;
+
+        /// <summary>
+        /// Position on the checkers board where the sub-move ended
+        /// </summary>
+        public PiecePosition End;
+
+        /// <summary>
+        /// Position on the checkers board where an opponent piece was captured during the sub-move
+        /// </summary>
+        public PiecePosition Capture;
     }
 }

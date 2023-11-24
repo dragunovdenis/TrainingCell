@@ -1,0 +1,126 @@
+﻿<!-- Copyright (c) 2023 Denys Dragunov, dragunovdenis@gmail.com
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and /or sell
+copies of the Software, and to permit persons to whom the Software is furnished
+to do so, subject to the following conditions :
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
+
+<UserControl x:Class="Monitor.UI.TrainControl"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 mc:Ignorable="d" 
+                 d:DesignHeight="450" d:DesignWidth="800" Name="Ui">
+    <Grid DataContext="{Binding ElementName=Ui}">
+        <Grid.Resources>
+            <Style TargetType="Button">
+                <Setter Property="Margin" Value="5, 2, 5, 2"/>
+            </Style>
+            <Style TargetType="TextBox" x:Key="TransparentBackgroundStyle">
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Background" Value="Transparent"></Setter>
+            </Style>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width= "*" />
+            <ColumnDefinition Width= "Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+            <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="0" Grid.Row="0" Margin="5">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBox Grid.Row="0" Text="Select Agent:" Margin="10, 5, 10, 0" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                    <DockPanel Grid.Row="1" Margin="5" >
+                        <ListBox ItemsSource="{Binding Agents}" Name="AgentPoolList" SelectionChanged="AgentPoolList_OnSelectionChanged">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Content" Value="{Binding Name, Mode=OneWay}"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </DockPanel>
+                </Grid>
+            </Border>
+            <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="1" Grid.Row="0" Margin="5">
+                <StackPanel>
+                    <StackPanel  Margin="10" IsEnabled="{Binding IsPlaying, Converter = {StaticResource InvertBoolConverter}}">
+                        <Button Name="AssignWhiteAgentButton" Click="AssignWhiteAgentButton_OnClick"
+                                IsEnabled="{Binding ElementName=AgentPoolList, Path=SelectedItems.Count}">
+                            Assign White Agent
+                        </Button>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="White Agent:" Style="{StaticResource TransparentBackgroundStyle}" FontWeight="Bold"/>
+                            <TextBox Text="{Binding WhiteAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                        </StackPanel>
+                        <Button Name="AssignBlackAgentButton" Click="AssignBlackAgentButton_OnClick"
+                                IsEnabled="{Binding ElementName=AgentPoolList, Path=SelectedItems.Count}">
+                            Assign Black Agent
+                        </Button>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Text="Black Agent:" FontWeight="Bold" Style="{StaticResource TransparentBackgroundStyle}"/>
+                            <TextBox Text="{Binding BlackAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Name="PlayButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" Grid.Column="0" Width="100">Play</Button>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <TextBox Margin="5" Text="for"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                                <TextBox Name="EpisodesTextBox" Text="{Binding EpisodesToPlay}" Margin="5"/>
+                                <TextBox Margin="5" Text="episodes"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Margin="10, 0, 10, 0">
+                        <Button Name="TerminateButton" IsEnabled="{Binding IsPlaying}" Click="TerminateButton_OnClick">Terminate</Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="1" Grid.Row="1" Margin="5">
+            <StackPanel>
+                <Button  Click="CreateButton_Click">Create Agent</Button>
+                <Button  Click="EditButton_OnClick" IsEnabled="{Binding CanEdit}">Edit/Inspect Agent</Button>
+                <Button  Click="LoadButton_Click">Load Agent</Button>
+                <Button  IsEnabled="{Binding CanSave}" Click="SaveButton_Click">Save Selected Agent</Button>
+                <Button  Click="CreateEnsemble_OnClick">Create Ensemble</Button>
+                <Button  IsEnabled="{Binding CanRemove}" Click="RemoveButton_OnClick">Remove Selected Agent</Button>
+                <Button  IsEnabled="{Binding IsEnsembleSelected}" Click="ExtractButton_OnClick">Extract Sub-Agents</Button>
+                <Button  IsEnabled="{Binding IsPlaying, Converter= {StaticResource InvertBoolConverter}}" Click="FinishSession_OnClick">Finish Session</Button>
+            </StackPanel>
+        </Border>
+        <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="0" Grid.Row="1" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" Text="Training Progress:" Margin="10, 5, 10, 0" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                <DockPanel  Margin="10" Grid.Row="1">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="InfoScroll">
+                        <ListBox ItemsSource="{Binding InfoCollection}" Name="InfoList" IsEnabled="False"/>
+                </ScrollViewer>
+                </DockPanel>
+            </Grid>
+        </Border>
+</Grid>
+</UserControl>

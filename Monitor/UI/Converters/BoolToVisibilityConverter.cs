@@ -15,14 +15,29 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System;
+using System.Globalization;
+using System.Windows.Data;
 using System.Windows;
 
-namespace Monitor
+namespace Monitor.UI.Converters
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// True/False to "Visible"/"Collapsed" converter
     /// </summary>
-    public partial class App : Application
+    class BoolToVisibilityConverter : IValueConverter
     {
+        /// <summary>
+        /// Forward conversion
+        /// </summary>
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            => value != null && (bool)value ? Visibility.Visible : Visibility.Collapsed;
+
+        /// <summary>
+        /// Backward conversion
+        /// </summary>
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new Exception("Not implemented");
+
     }
 }

@@ -18,20 +18,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
 <Application x:Class="Monitor.App"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                 xmlns:local="clr-namespace:Monitor"
-                 xmlns:utils="clr-namespace:Monitor.Utils"
-                 StartupUri="MainWindow.xaml">
+                 xmlns:converters1="clr-namespace:Monitor.UI.Converters"
+                 StartupUri="/UI/MainWindow.xaml">
     <Application.Resources>
-        <utils:InvertBoolConverter
+        <converters1:InvertBoolConverter
             x:Key="InvertBoolConverter"
         />
-        <utils:StringToUintArrayConverter
+        <converters1:StringToUintArrayConverter
             x:Key="StringToUintArrayConverter"
         />
-        <utils:ObjectToVisibilityConverter 
+        <converters1:ObjectToVisibilityConverter 
             x:Key="ObjectToVisibilityConverter"
         />
-        <utils:BoolToVisibilityConverter 
+        <converters1:BoolToVisibilityConverter 
             x:Key="BoolToVisibilityConverter"
         />
 

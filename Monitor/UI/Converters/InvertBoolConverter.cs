@@ -15,14 +15,27 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Windows;
+using System;
+using System.Globalization;
+using System.Windows.Data;
 
-namespace Monitor
+namespace Monitor.UI.Converters
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Boolean inverter for property binding
     /// </summary>
-    public partial class App : Application
+    class InvertBoolConverter : IValueConverter
     {
+        /// <summary>
+        /// Forward conversion
+        /// </summary>
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            => !(value as bool?);
+
+        /// <summary>
+        /// Backward conversion
+        /// </summary>
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => !(value as bool?);
     }
 }

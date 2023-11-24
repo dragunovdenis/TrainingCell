@@ -15,14 +15,43 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Windows;
+using System.Globalization;
+using System.Windows.Controls;
 
-namespace Monitor
+namespace Monitor.UI.Converters
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Validator for double precision property
     /// </summary>
-    public partial class App : Application
+    class DoublePropertyValidator : ValidationRule
     {
+        /// <summary>
+        /// Minimal acceptable value for the property
+        /// </summary>
+        public double MinVal { get; set; }
+
+        /// <summary>
+        /// Maximal acceptable value for the property
+        /// </summary>
+        public double MaxVal { get; set; }
+
+        /// <summary>
+        /// Error message to show in case of failed validation
+        /// </summary>
+        public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// Validation method
+        /// </summary>
+        public override ValidationResult Validate(object value,
+            CultureInfo cultureInfo)
+        {
+            var input = (double)(value ?? double.NaN);
+
+            if (input <= MaxVal && input >= MinVal)
+                return new ValidationResult(true, null);
+
+            return new ValidationResult(false, ErrorMessage);
+        }
     }
 }

@@ -16,13 +16,44 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System.Windows;
+using System.Windows.Navigation;
 
-namespace Monitor
+namespace Monitor.UI
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// About window.
     /// </summary>
-    public partial class App : Application
+    public partial class AboutWindow : Window
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public AboutWindow()
+        {
+            InitializeComponent();
+            this.DataContext = this;
+        }
+
+        /// <summary>
+        /// Returns current version of exe file.
+        /// </summary>
+        public string Version
+        {
+            get
+            {
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+                return fileVersionInfo.FileVersion;
+            }
+        }
+
+        /// <summary>
+        /// Hyperlink handling.
+        /// </summary>
+        private void Hyperlink_OnRequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
+        }
     }
 }

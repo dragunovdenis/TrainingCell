@@ -16,13 +16,34 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System.Windows;
+using System.Windows.Controls;
+using Monitor.Dll;
 
-namespace Monitor
+namespace Monitor.UI.Board.PieceControllers
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Interface to a piece visualization controller
     /// </summary>
-    public partial class App : Application
+    internal interface IPieceController
     {
+        /// <summary>
+        /// Method to visualize a piece that corresponds to the given ID on a field defined with the coordinates of its top left corner and the size.
+        /// </summary>
+        void DrawPiece(Canvas canvas, Point topLeft, double fieldSize, int pieceId);
+
+        /// <summary>
+        /// Returns "piece ID" that the current instance of controller will visualize as a "captured" piece of the corresponding color.
+        /// </summary>
+        int GetCapturedPieceId(bool white);
+
+        /// <summary>
+        /// Returns "piece ID" that the current instance of controller will visualize as a "piece trace" of the corresponding color.
+        /// </summary>
+        int GetPieceTraceId(bool white);
+
+        /// <summary>
+        /// Kind of the game the controller can facilitate.
+        /// </summary>
+        DllWrapper.GameKind GetGameKind { get; }
     }
 }

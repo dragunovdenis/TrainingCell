@@ -15,14 +15,21 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Windows;
-
-namespace Monitor
+namespace Monitor.DataStructures
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Representation of a checkers move (collection of sub-moves)
     /// </summary>
-    public partial class App : Application
+    internal struct CheckersMove
     {
-    }
+        /// <summary>
+        /// Collection of sub-moves
+        /// </summary>
+        public SubMove[] SubMoves;
+
+        /// <summary>
+        /// Index of the move
+        /// </summary>
+        public int Index;
+    };
 }

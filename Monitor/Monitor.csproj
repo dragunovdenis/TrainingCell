@@ -59,45 +59,45 @@
     <EmbeddedResource Include="Images\Chess\1.png" />
     <EmbeddedResource Include="Images\Chess\5.png" />
     <EmbeddedResource Include="Images\Chess\4.png" />
-    <Compile Update="Checkers\UI\EnsembleAgentControl.xaml.cs">
+    <Compile Update="UI\EnsembleAgentControl.xaml.cs">
       <DependentUpon>EnsembleAgentControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Checkers\UI\EnsembleAgentDialog.xaml.cs">
+    <Compile Update="UI\EnsembleAgentDialog.xaml.cs">
       <DependentUpon>EnsembleAgentDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Checkers\UI\TdlAgentControl.xaml.cs">
+    <Compile Update="UI\TdlAgentControl.xaml.cs">
       <DependentUpon>TdlAgentControl.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Checkers\UI\TdlAgentDialog.xaml.cs">
+    <Compile Update="UI\TdlAgentDialog.xaml.cs">
       <DependentUpon>TdlAgentDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Checkers\UI\TrainControl.xaml.cs">
+    <Compile Update="UI\TrainControl.xaml.cs">
       <DependentUpon>TrainControl.xaml</DependentUpon>
     </Compile>
-    <Page Include="AboutDialog.xaml">
+    <Page Include="UI\AboutDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Checkers\UI\EnsembleAgentControl.xaml">
+    <Page Include="UI\EnsembleAgentControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Checkers\UI\EnsembleAgentDialog.xaml">
+    <Page Include="UI\EnsembleAgentDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Checkers\UI\TdlAgentControl.xaml">
+    <Page Include="UI\TdlAgentControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Checkers\UI\TdlAgentDialog.xaml">
+    <Page Include="UI\TdlAgentDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Checkers\UI\TrainControl.xaml">
+    <Page Include="UI\TrainControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="UI\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -105,7 +105,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="MainWindow.xaml.cs">
+    <Compile Update="UI\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>

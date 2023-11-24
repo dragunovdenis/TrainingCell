@@ -15,14 +15,29 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Windows;
+using System;
+using System.Runtime.InteropServices;
 
-namespace Monitor
+namespace Monitor.Dll
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Wrapper for the methods of the corresponding dynamic link library
     /// </summary>
-    public partial class App : Application
+    class MemoryUtils
     {
+        /// <summary>
+        /// Generic method to read array of managed structs from a pointer to unmanaged memory
+        /// </summary>
+        internal static unsafe T[] ReadArrayOfStructs<T>(IntPtr source, int length)
+        {
+            var result = new T[length];
+            var totalBytesToCopy = (long)length * Marshal.SizeOf(typeof(T));
+            var destMemHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
+            Buffer.MemoryCopy(source.ToPointer(), destMemHandle.AddrOfPinnedObject().ToPointer(),
+                totalBytesToCopy, totalBytesToCopy);
+            destMemHandle.Free();
+
+            return result;
+        }
     }
 }

@@ -15,14 +15,15 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Windows;
-
-namespace Monitor
+namespace Monitor.DataStructures
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Checkerboard related constants.
     /// </summary>
-    public partial class App : Application
+    internal class Checkerboard
     {
+        public const int Rows = 8;
+        public const int Columns = 8;
+        public const int Fields = Rows * Columns;
     }
 }

@@ -4,7 +4,7 @@
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Page Update="AboutDialog.xaml">
+    <Page Update="UI\AboutDialog.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
