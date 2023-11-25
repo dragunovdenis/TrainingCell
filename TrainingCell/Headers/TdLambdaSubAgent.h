@@ -85,7 +85,13 @@ namespace TrainingCell
 		/// Calculates afterstate and its value
 		/// </summary>
 		[[nodiscard]] static MoveData evaluate(const IMinimalStateReadonly& state, const int move_id,
-		                                       const DeepLearning::Net<DeepLearning::CpuDC>& net);
+			const DeepLearning::Net<DeepLearning::CpuDC>& net);
+
+		/// <summary>
+		/// Calculates afterstate and its value.
+		/// </summary>
+		[[nodiscard]] static double evaluate(const IMinimalStateReadonly& state, const int move_id,
+			const DeepLearning::Net<DeepLearning::CpuDC>& net, DeepLearning::CpuDC::tensor_t& afterstate);
 
 		/// <summary>
 		/// Updates "z" field and returns value of the afterstate value function at the "previous afterstate"

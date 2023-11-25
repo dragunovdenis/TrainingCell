@@ -40,12 +40,17 @@ namespace TrainingCell
 		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() };
 
 		const auto actions_count = state.get_moves_count();
+		DeepLearning::Tensor afterstate;
 		for (auto move_id = 0; move_id < actions_count; ++move_id)
 		{
-			const auto trial_move_data = evaluate(state, move_id, net);
+			const auto value = evaluate(state, move_id, net, afterstate);
 
-			if (trial_move_data.value > best_move_data.value)
-				best_move_data = trial_move_data;
+			if (value > best_move_data.value)
+			{
+				best_move_data.move_id = move_id;
+				best_move_data.value = value;
+				best_move_data.after_state = afterstate;
+			}
 		}
 
 		if (best_move_data.move_id < 0)
@@ -57,11 +62,18 @@ namespace TrainingCell
 	MoveData TdLambdaSubAgent::evaluate(const IMinimalStateReadonly& state,
 	                                    const int move_id, const DeepLearning::Net<DeepLearning::CpuDC>& net)
 	{
-		const auto afterstate_std = state.evaluate(move_id);
-		DeepLearning::Tensor afterstate(1, 1, afterstate_std.size(), false /*assign zero*/);
-		std::ranges::copy(afterstate_std, afterstate.begin());
-		const auto value = net.act(afterstate)(0, 0, 0);
+		DeepLearning::Tensor afterstate;
+		const auto value = evaluate(state, move_id, net, afterstate);
 		return { move_id,  value, std::move(afterstate) };
+	}
+
+	double TdLambdaSubAgent::evaluate(const IMinimalStateReadonly& state, const int move_id,
+		const DeepLearning::Net<DeepLearning::CpuDC>& net, DeepLearning::CpuDC::tensor_t& afterstate)
+	{
+		const auto afterstate_std = state.evaluate(move_id);
+		afterstate.resize(1, 1, afterstate_std.size());
+		std::ranges::copy(afterstate_std, afterstate.begin());
+		return net.act(afterstate)(0, 0, 0);
 	}
 
 	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net)
