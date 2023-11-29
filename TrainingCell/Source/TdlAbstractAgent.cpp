@@ -32,6 +32,21 @@ namespace TrainingCell
 			_training_sub_mode == AutoTrainingSubMode::BLACK_ONLY;
 	}
 
+	DeepLearning::Net<DeepLearning::CpuDC>& TdlAbstractAgent::net()
+	{
+		return _net;
+	}
+
+	const DeepLearning::Net<DeepLearning::CpuDC>& TdlAbstractAgent::net() const
+	{
+		return _net;
+	}
+
+	const StateConverter& TdlAbstractAgent::converter() const
+	{
+		return _converter;
+	}
+
 	void TdlAbstractAgent::initialize_net(const std::vector<std::size_t>& layer_dimensions)
 	{
 		if (layer_dimensions.empty() || layer_dimensions.rbegin()[0] != 1)
@@ -176,13 +191,13 @@ namespace TrainingCell
 
 			if (get_training_mode())
 				//If the agent is in a "training" mode then we force it to "make a move" suggested by the search procedure
-				return _sub_agents[as_white].make_move(state, std::move(move_data), *this, _net);
+				return _sub_agents[as_white].make_move(state, std::move(move_data), *this, *this);
 
 			//Otherwise we just immediately output what search procedure has come up with
 			return move_data.move_id;
 		}
 
-		return _sub_agents[as_white].make_move(state, *this, _net);
+		return _sub_agents[as_white].make_move(state, *this, *this);
 	}
 
 	void TdlAbstractAgent::game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white)
@@ -191,7 +206,7 @@ namespace TrainingCell
 			//in the current implementation search net should be reset at the end of each episode
 			_search_net.reset();
 
-		_sub_agents[as_white].game_over(final_state, result, *this, _net);
+		_sub_agents[as_white].game_over(final_state, result, *this, *this);
 	}
 
 	int TdlAbstractAgent::pick_move_id(const IStateReadOnly& state, const bool as_white) const
@@ -199,7 +214,7 @@ namespace TrainingCell
 		if (_search_method == TreeSearchMethod::TD_SEARCH)
 			return run_search(state).move_id;
 
-		return TdLambdaSubAgent::pick_move(state, _net).move_id;
+		return TdLambdaSubAgent::pick_move(state, *this).move_id;
 	}
 
 	void TdlAbstractAgent::assign_hyperparams(const std::string& script_str)
@@ -340,7 +355,7 @@ namespace TrainingCell
 	MoveData TdlAbstractAgent::run_search(const IStateReadOnly& state) const
 	{
 		if (!_search_net)
-			_search_net = std::make_optional(_net); // copy the current net if search net is not defined
+			_search_net = std::make_optional(NetWithConverter(_net, _converter)); // copy the current net if search net is not defined
 
 		TdlTrainingAdapter adapter(&_search_net.value(), get_search_settings());
 		Board board(&adapter, &adapter);

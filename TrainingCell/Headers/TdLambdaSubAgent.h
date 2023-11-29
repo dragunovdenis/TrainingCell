@@ -20,6 +20,7 @@
 #include "MoveData.h"
 #include "TdlSettings.h"
 #include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "INet.h"
 
 namespace TrainingCell
 {
@@ -79,24 +80,25 @@ namespace TrainingCell
 		/// Returns index of the picked move and the related data
 		/// </summary>
 		[[nodiscard]] MoveData pick_move(const IMinimalStateReadonly& state,
-		                                 const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const;
+		                                 const ITdlSettingsReadOnly& settings, const INet& net) const;
 
 		/// <summary>
 		/// Calculates afterstate and its value
 		/// </summary>
 		[[nodiscard]] static MoveData evaluate(const IMinimalStateReadonly& state, const int move_id,
-			const DeepLearning::Net<DeepLearning::CpuDC>& net);
+			const INet& net);
 
 		/// <summary>
 		/// Calculates afterstate and its value.
 		/// </summary>
 		[[nodiscard]] static double evaluate(const IMinimalStateReadonly& state, const int move_id,
-			const DeepLearning::Net<DeepLearning::CpuDC>& net, DeepLearning::CpuDC::tensor_t& afterstate);
+			const INet& net, DeepLearning::CpuDC::tensor_t& afterstate,
+			DeepLearning::Net<DeepLearning::CpuDC>::Context& comp_context);
 
 		/// <summary>
 		/// Updates "z" field and returns value of the afterstate value function at the "previous afterstate"
 		/// </summary>
-		double update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
+		double update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, INet& net);
 
 		/// <summary>
 		///	Resets training state of the object which is an obligatory procedure to start new episode
@@ -119,33 +121,32 @@ namespace TrainingCell
 		/// that the agent wants to take given the current state
 		/// </summary>
 		int make_move(const IMinimalStateReadonly& state,
-		              const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
+		              const ITdlSettingsReadOnly& settings, INet& net);
 
 		/// <summary>
 		/// Returns index of a move from the given "move data" 
 		/// and performs all the training related actions (if those are required)
 		/// </summary>
 		int make_move(const IMinimalStateReadonly& state, MoveData&& move_data,
-		              const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
+		              const ITdlSettingsReadOnly& settings, INet& net);
 
 		/// <summary>
 		/// The method is supposed to be called by the "training environment" when the current training episode is over
 		/// to notify the agent about the "final" state and the result of entire game (episode)
 		/// </summary>
 		void game_over(const IMinimalStateReadonly& final_state, const GameResult& result,
-			const ITdlSettingsReadOnly& settings, DeepLearning::Net<DeepLearning::CpuDC>& net);
+			const ITdlSettingsReadOnly& settings, INet& net);
 
 		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
 		[[nodiscard]] int pick_move_id(const IMinimalStateReadonly& state,
-		                               const ITdlSettingsReadOnly& settings, const DeepLearning::Net<DeepLearning::CpuDC>& net) const;
+		                               const ITdlSettingsReadOnly& settings, const INet& net) const;
 
 		/// <summary>
 		/// Returns index of the "best score" move (out of the collection of given ones) and the related data
 		/// </summary>
-		[[nodiscard]] static MoveData pick_move(const IMinimalStateReadonly& state,
-		                                        const DeepLearning::Net<DeepLearning::CpuDC>& net);
+		[[nodiscard]] static MoveData pick_move(const IMinimalStateReadonly& state, const INet& net);
 
 		/// <summary>
 		/// Returns true if the current sub-agent is equal to the given sub-agent

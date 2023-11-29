@@ -16,54 +16,38 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "IMinimalAgent.h"
-#include "TdLambdaSubAgent.h"
-#include "INet.h"
+#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 
 namespace TrainingCell
 {
 	/// <summary>
-	/// Functionality allowing to train a neural net using TD-lambda approach
+	/// Interface for interacting with a neural net.
 	/// </summary>
-	class TdlTrainingAdapter : public IMinimalAgent
+	class INet
 	{
-		/// <summary>
-		/// Array of sub-agents (the first one "plays" black pieces and the second one "plays" white pieces)
-		/// </summary>
-		std::vector<TdLambdaSubAgent> _sub_agents{ TdLambdaSubAgent{false} , TdLambdaSubAgent{true} };
-
-		/// <summary>
-		/// Pointer to the net that needs to be trained
-		/// </summary>
-		INet* _net_ptr{};
-
-		/// <summary>
-		/// Settings to be used during the training
-		/// </summary>
-		const TdlSettings _settings;
-		
 	public:
+		/// <summary>
+		/// Virtual destructor.
+		/// </summary>
+		virtual ~INet() = default;
 
 		/// <summary>
-		/// Default constructor removed
+		/// Method to evaluate gradient of the neural net.
 		/// </summary>
-		TdlTrainingAdapter() = delete;
+		virtual void calc_gradient_and_value(const DeepLearning::CpuDC::tensor_t& state, const DeepLearning::CpuDC::tensor_t& target_value,
+			const DeepLearning::CostFunctionId& cost_func_id, std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& out_gradient,
+			DeepLearning::CpuDC::tensor_t& out_value, DeepLearning::Net<DeepLearning::CpuDC>::Context& context) const = 0;
 
 		/// <summary>
-		/// Constructor
+		/// Converts given state into its tensor representation (accessible for the caller through the corresponding reference parameter)
+		/// and returns value of the neural net at the given state.
 		/// </summary>
-		/// <param name="net_ptr">Pointer to a neural net to operate on</param>
-		/// <param name="settings">Settings to be used in the TD-lambda training process</param>
-		TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings);
+		virtual double evaluate(const std::vector<int>& state, DeepLearning::CpuDC::tensor_t& out_state_converted,
+			DeepLearning::Net<DeepLearning::CpuDC>::Context& comp_context) const = 0;
 
 		/// <summary>
-		/// See summary of the base class declaration
+		/// Updates weights of the neural net according to the given gradient, learning rate and regularization parameters.
 		/// </summary>
-		int make_move(const IStateReadOnly& state, const bool as_white) override;
-
-		/// <summary>
-		/// See summary of the base class declaration
-		/// </summary>
-		void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) override;
+		virtual void update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient, const double learning_rate, const double& lambda) = 0;
 	};
 }

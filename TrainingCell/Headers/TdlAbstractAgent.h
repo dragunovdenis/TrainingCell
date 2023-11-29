@@ -18,6 +18,7 @@
 #pragma once
 #include "Agent.h"
 #include "MoveData.h"
+#include "NetWithConverter.h"
 #include "TdlSettings.h"
 #include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 #include "TdLambdaSubAgent.h"
@@ -51,9 +52,27 @@ namespace TrainingCell
 	/// <summary>
 	/// General interface of TD(lambda) agent
 	/// </summary>
-	class TdlAbstractAgent : public Agent, public ITdlSettingsReadOnly
+	class TdlAbstractAgent : public Agent, ITdlSettingsReadOnly, NetWithConverterAbstract
 	{
+		StateConverter _converter{ StateConversionType::CheckersStandard };
+
 	protected:
+
+		/// <summary>
+		/// See the summary in the base class.
+		/// </summary>
+		DeepLearning::Net<DeepLearning::CpuDC>& net() override;
+
+		/// <summary>
+		/// See the summary in the base class.
+		/// </summary>
+		const DeepLearning::Net<DeepLearning::CpuDC>& net() const override;
+
+		/// <summary>
+		/// See the summary in the base class.
+		/// </summary>
+		const StateConverter& converter() const override;
+
 		/// <summary>
 		///	The neural net to approximate state value function
 		/// </summary>
@@ -131,7 +150,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Can contain a search net if the TD-tree search mode is engaged 
 		/// </summary>
-		mutable std::optional<DeepLearning::Net<DeepLearning::CpuDC>> _search_net{};
+		mutable std::optional<NetWithConverter> _search_net{};
 
 		/// <summary>
 		/// Returns settings that will be used in TD-tree search process
