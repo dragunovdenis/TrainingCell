@@ -16,54 +16,45 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "IMinimalAgent.h"
-#include "TdLambdaSubAgent.h"
-#include "INet.h"
+
+#include "NetWithConverterAbstract.h"
 
 namespace TrainingCell
 {
 	/// <summary>
-	/// Functionality allowing to train a neural net using TD-lambda approach
+	/// Neural net with stater converter.
 	/// </summary>
-	class TdlTrainingAdapter : public IMinimalAgent
+	class NetWithConverter : public NetWithConverterAbstract
 	{
-		/// <summary>
-		/// Array of sub-agents (the first one "plays" black pieces and the second one "plays" white pieces)
-		/// </summary>
-		std::vector<TdLambdaSubAgent> _sub_agents{ TdLambdaSubAgent{false} , TdLambdaSubAgent{true} };
+		StateConverter _converter;
+		DeepLearning::Net<DeepLearning::CpuDC> _net;
+
+	protected:
 
 		/// <summary>
-		/// Pointer to the net that needs to be trained
+		/// See summary in the base class.
 		/// </summary>
-		INet* _net_ptr{};
+		DeepLearning::Net<DeepLearning::CpuDC>& net() override;
 
 		/// <summary>
-		/// Settings to be used during the training
+		/// See summary in the base class.
 		/// </summary>
-		const TdlSettings _settings;
-		
+		const StateConverter& converter() const override;
+
+		/// <summary>
+		/// See summary in the base class.
+		/// </summary>
+		const DeepLearning::Net<DeepLearning::CpuDC>& net() const override;
 	public:
 
 		/// <summary>
-		/// Default constructor removed
+		/// Constructor.
 		/// </summary>
-		TdlTrainingAdapter() = delete;
+		NetWithConverter(const DeepLearning::Net<DeepLearning::CpuDC>& net, StateConverter converter);
 
 		/// <summary>
-		/// Constructor
+		/// Diagnostics method to assert equality of the net.
 		/// </summary>
-		/// <param name="net_ptr">Pointer to a neural net to operate on</param>
-		/// <param name="settings">Settings to be used in the TD-lambda training process</param>
-		TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings);
-
-		/// <summary>
-		/// See summary of the base class declaration
-		/// </summary>
-		int make_move(const IStateReadOnly& state, const bool as_white) override;
-
-		/// <summary>
-		/// See summary of the base class declaration
-		/// </summary>
-		void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) override;
+		bool net_is_equal_to(const DeepLearning::Net<DeepLearning::CpuDC>& another_net) const;
 	};
 }

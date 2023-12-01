@@ -38,6 +38,8 @@ namespace TrainingCellTest
 			int stalemates = 0;
 			int checkmates = 0;
 			int promotions = 0;
+			int total_options_count = 0;
+			int total_moves_played = 0;
 
 			for (auto episode_id = 0; episode_id < episodes_to_play; ++episode_id)
 			{
@@ -45,6 +47,9 @@ namespace TrainingCellTest
 				int round_id = 0;
 				while (round_id < 1000 && !state.get_moves(available_moves) && !available_moves.empty())
 				{
+					total_options_count += static_cast<int>(available_moves.size());
+					total_moves_played++;
+
 					const auto move_id = DeepLearning::Utils::get_random_int(0,
 							static_cast<int>(available_moves.size() - 1));
 
@@ -68,10 +73,13 @@ namespace TrainingCellTest
 						std::to_wstring(round_id)).c_str());
 			}
 
+			const auto average_options_per_move = total_options_count / static_cast<double>(total_moves_played);
+
 			Logger::WriteMessage((std::string("Castling moves : ") + std::to_string(castling_moves_executed) + "\n").c_str());
 			Logger::WriteMessage((std::string("Stalemates : ") + std::to_string(stalemates) + "\n").c_str());
 			Logger::WriteMessage((std::string("Checkmates : ") + std::to_string(checkmates) + "\n").c_str());
 			Logger::WriteMessage((std::string("Promotions : ") + std::to_string(promotions) + "\n").c_str());
+			Logger::WriteMessage((std::string("Average options per move : ") + std::to_string(average_options_per_move) + "\n").c_str());
 			Assert::IsTrue(castling_moves_executed >= episodes_to_play * 0.03, L"Too few castling moves..");
 			Assert::IsTrue(stalemates >= episodes_to_play * 0.03, L"Too few stalemates.");
 			Assert::IsTrue(checkmates >= episodes_to_play * 0.1, L"Too few checkmates.");

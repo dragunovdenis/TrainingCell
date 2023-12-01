@@ -240,7 +240,7 @@ namespace TrainingCellTest
 
 			//Assert
 			Assert::IsTrue(agent._search_net.has_value(), L"Search net is not initialized");
-			Assert::IsTrue(reference_search_net.equal(agent._search_net.value()), L"Nets are supposed to be equal");
+			Assert::IsTrue(agent._search_net.value().net_is_equal_to(reference_search_net), L"Nets are supposed to be equal");
 		}
 	};
 }

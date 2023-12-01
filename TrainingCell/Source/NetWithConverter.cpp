@@ -15,24 +15,31 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Headers/TdlTrainingAdapter.h"
+#include "../Headers/NetWithConverter.h"
 
 namespace TrainingCell
 {
-	TdlTrainingAdapter::TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings) :
-		_net_ptr(net_ptr), _settings(settings)
+	DeepLearning::Net<DeepLearning::CpuDC>& NetWithConverter::net()
 	{
-		if (!_net_ptr)
-			throw std::exception("Invalid pointer to the neural network");
+		return _net;
 	}
 
-	int TdlTrainingAdapter::make_move(const IStateReadOnly& state, const bool as_white)
+	const DeepLearning::Net<DeepLearning::CpuDC>& NetWithConverter::net() const
 	{
-		return _sub_agents[as_white].make_move(state, _settings, *_net_ptr);
+		return _net;
 	}
 
-	void TdlTrainingAdapter::game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white)
+	const StateConverter& NetWithConverter::converter() const
 	{
-		_sub_agents[as_white].game_over(final_state, result, _settings, *_net_ptr);
+		return _converter;
+	}
+
+	NetWithConverter::NetWithConverter(const DeepLearning::Net<DeepLearning::CpuDC>& net,
+		StateConverter converter) : _converter(std::move(converter)), _net(net)
+	{}
+
+	bool NetWithConverter::net_is_equal_to(const DeepLearning::Net<DeepLearning::CpuDC>& another_net) const
+	{
+		return _net.equal(another_net);
 	}
 }

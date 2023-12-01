@@ -31,6 +31,12 @@
     <Filter Include="Source Files\Chess">
       <UniqueIdentifier>{1039cc38-5a78-41c4-ad34-f74f30ba7157}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\TDL\Net">
+      <UniqueIdentifier>{ffbbd221-86e4-4579-8317-6506f6c931f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TDL\Net">
+      <UniqueIdentifier>{44ba4d5c-2469-4755-9b20-b80cfe690c1e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Checkers\CheckersState.h">
@@ -135,6 +141,18 @@
     <ClInclude Include="Headers\Chess\StateHandle.h">
       <Filter>Header Files\Chess</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\INet.h">
+      <Filter>Header Files\TDL\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\NetWithConverter.h">
+      <Filter>Header Files\TDL\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\NetWithConverterAbstract.h">
+      <Filter>Header Files\TDL\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\StateConverter.h">
+      <Filter>Header Files\TDL\Net</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\CheckersState.cpp">
@@ -208,6 +226,15 @@
     </ClCompile>
     <ClCompile Include="Source\StateHandleGeneral.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\NetWithConverter.cpp">
+      <Filter>Source Files\TDL\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\NetWithConverterAbstract.cpp">
+      <Filter>Source Files\TDL\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StateConverter.cpp">
+      <Filter>Source Files\TDL\Net</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

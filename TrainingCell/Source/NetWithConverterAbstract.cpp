@@ -15,24 +15,32 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Headers/TdlTrainingAdapter.h"
+#include "../Headers/NetWithConverterAbstract.h"
 
 namespace TrainingCell
 {
-	TdlTrainingAdapter::TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings) :
-		_net_ptr(net_ptr), _settings(settings)
+	void NetWithConverterAbstract::calc_gradient_and_value(const DeepLearning::CpuDC::tensor_t& state,
+		const DeepLearning::CpuDC::tensor_t& target_value, const DeepLearning::CostFunctionId& cost_func_id,
+		std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& out_gradient,
+		DeepLearning::CpuDC::tensor_t& out_value, DeepLearning::Net<DeepLearning::CpuDC>::Context& context) const
 	{
-		if (!_net_ptr)
-			throw std::exception("Invalid pointer to the neural network");
+		net().calc_gradient_and_value(state,
+			target_value, cost_func_id,
+			out_gradient,
+			out_value, context);
 	}
 
-	int TdlTrainingAdapter::make_move(const IStateReadOnly& state, const bool as_white)
+	double NetWithConverterAbstract::evaluate(const std::vector<int>& state, DeepLearning::CpuDC::tensor_t& out_state_converted,
+		DeepLearning::Net<DeepLearning::CpuDC>::Context& comp_context) const
 	{
-		return _sub_agents[as_white].make_move(state, _settings, *_net_ptr);
+		converter().convert(state, out_state_converted);
+		net().act(out_state_converted, comp_context, false /*calc gradient cache*/);
+		return comp_context.get_out()(0, 0, 0);
 	}
 
-	void TdlTrainingAdapter::game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white)
+	void NetWithConverterAbstract::update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient,
+		const double learning_rate, const double& lambda)
 	{
-		_sub_agents[as_white].game_over(final_state, result, _settings, *_net_ptr);
+		net().update(gradient, learning_rate, lambda);
 	}
 }

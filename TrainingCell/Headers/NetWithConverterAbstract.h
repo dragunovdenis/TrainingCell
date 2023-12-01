@@ -16,54 +16,50 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "IMinimalAgent.h"
-#include "TdLambdaSubAgent.h"
 #include "INet.h"
+#include "StateConverter.h"
 
 namespace TrainingCell
 {
 	/// <summary>
-	/// Functionality allowing to train a neural net using TD-lambda approach
+	/// Abstract implementation of a neural net with state conversion mechanism.
 	/// </summary>
-	class TdlTrainingAdapter : public IMinimalAgent
+	class NetWithConverterAbstract : public INet
 	{
+	protected:
 		/// <summary>
-		/// Array of sub-agents (the first one "plays" black pieces and the second one "plays" white pieces)
+		/// Access to the net.
 		/// </summary>
-		std::vector<TdLambdaSubAgent> _sub_agents{ TdLambdaSubAgent{false} , TdLambdaSubAgent{true} };
+		virtual DeepLearning::Net<DeepLearning::CpuDC>& net() = 0;
 
 		/// <summary>
-		/// Pointer to the net that needs to be trained
+		/// Access to the net.
 		/// </summary>
-		INet* _net_ptr{};
+		virtual const DeepLearning::Net<DeepLearning::CpuDC>& net() const = 0;
 
 		/// <summary>
-		/// Settings to be used during the training
+		/// Access to the converter.
 		/// </summary>
-		const TdlSettings _settings;
-		
+		virtual const StateConverter& converter() const = 0;
+
 	public:
+		/// <summary>
+		/// See summary of the base class.
+		/// </summary>
+		void calc_gradient_and_value(const DeepLearning::CpuDC::tensor_t& state, const DeepLearning::CpuDC::tensor_t& target_value,
+			const DeepLearning::CostFunctionId& cost_func_id, std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& out_gradient,
+			DeepLearning::CpuDC::tensor_t& out_value, DeepLearning::Net<DeepLearning::CpuDC>::Context& context) const override;
 
 		/// <summary>
-		/// Default constructor removed
+		/// See summary of the base class.
 		/// </summary>
-		TdlTrainingAdapter() = delete;
+		double evaluate(const std::vector<int>& state, DeepLearning::CpuDC::tensor_t& out_state_converted,
+			DeepLearning::Net<DeepLearning::CpuDC>::Context& comp_context) const override;
 
 		/// <summary>
-		/// Constructor
+		/// See summary of the base class.
 		/// </summary>
-		/// <param name="net_ptr">Pointer to a neural net to operate on</param>
-		/// <param name="settings">Settings to be used in the TD-lambda training process</param>
-		TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings);
-
-		/// <summary>
-		/// See summary of the base class declaration
-		/// </summary>
-		int make_move(const IStateReadOnly& state, const bool as_white) override;
-
-		/// <summary>
-		/// See summary of the base class declaration
-		/// </summary>
-		void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) override;
+		void update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient, const double learning_rate, const double& lambda) override;
 	};
+
 }

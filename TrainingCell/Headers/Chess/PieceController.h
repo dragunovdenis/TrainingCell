@@ -25,6 +25,7 @@ namespace TrainingCell::Chess
 	/// </summary>
 	class PieceController
 	{
+	public:
 		/// <summary>
 		/// Number of bits that are reserved for a piece rank
 		/// </summary>
@@ -55,8 +56,6 @@ namespace TrainingCell::Chess
 		/// A flag to mark ani-pieces
 		/// </summary>
 		static constexpr int AntiPieceFlag = InitialPositionFlag << 2;
-
-	public:
 
 		/// <summary>
 		/// Total number of bits (except the sign bit) set aside for the piece token.
