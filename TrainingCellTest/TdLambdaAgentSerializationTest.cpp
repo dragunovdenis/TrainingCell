@@ -30,7 +30,7 @@ using namespace TrainingCell;
 
 namespace TrainingCellTest
 {
-	TEST_CLASS(CheckersAgentSerializationTest)
+	TEST_CLASS(TdLambdaAgentSerializationTest)
 	{
 		TEST_METHOD(TdLambdaAgentPackSerialization)
 		{

@@ -21,10 +21,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CheckersAgentTrainingTest.cpp">
+    <ClCompile Include="TdLambdaAgentTrainingTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CheckersAgentSerializationTest.cpp">
+    <ClCompile Include="TdLambdaAgentSerializationTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CheckersStateTest.cpp">

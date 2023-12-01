@@ -22,6 +22,11 @@
 #include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
 #include "TdLambdaSubAgent.h"
 
+namespace TrainingCellTest
+{
+	class TdlambdaAgentTrainingTest;
+}
+
 namespace TrainingCell
 {
 	/// <summary>
@@ -53,6 +58,8 @@ namespace TrainingCell
 	/// </summary>
 	class TdlAbstractAgent : public Agent, public ITdlSettingsReadOnly
 	{
+		friend class TrainingCellTest::TdlambdaAgentTrainingTest; // for diagnostics purposes
+
 	protected:
 		/// <summary>
 		///	The neural net to approximate state value function

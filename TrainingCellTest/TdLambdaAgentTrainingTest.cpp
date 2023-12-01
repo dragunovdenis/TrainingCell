@@ -21,6 +21,7 @@
 #include "../TrainingCell/Headers/RandomAgent.h"
 #include "../TrainingCell/Headers/TdLambdaAgent.h"
 #include "../TrainingCell/Headers/TdlEnsembleAgent.h"
+#include "../TrainingCell/Headers/Checkers/StateHandle.h"
 #include "../TrainingCell/Headers/Checkers/CheckersState.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include <ppl.h>
@@ -31,7 +32,7 @@ using namespace TrainingCell;
 
 namespace TrainingCellTest
 {
-	TEST_CLASS(CheckersAgentTrainingTest)
+	TEST_CLASS(TdlambdaAgentTrainingTest)
 	{
 		/// <summary>
 		/// Enumerates different training modes
@@ -218,6 +219,28 @@ namespace TrainingCellTest
 			//Assert
 			Assert::IsTrue(agent0 == agent0_trained, L"0th agent does not coincide with the reference");
 			Assert::IsTrue(agent1 == agent1_trained, L"1st agent does not coincide with the reference");
+		}
+
+		TEST_METHOD(TdLambdaAgentSearchRegression)
+		{
+			//Arrange
+			auto agent = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0.tda");
+			agent.set_td_search_iterations(100);
+			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
+			auto state_handle = StateHandle(CheckersState::get_start_state());
+			const auto reference_search_net = DeepLearning::MsgPack::
+				load_from_file<DeepLearning::Net<DeepLearning::CpuDC>>("TestData/TdlTrainingRegression/search_net.dat");
+
+			//Act
+			agent.set_search_depth(5);
+			const auto move_id = agent.make_move(state_handle, true);
+			state_handle.move_invert_reset(move_id);
+			agent.set_search_depth(1000);
+			agent.make_move(state_handle, false);
+
+			//Assert
+			Assert::IsTrue(agent._search_net.has_value(), L"Search net is not initialized");
+			Assert::IsTrue(reference_search_net.equal(agent._search_net.value()), L"Nets are supposed to be equal");
 		}
 	};
 }

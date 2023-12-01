@@ -92,8 +92,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CheckersAgentSerializationTest.cpp" />
-    <ClCompile Include="CheckersAgentTrainingTest.cpp" />
+    <ClCompile Include="TdLambdaAgentSerializationTest.cpp" />
+    <ClCompile Include="TdLambdaAgentTrainingTest.cpp" />
     <ClCompile Include="CheckersStateTest.cpp" />
     <ClCompile Include="CheckersTestUtils.cpp" />
     <ClCompile Include="ChessStateTest.cpp" />
@@ -115,6 +115,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestData\TdlTrainingRegression\agent1_trained.tda">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\search_net.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
