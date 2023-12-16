@@ -35,7 +35,7 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentPackSerialization)
 		{
 			//Arrange
-			const TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11);
+			const TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9, 0.11, StateTypeId::CHESS);
 			Logger::WriteMessage(agent.to_script().c_str());
 			const auto pack = AgentPack::make<TdLambdaAgent>(agent);
 
@@ -50,8 +50,8 @@ namespace TrainingCellTest
 		{
 			//Arrange
 			TdlEnsembleAgent agent({
-				{{ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11},
-				{{ 32, 21, 32, 1 }, 3.05, 0.3, 1.9, 2.1},
+				{{ 64, 32, 16, 8 }, 0.05, 0.1, 0.9, 0.11, StateTypeId::CHESS},
+				{{ 21, 32 }, 3.05, 0.3, 1.9, 2.1, StateTypeId::CHESS},
 				});
 			const auto pack = AgentPack::make<TdlEnsembleAgent>(agent);
 
@@ -65,7 +65,8 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentSerialization)
 		{
 			//Arrange
-			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "some_name");
+			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9,
+				0.11, StateTypeId::CHECKERS, "some_name");
 			//set some non-default values
 			agent.set_reward_factor(0.375);
 
@@ -86,7 +87,8 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentScriptGeneration)
 		{
 			//Arrange
-			TdLambdaAgent agent({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.1, 0.9, 0.11, "Some Name");
+			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9,
+				0.11, StateTypeId::CHESS, "Some Name");
 			//set some non-default values
 			agent.set_reward_factor(0.375);
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);

@@ -50,8 +50,9 @@ extern "C"
 	TRAINING_CELL_API int RunTraining(
 		TrainingCell::Agent* agent1,
 		TrainingCell::Agent* agent2,
-		int gameKind,
-		int episodes,  TrainingCell::PublishStateCallBack publishStateCallBack,
+		int episodes, 
+		TrainingCell::StateTypeId state_type_id,
+		TrainingCell::PublishStateCallBack publishStateCallBack,
 		TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack, TrainingCell::CancelCallBack cancellationCallBack,
 		TrainingCell::ErrorMessageCallBack errorCallBack);
 
@@ -70,15 +71,17 @@ extern "C"
 	/// <summary>
 	/// Constructs a TD(lambda) agent on the heap and returns pointer to it
 	/// </summary>
-	/// <param name="layer_dims">Dimensions of layers (1 + number of actual neural layers,
-	/// because input as such is also considered as a layer)</param>
+	/// <param name="hidden_layer_dims">Dimensions of hidden layers (input and output layer dimensions
+	/// will be deduced from the state type)</param>
 	/// <param name="dims_count">Number of elements in "layer_dims" array</param>
 	/// <param name="exploration_epsilon">Probability of making exploration move</param>
 	/// <param name="lambda">The corresponding parameter of TD(lambda) method</param>
 	/// <param name="gamma">Discount coefficient (used to evaluate value of a state)</param>
 	/// <param name="alpha">Step of the gradient method (learning rate)</param>
-	TRAINING_CELL_API void* ConstructTdLambdaAgent(const unsigned int* layer_dims,
-		const int dims_count, const double exploration_epsilon, const double lambda, const double gamma, const double alpha);
+	/// <param name="state_type_id">ID of the state type the agent will be specialized on.</param>
+	TRAINING_CELL_API void* ConstructTdLambdaAgent(const unsigned int* hidden_layer_dims,
+		const int dims_count, const double exploration_epsilon, const double lambda, const double gamma, const double alpha,
+		const TrainingCell::StateTypeId state_type_id);
 
 	/// <summary>
 	/// Returns pointer to a copy of the TD(lambda) agent pointed by the given pointer
@@ -290,6 +293,11 @@ extern "C"
 	TRAINING_CELL_API const char* AgentGetId(const TrainingCell::Agent* agent_ptr);
 
 	/// <summary>
+	/// Returns state type ID of the agent represented with its pointer
+	/// </summary>
+	TRAINING_CELL_API TrainingCell::StateTypeId AgentGetStateTypeId(const TrainingCell::Agent* agent_ptr);
+
+	/// <summary>
 	/// Returns number of records in the record-book of the agent
 	/// </summary>
 	TRAINING_CELL_API int AgentGetRecordsCount(const TrainingCell::Agent* agent_ptr);
@@ -305,6 +313,12 @@ extern "C"
 	/// </summary>
 	/// <returns>Index of the added record in the record book</returns>
 	TRAINING_CELL_API int AgentAddRecord(TrainingCell::Agent* agent_ptr, const char* record);
+
+	/// <summary>
+	/// Returns "true" if there is a uniquely determined state type within which the two agent can play (the type is returned as `out_state_type_id` param).
+	/// In case "false" is returned, the value of `out_state_type_id` parameter should be ignored by the caller.
+	/// </summary>
+	TRAINING_CELL_API bool CanPlay(const TrainingCell::Agent* agent0_ptr, const TrainingCell::Agent* agent1_ptr, TrainingCell::StateTypeId& out_state_type_id);
 #pragma endregion Agent
 #pragma region AgentPack
 	/// <summary>

@@ -29,7 +29,6 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using Monitor.Agents;
 using Monitor.Dll;
-using static Monitor.Dll.DllWrapper;
 
 namespace Monitor.UI
 {
@@ -138,6 +137,11 @@ namespace Monitor.UI
             public int WhiteWins { get; set; }
 
             /// <summary>
+            /// Number of stalemates
+            /// </summary>
+            public int StaleMates { get; set; }
+
+            /// <summary>
             /// Used to synchronize interactions with UI
             /// </summary>
             public DispatcherOperation DispatcherOp { get; set; }
@@ -164,16 +168,30 @@ namespace Monitor.UI
                 var result = new TrainingResult();
                 int whiteWinsPrev = 0;
                 int blackWinsPrev = 0;
+                int staleMatesPrev = 0;
                 int totalGamersPrev = 0;
 
+                // Sanity check.
+                if (!DllWrapper.CanPlay(WhiteAgent.Ptr, BlackAgent.Ptr, out var stateTypeId) ||
+                    CurrentStateType != stateTypeId)
+                    throw new Exception("Incompatible agents");
+
                 DllWrapper.RunTraining(
-                    WhiteAgent.Ptr, BlackAgent.Ptr, EpisodesToPlay, GameKind.Checkers,
+                    WhiteAgent.Ptr, BlackAgent.Ptr, EpisodesToPlay, CurrentStateType,
                     null,
                     (whiteWinsLocal, blackWinsLocal, totalGamesLocal) =>
                     {
                         result.TotalEpisodes = totalGamesLocal;
-                        result.BlackWins += blackWinsLocal ? 1 : 0;
-                        result.WhiteWins += whiteWinsLocal ? 1 : 0;
+                        var isStaleMate = blackWinsLocal && whiteWinsLocal;
+                        if (isStaleMate)
+                        {
+                            result.StaleMates++;
+                        }
+                        else
+                        {
+                            result.BlackWins += blackWinsLocal ? 1 : 0;
+                            result.WhiteWins += whiteWinsLocal ? 1 : 0;
+                        }
 
                         if (totalGamesLocal % 1000 == 0 || totalGamesLocal == EpisodesToPlay)
                         {
@@ -184,10 +202,13 @@ namespace Monitor.UI
                                                                    gamesPlayedSinceLastReport;
                             var drawsPercentsFromLastReport = 100.0 - (whiteWinsPercentsSinceLastReport +
                                                                        blackWinsPercentsSinceLastReport);
+                            var staleMatesPercentsFromLastReport = (result.StaleMates - staleMatesPrev) * 100.0 /
+                                                                   gamesPlayedSinceLastReport;
 
                             totalGamersPrev = totalGamesLocal;
                             whiteWinsPrev = result.WhiteWins;
                             blackWinsPrev = result.BlackWins;
+                            staleMatesPrev = result.StaleMates;
 
                             var elapsedTimeSec = (DateTime.Now - timePrev).TotalMilliseconds * 1e-3;
                             timePrev = DateTime.Now;
@@ -195,6 +216,7 @@ namespace Monitor.UI
                             var infoLine =
                                 $"White Wins total/inst. %: {result.WhiteWins}/{whiteWinsPercentsSinceLastReport:F1}; " +
                                 $"Black Wins total/inst. %: {result.BlackWins}/{blackWinsPercentsSinceLastReport:F1}; " +
+                                $"StaleMates total/inst. %: {result.StaleMates}/{staleMatesPercentsFromLastReport:F1}; " +
                                 $"Draws total/inst. %: {totalGamesLocal - result.WhiteWins - result.BlackWins}/{drawsPercentsFromLastReport:F1}; " +
                                 $"Total Games: {totalGamesLocal}; Elapsed time: {elapsedTimeSec:F1} sec.";
 
@@ -271,7 +293,10 @@ namespace Monitor.UI
             set
             {
                 if (SetField(ref _whiteAgent, value))
+                {
                     OnPropertyChanged(nameof(CanPlay));
+                    OnPropertyChanged(nameof(CurrentStateType));
+                }
             }
         }
 
@@ -286,10 +311,28 @@ namespace Monitor.UI
             set
             {
                 if (SetField(ref _blackAgent, value))
+                {
                     OnPropertyChanged(nameof(CanPlay));
+                    OnPropertyChanged(nameof(CurrentStateType));
+                }
             }
         }
 
+        /// <summary>
+        /// State type deduced from the current instances of "white" and "black" agents
+        /// </summary>
+        public DllWrapper.StateTypeId CurrentStateType
+        {
+            get
+            {
+                if (WhiteAgent == null || BlackAgent == null ||
+                    !DllWrapper.CanPlay(WhiteAgent.Ptr, BlackAgent.Ptr, out var stateTypeId))
+                    return DllWrapper.StateTypeId.Invalid;
+
+                return stateTypeId;
+            }
+        }
+        
         /// <summary>
         /// Returns pointer to the agent that corresponds to the selected item in the list
         /// </summary>
@@ -361,7 +404,8 @@ namespace Monitor.UI
         /// <summary>
         /// Flag determining if both agents are selected and we can start playing
         /// </summary>
-        public bool CanPlay => BlackAgent != null && WhiteAgent != null && !IsPlaying;
+        public bool CanPlay => BlackAgent != null && WhiteAgent != null && !IsPlaying &&
+                               DllWrapper.CanPlay(BlackAgent.Ptr, WhiteAgent.Ptr, out _);
 
         private bool _isPlaying;
 
@@ -463,6 +507,21 @@ namespace Monitor.UI
                 dialog.ShowDialog();
             }
             else throw new Exception("Can't edit");
+
+            InvalidateUi();
+        }
+
+        /// <summary>
+        /// Rises all the property changed events needed to update UI
+        /// </summary>
+        private void InvalidateUi()
+        {
+            OnPropertyChanged(nameof(CanSave));
+            OnPropertyChanged(nameof(CanEdit));
+            OnPropertyChanged(nameof(CanRemove));
+            OnPropertyChanged(nameof(IsEnsembleSelected));
+            OnPropertyChanged(nameof(CanPlay));
+            OnPropertyChanged(nameof(CurrentStateType));
         }
 
         /// <summary>
@@ -470,14 +529,11 @@ namespace Monitor.UI
         /// </summary>
         private void AgentPoolList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            OnPropertyChanged(nameof(CanSave));
-            OnPropertyChanged(nameof(CanEdit));
-            OnPropertyChanged(nameof(CanRemove));
-            OnPropertyChanged(nameof(IsEnsembleSelected));
+            InvalidateUi();
         }
 
         /// <summary>
-        /// Property indicating whether the "selected" agent can be savesd
+        /// Property indicating whether the "selected" agent can be saved
         /// </summary>
         public bool CanSave => AgentFileSystemManager.CanSave(GetSelectedAgent());
 

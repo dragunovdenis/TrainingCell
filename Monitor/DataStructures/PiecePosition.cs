@@ -24,7 +24,7 @@ namespace Monitor.DataStructures
     /// Must be kept in sync with the corresponding twin structure on the c++ side
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct PiecePosition
+    public struct PiecePosition
     {
         /// <summary>
         /// Index of a row

@@ -80,7 +80,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Returns ration between output and input data dimensions.
 		/// </summary>
-		int get_expansion_factor() const;
+		[[nodiscard]] int get_expansion_factor() const;
 
 		/// <summary>
 		/// Converts input vector and stores the result in the output tensor.
@@ -96,6 +96,11 @@ namespace TrainingCell
 		/// Inequality operator.
 		/// </summary>
 		bool operator !=(const StateConverter& anotherConverter) const;
+
+		/// <summary>
+		/// Returns type of the converter.
+		/// </summary>
+		[[nodiscard]] StateConversionType get_type() const;
 	};
 }
 

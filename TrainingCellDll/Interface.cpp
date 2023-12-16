@@ -20,6 +20,7 @@
 #include "../TrainingCell/Headers/Checkers/CheckersState.h"
 #include "../TrainingCell/Headers/RandomAgent.h"
 #include "../TrainingCell/Headers/InteractiveAgent.h"
+#include "../TrainingCell/Headers/StateTypeController.h"
 #include "../TrainingCell/Headers/Chess/ChessState.h"
 
 namespace
@@ -37,32 +38,25 @@ namespace
 
 int RunTraining(TrainingCell::Agent* const agent1,
 	TrainingCell::Agent* const agent2,
-	int episodes, int gameKind,
+	int episodes, TrainingCell::StateTypeId state_type_id,
 	TrainingCell::PublishStateCallBack publishStateCallBack,
 	TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack,
 	TrainingCell::CancelCallBack cancellationCallBack,
 	TrainingCell::ErrorMessageCallBack errorCallBack)
 {
-	TrainingCell::Board board(agent1, agent2);
-
-	switch (gameKind)
+	try
 	{
+		TrainingCell::Board board(agent1, agent2);
+		const auto seed_ptr = TrainingCell::StateTypeController::get_start_seed(state_type_id);
+		board.play(episodes, *seed_ptr,
+			50, publishStateCallBack, publishStatsCallBack,
+			cancellationCallBack, errorCallBack);
 
-	case 1:
-			board.play(episodes, TrainingCell::Checkers::CheckersState::get_start_state(),
-				200, publishStateCallBack, publishStatsCallBack,
-				cancellationCallBack, errorCallBack);
-			break;
-	case 2:
-			board.play(episodes, TrainingCell::Chess::ChessState::get_start_state(),
-				200, publishStateCallBack, publishStatsCallBack,
-				cancellationCallBack, errorCallBack);
-			break;
-		default:
-			return -1;
+		return 0;
+	} catch (...)
+	{
+		return -1;
 	}
-
-	return 0;
 }
 #pragma region Random Agent
 void* ConstructRandomAgent()
@@ -80,10 +74,18 @@ bool FreeRandomAgent(const TrainingCell::RandomAgent* agent_ptr)
 }
 #pragma endregion Random Agent
 #pragma region Td(Lammbda)-Agent
-void* ConstructTdLambdaAgent(const unsigned int* layer_dims,
-	const int dims_count, const double exploration_epsilon, const double lambda, const double gamma, const double alpha)
+void* ConstructTdLambdaAgent(const unsigned int* hidden_layer_dims,
+	const int dims_count, const double exploration_epsilon, const double lambda,
+	const double gamma, const double alpha, const TrainingCell::StateTypeId state_type_id)
 {
-	return new TrainingCell::TdLambdaAgent(convert(layer_dims, dims_count), exploration_epsilon, lambda, gamma, alpha);
+	try
+	{
+		return new TrainingCell::TdLambdaAgent(convert(hidden_layer_dims, dims_count), exploration_epsilon,
+			lambda, gamma, alpha, state_type_id);
+	} catch(...)
+	{
+		return nullptr;
+	}
 }
 
 void* TdLambdaAgentCreateCopy(const TrainingCell::TdLambdaAgent* agent_ptr)
@@ -383,6 +385,14 @@ const char* AgentGetId(const TrainingCell::Agent* agent_ptr)
 	return agent_ptr->get_id().c_str();
 }
 
+TrainingCell::StateTypeId AgentGetStateTypeId(const TrainingCell::Agent* agent_ptr)
+{
+	if (!agent_ptr)
+		return TrainingCell::StateTypeId::INVALID;
+
+	return agent_ptr->get_state_type_id();
+}
+
 int AgentGetRecordsCount(const TrainingCell::Agent* agent_ptr)
 {
 	if (agent_ptr == nullptr)
@@ -405,6 +415,15 @@ int AgentAddRecord(TrainingCell::Agent* agent_ptr, const char* record)
 		return -1;
 
 	return static_cast<int>(agent_ptr->add_record(record));
+}
+
+bool CanPlay(const TrainingCell::Agent* agent0_ptr, const TrainingCell::Agent* agent1_ptr,
+	TrainingCell::StateTypeId& out_state_type_id)
+{
+	if (agent0_ptr == nullptr || agent1_ptr == nullptr)
+		return false;
+
+	return TrainingCell::StateTypeController::can_play(*agent0_ptr, *agent1_ptr, out_state_type_id);
 }
 
 #pragma endregion Agent

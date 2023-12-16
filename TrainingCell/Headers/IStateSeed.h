@@ -17,6 +17,7 @@
 
 #pragma once
 #include <memory>
+#include "StateTypeId.h"
 
 namespace TrainingCell
 {
@@ -37,6 +38,11 @@ namespace TrainingCell
 		/// Returns an instance of "IState" 
 		/// </summary>
 		[[nodiscard]] virtual std::unique_ptr<IState> yield() const = 0;
+
+		/// <summary>
+		/// Returns type identifier of the state that can be yielded by the "seed".
+		/// </summary>
+		[[nodiscard]] virtual StateTypeId state_type() const = 0;
 	};
 
 }

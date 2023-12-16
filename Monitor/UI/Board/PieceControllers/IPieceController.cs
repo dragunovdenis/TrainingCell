@@ -42,8 +42,8 @@ namespace Monitor.UI.Board.PieceControllers
         int GetPieceTraceId(bool white);
 
         /// <summary>
-        /// Kind of the game the controller can facilitate.
+        /// Returns type ID of the state the controller is compatible with.
         /// </summary>
-        DllWrapper.GameKind GetGameKind { get; }
+        DllWrapper.StateTypeId StateTypeId { get; }
     }
 }

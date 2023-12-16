@@ -83,6 +83,11 @@ namespace TrainingCell::Chess
 			make_move_and_update_attack_field(second_component);
 	}
 
+	std::size_t ChessState::state_size()
+	{
+		return Checkerboard::FieldsCount;
+	}
+
 	std::vector<int> ChessState::get_vector(const ChessMove& move) const
 	{
 		// A sanity check
@@ -281,6 +286,16 @@ namespace TrainingCell::Chess
 	std::unique_ptr<IState> ChessState::yield() const
 	{
 		return std::make_unique<StateHandle>(*this);
+	}
+
+	StateTypeId ChessState::type()
+	{
+		return StateTypeId::CHESS;
+	}
+
+	StateTypeId ChessState::state_type() const
+	{
+		return type();
 	}
 
 	int ChessState::locate_king() const

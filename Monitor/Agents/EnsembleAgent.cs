@@ -120,7 +120,9 @@ namespace Monitor.Agents
         /// </summary>
         public int AddSubAgent(TdLambdaAgent agentToAdd)
         {
-            return DllWrapper.TdlEnsembleAgentAdd(_ptr, agentToAdd.Ptr);
+            var result = DllWrapper.TdlEnsembleAgentAdd(_ptr, agentToAdd.Ptr);
+            OnPropertyChanged(nameof(StateTypeId));
+            return result;
         }
 
 
@@ -149,7 +151,9 @@ namespace Monitor.Agents
         /// </summary>
         public bool RemoveSubAgent(int subAgentIndex)
         {
-            return DllWrapper.TdlEnsembleAgentRemove(_ptr, subAgentIndex);
+            var result = DllWrapper.TdlEnsembleAgentRemove(_ptr, subAgentIndex);
+            OnPropertyChanged(nameof(StateTypeId));
+            return result;
         }
 
         /// <summary>

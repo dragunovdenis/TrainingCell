@@ -50,7 +50,7 @@ namespace TrainingCell
 				for (const auto piece_token : in)
 				{
 					const auto positive = !Chess::PieceController::is_rival_piece(piece_token);
-					
+
 					for (auto channel_id = 0; channel_id < channels; ++channel_id)
 					{
 						const auto bit_present = static_cast<int>((piece_token & (1 << channel_id)) != 0);
@@ -96,5 +96,10 @@ namespace TrainingCell
 	bool StateConverter::operator!=(const StateConverter& anotherConverter) const
 	{
 		return !(*this == anotherConverter);
+	}
+
+	StateConversionType StateConverter::get_type() const
+	{
+		return _type;
 	}
 }

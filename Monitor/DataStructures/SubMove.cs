@@ -24,7 +24,7 @@ namespace Monitor.DataStructures
     /// Must be kept in sync with the corresponding twin structure on the c++ side
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct SubMove
+    public struct SubMove
     {
         /// <summary>
         /// Position on the checkers board where the sub-move started

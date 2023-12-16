@@ -41,6 +41,11 @@ namespace TrainingCell
 		/// Settings to be used during the training
 		/// </summary>
 		const TdlSettings _settings;
+
+		/// <summary>
+		/// State type ID.
+		/// </summary>
+		const StateTypeId _state_type_id;
 		
 	public:
 
@@ -54,7 +59,7 @@ namespace TrainingCell
 		/// </summary>
 		/// <param name="net_ptr">Pointer to a neural net to operate on</param>
 		/// <param name="settings">Settings to be used in the TD-lambda training process</param>
-		TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings);
+		TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings, const StateTypeId state_type_id);
 
 		/// <summary>
 		/// See summary of the base class declaration
@@ -65,5 +70,10 @@ namespace TrainingCell
 		/// See summary of the base class declaration
 		/// </summary>
 		void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) override;
+
+		/// <summary>
+		/// See documentation of the base class.
+		/// </summary>
+		[[nodiscard]] StateTypeId get_state_type_id() const override;
 	};
 }

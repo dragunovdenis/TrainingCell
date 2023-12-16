@@ -79,4 +79,9 @@ namespace TrainingCell
 	{
 		throw std::exception("Not implemented");
 	}
+
+	StateTypeId Agent::get_state_type_id() const
+	{
+		return StateTypeId::ALL;
+	}
 }

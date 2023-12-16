@@ -47,6 +47,11 @@ namespace Monitor.Agents
         /// Brief summary of the current agent instance
         /// </summary>
         string Summary { get; }
+
+        /// <summary>
+        /// Getter for the state type ID property of the agent.
+        /// </summary>
+        DllWrapper.StateTypeId StateTypeId { get; }
     }
 
     /// <summary>
@@ -94,6 +99,11 @@ namespace Monitor.Agents
         /// Brief summary of the current agent instance
         /// </summary>
         public abstract string Summary { get; }
+
+        /// <summary>
+        /// Getter for the state type ID property of the agent.
+        /// </summary>
+        public DllWrapper.StateTypeId StateTypeId => DllWrapper.AgentGetStateTypeId(Ptr);
 
         /// <summary>
         /// Name of the agent

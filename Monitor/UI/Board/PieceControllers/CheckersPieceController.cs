@@ -37,7 +37,7 @@ namespace Monitor.UI.Board.PieceControllers
         /// <summary>
         /// See the summary of the interface method.
         /// </summary>
-        public DllWrapper.GameKind GetGameKind => DllWrapper.GameKind.Checkers;
+        public DllWrapper.StateTypeId StateTypeId => DllWrapper.StateTypeId.Checkers;
 
 
         /// <summary>

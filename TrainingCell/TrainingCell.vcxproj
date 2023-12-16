@@ -45,6 +45,8 @@
     <ClInclude Include="Headers\RandomAgent.h" />
     <ClInclude Include="Headers\StateConverter.h" />
     <ClInclude Include="Headers\StateHandleGeneral.h" />
+    <ClInclude Include="Headers\StateTypeId.h" />
+    <ClInclude Include="Headers\StateTypeController.h" />
     <ClInclude Include="Headers\SubMove.h" />
     <ClInclude Include="Headers\TdlAbstractAgent.h" />
     <ClInclude Include="Headers\TdLambdaAgent.h" />
@@ -75,6 +77,8 @@
     <ClCompile Include="Source\RandomAgent.cpp" />
     <ClCompile Include="Source\StateConverter.cpp" />
     <ClCompile Include="Source\StateHandleGeneral.cpp" />
+    <ClCompile Include="Source\StateTypeController.cpp" />
+    <ClCompile Include="Source\StateTypeId.cpp" />
     <ClCompile Include="Source\SubMove.cpp" />
     <ClCompile Include="Source\TdlAbstractAgent.cpp" />
     <ClCompile Include="Source\TdLambdaAgent.cpp" />

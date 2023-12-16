@@ -15,7 +15,8 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "..\Headers\Board.h"
+#include "../Headers/Board.h"
+#include "../Headers/StateTypeController.h"
 
 namespace TrainingCell
 {
@@ -88,6 +89,9 @@ namespace TrainingCell
 		CancelCallBack cancel,
 		ErrorMessageCallBack error)
 	{
+		if (!StateTypeController::validate(*agent_to_move(), *agent_to_wait(), start_state))
+			throw std::exception("Agents and state incompatible.");
+
 		try
 		{
 			for (auto episode_id = 0; episode_id < episodes; episode_id++)

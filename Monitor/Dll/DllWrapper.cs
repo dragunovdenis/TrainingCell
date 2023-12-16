@@ -24,7 +24,7 @@ namespace Monitor.Dll
     /// <summary>
     /// Wrapping functionality to communicate with the code inside native dll
     /// </summary>
-    internal static class DllWrapper
+    public static class DllWrapper
     {
         private const string DllName = "TrainingCellDll.dll";
 
@@ -82,13 +82,16 @@ namespace Monitor.Dll
             uint[] array);
 
         /// <summary>
-        /// Kind of a game.
+        /// Represents state type identifier.
+        /// Should be kept in sync with the corresponding data type on C++ side.
         /// </summary>
-        public enum GameKind : int
+        [Flags]
+        public enum StateTypeId : int
         {
-            Unknown = 0,
-            Checkers = 1,
-            Chess = 2,
+            All = -1,
+            Invalid = 0,
+            Checkers = 1 << 0,
+            Chess = 1 << 1,
         }
 
         /// <summary>
@@ -97,7 +100,7 @@ namespace Monitor.Dll
         [DllImport(dllName: DllName)]
         public static extern int RunTraining(IntPtr agent1, IntPtr agent2, int episodes,
             [MarshalAs(UnmanagedType.I4)]
-            GameKind gameKind,
+            StateTypeId gameKind,
             [MarshalAs(UnmanagedType.FunctionPtr)]
             PublishStateCallBack publishStateCallBack,
             [MarshalAs(UnmanagedType.FunctionPtr)]
@@ -118,6 +121,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool FreeRandomAgent(IntPtr agentPtr);
         #endregion
 
@@ -129,7 +133,8 @@ namespace Monitor.Dll
         public static extern IntPtr ConstructTdLambdaAgent(
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
             uint[] layerDims,
-            int layerDimsSize, double explorationEpsilon, double lambda, double gamma, double alpha);
+            int layerDimsSize, double explorationEpsilon, double lambda, double gamma, double alpha,
+            [MarshalAs(UnmanagedType.I4)] StateTypeId stateTypeId);
 
         /// <summary>
         /// Wrapper for the corresponding method
@@ -141,6 +146,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentsAreEqual(IntPtr agentPtr0, IntPtr agentPtr1);
 
         /// <summary>
@@ -153,12 +159,14 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName, EntryPoint = "TdLambdaAgentSaveToFile", CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool SaveTdLambdaAgent(IntPtr agentPtr, string path);
 
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetEpsilon(IntPtr agentPtr, double explorationEpsilon);
 
         /// <summary>
@@ -171,6 +179,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetLambda(IntPtr agentPtr, double lambda);
 
         /// <summary>
@@ -183,6 +192,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetGamma(IntPtr agentPtr, double gamma);
 
         /// <summary>
@@ -195,6 +205,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetLearningRate(IntPtr agentPtr, double learningRater);
 
         /// <summary>
@@ -207,6 +218,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetRewardFactor(IntPtr agentPtr, double rewardFactor);
 
         /// <summary>
@@ -219,6 +231,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetSearchDepth(IntPtr agentPtr, int searchDepth);
 
         /// <summary>
@@ -231,18 +244,21 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentGetNetDimensions(IntPtr agentPtr, AcquireArrayCallBack catchArray);
 
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentEqual(IntPtr agentPtr1, IntPtr agentPtr2);
 
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool FreeTdLambdaAgent(IntPtr agentPtr);
 
         /// <summary>
@@ -255,6 +271,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetSearchMode(IntPtr agentPtr,
             [MarshalAs(UnmanagedType.U1)]
             bool searchMode);
@@ -269,6 +286,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentSetSearchModeIterations(IntPtr agentPtr, int searchIterations);
 
         /// <summary>
@@ -329,6 +347,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool FreeInteractiveAgent(IntPtr agentPtr);
         #endregion
 
@@ -337,6 +356,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool AgentSetTrainingMode(IntPtr agentPtr,
             [MarshalAs(UnmanagedType.U1)]
             bool trainingMode);
@@ -362,11 +382,18 @@ namespace Monitor.Dll
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.I4)]
+        public static extern StateTypeId AgentGetStateTypeId(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
         [DllImport(dllName: DllName, EntryPoint = "AgentGetName")]
         private static extern IntPtr AgentGetNameInternal(IntPtr agentPtr);
 
         /// <summary>
-        /// Converts given pointer to ANSI atring
+        /// Converts given pointer to ANSI string
         /// </summary>
         private static string PtrToAnsiString(IntPtr ptr)
         {
@@ -396,6 +423,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName, CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool AgentSetName(IntPtr agentPtr, string id);
 
         /// <summary>
@@ -423,6 +451,14 @@ namespace Monitor.Dll
         /// </summary>
         [DllImport(dllName: DllName, CharSet = CharSet.Ansi)]
         public static extern int AgentAddRecord(IntPtr agentPtr, string record);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return:MarshalAs(UnmanagedType.U1)]
+        public static extern bool CanPlay(IntPtr agent0Ptr, IntPtr agent1Ptr, [MarshalAs(UnmanagedType.I4)] out StateTypeId suggestedStateTypeId);
+
         #endregion
 
         #region AgentPack
@@ -436,12 +472,14 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName, CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool AgentPackSaveToFile(IntPtr agentPackPtr, string path);
 
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool AgentPackFree(IntPtr agentPackPtr);
 
         /// <summary>
@@ -464,12 +502,14 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool FreeTdlEnsembleAgent(IntPtr ensembleAgentPtr);
 
         /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName, CharSet = CharSet.Ansi)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool SaveTdlEnsembleAgent(IntPtr ensembleAgentPtr, string filePath);
 
         /// <summary>
@@ -514,6 +554,7 @@ namespace Monitor.Dll
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdlEnsembleAgentRemove(IntPtr ensembleAgentPtr, int subAgentId);
 
         /// <summary>

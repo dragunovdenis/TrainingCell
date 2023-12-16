@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using Monitor.Dll;
 
 namespace Monitor.Agents
 {
@@ -74,6 +75,10 @@ namespace Monitor.Agents
         /// </summary>
         double RewardFactor { get; }
 
+        /// <summary>
+        /// ID of the state type the agent specializes on.
+        /// </summary>
+        DllWrapper.StateTypeId StateTypeId { get; }
     }
 
     /// <summary>
@@ -132,6 +137,11 @@ namespace Monitor.Agents
         public double RewardFactor { get; set; }
 
         /// <summary>
+        /// ID of the state type the agent specializes on.
+        /// </summary>
+        public DllWrapper.StateTypeId StateTypeId { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public TdlParameters() {}
@@ -154,6 +164,7 @@ namespace Monitor.Agents
             SearchIterations = source.SearchIterations;
             SearchDepth = source.SearchDepth;
             RewardFactor = source.RewardFactor;
+            StateTypeId = source.StateTypeId;
         }
     }
 }

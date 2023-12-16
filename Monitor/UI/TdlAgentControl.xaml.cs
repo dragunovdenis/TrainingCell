@@ -17,11 +17,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using Monitor.Agents;
+using Monitor.Dll;
 
 namespace Monitor.UI
 {
@@ -58,7 +60,7 @@ namespace Monitor.UI
         /// </summary>
         internal TdLambdaAgent CreateAgent()
         {
-            return new TdLambdaAgent(HiddenLayerDimensions.Prepend((uint)32).Append((uint)1).ToArray(), Params);
+            return new TdLambdaAgent(HiddenLayerDimensions.ToArray(), Params);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -116,6 +118,7 @@ namespace Monitor.UI
             SearchDepth = 1000,
             RewardFactor = 1.0,
             Name = "Agent-" + Guid.NewGuid(),
+            StateTypeId = DllWrapper.StateTypeId.Checkers,
         };
 
         /// <summary>
@@ -140,6 +143,7 @@ namespace Monitor.UI
                     OnPropertyChanged(nameof(SearchIterations));
                     OnPropertyChanged(nameof(SearchDepth));
                     OnPropertyChanged(nameof(RewardFactor));
+                    OnPropertyChanged(nameof(StateTypeId));
                 }
             }
         }
@@ -291,6 +295,30 @@ namespace Monitor.UI
                 }
             }
         }
+
+        /// <summary>
+        /// State type ID of the agent.
+        /// </summary>
+        public DllWrapper.StateTypeId StateTypeId
+        {
+            get => _params.StateTypeId;
+
+            set
+            {
+                if (!_params.StateTypeId.Equals(value))
+                {
+                    _params.StateTypeId = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Accessible options for the state type ID parameter.
+        /// </summary>
+        public ObservableCollection<DllWrapper.StateTypeId> StateIdOptions { get; set; } =
+            new ObservableCollection<DllWrapper.StateTypeId>()
+                { DllWrapper.StateTypeId.Checkers, DllWrapper.StateTypeId.Chess };
 
         /// <summary>
         /// Agent's identifier

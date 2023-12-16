@@ -31,6 +31,7 @@ namespace Monitor.UI
         internal TdlAgentDialog(TdLambdaAgent agent = null)
         {
             InitializeComponent();
+            Owner = Application.Current.MainWindow;
 
             if (agent != null)
             {

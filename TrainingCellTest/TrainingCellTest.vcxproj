@@ -98,6 +98,7 @@
     <ClCompile Include="CheckersTestUtils.cpp" />
     <ClCompile Include="ChessStateTest.cpp" />
     <ClCompile Include="StateConverterTest.cpp" />
+    <ClCompile Include="TdLambdaStateSpecializationTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TrainingCell\TrainingCell.vcxproj">

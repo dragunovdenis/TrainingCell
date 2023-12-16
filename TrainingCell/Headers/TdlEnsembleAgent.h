@@ -152,5 +152,10 @@ namespace TrainingCell
 		/// Returns true if the current agent is equal to the given one
 		/// </summary>
 		[[nodiscard]] bool equal(const Agent& agent) const override;
+
+		/// <summary>
+		/// See documentation in the base class.
+		/// </summary>
+		[[nodiscard]] StateTypeId get_state_type_id() const override;
 	};
 }

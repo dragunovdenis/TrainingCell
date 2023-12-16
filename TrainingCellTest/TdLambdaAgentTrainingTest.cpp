@@ -52,7 +52,7 @@ namespace TrainingCellTest
 			const AutoTrainingSubMode training_sub_mode = AutoTrainingSubMode::FULL )
 		{
 			RandomAgent agent0;
-			TdLambdaAgent result({ 32, 64, 32, 16, 8, 1 }, 0.05, 0.15, 0.97, 0.025);
+			TdLambdaAgent result({ 64, 32, 16, 8 }, 0.05, 0.15, 0.97, 0.025, StateTypeId::CHECKERS);
 			result.set_training_sub_mode(training_sub_mode);
 			train_agent_standard(result, episodes_with_exploration, mode);
 

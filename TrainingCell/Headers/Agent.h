@@ -105,6 +105,11 @@ namespace TrainingCell
 		/// Returns smart pointer to a clone of the current instance
 		/// </summary>
 		[[nodiscard]] virtual std::unique_ptr<Agent> clone() const;
+
+		/// <summary>
+		/// See documentation of the base class.
+		/// </summary>
+		[[nodiscard]] StateTypeId get_state_type_id() const override;
 	};
 }
 

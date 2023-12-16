@@ -36,7 +36,7 @@ namespace Monitor.UI.Board.PieceControllers
         /// <summary>
         /// See the summary of the interface method.
         /// </summary>
-        public DllWrapper.GameKind GetGameKind => DllWrapper.GameKind.Chess;
+        public DllWrapper.StateTypeId StateTypeId => DllWrapper.StateTypeId.Chess;
 
         /// <summary>
         /// Representation of a single chess field with all the related data/

@@ -52,15 +52,16 @@ namespace TrainingCell
 		TdLambdaAgent(const std::string& script_str);
 
 		/// <summary>Constructor</summary>
-		/// <param name="layer_dimensions">Dimensions of the layers of the neural net that will serve as "afterstate value function".
-		/// Must start with "32" and end with "1"</param>
+		/// <param name="hidden_layer_dimensions">Dimensions of the hidden(!) layers of the neural net that will serve as "afterstate value function";
+		/// They will be automatically augmented with "input" layer compatible with the suggested state type and the "output" layer of dimension "1".</param>
 		/// <param name="exploration_epsilon">Probability of taking an exploratory move during the training process, (0,1)</param>
 		/// <param name="lambda">Lambda parameters used to determine "strength" of eligibility traces, (0,1)</param>
 		/// <param name="gamma">Discount reward determining how reward decay with each next move, (0,1) </param>
 		/// <param name="alpha">Learning rate</param>
+		/// <param name="state_type_id">Type ID of the state the agent will be "compatible" with.</param>
 		/// <param name="name">Name of the agent</param>
-		TdLambdaAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-			const double lambda, const double gamma, const double alpha, const std::string& name = "AutoAgent");
+		TdLambdaAgent(const std::vector<std::size_t>& hidden_layer_dimensions, const double exploration_epsilon,
+			const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id, const std::string& name = "AutoAgent");
 
 		/// <summary>
 		/// Returns type ID

@@ -164,6 +164,11 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
+	std::size_t CheckersState::state_size()
+	{
+		return StateSize;
+	}
+
 	std::vector<int> CheckersState::expand_to_64(const std::vector<int>& state_vec)
 	{
 		std::vector<int> result(state_vec.size() * 2, 0);
@@ -323,6 +328,16 @@ namespace TrainingCell::Checkers
 	std::unique_ptr<IState> CheckersState::yield() const
 	{
 		return std::make_unique<StateHandle>(*this);
+	}
+
+	StateTypeId CheckersState::type()
+	{
+		return StateTypeId::CHECKERS;
+	}
+
+	StateTypeId CheckersState::state_type() const
+	{
+		return type();
 	}
 
 	bool CheckersState::is_allay_piece(const Piece piece)

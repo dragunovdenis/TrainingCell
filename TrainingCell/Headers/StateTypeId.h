@@ -16,45 +16,33 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "IStateReadOnly.h"
+#include <msgpack.hpp>
 
 namespace TrainingCell
 {
 	/// <summary>
-	///	Representation of possible game statuses
+	/// Represents different state types.
 	/// </summary>
-	enum class GameResult : int {
-		Victory = 1,
-		Loss = -1,
-		Draw = 0,
+	enum class StateTypeId : int
+	{
+		// The values of the items below are organized in such a way that
+		// to ensure "compatibility" of states one needs to check if
+		// the result of bitwise AND of their type IDs is nonzero or not.
+		ALL = -1, // represents "sum" of all state type IDs
+		INVALID = 0,
+		CHECKERS = 1 << 0,
+		CHESS = 1 << 1,
 	};
 
 	/// <summary>
-	/// Minimal "interface" that each checkers agent must possess
+	/// Converts given string to StateTypeId.
 	/// </summary>
-	class IMinimalAgent
-	{
-	public:
-		/// <summary>
-		/// Virtual destructor
-		/// </summary>
-		virtual ~IMinimalAgent() = default;
+	StateTypeId parse_state_type_id(const std::string& str);
 
-		/// <summary>
-		/// Returns index of a move from the given collection of available moves
-		/// that the agent "prefers" to take given the current state
-		/// </summary>
-		virtual int make_move(const IStateReadOnly& state, const bool as_white) = 0;
-
-		/// <summary>
-		/// The method is supposed to be called by the "training environment" when the current training episode is over
-		/// to notify the agent about the "final" state and the result of entire game (episode)
-		/// </summary>
-		virtual void game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white) = 0;
-
-		/// <summary>
-		/// Returns type of the state the agent is compatible with.
-		/// </summary>
-		[[nodiscard]] virtual StateTypeId get_state_type_id() const = 0;
-	};
+	/// <summary>
+	/// Returns string representation of the given state type ID.
+	/// </summary>
+	std::string to_string(const StateTypeId& state_type_id);
 }
+
+MSGPACK_ADD_ENUM(TrainingCell::StateTypeId)

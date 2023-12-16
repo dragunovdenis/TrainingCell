@@ -61,7 +61,7 @@ namespace Monitor.UI.Board
         /// </summary>
         private readonly Dispatcher _uiThreadDispatcher;
 
-        private readonly IPieceController _pieceController = new CheckersPieceController();
+        private IPieceController _pieceController;
 
         /// <summary>
         /// Provides means to cancel ongoing playing
@@ -280,6 +280,22 @@ namespace Monitor.UI.Board
         }
 
         /// <summary>
+        /// Returns instance of piece controller compatible with the given state type ID.
+        /// </summary>
+        IPieceController ResolvePieceController(IAgent agent0, IAgent agent1)
+        {
+            if (!DllWrapper.CanPlay(agent0.Ptr, agent1.Ptr, out var stateTypeId))
+                return null;
+
+            switch (stateTypeId)
+            {
+                case DllWrapper.StateTypeId.Checkers : return new CheckersPieceController();
+                case DllWrapper.StateTypeId.Chess: return new ChessPieceController();
+                default: return null;
+            }
+        }
+
+        /// <summary>
         /// Starts checkers game with the agents of the two given types (asynchronously) and returns immediately
         /// Returns true if the previous playing task is complete and the current one is successfully started
         /// </summary>
@@ -308,9 +324,11 @@ namespace Monitor.UI.Board
                         int blackWinsCounter = 0;
                         int staleMatesCounter = 0;
 
+                        _pieceController = ResolvePieceController(agentWhite, agentBlack);
+
                         var timePoint = DateTime.Now;
                         var res = DllWrapper.RunTraining(
-                            agentWhite.Ptr, agentBlack.Ptr, episodes, _pieceController.GetGameKind,
+                            agentWhite.Ptr, agentBlack.Ptr, episodes, _pieceController.StateTypeId,
                             (state, size, subMoves, subMovesCount, agentToMovePtr) =>
                             {
                                 if (size != Checkerboard.Fields)

@@ -19,6 +19,7 @@
 #include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
 #include "../Headers/TdlLegacyMsgPackAdapter.h"
+#include "../Headers/StateTypeController.h"
 
 namespace TrainingCell
 {
@@ -200,5 +201,26 @@ namespace TrainingCell
 			_ensemble == other_ensemble_ptr->_ensemble &&
 			_chosen_agent_id == other_ensemble_ptr->_chosen_agent_id &&
 			_msg_pack_version == other_ensemble_ptr->_msg_pack_version;
+	}
+
+	StateTypeId TdlEnsembleAgent::get_state_type_id() const
+	{
+		if (_ensemble.empty())
+			return StateTypeId::INVALID;
+
+		auto result = _ensemble[0].get_state_type_id();
+
+		for (auto agent_id = 1ull; agent_id < _ensemble.size(); ++agent_id)
+		{
+			const auto trial_state_id = _ensemble[agent_id].get_state_type_id();
+
+			// Sanity check
+			if (!StateTypeController::states_are_compatible(result, trial_state_id))
+				throw std::exception("Incompatible agents in ensemble");
+
+			result = StateTypeController::get_common_state(result, trial_state_id);
+		}
+
+		return result;
 	}
 }

@@ -37,6 +37,7 @@ namespace Monitor.UI
         public EnsembleAgentDialog(IList<ITdLambdaAgentReadOnly> agents, EnsembleAgent ensembleToEdit)
         {
             InitializeComponent();
+            Owner = Application.Current.MainWindow;
             Ensemble = ensembleToEdit;
             AgentControl.Assign(agents, ensembleToEdit);
         }

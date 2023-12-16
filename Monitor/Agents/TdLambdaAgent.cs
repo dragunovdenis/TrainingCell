@@ -107,14 +107,13 @@ namespace Monitor.Agents
         /// Constructor
         /// </summary>
         public TdLambdaAgent(uint[] layerDims,
-            double explorationEpsilon, double lambda, double gamma, double alpha)
+            double explorationEpsilon, double lambda, double gamma, double alpha, DllWrapper.StateTypeId stateTypeId)
         {
-            if (layerDims == null || layerDims.Length < 2 ||
-                layerDims[0] != 32 || layerDims.Last() != 1)
+            if (layerDims == null)
                 throw new Exception("Invalid input");
 
             _ptr = DllWrapper.ConstructTdLambdaAgent(layerDims, layerDims.Length,
-                explorationEpsilon, lambda, gamma, alpha);
+                explorationEpsilon, lambda, gamma, alpha, stateTypeId);
 
             if (Ptr == IntPtr.Zero)
                 throw new Exception("Failed to construct agent");
@@ -123,7 +122,8 @@ namespace Monitor.Agents
         /// <summary>
         /// Constructor
         /// </summary>
-        public TdLambdaAgent(uint[] layerDims, ITdlParameters parameters) : this(layerDims, 0, 0, 0, 0)
+        public TdLambdaAgent(uint[] layerDims, ITdlParameters parameters) :
+            this(layerDims, 0, 0, 0, 0, parameters.StateTypeId)
         {
             SetTrainingParameters(parameters);
         }
@@ -135,15 +135,6 @@ namespace Monitor.Agents
         {
             _ptr = ptr;
             _ownPointer = ownPointer;
-        }
-
-        /// <summary>
-        /// Agent with "standard" set of parameters
-        /// </summary>
-        public TdLambdaAgent(string name) : this(new uint[] {32, 64, 32, 16, 8, 1},
-            0.05, 0.2, 0.8, 0.01)
-        {
-            Name = name;
         }
 
         /// <summary>
@@ -397,6 +388,7 @@ namespace Monitor.Agents
                 SearchIterations = SearchIterations,
                 SearchDepth = SearchDepth,
                 RewardFactor = RewardFactor,
+                StateTypeId = StateTypeId,
             };
         }
 
@@ -418,6 +410,10 @@ namespace Monitor.Agents
             SearchIterations = parameters.SearchIterations;
             SearchDepth = parameters.SearchDepth;
             RewardFactor = parameters.RewardFactor;
+
+            // Sanity check
+            if (StateTypeId != parameters.StateTypeId)
+                throw new Exception("State type ID can't be updated");
 
             return true;
         }

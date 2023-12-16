@@ -39,6 +39,9 @@
     <ClCompile Include="StateConverterTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TdLambdaStateSpecializationTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -52,6 +55,9 @@
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
     <None Include="TestData\TdlTrainingRegression\agent1_trained.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\search_net.dat">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
   </ItemGroup>

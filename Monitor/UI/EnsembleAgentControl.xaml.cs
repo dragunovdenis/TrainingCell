@@ -21,8 +21,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Controls;
 using Monitor.Agents;
+using Monitor.Dll;
 
 namespace Monitor.UI
 {
@@ -34,7 +36,7 @@ namespace Monitor.UI
         /// <summary>
         /// Representation of an agent in the ListBox
         /// </summary>
-        public class AgentItem
+        public class AgentItem : INotifyPropertyChanged
         {
             /// <summary>
             /// Read-only access to the underlying agent
@@ -62,14 +64,57 @@ namespace Monitor.UI
                 CanBeAdded = canBeAdded;
             }
 
+            public bool _checked;
+
             /// <summary>
             /// Property representing if the agent is checked in the ListBox
             /// </summary>
-            public bool Checked { get; set; }
+            public bool Checked
+            {
+                get => _checked;
+                set
+                {
+                    if (_checked != value)
+                    {
+                        _checked = value;
+                        OnPropertyChanged();
+                    }
+                }
+            }
+
+            private bool _isEnabled;
+
+            /// <summary>
+            /// Returns "true" if the current item is available for selection.
+            /// </summary>
+            public bool IsEnabled
+            {
+                get => _isEnabled;
+
+                set
+                {
+                    if (value != _isEnabled)
+                    {
+                        _isEnabled = value;
+                        OnPropertyChanged();
+                    }
+                }
+            }
+
+            // Event handler
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            /// <summary>
+            /// Notifies about change of a property with the given name
+            /// </summary>
+            protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         /// <summary>
-        /// Depending collection of checked agents (those that need to be added to the corresponding ensemble)
+        /// Dependent collection of checked agents (those that need to be added to the corresponding ensemble)
         /// </summary>
         public IList<ITdLambdaAgentReadOnly> GetCheckedAgents()
         {
@@ -94,7 +139,7 @@ namespace Monitor.UI
             if (checkedAgents.Count == 0)
                 return null;
 
-            var result =  new EnsembleAgent(null)
+            var result = new EnsembleAgent(null)
             {
                 Name = AgentName,
                 SingleAgentMode = UseSingleAgent,
@@ -118,13 +163,49 @@ namespace Monitor.UI
         }
 
         /// <summary>
+        /// Updates agent items to prevent incompatible agents from being selected into the same ensemble.
+        /// </summary>
+        private void UpdateAgentCompatibility(DllWrapper.StateTypeId ensembleSpecialization)
+        {
+            foreach (var agentItem in Agents)
+                agentItem.IsEnabled = (int)(ensembleSpecialization & agentItem.Agent.StateTypeId) != 0;
+        }
+
+        /// <summary>
+        /// Based on the agent items that are currently selected deduces
+        /// "current" specialization of the ensemble "under construction".
+        /// </summary>
+        private DllWrapper.StateTypeId DeduceCurrentSpecialization()
+        {
+            var result = DllWrapper.StateTypeId.All;
+
+            foreach (var agentItem in Agents)
+            {
+                if (agentItem.Checked)
+                {
+                    result &= agentItem.Agent.StateTypeId;
+
+                    // sanity check
+                    if (!agentItem.IsEnabled)
+                        throw new Exception("Checked agent bust be enabled");
+                }
+            }
+
+            // sanity check
+            if (result == DllWrapper.StateTypeId.Invalid)
+                throw new Exception("Checked agents are incompatible.");
+            
+            return result;
+        }
+
+        /// <summary>
         /// Method to assign collection of available agents
         /// </summary>
         public void Assign(IEnumerable<ITdLambdaAgentReadOnly> agents, EnsembleAgent ensemble = null)
         {
             Agents = new ObservableCollection<AgentItem>(agents.Select((x, i) => new AgentItem(x, i, canBeAdded:true)));
 
-            if (ensemble != null)
+            if (ensemble != null && ensemble.Size > 0)
             {
                 var subAgents = ensemble.GetSubAgents();
 
@@ -137,7 +218,11 @@ namespace Monitor.UI
                 AgentName = ensemble.Name;
                 AgentId = ensemble.Id;
                 UseSingleAgent = ensemble.SingleAgentMode;
+
+                UpdateAgentCompatibility(ensemble.StateTypeId);
             }
+            else
+                UpdateAgentCompatibility(DllWrapper.StateTypeId.All);
 
             OnPropertyChanged(nameof(Agents));
         }
@@ -195,6 +280,19 @@ namespace Monitor.UI
             field = value;
             OnPropertyChanged(propertyName);
             return true;
+        }
+
+        /// <summary>
+        /// Event handler.
+        /// </summary>
+        private void CheckBox_OnChecked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = (CheckBox)sender;
+            if (checkBox.IsChecked.HasValue)
+            {
+                var currentSpecialization = DeduceCurrentSpecialization();
+                UpdateAgentCompatibility(currentSpecialization);
+            }
         }
     }
 }

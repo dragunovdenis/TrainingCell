@@ -340,6 +340,11 @@ namespace TrainingCell::Checkers
 		[[nodiscard]] std::vector<int> to_vector() const;
 
 		/// <summary>
+		/// Returns size of the state represented as a vector of integers delivered by `to_vector()` method;
+		/// </summary>
+		static std::size_t state_size();
+
+		/// <summary>
 		/// Returns a 64 elements long "int-vector" representation of the state.
 		/// </summary>
 		[[nodiscard]] std::vector<int> to_vector_64() const;
@@ -374,6 +379,16 @@ namespace TrainingCell::Checkers
 		/// Returns "handle" to a copy of the current state <see cref="StateHandle"/>.
 		/// </summary>
 		[[nodiscard]] std::unique_ptr<IState> yield() const override;
+
+		/// <summary>
+		/// Returns type identifier of the state.
+		/// </summary>
+		static StateTypeId type();
+
+		/// <summary>
+		/// Returns type identifier of the state that can be yielded by the "seed".
+		/// </summary>
+		[[nodiscard]] StateTypeId state_type() const override;
 
 		/// <summary>
 		/// Returns "anti"-piece for the given one.

@@ -57,19 +57,25 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
         <TextBox Margin="10, 0, 10, 0" Grid.Row="1" Text="Select agents to add to ensemble:" Style="{StaticResource TextBoxReadOnlyStyle}"/>
         <DockPanel Margin="10, 0, 10, 10" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Border Style="{StaticResource LocalBorderStyle}">
-                <ListBox ItemsSource="{Binding Agents}" SelectionMode="Multiple" Name="AgentsListBox" MaxHeight="200">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="IsSelected" Value="{Binding Checked, Mode=TwoWay}" />
+                <DataGrid ItemsSource="{Binding Agents}" Name="AgentsListBox" MaxHeight="200" MaxWidth="500" AutoGenerateColumns="False"
+                          SelectionMode="Single" SelectionUnit="FullRow">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
                         </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding Checked, Mode=TwoWay}" Content="{Binding Agent.Name, Mode=OneWay}"
-                                      ToolTip="{Binding Agent.Summary}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="" Width="50" >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Checked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Checked="CheckBox_OnChecked" Unchecked="CheckBox_OnChecked" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Agent.Name, Mode=OneWay}" Width="*" />
+                        <DataGridTextColumn Header="Specialization" Binding="{Binding Agent.StateTypeId, Mode=OneWay}" Width="100" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </Border>
         </DockPanel>
     </Grid>

@@ -20,6 +20,7 @@
 #include "../Headers/TdlTrainingAdapter.h"
 #include "../Headers/Board.h"
 #include <nlohmann/json.hpp>
+#include "../Headers/StateTypeController.h"
 
 namespace TrainingCell
 {
@@ -70,6 +71,7 @@ namespace TrainingCell
 	const char* json_search_method_id = "SearchMethod";
 	const char* json_td_search_iterations_id = "TdSearchIterations";
 	const char* json_td_search_depth_id = "TdSearchDepth";
+	const char* json_state_type_id = "StateType";
 
 	void TdlAbstractAgent::assign(const std::string& script_str, const bool hyper_params_only)
 	{
@@ -95,6 +97,20 @@ namespace TrainingCell
 				auto layer_dims_str = json[json_net_dim_id].get<std::string>();
 				initialize_net(DeepLearning::Utils::parse_vector<std::size_t>(layer_dims_str));
 			}
+		}
+
+		if (json.contains(json_state_type_id))
+		{
+			const auto suggested_state_type = parse_state_type_id(json[json_state_type_id].get<std::string>());
+
+			if (hyper_params_only)
+			{
+				// Sanity check
+				if (suggested_state_type != _state_type_id)
+					throw std::exception("Unexpected state type encountered");
+			}
+			else
+				set_state_type_id(suggested_state_type);
 		}
 
 		if (json.contains(json_lambda_id))
@@ -123,6 +139,8 @@ namespace TrainingCell
 
 		if (json.contains(json_td_search_depth_id))
 			_td_search_depth = json[json_td_search_depth_id].get<int>();
+
+		validate();
 	}
 
 	std::string TdlAbstractAgent::to_script() const
@@ -140,6 +158,7 @@ namespace TrainingCell
 		json[json_search_method_id] = _search_method;
 		json[json_td_search_iterations_id] = _td_search_iterations;
 		json[json_td_search_depth_id] = _td_search_depth;
+		json[json_state_type_id] = to_string(_state_type_id);
 
 		return json.dump();
 	}
@@ -153,9 +172,12 @@ namespace TrainingCell
 			_lambda == anotherAgent._lambda &&
 			_gamma == anotherAgent._gamma &&
 			_alpha == anotherAgent._alpha &&
+			_reward_factor == anotherAgent._reward_factor &&
 			_search_method == anotherAgent._search_method &&
 			_td_search_iterations == anotherAgent._td_search_iterations &&
-			_td_search_depth == anotherAgent._td_search_depth;
+			_td_search_depth == anotherAgent._td_search_depth &&
+			_state_type_id == anotherAgent._state_type_id &&
+			_converter == anotherAgent._converter;
 	}
 
 	bool TdlAbstractAgent::equal(const Agent& agent) const
@@ -164,23 +186,18 @@ namespace TrainingCell
 
 		return other_agent_ptr != nullptr && Agent::equal(agent) &&
 			_net.equal(other_agent_ptr->_net) &&
-			_exploration_epsilon == other_agent_ptr->_exploration_epsilon &&
-			_alpha == other_agent_ptr->_alpha &&
-			_gamma == other_agent_ptr->_gamma &&
-			_lambda == other_agent_ptr->_lambda &&
-			_training_sub_mode == other_agent_ptr->_training_sub_mode &&
-			_reward_factor == other_agent_ptr->_reward_factor &&
-			_search_method == other_agent_ptr->_search_method &&
-			_td_search_iterations == other_agent_ptr->_td_search_iterations &&
-			_td_search_depth == other_agent_ptr->_td_search_depth;
+			equal_hyperparams(*other_agent_ptr);
 	}
 
-	TdlAbstractAgent::TdlAbstractAgent(const std::vector<std::size_t>& layer_dimensions,
-	                                   const double exploration_epsilon, const double lambda, const double gamma, const double alpha,
+	TdlAbstractAgent::TdlAbstractAgent(const std::vector<std::size_t>& hidden_layer_dimensions,
+	                                   const double exploration_epsilon, const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id,
 	                                   const std::string& name) : _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha)
 	{
+
 		set_name(name);
-		initialize_net(layer_dimensions);
+		set_state_type_id(state_type_id);
+		initialize_net(augment_hidden_layer_dimensions(hidden_layer_dimensions));
+		validate();
 	}
 
 	int TdlAbstractAgent::make_move(const IStateReadOnly& state, const bool as_white)
@@ -308,6 +325,11 @@ namespace TrainingCell
 		_td_search_depth = depth;
 	}
 
+	StateTypeId TdlAbstractAgent::get_state_type_id() const
+	{
+		return _state_type_id;
+	}
+
 	void TdlAbstractAgent::set_lambda(const double lambda)
 	{
 		_lambda = lambda;
@@ -357,10 +379,43 @@ namespace TrainingCell
 		if (!_search_net)
 			_search_net = std::make_optional(NetWithConverter(_net, _converter)); // copy the current net if search net is not defined
 
-		TdlTrainingAdapter adapter(&_search_net.value(), get_search_settings());
+		TdlTrainingAdapter adapter(&_search_net.value(), get_search_settings(), _state_type_id);
 		Board board(&adapter, &adapter);
 		board.play(_td_search_iterations, state.current_state_seed(), 100 /*max moves without capture for a draw*/);
 
 		return TdLambdaSubAgent::pick_move(state, _search_net.value());
+	}
+
+	void TdlAbstractAgent::validate() const
+	{
+		if (!validate_net_input_size(StateTypeController::get_state_size(_state_type_id)))
+			throw std::exception("Neural net is incompatible with the chosen state type");
+	}
+
+	StateConversionType to_state_conversion_type(const StateTypeId state_type_id)
+	{
+		switch (state_type_id)
+		{
+			case StateTypeId::CHECKERS: return StateConversionType::CheckersStandard;
+			case StateTypeId::CHESS: return StateConversionType::ChessStandard;
+			default: throw std::exception("Unexpected state type");
+		}
+	}
+
+	std::vector<std::size_t> TdlAbstractAgent::augment_hidden_layer_dimensions(
+		const std::vector<std::size_t>& hidden_layer_dimensions) const
+	{
+		auto result = hidden_layer_dimensions;
+
+		result.push_back(1);
+		result.insert(result.begin(), calc_input_net_size(StateTypeController::get_state_size(_state_type_id), _converter));
+
+		return result;
+	}
+
+	void TdlAbstractAgent::set_state_type_id(const StateTypeId state_type_id)
+	{
+		_state_type_id = state_type_id;
+		_converter = StateConverter(to_state_conversion_type(_state_type_id));
 	}
 }

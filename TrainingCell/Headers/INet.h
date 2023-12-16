@@ -49,5 +49,10 @@ namespace TrainingCell
 		/// Updates weights of the neural net according to the given gradient, learning rate and regularization parameters.
 		/// </summary>
 		virtual void update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient, const double learning_rate, const double& lambda) = 0;
+
+		/// <summary>
+		/// Returns "true" if the net is "compatible" with a state of the given size.
+		/// </summary>
+		virtual bool validate_net_input_size(const std::size_t input_size) const = 0;
 	};
 }

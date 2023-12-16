@@ -43,4 +43,14 @@ namespace TrainingCell
 	{
 		net().update(gradient, learning_rate, lambda);
 	}
+
+	bool NetWithConverterAbstract::validate_net_input_size(const std::size_t state_size) const
+	{
+		return static_cast<long long>(calc_input_net_size(state_size, converter())) == net().in_size().coord_prod();
+	}
+
+	std::size_t NetWithConverterAbstract::calc_input_net_size(const std::size_t state_size, const StateConverter& converter)
+	{
+		return state_size * converter.get_expansion_factor();
+	}
 }

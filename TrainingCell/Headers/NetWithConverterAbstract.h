@@ -59,7 +59,18 @@ namespace TrainingCell
 		/// <summary>
 		/// See summary of the base class.
 		/// </summary>
-		void update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient, const double learning_rate, const double& lambda) override;
+		void update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient,
+			const double learning_rate, const double& lambda) override;
+
+		/// <summary>
+		/// See summary of the base class.
+		/// </summary>
+		bool validate_net_input_size(const std::size_t state_size) const override;
+
+		/// <summary>
+		/// Returns size of the input neural net layer deduced from the given size of state and the given converter.
+		/// </summary>
+		static std::size_t calc_input_net_size(const std::size_t state_size, const StateConverter& converter);
 	};
 
 }

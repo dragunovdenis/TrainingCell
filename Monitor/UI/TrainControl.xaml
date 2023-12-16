@@ -41,61 +41,66 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-            <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="0" Grid.Row="0" Margin="5">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBox Grid.Row="0" Text="Select Agent:" Margin="10, 5, 10, 0" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
-                    <DockPanel Grid.Row="1" Margin="5" >
-                        <ListBox ItemsSource="{Binding Agents}" Name="AgentPoolList" SelectionChanged="AgentPoolList_OnSelectionChanged">
-                            <ListBox.ItemContainerStyle>
-                                <Style TargetType="ListBoxItem">
-                                    <Setter Property="Content" Value="{Binding Name, Mode=OneWay}"/>
-                                </Style>
-                            </ListBox.ItemContainerStyle>
-                        </ListBox>
-                    </DockPanel>
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="1" Grid.Row="0" Margin="5">
-                <StackPanel>
-                    <StackPanel  Margin="10" IsEnabled="{Binding IsPlaying, Converter = {StaticResource InvertBoolConverter}}">
-                        <Button Name="AssignWhiteAgentButton" Click="AssignWhiteAgentButton_OnClick"
+        <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="0" Grid.Row="0" Margin="5">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBox Grid.Row="0" Text="Select Agent:" Margin="10, 5, 10, 0" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                <DockPanel Grid.Row="1" Margin="5" >
+                    <DataGrid ItemsSource="{Binding Agents}" Name="AgentPoolList" AutoGenerateColumns="False"
+                              SelectionMode="Single" SelectionUnit="FullRow" SelectionChanged="AgentPoolList_OnSelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Specialization" Binding="{Binding StateTypeId}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </Grid>
+        </Border>
+        <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="1" Grid.Row="0" Margin="5">
+            <StackPanel>
+                <StackPanel  Margin="10" IsEnabled="{Binding IsPlaying, Converter = {StaticResource InvertBoolConverter}}">
+                    <Button Name="AssignWhiteAgentButton" Click="AssignWhiteAgentButton_OnClick"
                                 IsEnabled="{Binding ElementName=AgentPoolList, Path=SelectedItems.Count}">
-                            Assign White Agent
-                        </Button>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Text="White Agent:" Style="{StaticResource TransparentBackgroundStyle}" FontWeight="Bold"/>
-                            <TextBox Text="{Binding WhiteAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
-                        </StackPanel>
-                        <Button Name="AssignBlackAgentButton" Click="AssignBlackAgentButton_OnClick"
+                        Assign White Agent
+                    </Button>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="White Agent:" Style="{StaticResource TransparentBackgroundStyle}" FontWeight="Bold"/>
+                        <TextBox Text="{Binding WhiteAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                    </StackPanel>
+                    <Button Name="AssignBlackAgentButton" Click="AssignBlackAgentButton_OnClick"
                                 IsEnabled="{Binding ElementName=AgentPoolList, Path=SelectedItems.Count}">
-                            Assign Black Agent
-                        </Button>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Text="Black Agent:" FontWeight="Bold" Style="{StaticResource TransparentBackgroundStyle}"/>
-                            <TextBox Text="{Binding BlackAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                        Assign Black Agent
+                    </Button>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="Black Agent:" FontWeight="Bold" Style="{StaticResource TransparentBackgroundStyle}"/>
+                        <TextBox Text="{Binding BlackAgent.Name, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="State Type:" FontWeight="Bold" Style="{StaticResource TransparentBackgroundStyle}"/>
+                        <TextBox Text="{Binding CurrentStateType, Mode=OneWay}" Style="{StaticResource TransparentBackgroundStyle}"/>
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Name="PlayButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" 
+                                HorizontalAlignment="Left" Grid.Column="0" Width="100">Play</Button>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBox Margin="5" Text="for"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                            <TextBox Name="EpisodesTextBox" Text="{Binding EpisodesToPlay}" Margin="5"/>
+                            <TextBox Margin="5" Text="episodes"  Style="{StaticResource TransparentBackgroundStyle}"/>
                         </StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Button Name="PlayButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" Grid.Column="0" Width="100">Play</Button>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <TextBox Margin="5" Text="for"  Style="{StaticResource TransparentBackgroundStyle}"/>
-                                <TextBox Name="EpisodesTextBox" Text="{Binding EpisodesToPlay}" Margin="5"/>
-                                <TextBox Margin="5" Text="episodes"  Style="{StaticResource TransparentBackgroundStyle}"/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                    <StackPanel Margin="10, 0, 10, 0">
-                        <Button Name="TerminateButton" IsEnabled="{Binding IsPlaying}" Click="TerminateButton_OnClick">Terminate</Button>
-                    </StackPanel>
+                    </Grid>
                 </StackPanel>
-            </Border>
+                <StackPanel Margin="10, 0, 10, 0">
+                    <Button Name="TerminateButton" IsEnabled="{Binding IsPlaying}" Click="TerminateButton_OnClick">Terminate</Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
         <Border Style="{StaticResource LocalBorderStyle}" Grid.Column="1" Grid.Row="1" Margin="5">
             <StackPanel>
                 <Button  Click="CreateButton_Click">Create Agent</Button>
@@ -116,11 +121,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                 </Grid.RowDefinitions>
                 <TextBox Grid.Row="0" Text="Training Progress:" Margin="10, 5, 10, 0" FontWeight="Bold"  Style="{StaticResource TransparentBackgroundStyle}"/>
                 <DockPanel  Margin="10" Grid.Row="1">
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="InfoScroll">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Name="InfoScroll">
                         <ListBox ItemsSource="{Binding InfoCollection}" Name="InfoList" IsEnabled="False"/>
-                </ScrollViewer>
+                    </ScrollViewer>
                 </DockPanel>
             </Grid>
         </Border>
-</Grid>
+    </Grid>
 </UserControl>

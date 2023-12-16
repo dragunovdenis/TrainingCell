@@ -15,33 +15,35 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Headers/TdlTrainingAdapter.h"
-#include "../Headers/StateTypeController.h"
+#include "../Headers/StateTypeId.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
 
 namespace TrainingCell
 {
-	TdlTrainingAdapter::TdlTrainingAdapter(INet* net_ptr, const TdlSettings& settings, const StateTypeId state_type_id) :
-		_net_ptr(net_ptr), _settings(settings), _state_type_id(state_type_id)
+	StateTypeId parse_state_type_id(const std::string& str)
 	{
-		if (!_net_ptr)
-			throw std::exception("Invalid pointer to the neural network");
+		const auto str_normalized = DeepLearning::Utils::normalize_string(str);
 
-		if (!_net_ptr->validate_net_input_size(StateTypeController::get_state_size(_state_type_id)))
-			throw std::exception("Net is incompatible with the suggested state type.");
+		for (auto id = static_cast<int>(StateTypeId::ALL);
+			id <= static_cast<int>(StateTypeId::CHESS); ++id)
+		{
+			const auto agent_id = static_cast<StateTypeId>(id);
+			if (to_string(agent_id) == str_normalized)
+				return agent_id;
+		}
+
+		return StateTypeId::INVALID;
 	}
 
-	int TdlTrainingAdapter::make_move(const IStateReadOnly& state, const bool as_white)
+	std::string to_string(const StateTypeId& state_type_id)
 	{
-		return _sub_agents[as_white].make_move(state, _settings, *_net_ptr);
-	}
-
-	void TdlTrainingAdapter::game_over(const IStateReadOnly& final_state, const GameResult& result, const bool as_white)
-	{
-		_sub_agents[as_white].game_over(final_state, result, _settings, *_net_ptr);
-	}
-
-	StateTypeId TdlTrainingAdapter::get_state_type_id() const
-	{
-		return _state_type_id;
+		switch (state_type_id)
+		{
+			case StateTypeId::ALL:      return "ALL";
+			case StateTypeId::INVALID:  return "INVALID";
+			case StateTypeId::CHECKERS: return "CHECKERS";
+			case StateTypeId::CHESS:    return "CHESS";
+			default:                    return "UNKNOWN";
+		}
 	}
 }

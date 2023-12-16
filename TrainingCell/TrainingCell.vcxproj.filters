@@ -37,6 +37,12 @@
     <Filter Include="Source Files\TDL\Net">
       <UniqueIdentifier>{44ba4d5c-2469-4755-9b20-b80cfe690c1e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\State">
+      <UniqueIdentifier>{c74d778e-5dde-473c-8475-836e53f3d0f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\State">
+      <UniqueIdentifier>{6145ad99-d5c4-49fb-95eb-7b92bab1c418}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Checkers\CheckersState.h">
@@ -102,20 +108,8 @@
     <ClInclude Include="Headers\MoveData.h">
       <Filter>Header Files\TDL</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\IStateReadOnly.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\IStateSeed.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\IState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\Checkers\StateHandle.h">
       <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\IMinimalStateReadonly.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Headers\Chess\PieceController.h">
       <Filter>Header Files\Chess</Filter>
@@ -135,9 +129,6 @@
     <ClInclude Include="Headers\Checkers\CheckersMove.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\StateHandleGeneral.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\Chess\StateHandle.h">
       <Filter>Header Files\Chess</Filter>
     </ClInclude>
@@ -152,6 +143,27 @@
     </ClInclude>
     <ClInclude Include="Headers\StateConverter.h">
       <Filter>Header Files\TDL\Net</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IState.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IStateReadOnly.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IStateSeed.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\IMinimalStateReadonly.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\StateHandleGeneral.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\StateTypeId.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\StateTypeController.h">
+      <Filter>Header Files\State</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -224,9 +236,6 @@
     <ClCompile Include="Source\Checkers\CheckersMove.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
-    <ClCompile Include="Source\StateHandleGeneral.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\NetWithConverter.cpp">
       <Filter>Source Files\TDL\Net</Filter>
     </ClCompile>
@@ -235,6 +244,15 @@
     </ClCompile>
     <ClCompile Include="Source\StateConverter.cpp">
       <Filter>Source Files\TDL\Net</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StateHandleGeneral.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StateTypeController.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StateTypeId.cpp">
+      <Filter>Source Files\State</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

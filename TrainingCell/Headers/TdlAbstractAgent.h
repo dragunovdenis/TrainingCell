@@ -60,7 +60,24 @@ namespace TrainingCell
 	class TdlAbstractAgent : public Agent, ITdlSettingsReadOnly, NetWithConverterAbstract
 	{
 		friend class TrainingCellTest::TdlambdaAgentTrainingTest; // for diagnostics purposes
-		StateConverter _converter{ StateConversionType::CheckersStandard };
+		StateConverter _converter{ StateConversionType::CheckersStandard }; // default value to preserve backward compatibility
+		StateTypeId _state_type_id{ StateTypeId::CHECKERS }; // default value to preserve backward compatibility
+
+		/// <summary>
+		/// Throws an exception if parameters of the agent are invalid/incompatible.
+		/// </summary>
+		void validate() const;
+
+		/// <summary>
+		/// Augments given collection of "hidden" layer dimensions
+		/// with input and output layers compatible with the current state type ID and state converter.
+		/// </summary>
+		std::vector<std::size_t> augment_hidden_layer_dimensions(const std::vector<std::size_t>& hidden_layer_dimensions) const;
+
+		/// <summary>
+		/// Updates the corresponding field and state converter.
+		/// </summary>
+		void set_state_type_id(const StateTypeId state_type_id);
 
 	protected:
 
@@ -170,7 +187,7 @@ namespace TrainingCell
 
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon,
-			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor, _search_method, _td_search_iterations, _td_search_depth)
+			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor, _search_method, _td_search_iterations, _td_search_depth, _converter, _state_type_id)
 
 		/// <summary>
 		/// Returns script representation of all the hyper-parameters of the agent
@@ -193,15 +210,16 @@ namespace TrainingCell
 		TdlAbstractAgent() = default;
 
 		/// <summary>Constructor</summary>
-		/// <param name="layer_dimensions">Dimensions of the layers of the neural net that will serve as "afterstate value function";
-		/// Must start with "32" and end with "1"</param>
+		/// <param name="hidden_layer_dimensions">Dimensions of the hidden(!) layers of the neural net that will serve as "afterstate value function";
+		/// They will be automatically augmented with "input" layer compatible with the suggested state type and the "output" layer of dimension "1".</param>
 		/// <param name="exploration_epsilon">Probability of taking an exploratory move during the training process, (0,1)</param>
 		/// <param name="lambda">Lambda parameters used to determine "strength" of eligibility traces, (0,1)</param>
 		/// <param name="gamma">Discount reward determining how reward decay with each next move, (0,1) </param>
 		/// <param name="alpha">Learning rate</param>
+		/// <param name="state_type_id">Type ID of the state the agent will be "compatible" with.</param>
 		/// <param name="name">Name of the agent</param>
-		TdlAbstractAgent(const std::vector<std::size_t>& layer_dimensions, const double exploration_epsilon,
-		                 const double lambda, const double gamma, const double alpha, const std::string& name);
+		TdlAbstractAgent(const std::vector<std::size_t>& hidden_layer_dimensions, const double exploration_epsilon,
+		                 const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id, const std::string& name);
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
@@ -335,6 +353,11 @@ namespace TrainingCell
 		/// Sets number of first moves in each search episode during which the "search" neural net should be updated
 		/// </summary>
 		void set_search_depth(const int depth);
+
+		/// <summary>
+		/// See documentation of the base class.
+		/// </summary>
+		[[nodiscard]] StateTypeId get_state_type_id() const override;
 	};
 }
 
