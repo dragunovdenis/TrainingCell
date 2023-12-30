@@ -197,7 +197,7 @@ namespace Training::Modes
 
 		assign_params(params.to_std_vector(), args, state);
 
-		std::vector<Agent*> agent_ptrs;
+		std::vector<TdLambdaAgent*> agent_ptrs;
 
 		for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
 			agent_ptrs.push_back(&state[agent_id]);

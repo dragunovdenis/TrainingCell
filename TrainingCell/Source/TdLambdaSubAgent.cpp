@@ -24,11 +24,11 @@ namespace TrainingCell
 	MoveData TdLambdaSubAgent::pick_move(const IMinimalStateReadonly& state,
 	                                     const ITdlSettingsReadOnly& settings, const INet& net) const
 	{
-		if (state.get_moves_count() <= 0)
-			return { -1 };
+		if (state.get_moves_count() == 1)
+			return evaluate(state, 0, net);
 
-		if (settings.get_training_mode(_is_white) &&
-			DeepLearning::Utils::get_random(0, 1.0) <= settings.get_exploratory_probability())
+		const auto explore_probability = settings.get_exploratory_probability();
+		if (explore_probability > 0.0 && DeepLearning::Utils::get_random(0, 1.0) <= explore_probability)
 			return evaluate(state, DeepLearning::Utils::get_random_int(0, state.get_moves_count() - 1), net);
 
 		return pick_move(state, net);

@@ -30,11 +30,25 @@ namespace TrainingCell
 		/// <summary>
 		/// Field to track version of the container and facilitate backward compatibility if needed
 		/// </summary>
-		int _msg_pack_version = 1;
+		//int _msg_pack_version = 1;
+		int _msg_pack_version = 2; // "Performance evaluation mode" was introduced instead of ignoring
+		                           // exploration probability when training mode is off.
 
 	public:
 
-		MSGPACK_DEFINE(_msg_pack_version, MSGPACK_BASE(TdlAbstractAgent))
+		/// <summary>
+		/// Custom "packing" method.
+		/// </summary>
+		template <typename Packer>
+		void msgpack_pack(Packer& msgpack_pk) const
+		{
+			msgpack::type::make_define_array(_msg_pack_version, MSGPACK_BASE(TdlAbstractAgent)).msgpack_pack(msgpack_pk);
+		}
+
+		/// <summary>
+		/// Custom "unpacking" method.
+		/// </summary>
+		void msgpack_unpack(msgpack::object const& msgpack_o);
 
 		/// <summary>
 		/// Construction from a legacy adapter container
@@ -106,12 +120,5 @@ namespace TrainingCell
 		/// Throws exception if fails.
 		/// </summary>
 		static TdLambdaAgent load_from_file(const std::filesystem::path& file_path);
-
-		/// <summary>
-		/// Returns smart pointer to a clone of the current instance
-		/// </summary>
-		[[nodiscard]] std::unique_ptr<Agent> clone() const override;
-
 	};
-
 }

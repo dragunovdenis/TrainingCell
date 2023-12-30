@@ -100,7 +100,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Setter for the corresponding property
 		/// </summary>
-		void set_exploratory_probability(const bool exploratory_probability);
+		void set_exploratory_probability(const double exploratory_probability);
 
 		/// <summary>
 		/// Returns actual value of parameter gamma (reward discount)
@@ -162,5 +162,10 @@ namespace TrainingCell
 		/// Setter for the corresponding property
 		/// </summary>
 		void set_train_depth(const int train_depth);
+
+		/// <summary>
+		/// Equality operator.
+		/// </summary>
+		bool operator ==(const TdlSettings& otherSettings) const;
 	};
 }

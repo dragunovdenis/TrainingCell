@@ -372,6 +372,24 @@ namespace Monitor.Agents
         }
 
         /// <summary>
+        /// "Performance evaluation mode" flag.
+        /// </summary>
+        public bool PerformanceEvaluationMode
+        {
+            get => DllWrapper.TdLambdaAgentGetPerformanceEvaluationMode(Ptr).ToBool();
+
+            set
+            {
+                if (PerformanceEvaluationMode != value)
+                {
+                    if (!DllWrapper.TdLambdaAgentSetPerformanceEvaluationMode(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+        
+        /// <summary>
         /// Returns snapshot of training parameters (all but those related to the underlying neural net)
         /// </summary>
         public ITdlParameters GetTrainingParameters()
@@ -389,6 +407,7 @@ namespace Monitor.Agents
                 SearchDepth = SearchDepth,
                 RewardFactor = RewardFactor,
                 StateTypeId = StateTypeId,
+                PerformanceEvaluationMode = PerformanceEvaluationMode,
             };
         }
 
@@ -410,6 +429,7 @@ namespace Monitor.Agents
             SearchIterations = parameters.SearchIterations;
             SearchDepth = parameters.SearchDepth;
             RewardFactor = parameters.RewardFactor;
+            PerformanceEvaluationMode = parameters.PerformanceEvaluationMode;
 
             // Sanity check
             if (StateTypeId != parameters.StateTypeId)

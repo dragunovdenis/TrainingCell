@@ -27,8 +27,6 @@ namespace TrainingCell
 
 namespace TrainingCell::Checkers
 {
-
-
 	/// <summary>
 	/// Move instruction for checkers.
 	/// </summary>
@@ -92,5 +90,15 @@ namespace TrainingCell::Checkers
 		/// Constructor.
 		/// </summary>
 		CheckersMove(const Move& source);
+
+		/// <summary>
+		/// Returns "true" if the current "move" is equal to the given one.
+		/// </summary>
+		bool operator==(const CheckersMove& anotherMove) const;
+
+		/// <summary>
+		/// Returns "invalid" move.
+		/// </summary>
+		static CheckersMove invalid();
 	};
 }

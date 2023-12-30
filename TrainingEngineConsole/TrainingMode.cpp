@@ -22,6 +22,7 @@
 #include "TrainingState.h"
 #include "Headers/Checkers/TrainingEngine.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "Headers/TdlEnsembleAgent.h"
 
 using namespace TrainingCell;
 using namespace TrainingCell::Checkers;
@@ -98,7 +99,7 @@ namespace Training::Modes
 			}
 		}
 
-		std::vector<Agent*> agent_pointers;
+		std::vector<TdLambdaAgent*> agent_pointers;
 		agent_pointers.reserve(state.agents_count());
 		for (auto agent_id = 0ull; agent_id < state.agents_count(); ++agent_id)
 			agent_pointers.push_back(&state[agent_id]);

@@ -301,6 +301,12 @@ namespace TrainingCell::Checkers
 		make_move(move, true);
 	}
 
+	void CheckersState::make_move_and_invert(const CheckersMove& move)
+	{
+		make_move(move);
+		invert();
+	}
+
 	std::vector<int> CheckersState::get_vector(const CheckersMove& move) const
 	{
 		auto result = to_vector();
@@ -325,9 +331,9 @@ namespace TrainingCell::Checkers
 		return !(*this == another_state);
 	}
 
-	std::unique_ptr<IState> CheckersState::yield() const
+	std::unique_ptr<IState> CheckersState::yield(const bool initialize_recorder) const
 	{
-		return std::make_unique<StateHandle>(*this);
+		return std::make_unique<StateHandle>(*this, initialize_recorder);
 	}
 
 	StateTypeId CheckersState::type()

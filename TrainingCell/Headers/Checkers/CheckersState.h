@@ -277,6 +277,11 @@ namespace TrainingCell::Checkers
 		using Move = CheckersMove;
 
 		/// <summary>
+		/// "Base" state.
+		/// </summary>
+		using BaseState = CheckersState;
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		CheckersState() : State_array() {}
@@ -301,6 +306,12 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		/// <param name="move">Move to "apply".</param>
 		void make_move(const CheckersMove& move);
+
+		/// <summary>
+		/// "Applies" the given move to the current state and inverts the state.
+		/// </summary>
+		/// <param name="move">Move to "apply".</param>
+		virtual void make_move_and_invert(const CheckersMove& move);
 
 		/// <summary>
 		/// Returns "int-vector" representation of the current state after given `move` was "applied" to it.
@@ -363,7 +374,7 @@ namespace TrainingCell::Checkers
 		/// Fills the given collection with available moves for the current state.
 		/// Returns "true" if the current state is a "draw".
 		/// </summary>
-		bool get_moves(std::vector<CheckersMove>& out_result) const;
+		virtual bool get_moves(std::vector<CheckersMove>& out_result) const;
 
 		/// <summary>
 		/// Equality operator.
@@ -378,7 +389,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Returns "handle" to a copy of the current state <see cref="StateHandle"/>.
 		/// </summary>
-		[[nodiscard]] std::unique_ptr<IState> yield() const override;
+		[[nodiscard]] std::unique_ptr<IState> yield(const bool initialize_recorder) const override;
 
 		/// <summary>
 		/// Returns type identifier of the state.

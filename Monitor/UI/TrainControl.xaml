@@ -87,10 +87,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Button Name="PlayButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" 
-                                HorizontalAlignment="Left" Grid.Column="0" Width="100">Play</Button>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                            <TextBox Margin="5" Text="for"  Style="{StaticResource TransparentBackgroundStyle}"/>
+                        <StackPanel Grid.Column="0">
+                            <Button Name="PlayButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" 
+                                    HorizontalAlignment="Left"  Width="100"
+                                    ToolTip="Plays the given number of episodes with the selected pair of agents.">Play</Button>
+                            <Button Name="TrainButton" Click="PlayButton_Click" IsEnabled="{Binding CanPlay}" 
+                                    HorizontalAlignment="Left" Width="100"
+                                    ToolTip="Trains the selected pair of agents for the given number of non-trivial (non-draw) episodes.">
+                                Train
+                            </Button>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <TextBox Name="EpisodesTextBox" Text="{Binding EpisodesToPlay}" Margin="5"/>
                             <TextBox Margin="5" Text="episodes"  Style="{StaticResource TransparentBackgroundStyle}"/>
                         </StackPanel>

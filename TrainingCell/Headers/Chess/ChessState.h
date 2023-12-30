@@ -269,6 +269,16 @@ namespace TrainingCell::Chess
 		using Move = ChessMove;
 
 		/// <summary>
+		/// "Base" state.
+		/// </summary>
+		using BaseState = ChessState;
+
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
+		ChessState() = default;
+
+		/// <summary>
 		/// Returns collection of moves available in the current state.
 		/// </summary>
 		[[nodiscard]] std::vector<ChessMove> get_moves() const;
@@ -277,12 +287,18 @@ namespace TrainingCell::Chess
 		/// Fills the given collection with moves available in the current state.
 		/// Returns "true" if the current state is a "draw".
 		/// </summary>
-		bool get_moves(std::vector<ChessMove>& out_result) const;
+		virtual bool get_moves(std::vector<ChessMove>& out_result) const;
 
 		/// <summary>
 		/// Applies given "move" to the current board state.
 		/// </summary>
 		void make_move(const ChessMove& move);
+
+		/// <summary>
+		/// "Applies" the given move to the current state and inverts the state.
+		/// </summary>
+		/// <param name="move">Move to "apply".</param>
+		virtual void make_move_and_invert(const ChessMove& move);
 
 		/// <summary>
 		/// Inverts the current state so that "ally" and "rival" pieces "swap sides".
@@ -353,7 +369,7 @@ namespace TrainingCell::Chess
 		/// <summary>
 		/// Returns an instance of "IState" 
 		/// </summary>
-		[[nodiscard]] std::unique_ptr<IState> yield() const override;
+		[[nodiscard]] std::unique_ptr<IState> yield(const bool initialize_recorder) const override;
 
 		/// <summary>
 		/// Returns type identifier of the state.

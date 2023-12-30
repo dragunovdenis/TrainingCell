@@ -17,14 +17,14 @@
 
 #pragma once
 #include "AgentTypeId.h"
-#include "IMinimalAgent.h"
+#include "ITrainableAgent.h"
 
 namespace TrainingCell
 {
 	/// <summary>
 	///	Abstract checkers agent (interface)
 	/// </summary>
-	class Agent : public IMinimalAgent
+	class Agent : public ITrainableAgent
 	{
 		std::string _id{};
 		std::string _name{};
@@ -42,21 +42,14 @@ namespace TrainingCell
 		[[nodiscard]] virtual AgentTypeId get_type_id() const = 0;
 
 		/// <summary>
-		/// Returns "true" if the agent can be trained otherwise returns "false"
-		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
-		/// property because the later can throw exception (as not applicable)
-		/// </summary>
-		[[nodiscard]] virtual bool can_train() const = 0;
-
-		/// <summary>
 		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing
 		/// </summary>
-		virtual void set_training_mode(const bool training_mode);
+		void set_training_mode(const bool training_mode) override;
 
 		/// <summary>
 		/// Returns actual value of training mode
 		/// </summary>
-		[[nodiscard]] virtual bool get_training_mode() const;
+		[[nodiscard]] bool get_training_mode() const override;
 
 		/// <summary>
 		/// Returns true if the current agent is equal to the given one
@@ -100,11 +93,6 @@ namespace TrainingCell
 		/// Returns constant reference to the entire record book of the agent
 		/// </summary>
 		[[nodiscard]] const std::vector<std::string>& get_record_book() const;
-
-		/// <summary>
-		/// Returns smart pointer to a clone of the current instance
-		/// </summary>
-		[[nodiscard]] virtual std::unique_ptr<Agent> clone() const;
 
 		/// <summary>
 		/// See documentation of the base class.

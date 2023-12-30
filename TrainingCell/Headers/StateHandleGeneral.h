@@ -18,6 +18,7 @@
 #pragma once
 
 #include "IState.h"
+#include "../Headers/StateTraceRecorder.h"
 
 namespace TrainingCell
 {
@@ -42,6 +43,11 @@ namespace TrainingCell
 		/// </summary>
 		std::vector<typename S::Move> _actions{};
 
+		/// <summary>
+		/// Pointer to a state trace recorder.
+		/// </summary>
+		std::unique_ptr<StateTraceRecorder<typename S::BaseState>> _trace_recorder_ptr{};
+
 	public:
 
 		/// <summary>
@@ -52,7 +58,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		StateHandleGeneral(S state);
+		StateHandleGeneral(S state, const bool initialize_recorder = false);
 
 		/// <summary>
 		/// See documentation of the base class.
@@ -119,5 +125,10 @@ namespace TrainingCell
 		/// See documentation of the base class.
 		/// </summary>
 		[[nodiscard]]  std::vector<int> evaluate_ui_inverted() const override;
+
+		/// <summary>
+		/// See documentation of the base class.
+		/// </summary>
+		[[nodiscard]] std::unique_ptr<IState> get_recorded_state() const override;
 	};
 }

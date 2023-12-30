@@ -23,7 +23,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
             xmlns:local="clr-namespace:Monitor"
             xmlns:checkers="clr-namespace:Monitor"
             mc:Ignorable="d"
-            Title="TrainingCell" Height="475" Width="800" MinHeight="475" Icon="/TrainingCell.ico" Name="Ui">
+            Title="TrainingCell" Height="600" Width="800" MinHeight="475" Icon="/TrainingCell.ico" Name="Ui">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height= "Auto" />

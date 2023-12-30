@@ -63,6 +63,8 @@ namespace TrainingCell
 		StateConverter _converter{ StateConversionType::CheckersStandard }; // default value to preserve backward compatibility
 		StateTypeId _state_type_id{ StateTypeId::CHECKERS }; // default value to preserve backward compatibility
 
+		bool _performance_evaluation_mode{false};
+
 		/// <summary>
 		/// Throws an exception if parameters of the agent are invalid/incompatible.
 		/// </summary>
@@ -126,7 +128,12 @@ namespace TrainingCell
 		/// <summary>
 		/// Defines whether the agent is going to train while playing
 		/// </summary>
-		AutoTrainingSubMode _training_sub_mode{ AutoTrainingSubMode::FULL }; 
+		AutoTrainingSubMode _training_sub_mode{ AutoTrainingSubMode::FULL };
+
+		/// <summary>
+		/// Readonly access to training sub-mode.
+		/// </summary>
+		AutoTrainingSubMode training_sub_mode() const;
 
 		/// <summary>
 		/// Factor that is applied to the result of internal reward function during training
@@ -187,7 +194,9 @@ namespace TrainingCell
 
 	public:
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon,
-			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor, _search_method, _td_search_iterations, _td_search_depth, _converter, _state_type_id)
+			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor,
+			_search_method, _td_search_iterations, _td_search_depth, _converter,
+			_state_type_id, _performance_evaluation_mode)
 
 		/// <summary>
 		/// Returns script representation of all the hyper-parameters of the agent
@@ -358,6 +367,16 @@ namespace TrainingCell
 		/// See documentation of the base class.
 		/// </summary>
 		[[nodiscard]] StateTypeId get_state_type_id() const override;
+
+		/// <summary>
+		/// Setter for the corresponding property.
+		/// </summary>
+		void set_performance_evaluation_mode(const bool value);
+
+		/// <summary>
+		/// Getter for the corresponding property.
+		/// </summary>
+		[[nodiscard]] bool get_performance_evaluation_mode() const;
 	};
 }
 

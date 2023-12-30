@@ -76,6 +76,7 @@ namespace TrainingCellTest
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
 			agent.set_td_search_iterations(1234);
 			agent.set_search_depth(321);
+			agent.set_performance_evaluation_mode(true);
 
 			//Act
 			const auto agent_from_stream = DeepLearning::MsgPack::unpack<TdLambdaAgent>(DeepLearning::MsgPack::pack(agent));
@@ -94,6 +95,7 @@ namespace TrainingCellTest
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
 			agent.set_td_search_iterations(1234);
 			agent.set_search_depth(321);
+			agent.set_performance_evaluation_mode(true);
 
 			//Act
 			const auto script = agent.to_script();

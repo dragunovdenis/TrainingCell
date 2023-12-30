@@ -26,11 +26,12 @@ namespace TrainingCell
 {
 	bool TdlAbstractAgent::get_training_mode(const bool as_white) const
 	{
-		if (_training_sub_mode == AutoTrainingSubMode::FULL)
+		const auto sub_mode = training_sub_mode();
+		if (sub_mode == AutoTrainingSubMode::FULL)
 			return true;
 
-		return as_white ? _training_sub_mode == AutoTrainingSubMode::WHITE_ONLY :
-			_training_sub_mode == AutoTrainingSubMode::BLACK_ONLY;
+		return as_white ? sub_mode == AutoTrainingSubMode::WHITE_ONLY :
+			sub_mode == AutoTrainingSubMode::BLACK_ONLY;
 	}
 
 	DeepLearning::Net<DeepLearning::CpuDC>& TdlAbstractAgent::net()
@@ -46,6 +47,11 @@ namespace TrainingCell
 	const StateConverter& TdlAbstractAgent::converter() const
 	{
 		return _converter;
+	}
+
+	AutoTrainingSubMode TdlAbstractAgent::training_sub_mode() const
+	{
+		return _performance_evaluation_mode ? AutoTrainingSubMode::NONE : _training_sub_mode;
 	}
 
 	void TdlAbstractAgent::initialize_net(const std::vector<std::size_t>& layer_dimensions)
@@ -72,6 +78,7 @@ namespace TrainingCell
 	const char* json_td_search_iterations_id = "TdSearchIterations";
 	const char* json_td_search_depth_id = "TdSearchDepth";
 	const char* json_state_type_id = "StateType";
+	const char* json_performance_evaluation_mode_id = "PerformanceEvaluationMode";
 
 	void TdlAbstractAgent::assign(const std::string& script_str, const bool hyper_params_only)
 	{
@@ -140,6 +147,9 @@ namespace TrainingCell
 		if (json.contains(json_td_search_depth_id))
 			_td_search_depth = json[json_td_search_depth_id].get<int>();
 
+		if (json.contains(json_performance_evaluation_mode_id))
+			_performance_evaluation_mode = json[json_performance_evaluation_mode_id].get<bool>();
+
 		validate();
 	}
 
@@ -159,6 +169,7 @@ namespace TrainingCell
 		json[json_td_search_iterations_id] = _td_search_iterations;
 		json[json_td_search_depth_id] = _td_search_depth;
 		json[json_state_type_id] = to_string(_state_type_id);
+		json[json_performance_evaluation_mode_id] = _performance_evaluation_mode;
 
 		return json.dump();
 	}
@@ -177,7 +188,8 @@ namespace TrainingCell
 			_td_search_iterations == anotherAgent._td_search_iterations &&
 			_td_search_depth == anotherAgent._td_search_depth &&
 			_state_type_id == anotherAgent._state_type_id &&
-			_converter == anotherAgent._converter;
+			_converter == anotherAgent._converter &&
+			_performance_evaluation_mode == anotherAgent._performance_evaluation_mode;
 	}
 
 	bool TdlAbstractAgent::equal(const Agent& agent) const
@@ -246,7 +258,7 @@ namespace TrainingCell
 
 	double TdlAbstractAgent::get_exploratory_probability() const
 	{
-		return _exploration_epsilon;
+		return _performance_evaluation_mode ? 0.0 : _exploration_epsilon;
 	}
 
 	void TdlAbstractAgent::set_discount(double gamma)
@@ -271,7 +283,7 @@ namespace TrainingCell
 
 	bool TdlAbstractAgent::get_training_mode() const
 	{
-		return _training_sub_mode != AutoTrainingSubMode::NONE;
+		return training_sub_mode() != AutoTrainingSubMode::NONE;
 	}
 
 	void TdlAbstractAgent::set_training_sub_mode(const AutoTrainingSubMode sub_mode)
@@ -330,6 +342,16 @@ namespace TrainingCell
 		return _state_type_id;
 	}
 
+	void TdlAbstractAgent::set_performance_evaluation_mode(const bool value)
+	{
+		_performance_evaluation_mode = value;
+	}
+
+	bool TdlAbstractAgent::get_performance_evaluation_mode() const
+	{
+		return _performance_evaluation_mode;
+	}
+
 	void TdlAbstractAgent::set_lambda(const double lambda)
 	{
 		_lambda = lambda;
@@ -370,6 +392,7 @@ namespace TrainingCell
 		result.set_training_mode(true, true);
 		result.set_training_mode(true, false);
 		result.set_train_depth(get_search_depth());
+		result.set_exploratory_probability(_exploration_epsilon);
 
 		return result;
 	}
@@ -380,8 +403,8 @@ namespace TrainingCell
 			_search_net = std::make_optional(NetWithConverter(_net, _converter)); // copy the current net if search net is not defined
 
 		TdlTrainingAdapter adapter(&_search_net.value(), get_search_settings(), _state_type_id);
-		Board board(&adapter, &adapter);
-		board.play(_td_search_iterations, state.current_state_seed(), 100 /*max moves without capture for a draw*/);
+		Board::play(&adapter, &adapter,_td_search_iterations,
+			state.current_state_seed(), 100 /*max moves without capture for a draw*/);
 
 		return TdLambdaSubAgent::pick_move(state, _search_net.value());
 	}

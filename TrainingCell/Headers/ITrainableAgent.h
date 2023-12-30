@@ -16,34 +16,33 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include <memory>
-#include "StateTypeId.h"
+#include "IMinimalAgent.h"
 
 namespace TrainingCell
 {
-	class IState;
-
 	/// <summary>
-	/// An auxiliary interface allowing to get a copy of an "IState" instance 
+	/// Interface to a "training" aspect of an agent
 	/// </summary>
-	class IStateSeed
+	class ITrainableAgent : public IMinimalAgent
 	{
 	public:
-		/// <summary>
-		/// Destructor
-		/// </summary>
-		virtual ~IStateSeed() = default;
 
 		/// <summary>
-		/// Returns an instance of "IState", with or without initialized
-		/// recorder (depending on the value of the input parameter).
+		/// Returns "true" if the agent can be trained otherwise returns "false"
+		/// If "false" is returned one should avoid calling getter or setter of the "training mode"
+		/// property because the later can throw exception (as not applicable).
 		/// </summary>
-		[[nodiscard]] virtual std::unique_ptr<IState> yield(const bool initialize_recorder) const = 0;
+		[[nodiscard]] virtual bool can_train() const = 0;
 
 		/// <summary>
-		/// Returns type identifier of the state that can be yielded by the "seed".
+		/// Sets "training_mode" flag for the agent defining whether the agent trains while playing.
 		/// </summary>
-		[[nodiscard]] virtual StateTypeId state_type() const = 0;
+		virtual void set_training_mode(const bool training_mode) = 0;
+
+		/// <summary>
+		/// Returns actual value of training mode.
+		/// </summary>
+		[[nodiscard]] virtual bool get_training_mode() const = 0;
 	};
 
 }

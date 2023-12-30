@@ -39,7 +39,7 @@ namespace TrainingCell
 		return _exploratory_probability;
 	}
 
-	void TdlSettings::set_exploratory_probability(const bool exploratory_probability)
+	void TdlSettings::set_exploratory_probability(const double exploratory_probability)
 	{
 		_exploratory_probability = exploratory_probability;
 	}
@@ -105,5 +105,17 @@ namespace TrainingCell
 	void TdlSettings::set_train_depth(const int train_depth)
 	{
 		_train_depth = train_depth;
+	}
+
+	bool TdlSettings::operator==(const TdlSettings& otherSettings) const
+	{
+		return _exploratory_probability == otherSettings._exploratory_probability &&
+			   _discount == otherSettings._discount &&
+			   _lambda == otherSettings._lambda &&
+			   _learning_rate == otherSettings._learning_rate &&
+			   _training_mode_white == otherSettings._training_mode_white &&
+			   _training_mode_black == otherSettings._training_mode_black &&
+			   _reward_factor == otherSettings._reward_factor &&
+			   _train_depth == otherSettings._train_depth;
 	}
 }

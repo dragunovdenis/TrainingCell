@@ -93,6 +93,16 @@ namespace TrainingCell::Chess
 		/// Convertor to "general move".
 		/// </summary>
 		Move to_move() const;
+
+		/// <summary>
+		/// Returns "true" if the current "move" is equal to the given "move".
+		/// </summary>
+		bool operator ==(const ChessMove& anotherMove) const;
+
+		/// <summary>
+		/// Returns a "standard" value of invalid move.
+		/// </summary>
+		static ChessMove invalid();
 	};
 
 }

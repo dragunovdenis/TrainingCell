@@ -50,6 +50,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <TextBox Text="Reward Factor"/>
                         <TextBox Text="Training Mode"/>
                         <TextBox Text="Search Mode"/>
+                        <TextBox Text="Performance Evaluation Mode"/>
                         <TextBox Text="Search Iterations"/>
                         <TextBox Text="Search Depth"/>
                         <TextBox Text="Specialization"/>
@@ -66,10 +67,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <TextBox Text="{Binding LearningRate, Mode=TwoWay}"/>
                         <TextBox Text="{Binding Lambda, Mode=TwoWay}"/>
                         <TextBox Text="{Binding Discount, Mode=TwoWay}"/>
-                        <TextBox Text="{Binding Epsilon, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding Epsilon, Mode=TwoWay}"
+                                 IsEnabled ="{Binding PerformanceEvaluationMode,
+                                 Converter= {StaticResource InvertBoolConverter}}"/>
                         <TextBox Text="{Binding RewardFactor, Mode=TwoWay}"/>
-                        <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}" Margin="3,3,3,3"/>
+                        <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}"
+                                  IsEnabled ="{Binding PerformanceEvaluationMode,
+                                  Converter= {StaticResource InvertBoolConverter}}"  Margin="3,3,3,3"/>
                         <CheckBox IsChecked="{Binding SearchMode, Mode=TwoWay}" Margin="3,3,3,3"/>
+                        <CheckBox IsChecked="{Binding PerformanceEvaluationMode, Mode=TwoWay}" Margin="3,3,3,3"/>
                         <TextBox Text="{Binding SearchIterations, Mode=TwoWay}"/>
                         <TextBox Text="{Binding SearchDepth, Mode=TwoWay}"/>
                         <ComboBox ItemsSource="{Binding StateIdOptions}" SelectedItem="{Binding StateTypeId}"

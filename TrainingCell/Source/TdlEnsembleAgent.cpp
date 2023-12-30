@@ -36,7 +36,7 @@ namespace TrainingCell
 	std::size_t TdlEnsembleAgent::add(const TdLambdaAgent& agent)
 	{
 		_ensemble.emplace_back(agent);
-		_ensemble.rbegin()->set_training_mode(false);
+		_ensemble.rbegin()->set_performance_evaluation_mode(true);
 
 		return _ensemble.size() - 1;
 	}

@@ -69,6 +69,11 @@ namespace TrainingCell
 		return { -row, -col };
 	}
 
+	PiecePosition PiecePosition::invalid()
+	{
+		return { -1, -1 };
+	}
+
 	PiecePosition operator+(PiecePosition pos1, const PiecePosition& pos2)
 	{
 		return pos1 += pos2;

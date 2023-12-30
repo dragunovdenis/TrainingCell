@@ -95,12 +95,34 @@ namespace Monitor.Dll
         }
 
         /// <summary>
+        /// Playing/training statistics. Should match the corresponding data structure on C++ side.
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Stats
+        {
+            /// <summary>
+            /// Number of "black" wins.
+            /// </summary>
+            public int BlacksWinCount;
+            
+            /// <summary>
+            /// Number of "white" wins.
+            /// </summary>
+            public int WhitesWinCount;
+            
+            /// <summary>
+            /// Total number of games played.
+            /// </summary>
+            public int TotalEpisodesCount;
+        }
+
+        /// <summary>
         /// Wrapper for the corresponding method
         /// </summary>
         [DllImport(dllName: DllName)]
-        public static extern int RunTraining(IntPtr agent1, IntPtr agent2, int episodes,
+        public static extern int Play(IntPtr agent1, IntPtr agent2, int episodes,
             [MarshalAs(UnmanagedType.I4)]
-            StateTypeId gameKind,
+            StateTypeId stateType,
             [MarshalAs(UnmanagedType.FunctionPtr)]
             PublishStateCallBack publishStateCallBack,
             [MarshalAs(UnmanagedType.FunctionPtr)]
@@ -108,8 +130,38 @@ namespace Monitor.Dll
             [MarshalAs(UnmanagedType.FunctionPtr)]
             CancelCallBack cancel,
             [MarshalAs(UnmanagedType.FunctionPtr)]
-            ErrorMessageCallBack error);
+            ErrorMessageCallBack error, out Stats stats);
 
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        public static extern int Train(IntPtr agent1, IntPtr agent2, int episodes,
+            [MarshalAs(UnmanagedType.I4)]
+            StateTypeId stateType,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            PublishGameStatsCallBack publishStats,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            CancelCallBack cancel,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            ErrorMessageCallBack error, out Stats stats);
+
+        /// <summary>
+        /// Compound play-or-train operation.
+        /// </summary>
+        public static int PlayOrTrain(IntPtr agent1, IntPtr agent2, int episodes,
+            StateTypeId stateType,
+            PublishStateCallBack publishStateCallBack,
+            PublishGameStatsCallBack publishStats,
+            CancelCallBack cancel,
+            ErrorMessageCallBack error, out Stats stats, bool train = false)
+        {
+            if (train)
+                return Train(agent1, agent2, episodes, stateType, publishStats, cancel, error, out stats);
+
+            return Play(agent1, agent2, episodes, stateType, publishStateCallBack, publishStats, cancel, error, out stats);
+        }
+        
         #region Random Agent
         /// <summary>
         /// Wrapper for the corresponding method
@@ -294,6 +346,21 @@ namespace Monitor.Dll
         /// </summary>
         [DllImport(dllName: DllName)]
         public static extern IntPtr PackTdLambdaAgent(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        public static extern byte TdLambdaAgentGetPerformanceEvaluationMode(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool TdLambdaAgentSetPerformanceEvaluationMode(IntPtr agentPtr,
+            [MarshalAs(UnmanagedType.U1)] bool mode);
+
         #endregion
 
         #region Interactive Agent

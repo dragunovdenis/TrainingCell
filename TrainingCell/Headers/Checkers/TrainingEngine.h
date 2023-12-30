@@ -18,9 +18,8 @@
 #pragma once
 #include <vector>
 #include <array>
-#include "../Agent.h"
+#include "../TdLambdaAgent.h"
 #include <functional>
-#include "../TdlEnsembleAgent.h"
 #include "msgpack.hpp"
 
 namespace TrainingCell::Checkers
@@ -71,7 +70,7 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Collection of pointer to the agents to be trained
 		/// </summary>
-		std::vector<Agent*> _agent_pointers{};
+		std::vector<TdLambdaAgent*> _agent_pointers{};
 
 		/// <summary>
 		/// Returns collection of integer pairs representing indices of agents in the corresponding collection
@@ -86,7 +85,7 @@ namespace TrainingCell::Checkers
 		/// winning percentage when the agent played as a "white" player and the second one represents winning percentage when
 		/// the agent played as a "black" player
 		/// </summary>
-		static PerformanceRec evaluate_performance(const Agent& agent, const int episodes_to_play,
+		static PerformanceRec evaluate_performance(const TdLambdaAgent& agent, const int episodes_to_play,
 			const int round_id, const double draw_percentage);
 	public:
 
@@ -94,7 +93,7 @@ namespace TrainingCell::Checkers
 		/// Adds the given agent pointer to the collection of agent pointers
 		/// Returns index of the added agent in the collection of agents
 		/// </summary>
-		std::size_t add_agent(Agent* agent_ptr);
+		std::size_t add_agent(TdLambdaAgent* agent_ptr);
 
 		/// <summary>
 		/// Default constructor
@@ -102,9 +101,14 @@ namespace TrainingCell::Checkers
 		TrainingEngine() = default;
 
 		/// <summary>
+		/// Due to the collection of pointers we would be better off prohibiting copying.
+		/// </summary>
+		TrainingEngine(const TrainingEngine&) = delete;
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
-		TrainingEngine(const std::vector<Agent*>& agent_pointers);
+		TrainingEngine(const std::vector<TdLambdaAgent*>& agent_pointers);
 
 		/// <summary>
 		/// Method to run training

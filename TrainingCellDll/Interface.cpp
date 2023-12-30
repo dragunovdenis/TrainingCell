@@ -36,28 +36,49 @@ namespace
 	}
 }
 
-int RunTraining(TrainingCell::Agent* const agent1,
+int Play(TrainingCell::Agent* const agent1,
 	TrainingCell::Agent* const agent2,
 	int episodes, TrainingCell::StateTypeId state_type_id,
 	TrainingCell::PublishStateCallBack publishStateCallBack,
 	TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack,
 	TrainingCell::CancelCallBack cancellationCallBack,
-	TrainingCell::ErrorMessageCallBack errorCallBack)
+	TrainingCell::ErrorMessageCallBack errorCallBack, TrainingCell::Board::Stats& stats)
 {
 	try
 	{
-		TrainingCell::Board board(agent1, agent2);
 		const auto seed_ptr = TrainingCell::StateTypeController::get_start_seed(state_type_id);
-		board.play(episodes, *seed_ptr,
-			50, publishStateCallBack, publishStatsCallBack,
-			cancellationCallBack, errorCallBack);
+		stats = TrainingCell::Board::play(agent1, agent2, episodes, *seed_ptr,
+		                          50, publishStateCallBack, publishStatsCallBack,
+		                          cancellationCallBack, errorCallBack);
 
 		return 0;
 	} catch (...)
 	{
+		stats ={-1, -1, -1};
 		return -1;
 	}
 }
+
+int Train(TrainingCell::Agent* agent1, TrainingCell::Agent* agent2, int episodes,
+	TrainingCell::StateTypeId state_type_id, TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack,
+	TrainingCell::CancelCallBack cancellationCallBack, TrainingCell::ErrorMessageCallBack errorCallBack, 
+	TrainingCell::Board::Stats& stats)
+{
+	try
+	{
+		const auto seed_ptr = TrainingCell::StateTypeController::get_start_seed(state_type_id);
+		stats = TrainingCell::Board::train(agent1, agent2, episodes, *seed_ptr,
+			50, publishStatsCallBack, cancellationCallBack, errorCallBack);
+
+		return 0;
+	}
+	catch (...)
+	{
+		stats = { -1, -1, -1 };
+		return -1;
+	}
+}
+
 #pragma region Random Agent
 void* ConstructRandomAgent()
 {
@@ -292,6 +313,23 @@ bool TdLambdaAgentSetSearchModeIterations(TrainingCell::TdLambdaAgent* agent_ptr
 	return true;
 }
 
+char TdLambdaAgentGetPerformanceEvaluationMode(TrainingCell::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return static_cast<char>(2);
+
+	return static_cast<char>(agent_ptr->get_performance_evaluation_mode());
+}
+
+bool TdLambdaAgentSetPerformanceEvaluationMode(TrainingCell::TdLambdaAgent* agent_ptr, const bool mode)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_performance_evaluation_mode(mode);
+
+	return true;
+}
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 void* ConstructInteractiveAgent(const MakeMoveCallBack make_move_callback,

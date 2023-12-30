@@ -327,7 +327,7 @@ namespace Monitor.UI.Board
                         _pieceController = ResolvePieceController(agentWhite, agentBlack);
 
                         var timePoint = DateTime.Now;
-                        var res = DllWrapper.RunTraining(
+                        var res = DllWrapper.Play(
                             agentWhite.Ptr, agentBlack.Ptr, episodes, _pieceController.StateTypeId,
                             (state, size, subMoves, subMovesCount, agentToMovePtr) =>
                             {
@@ -376,7 +376,7 @@ namespace Monitor.UI.Board
                                 {
                                     InactiveAgent = null;
                                     MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK);
-                                }));
+                                }), out _);
 
                         if (res != 0)
                             throw new Exception("Playing failed");

@@ -157,6 +157,8 @@ namespace Monitor.UI
             if (!CanPlay)
                 throw new Exception("Can't play: the button must be disabled!");
 
+            var train = sender == TrainButton;
+            
             IsPlaying = true;
 
             var timePrev = DateTime.Now;
@@ -176,7 +178,7 @@ namespace Monitor.UI
                     CurrentStateType != stateTypeId)
                     throw new Exception("Incompatible agents");
 
-                DllWrapper.RunTraining(
+                DllWrapper.PlayOrTrain(
                     WhiteAgent.Ptr, BlackAgent.Ptr, EpisodesToPlay, CurrentStateType,
                     null,
                     (whiteWinsLocal, blackWinsLocal, totalGamesLocal) =>
@@ -242,8 +244,10 @@ namespace Monitor.UI
                         }));
                         WhiteAgent.AddTrainingFailRecord(BlackAgent, errorMessage);
                         BlackAgent.AddTrainingFailRecord(WhiteAgent, errorMessage);
-                    });
+                    }, out var stats, train);
 
+                result.TotalEpisodes = stats.TotalEpisodesCount;
+                
                 return result;
             });
             playTask.ContinueWith((task) =>
@@ -255,6 +259,7 @@ namespace Monitor.UI
                 IsPlaying = false;
                 WhiteAgent.AddTrainingCompletionRecord(BlackAgent, res.TotalEpisodes, res.BlackWins);
                 BlackAgent.AddTrainingCompletionRecord(WhiteAgent, res.TotalEpisodes, res.WhiteWins);
+                InfoCollection.Add($"Total episodes explored : {res.TotalEpisodes}");
                 InfoCollection.Add($"Total training time : {DateTime.Now - trainingStart}");
             }, TaskScheduler.FromCurrentSynchronizationContext());
             playTask.Start();

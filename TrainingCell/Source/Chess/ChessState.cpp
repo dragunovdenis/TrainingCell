@@ -83,6 +83,12 @@ namespace TrainingCell::Chess
 			make_move_and_update_attack_field(second_component);
 	}
 
+	void ChessState::make_move_and_invert(const ChessMove& move)
+	{
+		make_move(move);
+		invert();
+	}
+
 	std::size_t ChessState::state_size()
 	{
 		return Checkerboard::FieldsCount;
@@ -283,9 +289,9 @@ namespace TrainingCell::Chess
 		return 0;
 	}
 
-	std::unique_ptr<IState> ChessState::yield() const
+	std::unique_ptr<IState> ChessState::yield(const bool initialize_recorder) const
 	{
-		return std::make_unique<StateHandle>(*this);
+		return std::make_unique<StateHandle>(*this, initialize_recorder);
 	}
 
 	StateTypeId ChessState::type()

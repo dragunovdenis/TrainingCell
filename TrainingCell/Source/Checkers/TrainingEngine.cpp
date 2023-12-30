@@ -26,7 +26,7 @@
 
 namespace TrainingCell::Checkers
 {
-	std::size_t TrainingEngine::add_agent(Agent* agent_ptr)
+	std::size_t TrainingEngine::add_agent(TdLambdaAgent* agent_ptr)
 	{
 		if (agent_ptr == nullptr)
 			throw std::exception("Invalid agent pointer");
@@ -36,7 +36,7 @@ namespace TrainingCell::Checkers
 		return _agent_pointers.size() - 1;
 	}
 
-	TrainingEngine::TrainingEngine(const std::vector<Agent*>& agent_pointers) : _agent_pointers(agent_pointers)
+	TrainingEngine::TrainingEngine(const std::vector<TdLambdaAgent*>& agent_pointers) : _agent_pointers(agent_pointers)
 	{}
 
 	std::vector<std::array<int, 2>> TrainingEngine::split_for_pairs(const std::size_t agents_count, const bool fixed_pairs)
@@ -62,22 +62,22 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
-	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(const Agent& agent, const int episodes_to_play,
+	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(const TdLambdaAgent& agent, const int episodes_to_play,
 		const int round_id, const double draw_percentage)
 	{
-		const auto agent_clone = agent.clone();
-		agent_clone->set_training_mode(false);
+		auto agent_copy = agent;
+		agent_copy.set_performance_evaluation_mode(true);
 
 		const auto factor = 1.0 / episodes_to_play;
 		RandomAgent random_agent{};
 
-		Board board(agent_clone.get(), &random_agent);
-		board.play(episodes_to_play, CheckersState::get_start_state());
-		const auto white_wins = board.get_whites_wins() * factor;
+		Board board(&agent_copy, &random_agent);
+		const auto stats0 = board.play(episodes_to_play, CheckersState::get_start_state());
+		const auto white_wins = stats0.whites_win_count() * factor;
 
 		board.swap_agents();
-		board.play(episodes_to_play, CheckersState::get_start_state());
-		const auto black_wins = board.get_blacks_wins() * factor;
+		const auto stats1 = board.play(episodes_to_play, CheckersState::get_start_state());
+		const auto black_wins = stats1.blacks_win_count() * factor;
 
 		return  PerformanceRec{ round_id, white_wins, black_wins, draw_percentage };
 	}
@@ -105,10 +105,10 @@ namespace TrainingCell::Checkers
 					const auto black_agent_id = pairs[pair_id][1];
 					auto agent_black_ptr = _agent_pointers[black_agent_id];
 
-					Board board(agent_white_ptr, agent_black_ptr);
-					board.play(episodes_cnt, CheckersState::get_start_state());
+					const Board board(agent_white_ptr, agent_black_ptr);
+					const auto stats = board.play(episodes_cnt, CheckersState::get_start_state());
 
-					const auto draw_percentage = (episodes_cnt - board.get_blacks_wins() - board.get_whites_wins()) * 1.0 / episodes_cnt;
+					const auto draw_percentage = (episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / episodes_cnt;
 
 					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id], test_episodes,
 						round_id, draw_percentage);
@@ -140,9 +140,9 @@ namespace TrainingCell::Checkers
 				[this, &performance_scores, episodes_cnt, test_episodes, round_id](const auto& agent_id)
 			{
 				auto agent_ptr = _agent_pointers[agent_id];
-				Board board(agent_ptr, agent_ptr);
-				board.play(episodes_cnt, CheckersState::get_start_state());
-				const auto draw_percentage = (episodes_cnt - board.get_blacks_wins() - board.get_whites_wins()) * 1.0 / episodes_cnt;
+				const Board board(agent_ptr, agent_ptr);
+				const auto stats = board.play(episodes_cnt, CheckersState::get_start_state());
+				const auto draw_percentage = (episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / episodes_cnt;
 				performance_scores[agent_id] = evaluate_performance(*agent_ptr, test_episodes, round_id, draw_percentage);
 			});
 

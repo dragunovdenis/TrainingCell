@@ -44,4 +44,9 @@ namespace TrainingCell
 	{
 		return !(*this == other_sub_move);
 	}
+
+	SubMove SubMove::invalid()
+	{
+		return { PiecePosition::invalid(), PiecePosition::invalid() , PiecePosition::invalid() };
+	}
 }

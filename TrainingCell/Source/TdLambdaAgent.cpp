@@ -21,6 +21,15 @@
 
 namespace TrainingCell
 {
+	void TdLambdaAgent::msgpack_unpack(msgpack::object const& msgpack_o)
+	{
+		_msg_pack_version = 0;
+		msgpack::type::make_define_array(_msg_pack_version, MSGPACK_BASE(TdlAbstractAgent)).msgpack_unpack(msgpack_o);
+
+		if (_msg_pack_version <= 1 && !get_training_mode())
+			set_performance_evaluation_mode(true);
+	}
+
 	TdLambdaAgent::TdLambdaAgent(const TdlLegacyMsgPackAdapter& legacyContainer)
 	{
 		_net = DeepLearning::Net<DeepLearning::CpuDC>(legacyContainer._net);
@@ -31,6 +40,9 @@ namespace TrainingCell
 		_training_sub_mode = training_mode_to_sub_mode(legacyContainer._training_mode);
 		_reward_factor = legacyContainer._reward_factor;
 		static_cast<Agent&>(*this) = static_cast<const Agent&>(legacyContainer);
+
+		if (!TdlAbstractAgent::get_training_mode())
+			set_performance_evaluation_mode(true);
 	}
 
 	TdLambdaAgent::TdLambdaAgent(const std::string& script_str)
@@ -91,10 +103,5 @@ namespace TrainingCell
 			const auto legacy_container = DeepLearning::MsgPack::load_from_file<TdlLegacyMsgPackAdapter>(file_path);
 			return { legacy_container };
 		}
-	}
-
-	std::unique_ptr<Agent> TdLambdaAgent::clone() const
-	{
-		return std::make_unique<TdLambdaAgent>(*this);
 	}
 }

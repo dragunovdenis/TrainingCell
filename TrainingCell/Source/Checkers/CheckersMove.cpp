@@ -123,4 +123,15 @@ namespace TrainingCell::Checkers
 				captures.push_back(sub_move.capture);
 			}
 	}
+
+	bool CheckersMove::operator==(const CheckersMove& anotherMove) const
+	{
+		return start == anotherMove.start && finish == anotherMove.finish &&
+			captures == anotherMove.captures;
+	}
+
+	CheckersMove CheckersMove::invalid()
+	{
+		return { PiecePosition::invalid(), PiecePosition::invalid(), {} };
+	}
 }

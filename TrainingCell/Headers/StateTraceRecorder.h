@@ -16,51 +16,56 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "PiecePosition.h"
+#include <vector>
 
 namespace TrainingCell
 {
 	/// <summary>
-	/// The simplest move
+	/// Represents a state which offers fixed sequence ("path" or "trace") of moves.
 	/// </summary>
-	struct SubMove
+	template <class S>
+	class StateTraceRecorder : public S
 	{
-		/// <summary>
-		/// Start position of the piece that "moves"
-		/// </summary>
-		PiecePosition start;
-		/// <summary>
-		/// End position of the piece that "moves"
-		/// </summary>
-		PiecePosition end;
-		/// <summary>
-		/// Position of a captured piece (if valid)
-		/// </summary>
-		PiecePosition capture;
+		int _moves_counter{ 0 };
+		std::vector<typename S::Move> _moves{};
+		std::vector<bool> _draw_flags{};
+	public:
 
 		/// <summary>
-		/// "Inverts" the sub-move, i.e. aligns the sub-move with "inverted" state
+		/// "Base" state.
 		/// </summary>
-		void invert();
+		using BaseState = S;
 
 		/// <summary>
-		/// Returns "inverted" sub-move
+		/// Constructor.
 		/// </summary>
-		[[nodiscard]] SubMove get_inverted() const;
+		StateTraceRecorder(const S& init_state);
 
 		/// <summary>
-		/// Equality operator.
+		/// Appends move to the collection of "recorded" moves.
 		/// </summary>
-		bool operator ==(const SubMove& other_sub_move) const;
+		void add_record(const typename S::Move& move, const bool draw_flag);
 
 		/// <summary>
-		/// Inequality operator.
+		/// Adds final record (the one that does not have a move, only draw state flag)
 		/// </summary>
-		bool operator !=(const SubMove& other_sub_move) const;
+		void add_final_record(const bool draw_flag);
 
 		/// <summary>
-		/// Returns a "standard" value of "invalid" sub-move.
+		/// Substitutes the latest added move with the given one.
+		void adjust_last_move(const typename S::Move& move);
+
+		/// <summary>
+		/// Fills the given array with all the possible moves "in the current state".
 		/// </summary>
-		static SubMove invalid();
+		bool get_moves(std::vector<typename S::Move>& out_result) const override;
+
+		/// <summary>
+		/// "Applies" the given move to the current state and inverts the state.
+		/// Increments "moves counter".
+		/// Notice that override version below, throws an exception if the given move does not coincide with the recorder one;
+		/// </summary>
+		/// <param name="move">Move to "apply".</param>
+		void make_move_and_invert(const typename S::Move& move) override;
 	};
 }

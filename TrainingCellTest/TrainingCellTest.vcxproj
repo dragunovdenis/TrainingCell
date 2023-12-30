@@ -92,6 +92,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="StateTraceRecorderTest.cpp" />
     <ClCompile Include="TdLambdaAgentSerializationTest.cpp" />
     <ClCompile Include="TdLambdaAgentTrainingTest.cpp" />
     <ClCompile Include="CheckersStateTest.cpp" />

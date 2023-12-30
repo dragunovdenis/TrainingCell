@@ -79,6 +79,11 @@ namespace Monitor.Agents
         /// ID of the state type the agent specializes on.
         /// </summary>
         DllWrapper.StateTypeId StateTypeId { get; }
+        
+        /// <summary>
+        /// Getter for the "performance evaluation mode" flag.
+        /// </summary>
+        bool PerformanceEvaluationMode { get; }
     }
 
     /// <summary>
@@ -142,6 +147,11 @@ namespace Monitor.Agents
         public DllWrapper.StateTypeId StateTypeId { get; set; }
 
         /// <summary>
+        /// "Performance evaluation mode" flag.
+        /// </summary>
+        public bool PerformanceEvaluationMode { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public TdlParameters() {}
@@ -165,6 +175,7 @@ namespace Monitor.Agents
             SearchDepth = source.SearchDepth;
             RewardFactor = source.RewardFactor;
             StateTypeId = source.StateTypeId;
+            PerformanceEvaluationMode = source.PerformanceEvaluationMode;
         }
     }
 }

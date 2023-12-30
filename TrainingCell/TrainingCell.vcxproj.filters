@@ -165,6 +165,12 @@
     <ClInclude Include="Headers\StateTypeController.h">
       <Filter>Header Files\State</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\StateTraceRecorder.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\ITrainableAgent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\CheckersState.cpp">
@@ -252,6 +258,9 @@
       <Filter>Source Files\State</Filter>
     </ClCompile>
     <ClCompile Include="Source\StateTypeId.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\StateTraceRecorder.cpp">
       <Filter>Source Files\State</Filter>
     </ClCompile>
   </ItemGroup>

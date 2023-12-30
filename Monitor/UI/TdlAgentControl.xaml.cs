@@ -40,19 +40,33 @@ namespace Monitor.UI
             InitializeComponent();
         }
 
+        private TdLambdaAgent _agent = null;
+
         /// <summary>
         /// "Connects" agent to be edited
         /// </summary>
         internal void SetEdit(TdLambdaAgent agent)
         {
-            if (agent == null)
-                throw new Exception("Invalid agent to edit");
-
+            _agent = agent ?? throw new Exception("Invalid agent to edit");
             Params = agent.GetTrainingParameters();
             HiddenLayerDimensions = agent.NetDimensions;
             AgentId = agent.Id;
             Records = agent.Records;
             EditMode = true;
+        }
+
+        /// <summary>
+        /// In the current implementation there are some hidden
+        /// dependencies between parameters of TD-lambda agent.
+        /// In order to update UI accordingly we need to do the synchronization operation below.
+        /// </summary>
+        private void TrySynchronizeParametersWithAgent()
+        {
+            if (_agent == null)
+                return;
+
+            _agent.SetTrainingParameters(Params);
+            Params = _agent.GetTrainingParameters();
         }
 
         /// <summary>
@@ -124,10 +138,10 @@ namespace Monitor.UI
         /// <summary>
         /// Parameters that govern learning process of the agent (everything but the underlying neural net)
         /// </summary>
-        internal ITdlParameters Params
+        private ITdlParameters Params
         {
             get => _params;
-            private set
+            set
             {
                 if (!_params.Equals(value))
                 {
@@ -144,6 +158,7 @@ namespace Monitor.UI
                     OnPropertyChanged(nameof(SearchDepth));
                     OnPropertyChanged(nameof(RewardFactor));
                     OnPropertyChanged(nameof(StateTypeId));
+                    OnPropertyChanged(nameof(PerformanceEvaluationMode));
                 }
             }
         }
@@ -160,6 +175,7 @@ namespace Monitor.UI
                 {
                     _params.Epsilon = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -176,6 +192,7 @@ namespace Monitor.UI
                 {
                     _params.Lambda = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -192,6 +209,7 @@ namespace Monitor.UI
                 {
                     _params.Discount = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -208,6 +226,7 @@ namespace Monitor.UI
                 {
                     _params.LearningRate = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -224,6 +243,7 @@ namespace Monitor.UI
                 {
                     _params.TrainingMode = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -241,6 +261,7 @@ namespace Monitor.UI
                 {
                     _params.SearchMode = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -258,6 +279,7 @@ namespace Monitor.UI
                 {
                     _params.SearchIterations = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -275,6 +297,7 @@ namespace Monitor.UI
                 {
                     _params.SearchDepth = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -292,6 +315,7 @@ namespace Monitor.UI
                 {
                     _params.RewardFactor = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -309,6 +333,25 @@ namespace Monitor.UI
                 {
                     _params.StateTypeId = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
+                }
+            }
+        }
+
+        /// <summary>
+        /// "Performance evaluation mode" flag.
+        /// </summary>
+        public bool PerformanceEvaluationMode
+        {
+            get => _params.PerformanceEvaluationMode;
+
+            set
+            {
+                if (_params.PerformanceEvaluationMode != value)
+                {
+                    _params.PerformanceEvaluationMode = value;
+                    OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }
@@ -332,6 +375,7 @@ namespace Monitor.UI
                 {
                     _params.Name = value;
                     OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
                 }
             }
         }

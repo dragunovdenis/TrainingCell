@@ -44,17 +44,29 @@ typedef void (*GetArrayCallBack)(const int size, const unsigned int* arr);
 extern "C"
 {
 	/// <summary>
-	/// Runs training for the given number of episodes.
-	/// Returns 0 if succeeded.
+	/// Plays given number of episodes between the given pair of agents.
+	/// Returns statistics if succeeded.
 	/// </summary>
-	TRAINING_CELL_API int RunTraining(
+	TRAINING_CELL_API int Play(
 		TrainingCell::Agent* agent1,
 		TrainingCell::Agent* agent2,
 		int episodes, 
 		TrainingCell::StateTypeId state_type_id,
 		TrainingCell::PublishStateCallBack publishStateCallBack,
 		TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack, TrainingCell::CancelCallBack cancellationCallBack,
-		TrainingCell::ErrorMessageCallBack errorCallBack);
+		TrainingCell::ErrorMessageCallBack errorCallBack, TrainingCell::Board::Stats& stats);
+
+	/// <summary>
+	/// Trains given pair of agents for the given number of "non-trivial" (non-draw) episodes.
+	/// Returns statistics if succeeded.
+	/// </summary>
+	TRAINING_CELL_API int Train(
+		TrainingCell::Agent* agent1,
+		TrainingCell::Agent* agent2,
+		int episodes,
+		TrainingCell::StateTypeId state_type_id,
+		TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack, TrainingCell::CancelCallBack cancellationCallBack,
+		TrainingCell::ErrorMessageCallBack errorCallBack, TrainingCell::Board::Stats& stats);
 
 #pragma region Random agent
 	/// <summary>
@@ -221,6 +233,17 @@ extern "C"
 	/// </summary>
 	TRAINING_CELL_API bool TdLambdaAgentSetSearchModeIterations(TrainingCell::TdLambdaAgent* agent_ptr, const int search_iterations);
 
+	/// <summary>
+	/// Returns value of "performance evaluation mode" flag.
+	/// Returned value other than "0" or "1" indicates an error.
+	/// </summary>
+	TRAINING_CELL_API char TdLambdaAgentGetPerformanceEvaluationMode(TrainingCell::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Sets value of "performance evaluation mode" flag.
+	/// Returns "true" if succeeded.
+	/// </summary>
+	TRAINING_CELL_API bool TdLambdaAgentSetPerformanceEvaluationMode(TrainingCell::TdLambdaAgent* agent_ptr, const bool mode);
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 	/// <summary>

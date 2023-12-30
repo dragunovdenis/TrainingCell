@@ -75,11 +75,6 @@ namespace TrainingCell
 		return _record_book;
 	}
 
-	std::unique_ptr<Agent> Agent::clone() const
-	{
-		throw std::exception("Not implemented");
-	}
-
 	StateTypeId Agent::get_state_type_id() const
 	{
 		return StateTypeId::ALL;

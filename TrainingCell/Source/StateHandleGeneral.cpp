@@ -19,13 +19,20 @@
 #include "../Headers/StateHandleGeneral.h"
 #include "../Headers/Checkers/CheckersState.h"
 #include "../Headers/Chess/ChessState.h"
+#include "../Headers/StateTraceRecorder.h"
 
 namespace TrainingCell
 {
 	template <class S>
-	StateHandleGeneral<S>::StateHandleGeneral(S state) : _state(std::move(state))
+	StateHandleGeneral<S>::StateHandleGeneral(S state, const bool initialize_recorder) : _state(std::move(state))
 	{
-		_actions = _state.get_moves();
+		_is_draw = _state.get_moves(_actions);
+
+		if (initialize_recorder)
+		{
+			_trace_recorder_ptr = std::make_unique<StateTraceRecorder<typename S::BaseState>>(_state);
+			_trace_recorder_ptr->add_record(S::Move::invalid(), _is_draw);
+		}
 	}
 
 	template <class S>
@@ -90,9 +97,19 @@ namespace TrainingCell
 	template <class S>
 	void StateHandleGeneral<S>::move_invert_reset(const int action_id)
 	{
-		_state.make_move(_actions[action_id]);
-		_state.invert();
+		if (_trace_recorder_ptr)
+			_trace_recorder_ptr->adjust_last_move(_actions[action_id]);
+
+		_state.make_move_and_invert(_actions[action_id]);
 		_is_draw = _state.get_moves(_actions);
+
+		if (_trace_recorder_ptr)
+		{
+			if (_actions.empty())
+				_trace_recorder_ptr->add_final_record(_is_draw);
+			else
+				_trace_recorder_ptr->add_record(S::Move::invalid(), _is_draw);
+		}
 	}
 
 	template <class S>
@@ -111,6 +128,15 @@ namespace TrainingCell
 	std::vector<int> StateHandleGeneral<S>::evaluate_ui_inverted() const
 	{
 		return _state.to_vector_64_inverted();
+	}
+
+	template <class S>
+	std::unique_ptr<IState> StateHandleGeneral<S>::get_recorded_state() const
+	{
+		if (_trace_recorder_ptr)
+			return std::make_unique<StateHandleGeneral<StateTraceRecorder<typename S::BaseState>>>(*_trace_recorder_ptr, false);
+
+		return nullptr;
 	}
 
 	template class StateHandleGeneral<Checkers::CheckersState>;

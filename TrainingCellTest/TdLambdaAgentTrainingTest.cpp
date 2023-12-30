@@ -65,8 +65,10 @@ namespace TrainingCellTest
 		static void train_agent_standard(TdLambdaAgent& agent_to_train, const int episodes_with_exploration, const TrainingMode mode)
 		{
 			RandomAgent r_agent;
-			auto board = mode == TrainingMode::WHITE ? Board(&agent_to_train, &r_agent) : ((mode == TrainingMode::BLACK) ?
-				Board(&r_agent, &agent_to_train) : Board(&agent_to_train, &agent_to_train));
+			const auto board = mode == TrainingMode::WHITE ?
+				Board(&agent_to_train, &r_agent) : ((mode == TrainingMode::BLACK) ?
+				Board(&r_agent, &agent_to_train) :
+				Board(&agent_to_train, &agent_to_train));
 			board.play(episodes_with_exploration, CheckersState::get_start_state());
 			agent_to_train.set_exploration_probability(-1);
 			agent_to_train.set_learning_rate(0.01);
@@ -87,9 +89,9 @@ namespace TrainingCellTest
 			RandomAgent r_agent;
 			auto board = as_white ? Board(&agent , &r_agent) : Board(&r_agent, &agent);
 			constexpr auto episodes = 1000;
-			board.play(episodes, CheckersState::get_start_state());
+			const auto stats = board.play(episodes, CheckersState::get_start_state());
 
-			return (as_white ? board.get_whites_wins() : board.get_blacks_wins()) * 1.0 / episodes;
+			return (as_white ? stats.whites_win_count() : stats.blacks_win_count()) * 1.0 / episodes;
 		}
 
 		/// <summary>
@@ -148,12 +150,21 @@ namespace TrainingCellTest
 			Assert::IsTrue(smallest_win_percentage > min_acceptable_performance, L"Too low win percentage");
 		}
 
+		/// <summary>
+		/// Prepares given agent to a performance test.
+		/// </summary>
+		template <class A>
+		static void prepare_for_performance_test(A& agent)
+		{
+			agent.set_performance_evaluation_mode(true);
+		}
+
 	public:
 
 		TEST_METHOD(TdLambdaAgentAsBlackTraining)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::BLACK);
-			agent.set_training_mode(false);
+			prepare_for_performance_test(agent);
 
 			//Assert
 			assess_performance(agent, 0.95);
@@ -162,7 +173,7 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentAsWhiteTraining)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::WHITE);
-			agent.set_training_mode(false);
+			prepare_for_performance_test(agent);
 
 			//Assert
 			assess_performance(agent, 0.95);
@@ -171,7 +182,7 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentAutoTraining)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::BOTH);
-			agent.set_training_mode(false);
+			prepare_for_performance_test(agent);
 
 			//Assert
 			assess_performance(agent, 0.935);
@@ -180,7 +191,7 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentAutoTrainingWhiteOnly)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::BOTH, AutoTrainingSubMode::WHITE_ONLY);
-			agent.set_training_mode(false);
+			prepare_for_performance_test(agent);
 
 			//Assert
 			assess_performance(agent, 0.89);
@@ -189,7 +200,7 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentAutoTrainingBlackOnly)
 		{
 			auto agent = train_agent_standard(5000, TrainingMode::BOTH, AutoTrainingSubMode::BLACK_ONLY);
-			agent.set_training_mode(false);
+			prepare_for_performance_test(agent);
 
 			//Assert
 			assess_performance(agent, 0.87);
@@ -213,7 +224,7 @@ namespace TrainingCellTest
 			const auto agent1_trained = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent1_trained.tda");
 
 			//Act
-			Board board(&agent0, &agent1);
+			const Board board(&agent0, &agent1);
 			board.play(200, CheckersState::get_start_state());
 
 			//Assert
@@ -241,6 +252,104 @@ namespace TrainingCellTest
 			//Assert
 			Assert::IsTrue(agent._search_net.has_value(), L"Search net is not initialized");
 			Assert::IsTrue(agent._search_net.value().net_is_equal_to(reference_search_net), L"Nets are supposed to be equal");
+		}
+
+		TEST_METHOD(TdLambdaAgentSearchSettingsTest)
+		{
+			// Arrange
+			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.0517, 0.15, 0.97, 0.025, StateTypeId::CHECKERS);
+			agent.set_reward_factor(0.1234);
+			agent.set_training_mode(false);
+			agent.set_search_depth(3216);
+			Assert::IsFalse(agent.get_training_mode(), L"Training mode is supposed to be off.");
+
+			// Act
+			const auto search_settings_default = agent.get_search_settings();
+
+			// Assert
+			Assert::IsTrue(search_settings_default.get_training_mode(false) &&
+				search_settings_default.get_training_mode(true), L"Search settings should have training mode on.");
+
+			Assert::IsTrue(search_settings_default.get_exploratory_probability() == agent.get_exploratory_probability(),
+				L"Search settings should have the same exploration probability as the source agent.");
+			Assert::IsTrue(search_settings_default.get_discount() == agent.get_discount(),
+				L"Search settings should have the same reward discount as the source agent.");
+			Assert::IsTrue(search_settings_default.get_lambda() == agent.get_lambda(),
+				L"Search settings should have the same lambda factor as the source agent.");
+			Assert::IsTrue(search_settings_default.get_learning_rate() == agent.get_learning_rate(),
+				L"Search settings should have the same learning rate as the source agent.");
+			Assert::IsTrue(search_settings_default.get_reward_factor() == agent.get_reward_factor(),
+				L"Search settings should have the same reward factor as the source agent.");
+			Assert::IsTrue(search_settings_default.get_train_depth() == agent.get_search_depth(),
+				L"Search settings should have training depth equal to the search depth of the source agent.");
+		}
+
+		/// <summary>
+		/// General method to test performance evaluation mode.
+		/// </summary>
+		static void test_performance_evaluation_mode(const TdLambdaAgent& agent)
+		{
+			// Arrange
+			auto test_agent = agent;
+			// Sanity check.
+			Assert::IsTrue(test_agent.get_exploratory_probability() > 0,
+				L"Exploration probability is supposed to be positive.");
+			Assert::IsFalse(test_agent.get_performance_evaluation_mode(),
+				L"Performance evaluation mode is supposed to be disabled by default.");
+
+			// Act
+			test_agent.set_performance_evaluation_mode(true);
+
+			// Assert
+			Assert::IsTrue(test_agent.get_performance_evaluation_mode(),
+				L"Performance evaluation mode is supposed to be enabled.");
+			Assert::IsFalse(test_agent.get_training_mode(),
+				L"Training mode is supposed to be of in the performance evaluation mode.");
+			Assert::IsTrue(test_agent.get_exploratory_probability() == 0.0,
+				L"Exploration probability is supposed to be 0 in the performance evaluation mode.");
+
+			// Act
+			test_agent.set_performance_evaluation_mode(false);
+
+			// Assert
+			Assert::IsFalse(test_agent.get_performance_evaluation_mode(),
+				L"Performance evaluation mode is supposed to be disabled.");
+			Assert::IsTrue(test_agent.get_training_mode() == agent.get_training_mode(),
+				L"Training mode is supposed to be restored to the original value when performance evaluation mode is off.");
+			Assert::IsTrue(agent.get_exploratory_probability() == test_agent.get_exploratory_probability(),
+				L"Exploration probability should be restored when performance evaluation mode is off.");
+		}
+
+		TEST_METHOD(TdLambdaAgentPerformanceEvaluationModeTrainingOnTest)
+		{
+			const TdLambdaAgent agent({ 64, 32, 16, 8 },
+				0.0517, 0.15, 0.97, 0.025, StateTypeId::CHECKERS);
+			Assert::IsTrue(agent.get_training_mode(), L"Training mode is supposed to be on by default.");
+			test_performance_evaluation_mode(agent);
+		}
+
+		TEST_METHOD(TdLambdaAgentPerformanceEvaluationModeTrainingOffTest)
+		{
+			TdLambdaAgent agent({ 64, 32, 16, 8 },
+				0.0517, 0.15, 0.97, 0.025, StateTypeId::CHECKERS);
+			agent.set_training_mode(false);
+			Assert::IsFalse(agent.get_training_mode(), L"Training mode is supposed to be off.");
+			test_performance_evaluation_mode(agent);
+		}
+
+		TEST_METHOD(TdLambdaAgentSearchSettingsInPerformanceEvaluationModeTest)
+		{
+			// Arrange
+			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.0517, 0.15, 0.97, 0.025, StateTypeId::CHECKERS);
+			const auto search_settings_default = agent.get_search_settings();
+
+			// Act
+			agent.set_performance_evaluation_mode(true);
+
+			// Assert
+			const auto search_settings_performance_evaluation_mode = agent.get_search_settings();
+			Assert::IsTrue(search_settings_default == search_settings_performance_evaluation_mode,
+				L"Search settings should be independent on the performance evaluation mode of the agent.");
 		}
 	};
 }

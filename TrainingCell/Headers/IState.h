@@ -36,5 +36,11 @@ namespace TrainingCell
 		/// It is a responsibility of the caller to ensure validness of the provided "move ID".
 		/// </summary>
 		virtual void move_invert_reset(const int move_id) = 0;
+
+		/// <summary>
+		/// Returns pointer to an instance of state recorder.
+		/// If state recorder is not initialized null is returned.
+		/// </summary>
+		[[nodiscard]] virtual std::unique_ptr<IState> get_recorded_state() const = 0;
 	};
 }

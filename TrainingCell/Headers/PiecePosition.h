@@ -74,6 +74,11 @@ namespace TrainingCell
 		/// Negation operator.
 		/// </summary>
 		PiecePosition operator -() const;
+
+		/// <summary>
+		/// Returns a "standard" value of "invalid" piece position.
+		/// </summary>
+		static PiecePosition invalid();
 	};
 
 	/// <summary>

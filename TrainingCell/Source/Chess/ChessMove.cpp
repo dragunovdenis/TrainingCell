@@ -49,4 +49,17 @@ namespace TrainingCell::Chess
 	{
 		return Move{ {PosController::from_linear(start_field_id), PosController::from_linear(finish_field_id)}, final_rank };
 	}
+
+	bool ChessMove::operator==(const ChessMove& anotherMove) const
+	{
+		return start_field_id == anotherMove.start_field_id &&
+			   finish_field_id == anotherMove.finish_field_id &&
+			   captures == anotherMove.captures &&
+			   final_rank == anotherMove.final_rank;
+	}
+
+	ChessMove ChessMove::invalid()
+	{
+		return { -1, -1, false, -1 };
+	}
 }

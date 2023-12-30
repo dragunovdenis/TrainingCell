@@ -50,11 +50,7 @@ namespace Monitor.UI
         /// </summary>
         private void OkButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (Agent != null)
-                //Edit mode
-                Agent.SetTrainingParameters(AgentControl.Params);
-            else
-                //Construction mode
+            if (Agent == null)
                 Agent = AgentControl.CreateAgent();
                 
             DialogResult = true;
