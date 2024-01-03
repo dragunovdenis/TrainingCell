@@ -212,7 +212,7 @@ namespace TrainingCell
 
 	Board::Stats Board::train(ITrainableAgent* const agent_white_ptr, ITrainableAgent* const agent_black_ptr,
 		const int episodes, const IStateSeed& start_state, const int max_moves_without_capture,
-		PublishEndEpisodeStatsCallBack publish_end_episode_stats_callback, CancelCallBack cancel,
+		const int  max_consequent_draw_episodes, PublishEndEpisodeStatsCallBack publish_end_episode_stats_callback, CancelCallBack cancel,
 		ErrorMessageCallBack error)
 	{
 		AgentManagerAdv agent_manager(agent_white_ptr, agent_black_ptr);
@@ -227,6 +227,7 @@ namespace TrainingCell
 		try
 		{
 			auto episode_id = 0;
+			auto consequent_draw_episodes = 0;
 			while (episode_id < episodes)
 			{
 				if (cancel != nullptr && cancel())
@@ -240,9 +241,13 @@ namespace TrainingCell
 				const auto episode_result = play_episode(*state_ptr, agent_manager,
 					max_moves_without_capture, nullptr, cancel);
 
-				if (episode_result == Draw)
+				if (episode_result == Draw && consequent_draw_episodes < max_consequent_draw_episodes)
+				{
+					consequent_draw_episodes++;
 					continue;
+				}
 
+				consequent_draw_episodes = 0;
 				episode_id++;
 				agent_manager.reset();
 				agent_manager.set_training_mode();

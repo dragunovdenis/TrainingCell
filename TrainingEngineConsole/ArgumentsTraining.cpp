@@ -39,6 +39,8 @@ namespace Training::Modes
 		str += DeepLearning::Utils::to_upper_case(_output_folder.string());
 		str += std::to_string(_fixed_pairs);
 		str += std::to_string(_auto_training);
+		str += std::to_string(_smart_training);
+		str += std::to_string(_remove_outliers);
 
 		return DeepLearning::Utils::get_hash_as_hex_str(str);
 	}
@@ -113,6 +115,15 @@ namespace Training::Modes
 			"Number of rounds after which all the agents should be saved to disk", false, 0, "unsigned int");
 		cmd.add(save_rounds_arg);
 
+		auto smart_training_arg = TCLAP::ValueArg<bool>("", "smart_training",
+			"If true only non-draw episodes will be used to train the agents.", false, false, "bool");
+		cmd.add(smart_training_arg);
+
+		auto remove_outliers_arg = TCLAP::ValueArg<bool>("", "remove_outliers",
+			"If true agents showing scores considerably lower than average score of all "
+					"the agents in a round will be substituted with a copy of best-score agent in the round.", false, false, "bool");
+		cmd.add(remove_outliers_arg);
+
 		cmd.parse(argc, argv);
 
 		_source_path = source_path_arg.getValue();
@@ -156,6 +167,10 @@ namespace Training::Modes
 
 		_save_rounds = save_rounds_arg.getValue();
 
+		_smart_training = smart_training_arg.getValue();
+
+		_remove_outliers = remove_outliers_arg.getValue();
+
 		_hash = calc_hash();
 	}
 
@@ -163,9 +178,9 @@ namespace Training::Modes
 	{
 		return std::format(" Source Path: {}\n Adjustments Path: {}\n Rounds: {}\n Episodes per round: {}\n"
 					 " Evaluation episodes per round: {}\n Output folder: {}\n"
-			" Fixed pairs: {}\n Auto training: {}\n Dump Rounds: {}\n Save Rounds: {}\n Hash: {}\n",
+			" Fixed pairs: {}\n Auto training: {}\n Dump Rounds: {}\n Save Rounds: {}\n Smart Training: {}\n Remove Outliers: {}\n Hash: {}\n",
 			_source_path.string(), _adjustments_path.string(), _num_rounds, _num_episodes, _num_eval_episodes, _output_folder.string(),
-			_fixed_pairs, _auto_training, _dump_rounds, _save_rounds, _hash);
+			_fixed_pairs, _auto_training, _dump_rounds, _save_rounds, _smart_training, _remove_outliers, _hash);
 	}
 
 	bool ArgumentsTraining::get_fixed_pairs() const
@@ -201,5 +216,15 @@ namespace Training::Modes
 	std::filesystem::path ArgumentsTraining::get_state_dump_file_name() const
 	{
 		return get_hash() + ".sdmp";
+	}
+
+	bool ArgumentsTraining::get_smart_training() const
+	{
+		return _smart_training;
+	}
+
+	bool ArgumentsTraining::get_remove_outliers() const
+	{
+		return _remove_outliers;
 	}
 }

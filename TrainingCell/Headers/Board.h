@@ -250,12 +250,15 @@ namespace TrainingCell
 		/// <param name="episodes">Number of episodes (games) to play</param>
 		/// <param name="max_moves_without_capture">Defines maximal number of moves without a capture that will be qualified as a "draw"</param>
 		/// <param name="start_state">State from which each episode (game) should be started</param>
+		/// <param name="max_consequent_draw_episodes">Number of consequent draw episodes that, when reached, will result
+		/// in using of a draw outcome episode for training. This allows to avoid an "infinite" training in case non-draw
+		/// episode can't be found during the exploration phase.</param>
 		/// <param name="publish_end_episode_stats_callback">Callback to be called after each episode (game). Allows caller to get some intermediate information about the process</param>
 		/// <param name="cancel">Callback allowing caller to cancel the process</param>
 		/// <param name="error">Callback allowing caller to get some information about errors encountered</param>
 		static Stats train(ITrainableAgent* const agent_white_ptr, ITrainableAgent* const agent_black_ptr,
 			const int episodes, const IStateSeed& start_state, const int max_moves_without_capture = 200,
-			PublishEndEpisodeStatsCallBack publish_end_episode_stats_callback = nullptr, CancelCallBack cancel = nullptr,
-			ErrorMessageCallBack error = nullptr);
+			const int  max_consequent_draw_episodes = 100, PublishEndEpisodeStatsCallBack publish_end_episode_stats_callback = nullptr,
+			CancelCallBack cancel = nullptr, ErrorMessageCallBack error = nullptr);
 	};
 }

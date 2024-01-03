@@ -20,7 +20,7 @@
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
 #include "../../../DeepLearning/DeepLearning/StopWatch.h"
 #include "../../Headers/Board.h"
-#include "../../Headers/Checkers/CheckersState.h"
+#include "../../Headers/StateTypeController.h"
 #include <numeric>
 #include <ppl.h>
 
@@ -62,6 +62,41 @@ namespace TrainingCell::Checkers
 		return result;
 	}
 
+	/// <summary>
+	/// Returns ID of the agent with best performance as well as a collection of IDs of the agents with too low performance (outliers).
+	/// </summary>
+	int find_best_score_agent_id(const std::vector<TrainingEngine::PerformanceRec>& performance_scores, std::vector<int>& outlier_ids)
+	{
+		const auto best_item_id = static_cast<int>(std::ranges::max_element(performance_scores, [](const auto& x, const auto& y)
+			{return x.get_score() < y.get_score(); }) - performance_scores.begin());
+
+		const auto average_score = std::accumulate(performance_scores.begin(), performance_scores.end(), 0.0,
+			[](const double& sum, const auto& x) { return sum + x.get_score(); }) / static_cast<double>(performance_scores.size());
+
+		outlier_ids.clear();
+
+		for (auto score_item_id = 0ull; score_item_id < performance_scores.size(); ++score_item_id)
+		{
+			if (performance_scores[score_item_id].get_score() < 0.6 * average_score)
+				outlier_ids.push_back(static_cast<int>(score_item_id));
+		}
+
+		return best_item_id;
+	}
+
+	/// <summary>
+	/// Substitutes agents with poor performance with a copy of a best-score agent.
+	/// </summary>
+	void remove_low_score_outliers(const std::vector<TrainingEngine::PerformanceRec>& performance_scores, const std::vector<TdLambdaAgent*>& agent_pointers)
+	{
+		std::vector<int> outlier_ids;
+		const auto best_agent_id = find_best_score_agent_id(performance_scores, outlier_ids);
+
+		for (const auto outlier_agent_id : outlier_ids)
+			*agent_pointers[outlier_agent_id] = TdLambdaAgent(*agent_pointers[best_agent_id]);
+	}
+
+
 	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(const TdLambdaAgent& agent, const int episodes_to_play,
 		const int round_id, const double draw_percentage)
 	{
@@ -72,11 +107,11 @@ namespace TrainingCell::Checkers
 		RandomAgent random_agent{};
 
 		Board board(&agent_copy, &random_agent);
-		const auto stats0 = board.play(episodes_to_play, CheckersState::get_start_state());
+		const auto stats0 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent_copy.get_state_type_id()), _max_moves_without_capture);
 		const auto white_wins = stats0.whites_win_count() * factor;
 
 		board.swap_agents();
-		const auto stats1 = board.play(episodes_to_play, CheckersState::get_start_state());
+		const auto stats1 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent_copy.get_state_type_id()), _max_moves_without_capture);
 		const auto black_wins = stats1.blacks_win_count() * factor;
 
 		return  PerformanceRec{ round_id, white_wins, black_wins, draw_percentage };
@@ -85,7 +120,8 @@ namespace TrainingCell::Checkers
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms,
 			const std::vector<PerformanceRec>& agent_performances)>& round_callback,
-		const bool fixed_pairs, const int test_episodes) const
+		const bool fixed_pairs, const int test_episodes, const bool smart_training,
+		const bool remove_outliers) const
 	{
 		if (_agent_pointers.empty() || _agent_pointers.size() % 2 == 1)
 			throw std::exception("Collection of agents must be nonempty and contain an even number of elements");
@@ -97,7 +133,7 @@ namespace TrainingCell::Checkers
 		{
 			DeepLearning::StopWatch sw;
 			Concurrency::parallel_for(0ull, pairs.size(),
-				[this, &performance_scores, episodes_cnt, &pairs, test_episodes, round_id](const auto& pair_id)
+				[this, &performance_scores, episodes_cnt, &pairs, test_episodes, round_id, smart_training](const auto& pair_id)
 				{
 					const auto white_agent_id = pairs[pair_id][0];
 					auto agent_white_ptr = _agent_pointers[white_agent_id];
@@ -105,9 +141,10 @@ namespace TrainingCell::Checkers
 					const auto black_agent_id = pairs[pair_id][1];
 					auto agent_black_ptr = _agent_pointers[black_agent_id];
 
-					const Board board(agent_white_ptr, agent_black_ptr);
-					const auto stats = board.play(episodes_cnt, CheckersState::get_start_state());
-
+					auto state_seed_ptr = StateTypeController::get_start_seed(agent_white_ptr->get_state_type_id());
+					const auto stats = smart_training ?
+						Board::train(agent_white_ptr, agent_black_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture) :
+						Board::play(agent_white_ptr, agent_black_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture);
 					const auto draw_percentage = (episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / episodes_cnt;
 
 					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id], test_episodes,
@@ -119,14 +156,18 @@ namespace TrainingCell::Checkers
 
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
 
+			if (remove_outliers)
+				remove_low_score_outliers(performance_scores, _agent_pointers);
+
 			if (round_id != rounds_cnt - 1 && !fixed_pairs) //re-generate pairs
 				pairs = split_for_pairs(_agent_pointers.size(), fixed_pairs);
 		}
 	}
-
+ 
 	void TrainingEngine::run_auto(const int rounds_cnt, const int episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms, const std::vector<PerformanceRec>&
-			agent_performances)>& round_callback, const int test_episodes) const
+			agent_performances)>& round_callback, const int test_episodes, const bool smart_training,
+			const bool remove_outliers) const
 	{
 		if (_agent_pointers.empty())
 			throw std::exception("Collection of agents must be nonempty");
@@ -137,16 +178,21 @@ namespace TrainingCell::Checkers
 		{
 			DeepLearning::StopWatch sw;
 			Concurrency::parallel_for(0ull, _agent_pointers.size(),
-				[this, &performance_scores, episodes_cnt, test_episodes, round_id](const auto& agent_id)
+				[this, &performance_scores, episodes_cnt, test_episodes, round_id, smart_training](const auto& agent_id)
 			{
-				auto agent_ptr = _agent_pointers[agent_id];
-				const Board board(agent_ptr, agent_ptr);
-				const auto stats = board.play(episodes_cnt, CheckersState::get_start_state());
+				const auto agent_ptr = _agent_pointers[agent_id];
+			    auto state_seed_ptr = StateTypeController::get_start_seed(agent_ptr->get_state_type_id());
+				const auto stats = smart_training ?
+					Board::train(agent_ptr, agent_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture) :
+					Board::play(agent_ptr, agent_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture);
 				const auto draw_percentage = (episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / episodes_cnt;
 				performance_scores[agent_id] = evaluate_performance(*agent_ptr, test_episodes, round_id, draw_percentage);
 			});
 
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
+
+			if (remove_outliers)
+				remove_low_score_outliers(performance_scores, _agent_pointers);
 		}
 	}
 

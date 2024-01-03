@@ -346,7 +346,7 @@ namespace Monitor.UI
             if (AgentPoolList.SelectedIndex < 0)
                 return null;
 
-            return Agents[AgentPoolList.SelectedIndex];
+            return (IAgent)AgentPoolList.SelectedItem;
         }
 
         /// <summary>

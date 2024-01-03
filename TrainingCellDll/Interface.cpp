@@ -68,7 +68,8 @@ int Train(TrainingCell::Agent* agent1, TrainingCell::Agent* agent2, int episodes
 	{
 		const auto seed_ptr = TrainingCell::StateTypeController::get_start_seed(state_type_id);
 		stats = TrainingCell::Board::train(agent1, agent2, episodes, *seed_ptr,
-			50, publishStatsCallBack, cancellationCallBack, errorCallBack);
+			/*max moves without capture*/ 50, /*max consequent draw episodes*/ 100,
+			publishStatsCallBack, cancellationCallBack, errorCallBack);
 
 		return 0;
 	}

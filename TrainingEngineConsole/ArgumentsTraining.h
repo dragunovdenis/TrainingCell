@@ -85,6 +85,18 @@ namespace Training::Modes
 		/// Number of rounds after which all the agents should be saved
 		/// </summary>
 		unsigned int _save_rounds{};
+
+		/// <summary>
+		/// Flag indicating whether training on non-draw episodes should be used.
+		/// </summary>
+		bool _smart_training{};
+
+		/// <summary>
+		/// Flag indicating that agents showing score considerably lower than
+		/// the average score among all the training agents in a round will be substituted
+		/// by a copy of an agent with the best score in the round.
+		/// </summary>
+		bool _remove_outliers{};
 	public:
 
 		/// <summary>
@@ -161,6 +173,16 @@ namespace Training::Modes
 		/// Returns name of the file where state should be dumped
 		/// </summary>
 		[[nodiscard]] std::filesystem::path get_state_dump_file_name() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] bool get_smart_training() const;
+
+		/// <summary>
+		/// Read-only access to the corresponding field
+		/// </summary>
+		[[nodiscard]] bool get_remove_outliers() const;
 	};
 }
 

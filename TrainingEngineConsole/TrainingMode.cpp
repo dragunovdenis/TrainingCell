@@ -175,12 +175,13 @@ namespace Training::Modes
 		if (args.get_auto_training())
 		{
 			engine.run_auto(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
-				static_cast<int>(args.get_num_eval_episodes()));
+				static_cast<int>(args.get_num_eval_episodes()), args.get_smart_training(), args.get_remove_outliers());
 		}
 		else
 		{
 			engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
-				args.get_fixed_pairs(), static_cast<int>(args.get_num_eval_episodes()));
+				args.get_fixed_pairs(), static_cast<int>(args.get_num_eval_episodes()),
+				args.get_smart_training(), args.get_remove_outliers());
 		}
 
 		saver("");

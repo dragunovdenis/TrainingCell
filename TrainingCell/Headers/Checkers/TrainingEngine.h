@@ -87,6 +87,11 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		static PerformanceRec evaluate_performance(const TdLambdaAgent& agent, const int episodes_to_play,
 			const int round_id, const double draw_percentage);
+
+		/// <summary>
+		/// Maximal number of consequent moves without a capture that will be qualified as a draw.
+		/// </summary>
+		static constexpr int _max_moves_without_capture = 50;
 	public:
 
 		/// <summary>
@@ -119,10 +124,14 @@ namespace TrainingCell::Checkers
 		/// each round to provide some intermediate information to the caller</param>
 		/// <param name="fixed_pairs">If "true" training pairs are fixed stale during all the training</param>
 		/// <param name="test_episodes">Number of episodes to run when evaluating performance of trained agents</param>
+		/// <param name="smart_training">If "true" training on non-draw episodes will be used.</param>
+		/// <param name="remove_outliers">If "true" agents with low score will be substituted
+		/// with copies of best-score agents (on a round basis).</param>
 		void run(const int rounds_cnt, const int episodes_cnt,
 		         const std::function<void(const long long& time_per_round_ms,
 					 const std::vector<PerformanceRec>& agent_performances)>& round_callback,
-			const bool fixed_pairs, const int test_episodes = 1000) const;
+			const bool fixed_pairs, const int test_episodes = 1000,
+			const bool smart_training = false, const bool remove_outliers = false) const;
 
 		/// <summary>
 		/// Method to run auto-training
@@ -132,9 +141,12 @@ namespace TrainingCell::Checkers
 		/// <param name="round_callback">Call-back function that is called after
 		/// each round to provide some intermediate information to the caller</param>
 		/// <param name="test_episodes">Number of episodes to run when evaluating performance of trained agents</param>
+		/// <param name="smart_training">If "true" training on non-draw episodes will be used.</param>
+		/// <param name="remove_outliers">If "true" agents with low score will be substituted
+		/// with copies of best-score agents (on a round basis).</param>
 		void run_auto(const int rounds_cnt, const int episodes_cnt,
 			const std::function<void(const long long& time_per_round_ms,
 				const std::vector<PerformanceRec>& agent_performances)>& round_callback,
-			const int test_episodes = 1000) const;
+			const int test_episodes = 1000, const bool smart_training = false, const bool remove_outliers = false) const;
 	};
 }
