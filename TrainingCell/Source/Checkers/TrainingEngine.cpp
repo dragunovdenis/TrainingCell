@@ -109,12 +109,14 @@ namespace TrainingCell::Checkers
 		Board board(&agent_copy, &random_agent);
 		const auto stats0 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent_copy.get_state_type_id()), _max_moves_without_capture);
 		const auto white_wins = stats0.whites_win_count() * factor;
+		const auto white_losses = stats0.blacks_win_count() * factor;
 
 		board.swap_agents();
 		const auto stats1 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent_copy.get_state_type_id()), _max_moves_without_capture);
 		const auto black_wins = stats1.blacks_win_count() * factor;
+		const auto black_losses = stats1.whites_win_count() * factor;
 
-		return  PerformanceRec{ round_id, white_wins, black_wins, draw_percentage };
+		return PerformanceRec{ round_id, white_wins, white_losses, black_wins, black_losses, draw_percentage };
 	}
 
 	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
@@ -199,5 +201,12 @@ namespace TrainingCell::Checkers
 	double TrainingEngine::PerformanceRec::get_score() const
 	{
 		return 0.5 * (perf_white + perf_black);
+	}
+
+	std::string TrainingEngine::PerformanceRec::to_string() const
+	{
+		return std::string("w.w./w.l.-b.w/b.l.-d : ")
+			+ std::to_string(perf_white) + "/" + std::to_string(losses_white) + "-" +
+			std::to_string(perf_black) + "/" + std::to_string(losses_black) + "-" + std::to_string(draws);
 	}
 }

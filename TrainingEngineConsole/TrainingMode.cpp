@@ -151,13 +151,11 @@ namespace Training::Modes
 			for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)
 			{
 				const auto& perf_item = performance[agent_id];
-				ConsoleUtils::print_to_console(state[agent_id].get_name() + " (" + state[agent_id].get_id() + ") performance (b/w/d): "
-					+ std::to_string(perf_item.perf_white) + "/" + std::to_string(perf_item.perf_black) + "/" + std::to_string(perf_item.draws));
+				ConsoleUtils::print_to_console(state[agent_id].get_name() + " (" + state[agent_id].get_id() + ") performance " + perf_item.to_string());
 			}
 
 			const auto average_performance = state.add_performance_record(performance);
-			ConsoleUtils::print_to_console("Average performance (w/b/d): " + std::to_string(average_performance.perf_white) + "/" +
-				std::to_string(average_performance.perf_black) + "/" + std::to_string(average_performance.draws));
+			ConsoleUtils::print_to_console("Average performance " + average_performance.to_string());
 
 			ConsoleUtils::horizontal_console_separator();
 

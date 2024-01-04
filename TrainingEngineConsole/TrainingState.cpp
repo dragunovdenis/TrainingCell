@@ -44,13 +44,17 @@ namespace Training
 		for (const auto& perf_rec : performance)
 		{
 			average_perf.perf_white += perf_rec.perf_white;
+			average_perf.losses_white += perf_rec.losses_white;
 			average_perf.perf_black += perf_rec.perf_black;
+			average_perf.losses_black += perf_rec.losses_black;
 			average_perf.draws += perf_rec.draws;
 		}
 		const auto rec_count = static_cast<double>(performance.size());
 
 		average_perf.perf_white /= rec_count;
 		average_perf.perf_black /= rec_count;
+		average_perf.losses_white /= rec_count;
+		average_perf.losses_black /= rec_count;
 		average_perf.draws /= rec_count;
 
 		return average_perf;

@@ -36,34 +36,50 @@ namespace TrainingCell::Checkers
 		struct PerformanceRec
 		{
 			/// <summary>
-			/// Round the record corresponds to
+			/// Round the record corresponds to.
 			/// </summary>
 			int round{};
 
 			/// <summary>
-			/// Performance of an agent when it plays for "whites"
+			/// Performance of an agent when it plays for "whites".
 			/// </summary>
 			double perf_white{};
 
 			/// <summary>
-			/// Performance of an agent when it plays for "blacks"
+			/// Performance of "random" agent played for "blacks".
+			/// </summary>
+			double losses_white{};
+
+			/// <summary>
+			/// Performance of an agent when it plays for "blacks".
 			/// </summary>
 			double perf_black{};
 
 			/// <summary>
-			/// Percentage of "draw" games during the training in the current round
+			/// Performance of "random" agent player for "whites".
+			/// </summary>
+			double losses_black{};
+
+			/// <summary>
+			/// Percentage of "draw" games during the training in the current round.
 			/// </summary>
 			double draws{};
 
 			/// <summary>
-			/// Returns score
+			/// Returns score.
 			/// </summary>
 			[[nodiscard]] double get_score() const;
 
 			/// <summary>
-			/// Message-pack stuff
+			/// Returns string representation of the record.
 			/// </summary>
-			MSGPACK_DEFINE(round, perf_white, perf_black, draws);
+			/// <returns></returns>
+			[[nodiscard]] std::string to_string() const;
+
+			/// <summary>
+			/// Message-pack stuff.
+			/// </summary>
+			MSGPACK_DEFINE(round, perf_white, perf_black, draws, losses_white, losses_black);
 		};
 
 	private:
