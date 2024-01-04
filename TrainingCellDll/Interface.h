@@ -260,6 +260,12 @@ extern "C"
 		///	Number of sub-moves in the array
 		/// </summary>
 		int sub_moves_cnt{};
+
+		/// <summary>
+		/// Rank of the corresponding piece after the move was taken
+		/// (can differ from the original rank of the piece in case of a "transformation" move).
+		/// </summary>
+		int final_piece_rank{};
 	};
 
 	/// <summary>

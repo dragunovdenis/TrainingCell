@@ -20,7 +20,7 @@ namespace Monitor.DataStructures
     /// <summary>
     /// Representation of a checkers move (collection of sub-moves)
     /// </summary>
-    internal struct CheckersMove
+    internal struct Move
     {
         /// <summary>
         /// Collection of sub-moves
@@ -31,5 +31,11 @@ namespace Monitor.DataStructures
         /// Index of the move
         /// </summary>
         public int Index;
+
+        /// <summary>
+        /// Rank of the corresponding piece after the move was taken
+        /// (can differ from the original rank of the piece in case of a "transformation" move).
+        /// </summary>
+        public int FinalPieceRank;
     };
 }

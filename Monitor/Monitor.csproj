@@ -47,6 +47,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <EmbeddedResource Include="Images\Checkers\-1.png" />
+    <EmbeddedResource Include="Images\Checkers\-2.png" />
+    <EmbeddedResource Include="Images\Checkers\1.png" />
+    <EmbeddedResource Include="Images\Checkers\2.png" />
     <EmbeddedResource Include="Images\Chess\-2.png" />
     <EmbeddedResource Include="Images\Chess\-6.png" />
     <EmbeddedResource Include="Images\Chess\-3.png" />

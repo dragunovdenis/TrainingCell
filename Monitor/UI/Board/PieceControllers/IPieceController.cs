@@ -37,9 +37,9 @@ namespace Monitor.UI.Board.PieceControllers
         int GetCapturedPieceId(bool white);
 
         /// <summary>
-        /// Returns "piece ID" that the current instance of controller will visualize as a "piece trace" of the corresponding color.
+        /// Returns "piece ID" that the current instance of controller will visualize as a "piece trace" of the corresponding rank.
         /// </summary>
-        int GetPieceTraceId(bool white);
+        int GetPieceTraceId(int pieceId);
 
         /// <summary>
         /// Returns type ID of the state the controller is compatible with.

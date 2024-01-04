@@ -42,6 +42,14 @@ namespace Monitor.Dll
         }
 
         /// <summary>
+        /// Boolean to integer conversion.
+        /// </summary>
+        public static int ToInt(this bool val)
+        {
+            return val ? 1 : 0;
+        }
+        
+        /// <summary>
         /// Checkers move report delegate
         /// </summary>
         public delegate void PublishStateCallBack(
@@ -380,6 +388,12 @@ namespace Monitor.Dll
             ///	Number of sub-moves in the array
             /// </summary>
             public int SubMovesCnt;
+
+            /// <summary>
+            /// Rank of the corresponding piece after the move was taken
+            /// (can differ from the original rank of the piece in case of a "transformation" move).
+            /// </summary>
+            public int FinalPieceRank;
         };
 
         /// <summary>

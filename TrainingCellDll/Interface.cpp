@@ -347,7 +347,7 @@ void* ConstructInteractiveAgent(const MakeMoveCallBack make_move_callback,
 				std::vector<MoveDto> moves_dto;
 				moves_dto.reserve(moves.size());
 				for (auto& move : moves)
-					moves_dto.push_back(MoveDto{ move.sub_moves.data(), static_cast<int>(move.sub_moves.size()) });
+					moves_dto.push_back(MoveDto{ move.sub_moves.data(), static_cast<int>(move.sub_moves.size()), move.final_rank });
 
 				return make_move_callback(state.data(), static_cast<int>(state.size()), moves_dto.data(), static_cast<int>(moves_dto.size()));
 			},

@@ -39,9 +39,9 @@ namespace Monitor.UI.Board.PieceControllers
         public DllWrapper.StateTypeId StateTypeId => DllWrapper.StateTypeId.Chess;
 
         /// <summary>
-        /// Representation of a single chess field with all the related data/
+        /// Representation of a single chess field with all the related data.
         /// </summary>
-        class Field
+        private class Field
         {
             /// <summary>
             /// IMPORTANT: the constant below should be kept in sync with "PieceController" on C++ side
@@ -90,7 +90,7 @@ namespace Monitor.UI.Board.PieceControllers
             /// IMPORTANT: the constant below should be kept in sync with "PieceController" on C++ side
             /// Mask to cover all the bits of the piece rank token including the sign bit.
             /// </summary>
-            private const int BitMask = (1 << TotalBitsCount) - 1;
+            private const int RankBitMask = (1 << TotalBitsCount) - 1;
 
             /// <summary>
             /// IMPORTANT: the constant below should be kept in sync with "AttackController" on C++ side
@@ -100,7 +100,7 @@ namespace Monitor.UI.Board.PieceControllers
 
             /// <summary>
             /// IMPORTANT: the constant below should be kept in sync with "AttackController" on C++ side
-            /// Number of bits used to encode single side attack (i.e., either rival or ally attack).
+            /// Number of bits used to encode single side attack (i.e., either rival or allay attack).
             /// </summary>
             private const int AttackPackageBitsCount = 10;
 
@@ -110,7 +110,26 @@ namespace Monitor.UI.Board.PieceControllers
             /// </summary>
             private const int LongRangeAttackBitMask = (1 << LongRangeAttackBitsCount) - 1;
 
+            /// <summary>
+            /// Bits with indices greater or equal to the value below can be used for internal needs of the controller.
+            /// </summary>
+            private const int AuxBitsShift = 2 * AttackPackageBitsCount + TotalBitsCount;
+
             private readonly int _data;
+
+            /// <summary>
+            /// Returns all the possible signed piece IDs.
+            /// </summary>
+            public static IEnumerable<int> GetSignedPieceIds()
+            {
+                for (var id = -6; id <= 6; id++)
+                {
+                    if (id == 0)
+                        continue;
+
+                    yield return id;
+                }
+            }
 
             /// <summary>
             /// Constructor.
@@ -118,23 +137,31 @@ namespace Monitor.UI.Board.PieceControllers
             public Field(int fieldData)
             {
                 _data = fieldData;
+
+                IsTrace = (_data & MinBitMask) == 0;
+                var unsignedId = (IsTrace ? (_data >> AuxBitsShift) : _data) & MinBitMask;
+                var isAntiPiece = ((IsTrace ? (_data >> AuxBitsShift) : _data) & AntiPieceFlag) != 0;
+                SignedPieceId = isAntiPiece ? -unsignedId : unsignedId;
             }
 
             /// <summary>
+            /// Converts given piece ID to "piece trace" ID (i.e., identifier
+            /// used to mark previous or possible next position of a piece).
+            /// </summary>
+            public static int GetPieceTraceId(int pieceId)
+            {
+                return (pieceId & RankBitMask) << AuxBitsShift;
+            }
+            
+            /// <summary>
             /// Returns signed ID of a piece on the current field (or 0 if the field is empty).
             /// </summary>
-            public int SignedPieceId
-            {
-                get
-                {
-                    var unsignedId = _data & MinBitMask;
-
-                    if ((_data & AntiPieceFlag) == 0)
-                        return unsignedId;
-
-                    return -unsignedId;
-                }
-            }
+            public int SignedPieceId { get; }
+            
+            /// <summary>
+            /// Returns "true" if the given field represents a "piece trace".
+            /// </summary>
+            public bool IsTrace { get; }
 
             /// <summary>
             /// Returns string representation of the attack data encoded in the lowest 10 bits of the given integer.
@@ -186,7 +213,6 @@ namespace Monitor.UI.Board.PieceControllers
                     return AttackToString(temp);
                 }
             }
-
         }
 
         /// <summary>
@@ -206,13 +232,8 @@ namespace Monitor.UI.Board.PieceControllers
         {
             _showDebugInfo = showDebugInfo;
 
-            for (int i = -6; i <= 6; i++)
-            {
-                if (i == 0)
-                    continue;
-
-                _steams[i] = Assembly.GetExecutingAssembly().GetManifestResourceStream($"Monitor.Images.Chess.{i}.png");
-            }
+            foreach (int id in Field.GetSignedPieceIds())
+                _steams[id] = Assembly.GetExecutingAssembly().GetManifestResourceStream($"Monitor.Images.Chess.{id}.png");
         }
 
         /// <summary>
@@ -237,7 +258,8 @@ namespace Monitor.UI.Board.PieceControllers
                 {
                     Source = bitmap,
                     Width = fieldSizeShrunk,
-                    Height = fieldSizeShrunk
+                    Height = fieldSizeShrunk,
+                    Opacity = field.IsTrace ? 0.3 : 1.0,
                 };
 
                 Canvas.SetLeft(image, topLeftAdjusted.X);
@@ -274,9 +296,9 @@ namespace Monitor.UI.Board.PieceControllers
         /// <summary>
         /// See the summary of the interface method.
         /// </summary>
-        public int GetPieceTraceId(bool white)
+        public int GetPieceTraceId(int pieceId)
         {
-            return 0;
+            return Field.GetPieceTraceId(pieceId);
         }
     }
 }

@@ -83,7 +83,7 @@ namespace Monitor.UI.Board
             /// <summary>
             /// Set of possible moves in the current state
             /// </summary>
-            public readonly CheckersMove[] PossibleMoves;
+            public readonly Move[] PossibleMoves;
             /// <summary>
             /// Channel to provide user input to the thread that is running training
             /// </summary>
@@ -92,7 +92,7 @@ namespace Monitor.UI.Board
             /// <summary>
             /// Constructor
             /// </summary>
-            public MoveRequest(CheckersMove[] possibleMoves)
+            public MoveRequest(Move[] possibleMoves)
             {
                 PossibleMoves = possibleMoves;
             }
@@ -106,7 +106,7 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Initializes a state when we wait until used make a move
         /// </summary>
-        private Task<int> RequestUserMove(int[] state, CheckersMove[] possibleMoves)
+        private Task<int> RequestUserMove(int[] state, Move[] possibleMoves)
         {
             if (state.Length != Checkerboard.Fields)
                 throw new Exception("Invalid size of the state");
@@ -265,17 +265,18 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Adds extra symbols to the state to trace the series of given sub-moves (representing a move)
         /// </summary>
-        private void AddMoveTrace(int[] state, SubMove[] subMoves, bool whiteMove)
+        private void AddMoveTrace(int[] state, SubMove[] subMoves)
         {
             if (subMoves == null)
                 return;
 
+            var pieceId = state[subMoves.Last().End.LinearPosition];
             foreach (var move in subMoves)
             {
                 if (move.Capture.IsValid)
-                    state[move.Capture.LinearPosition] = _pieceController.GetCapturedPieceId(whiteMove);
+                    state[move.Capture.LinearPosition] = _pieceController.GetCapturedPieceId(white: pieceId > 0);
 
-                state[move.Start.LinearPosition] = _pieceController.GetPieceTraceId(whiteMove);
+                state[move.Start.LinearPosition] = _pieceController.GetPieceTraceId(pieceId);
             }
         }
 
@@ -296,11 +297,28 @@ namespace Monitor.UI.Board
         }
 
         /// <summary>
+        /// Returns a string with a message summarising the game.  
+        /// </summary>
+        string GetConclusionMessage(bool whiteWonFlag, bool blackWonFlag)
+        {
+            if (whiteWonFlag & !blackWonFlag)
+                return "The Whites have won!";
+            
+            if (!whiteWonFlag & blackWonFlag)
+                return "The Blacks have won!";
+
+            if (whiteWonFlag & blackWonFlag)
+                return "Stalemate!";
+
+            return "Draw!";
+        }
+
+        /// <summary>
         /// Starts checkers game with the agents of the two given types (asynchronously) and returns immediately
         /// Returns true if the previous playing task is complete and the current one is successfully started
         /// </summary>
-        /// <param name="agentTypeWhite"></param>
-        /// <param name="agentTypeBlack"></param>
+        /// <param name="agentTypeWhite">Type of the "white" agent.</param>
+        /// <param name="agentTypeBlack">Type of the "black" agent.</param>
         /// <param name="episodes">Number of episodes to play</param>
         /// <param name="movePause">Number of milliseconds to wait between two successive moves</param>
         public bool Play(AgentType agentTypeWhite, AgentType agentTypeBlack, int episodes, int movePause = 100)
@@ -343,7 +361,7 @@ namespace Monitor.UI.Board
 
                                 InactiveAgent = agentToMovePtr == agentWhite.Ptr ? agentBlack : agentWhite;
 
-                                AddMoveTrace(state, subMoves, InactiveAgent == agentWhite);
+                                AddMoveTrace(state, subMoves);
 
                                 _uiThreadDispatcher.Invoke(() =>
                                 {
@@ -356,9 +374,13 @@ namespace Monitor.UI.Board
                                 InactiveAgent = null;
                                 _uiThreadDispatcher.Invoke(() =>
                                 {
-                                    whiteWinsCounter += whiteWon & !blackWon ? 1 : 0;
-                                    blackWinsCounter += blackWon & !whiteWon ? 1 : 0;
-                                    staleMatesCounter += whiteWon & blackWon ? 1 : 0;
+                                    whiteWinsCounter += (whiteWon & !blackWon).ToInt();
+                                    blackWinsCounter += (blackWon & !whiteWon).ToInt();
+                                    staleMatesCounter += (whiteWon & blackWon).ToInt();
+
+                                    MessageBox.Show(Application.Current.MainWindow,
+                                        GetConclusionMessage(whiteWon, blackWon), "Episode is over",
+                                        MessageBoxButton.OK, MessageBoxImage.Information);
 
                                     _state = null;
                                     InfoEvent?.Invoke(new List<string>()
@@ -406,15 +428,13 @@ namespace Monitor.UI.Board
         /// </summary>
         PiecePosition CanvasCoordinateToFieldPosition(Point pt)
         {
-            var result = new PiecePosition() { Col = -1, Row = -1 };
-
             var colIdFloat = (pt.X - _topLeftX) / _fieldSide;
             if (colIdFloat < 0 || colIdFloat > Checkerboard.Columns)
-                return result;
+                return PiecePosition.Invalid();
 
             var rowIdFloat = (pt.Y - _topLeftY) / _fieldSide;
             if (rowIdFloat < 0 || rowIdFloat > Checkerboard.Rows)
-                return result;
+                return PiecePosition.Invalid();
 
             return new PiecePosition() { Row = (int)rowIdFloat, Col = (int)colIdFloat };
         }
@@ -424,7 +444,7 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Returns sub-set of possible moves that start from the given position
         /// </summary>
-        private CheckersMove[] GetPossibleMovesStartingFrom(PiecePosition startPos)
+        private Move[] GetPossibleMovesStartingFrom(PiecePosition startPos)
         {
             return GetPossibleMovesStartingFrom(_userMoveRequest?.PossibleMoves, startPos);
         }
@@ -432,10 +452,10 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Returns sub-set of possible moves that start from the given position
         /// </summary>
-        private static CheckersMove[] GetPossibleMovesStartingFrom(CheckersMove[] possibleMoves, PiecePosition startPos)
+        private static Move[] GetPossibleMovesStartingFrom(Move[] possibleMoves, PiecePosition startPos)
         {
             if (possibleMoves == null || possibleMoves.Length == 0)
-                return Array.Empty<CheckersMove>();
+                return Array.Empty<Move>();
 
             return possibleMoves.Where(x => x.SubMoves[0].Start.IsEqualTo(startPos)).ToArray();
         }
@@ -443,10 +463,10 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Returns sub-set of possible moves that end at the given position
         /// </summary>
-        private static CheckersMove[] GetPossibleMovesEndingAt(CheckersMove[] possibleMoves, PiecePosition endPos)
+        private static Move[] GetPossibleMovesEndingAt(Move[] possibleMoves, PiecePosition endPos)
         {
             if (possibleMoves == null || possibleMoves.Length == 0)
-                return Array.Empty<CheckersMove>();
+                return Array.Empty<Move>();
 
             return possibleMoves.Where(x => x.SubMoves.Last().End.IsEqualTo(endPos)).ToArray();
         }
@@ -461,6 +481,14 @@ namespace Monitor.UI.Board
         private Point GetTopLeftCorner(long colId, long rowId, double offset)
         {
             return new Point(colId * _fieldSide + _topLeftX + offset, rowId * _fieldSide + _topLeftY + offset);
+        }
+
+        /// <summary>
+        /// Returns coordinates of the top left corner of the corresponding field on the canvas.
+        /// </summary>
+        private Point GetTopLeftCorner(PiecePosition fieldCoordinate)
+        {
+            return GetTopLeftCorner(fieldCoordinate.Col, fieldCoordinate.Row, 0);
         }
 
         /// <summary>
@@ -517,8 +545,8 @@ namespace Monitor.UI.Board
                 foreach (var move in _userMoveRequest.PossibleMoves)
                 {
                     var start = move.SubMoves[0].Start;
-                    var topLeftStart = GetTopLeftCorner(start.Col, start.Row, 0);
-                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftStart.X, topLeftStart.Y, _fieldSide, _fieldSide,
+                    var topLeftCorner = GetTopLeftCorner(start.Col, start.Row, 0);
+                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
                         _selectedField.IsEqualTo(start) ? Brushes.Red : Brushes.Yellow, null, _canvas);
                 }
 
@@ -526,8 +554,8 @@ namespace Monitor.UI.Board
                 foreach (var move in possibleMovesForCurrentPosition)
                 {
                     var end = move.SubMoves.Last().End;
-                    var topLeftEnd = GetTopLeftCorner(end.Col, end.Row, 0);
-                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftEnd.X, topLeftEnd.Y, _fieldSide, _fieldSide,
+                    var topLeftCorner = GetTopLeftCorner(end.Col, end.Row, 0);
+                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
                         Brushes.GreenYellow, null, _canvas);
                 }
             }
@@ -551,7 +579,118 @@ namespace Monitor.UI.Board
             _uiThreadDispatcher = uiThreadDispatcher ?? throw new Exception("Dispatcher must be not null");
             _canvas = canvas ?? throw new Exception("Invalid input");
             _canvas.MouseDown += CanvasOnMouseDown;
+            _canvas.MouseMove += CanvasOnMouseMove;
+            _canvas.MouseWheel += CanvasOnMouseWheel;
             Draw();
+        }
+
+        /// <summary>
+        /// Position of the board field under the mouse pointer (if valid).
+        /// </summary>
+        PiecePosition _fieldUnderMousePointer = PiecePosition.Invalid();
+
+        /// <summary>
+        /// Functionality to facilitate selection of moves (especially
+        /// in case there are multiple moves with the same end position).
+        /// </summary>
+        private class MoveSelector
+        {
+            private readonly IList<Move> _moves;
+            private int _selectedMoveId = 0;
+
+            /// <summary>
+            /// Constructor.
+            /// </summary>
+            public MoveSelector(IList<Move> moves)
+            {
+                if (moves == null || moves.Count == 0)
+                    throw new ArgumentException("Invalid collection of moves.");
+                    
+                _moves = moves.ToArray();
+            }
+
+            /// <summary>
+            /// Selects next move in the collection of moves.
+            /// </summary>
+            public void SelectNextMove()
+            {
+                _selectedMoveId = (_selectedMoveId + 1) % _moves.Count;
+            }
+
+            /// <summary>
+            /// Selects previous move in the collection of moves.
+            /// </summary>
+            public void SelectPreviousMove()
+            {
+                _selectedMoveId = (_selectedMoveId + _moves.Count - 1) % _moves.Count;
+            }
+
+            /// <summary>
+            /// Returns the selected move.
+            /// </summary>
+            public Move SelectedMove => _moves[_selectedMoveId];
+        }
+
+        private MoveSelector _moveSelector = null;
+
+        /// <summary>
+        /// MouseMove handler.
+        /// </summary>
+        private void CanvasOnMouseMove(object sender, MouseEventArgs e)
+        {
+            var fieldPositions = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
+
+            if (_fieldUnderMousePointer.IsEqualTo(fieldPositions))
+                return;
+
+            _fieldUnderMousePointer = fieldPositions;
+            _moveSelector = null;
+            Draw();
+
+            if (_fieldUnderMousePointer.IsValid && _selectedField.IsValid && _userMoveRequest != null)
+            {
+                var possibleMovesForCurrentPosition =
+                    GetPossibleMovesEndingAt(GetPossibleMovesStartingFrom(_selectedField), _fieldUnderMousePointer);
+
+                if (possibleMovesForCurrentPosition.Length != 0)
+                {
+                    _moveSelector = new MoveSelector(possibleMovesForCurrentPosition);
+                    DrawMovePreview();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Draws "preview" of a move.
+        /// </summary>
+        private void DrawMovePreview()
+        {
+            if (_moveSelector == null)
+                throw new InvalidOperationException("Invalid input data");
+
+            var selectedMove = _moveSelector.SelectedMove;
+            var selectedPiece = selectedMove.FinalPieceRank != 0 ?
+                selectedMove.FinalPieceRank : _state[_selectedField.LinearPosition];
+            var tracePieceId = _pieceController.GetPieceTraceId(selectedPiece);
+            var topLeftCorner = GetTopLeftCorner(_fieldUnderMousePointer);
+            _pieceController.DrawPiece(_canvas, topLeftCorner, _fieldSide, tracePieceId);
+        }
+
+        /// <summary>
+        /// MouseWheel handler.
+        /// </summary>
+        private void CanvasOnMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (_moveSelector == null || e.Delta == 0)
+                return;
+
+            if (e.Delta > 0)
+                _moveSelector.SelectNextMove();
+            else
+                _moveSelector.SelectPreviousMove();
+            
+            Draw();
+            DrawMovePreview();
         }
 
         /// <summary>
@@ -562,19 +701,14 @@ namespace Monitor.UI.Board
 
             if (_userMoveRequest != null)
             {
-                var oldSelectedField = _selectedField;
                 _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
-                var possibleMoves = GetPossibleMovesEndingAt(GetPossibleMovesStartingFrom(oldSelectedField), _selectedField);
 
-                if (possibleMoves.Length > 0)
+                if (_moveSelector != null)
                 {
-                    //TODO: 
-                    //in principle there can be a couple of moves that have the same start and end position but this is only for the case of capturing moves
-                    //For now we go for a simplified solution of the problem we choose index of the move that captures the most
-                    //It would be nice to come up with a mechanism that would allow user to deliberately choose between the possible moves in such a (rare) cases
-                    var moveId = possibleMoves.OrderByDescending(x => x.SubMoves.Length).First().Index;
+                    var moveId = _moveSelector.SelectedMove.Index;
                     _userMoveRequest.UserMoveResult.SetResult(moveId);
                     _userMoveRequest = null;
+                    _moveSelector = null;
                 }
             }
             else

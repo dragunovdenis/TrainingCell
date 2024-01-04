@@ -30,7 +30,7 @@ namespace Monitor.Agents
         /// <summary>
         /// "Make move" delegate
         /// </summary>
-        internal delegate int MakeMoveDelegate(int[] state, CheckersMove[] moves);
+        internal delegate int MakeMoveDelegate(int[] state, Move[] moves);
 
         /// <summary>
         /// "Game over" delegate
@@ -57,10 +57,11 @@ namespace Monitor.Agents
             _makeMoveAdapter =
                 (state, stateSize, moves, movesSize) =>
                 {
-                    var movesAdapted = moves.Select((x, i) => new CheckersMove()
+                    var movesAdapted = moves.Select((x, i) => new Move()
                     {
                         SubMoves = MemoryUtils.ReadArrayOfStructs<SubMove>(x.SubMoves, x.SubMovesCnt),
                         Index = i,
+                        FinalPieceRank = x.FinalPieceRank,
                     }).ToArray();
 
                     return makeMove(state, movesAdapted);
