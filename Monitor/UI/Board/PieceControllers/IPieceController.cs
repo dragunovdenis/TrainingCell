@@ -15,6 +15,7 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Monitor.Dll;
@@ -31,6 +32,11 @@ namespace Monitor.UI.Board.PieceControllers
         /// </summary>
         void DrawPiece(Canvas canvas, Point topLeft, double fieldSize, int pieceId);
 
+        /// <summary>
+        /// Returns elements of a piece represented with the given ID and placed on a canvas at the given coordinate.
+        /// </summary>
+        IEnumerable<UIElement> CreatePieceElements(Point topLeft, double fieldSize, int pieceId);
+        
         /// <summary>
         /// Returns "piece ID" that the current instance of controller will visualize as a "captured" piece of the corresponding color.
         /// </summary>

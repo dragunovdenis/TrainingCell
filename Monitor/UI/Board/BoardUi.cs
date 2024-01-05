@@ -40,10 +40,12 @@ namespace Monitor.UI.Board
     /// </summary>
     class BoardUi : ITwoPlayerGameUi
     {
-        double _boardSide;
-        double _fieldSide;
-        double _topLeftX;
-        double _topLeftY;
+        private double _boardSide;
+        private double _fieldSide;
+        private double _topLeftX;
+        private double _topLeftY;
+        private double _canvasHeight = -1;
+        private double _canvasWidth = -1;
 
         /// <summary>
         /// Types of agents
@@ -112,7 +114,7 @@ namespace Monitor.UI.Board
                 throw new Exception("Invalid size of the state");
 
             _userMoveRequest = new MoveRequest(possibleMoves);
-            Draw();
+            _uiThreadDispatcher.Invoke(UpdateMarkers, DispatcherPriority.ContextIdle);
             return _userMoveRequest.UserMoveResult.Task;
         }
 
@@ -135,7 +137,7 @@ namespace Monitor.UI.Board
                         if (state.Length != Checkerboard.Fields)
                             throw new Exception("Invalid size of the state");
 
-                        var movePromise = _uiThreadDispatcher.Invoke(() => RequestUserMove(state, moves));
+                        var movePromise = RequestUserMove(state, moves);
                         return movePromise.Result;
                     }, (state, result) =>
                     {
@@ -310,7 +312,7 @@ namespace Monitor.UI.Board
             if (whiteWonFlag & blackWonFlag)
                 return "Stalemate!";
 
-            return "Draw!";
+            return "It is a draw!";
         }
 
         /// <summary>
@@ -357,17 +359,12 @@ namespace Monitor.UI.Board
                                 PreviousMoveTime = elapsedTime.ToString(@"hh\:mm\:ss");
                                 timePoint = timePointNext;
 
-                                if (movePause > 0) Thread.Sleep(movePause);
-
                                 InactiveAgent = agentToMovePtr == agentWhite.Ptr ? agentBlack : agentWhite;
 
                                 AddMoveTrace(state, subMoves);
-
-                                _uiThreadDispatcher.Invoke(() =>
-                                {
-                                    _state = state;
-                                    Draw();
-                                });
+                                _state = state;
+                                _uiThreadDispatcher.Invoke(Draw, DispatcherPriority.ContextIdle);
+                                if (movePause > 0) Thread.Sleep(movePause);
                             },
                             (whiteWon, blackWon, totalGamers) =>
                             {
@@ -391,7 +388,7 @@ namespace Monitor.UI.Board
                                         "Total Games: " + totalGamers,
                                     });
                                     Draw();
-                                });
+                                }, DispatcherPriority.ContextIdle);
                             }, () => _playTaskCancellation.IsCancellationRequested,
                             (errorMessage) => _uiThreadDispatcher.Invoke(
                                 () =>
@@ -414,6 +411,7 @@ namespace Monitor.UI.Board
                 _playTaskCancellation = null;
                 IsPlaying = false;
                 InfoEvent?.Invoke(null);
+                ResetUserInput();
             }, TaskScheduler.FromCurrentSynchronizationContext());
             _playTask.Start();
 
@@ -491,54 +489,119 @@ namespace Monitor.UI.Board
             return GetTopLeftCorner(fieldCoordinate.Col, fieldCoordinate.Row, 0);
         }
 
+        private readonly IList<UIElement> _stateElements = new List<UIElement>();
+
         /// <summary>
-        /// Draws the given state
+        /// Removes state visualization elements from the canvas.
         /// </summary>
-        private void DrawState(int[] state)
+        private void ClearStateElements()
         {
-            if (state == null || state.Length != Checkerboard.Fields)
-                throw new Exception("Invalid state parameter");
+            foreach (var element in _stateElements)
+                _canvas.Children.Remove(element);
+            
+            _stateElements.Clear();
+        }
+        
+        /// <summary>
+        /// Updates visualization elements the current state.
+        /// </summary>
+        private void UpdateStateElements()
+        {
+            ClearStateElements();
 
-            UpdateBoardDimensions();
+            if (_state == null)
+                return;
 
-            for (var stateItemId = 0; stateItemId < state.Length; stateItemId++)
+            for (var stateItemId = 0; stateItemId < _state.Length; stateItemId++)
             {
-                var pieceId = state[stateItemId];
+                var pieceId = _state[stateItemId];
 
                 var position = PiecePosition.GetPosition(stateItemId);
                 var topLeft = GetTopLeftCorner(position.Col, position.Row, 0);
-                _pieceController.DrawPiece(_canvas, topLeft, _fieldSide, pieceId);
+                foreach (var element in _pieceController.CreatePieceElements(topLeft, _fieldSide, pieceId))
+                    _stateElements.Add(element);
             }
+
+            foreach (var element in _stateElements)
+                _canvas.Children.Add(element);
         }
 
         /// <summary>
-        /// Updates board size parameters from the current size of the canvas constrol
+        /// Updates board size parameters from the current size of the canvas control.
+        /// Returns "true" if any of the board dimensions has been updated.
         /// </summary>
-        void UpdateBoardDimensions()
+        bool UpdateBoardDimensions()
         {
-            _boardSide = Math.Max(0, Math.Min(_canvas.ActualHeight, _canvas.ActualWidth) - 10.0);
+            if (Math.Abs(_canvasHeight - _canvas.ActualHeight) < 1e-10 &&
+                Math.Abs(_canvasWidth - _canvas.ActualWidth) < 1e-10)
+                return false;
+
+            _canvasHeight = _canvas.ActualHeight;
+            _canvasWidth = _canvas.ActualWidth;
+
+            _boardSide = Math.Max(0, Math.Min(_canvasHeight, _canvasWidth) - 10.0);
             _fieldSide = _boardSide / Checkerboard.Rows;
-            _topLeftX = (_canvas.ActualWidth - _boardSide) / 2;
-            _topLeftY = (_canvas.ActualHeight - _boardSide) / 2;
+            _topLeftX = (_canvasWidth - _boardSide) / 2;
+            _topLeftY = (_canvasHeight - _boardSide) / 2;
+
+            return true;
         }
 
-        /// <summary>
-        /// Draws checkers board
-        /// </summary>
-        private void DrawBoard()
-        {
-            _canvas.Children.Clear();
+        private readonly IList<UIElement> _boardElements = new List<UIElement>();
 
-            UpdateBoardDimensions();
+        /// <summary>
+        /// Removes board elements from canvas.
+        /// </summary>
+        private void ClearBoardElements()
+        {
+            foreach (var element in _boardElements)
+                _canvas.Children.Remove(element);
+            
+            _boardElements.Clear();
+        }
+        
+        /// <summary>
+        /// Updates checkers board visualization elements.
+        /// </summary>
+        private void UpdateBoardElements()
+        {
+            if (!UpdateBoardDimensions())
+                return;
+
+            ClearBoardElements();
 
             for (var rowId = 0; rowId < Checkerboard.Rows; rowId++)
                 for (var colId = 0; colId < Checkerboard.Columns; colId++)
                 {
                     var topLeft = GetTopLeftCorner(colId, rowId, 0);
                     var isDarkField = rowId % 2 == 0 ? colId % 2 == 1 : colId % 2 == 0;
-                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
-                        Brushes.Black, isDarkField ? Brushes.SaddleBrown : Brushes.BurlyWood, _canvas);
+                    _boardElements.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
+                        Brushes.Black, isDarkField ? Brushes.SaddleBrown : Brushes.BurlyWood));
                 }
+
+            foreach (var element in _boardElements)
+                _canvas.Children.Add(element);
+        }
+
+        private readonly IList<UIElement> _markers = new List<UIElement>();
+
+        /// <summary>
+        /// Clears guiding markers on the canvas.
+        /// </summary>
+        void ClearMarkers()
+        {
+            foreach (var marker in _markers)
+                _canvas.Children.Remove(marker);
+
+            _markers.Clear();
+        }
+
+        /// <summary>
+        /// Updates guiding markers on the board.
+        /// </summary>
+        void UpdateMarkers()
+        {
+            ClearMarkers();
 
             if (_userMoveRequest != null)
             {
@@ -546,8 +609,8 @@ namespace Monitor.UI.Board
                 {
                     var start = move.SubMoves[0].Start;
                     var topLeftCorner = GetTopLeftCorner(start.Col, start.Row, 0);
-                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
-                        _selectedField.IsEqualTo(start) ? Brushes.Red : Brushes.Yellow, null, _canvas);
+                    _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
+                        _selectedField.IsEqualTo(start) ? Brushes.Red : Brushes.BlueViolet, null));
                 }
 
                 var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(_selectedField);
@@ -555,9 +618,12 @@ namespace Monitor.UI.Board
                 {
                     var end = move.SubMoves.Last().End;
                     var topLeftCorner = GetTopLeftCorner(end.Col, end.Row, 0);
-                    CanvasDrawingUtils.DrawShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
-                        Brushes.GreenYellow, null, _canvas);
+                    _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
+                        Brushes.GreenYellow, null));
                 }
+
+                foreach (var marker in _markers)
+                    _canvas.Children.Add(marker);
             }
         }
 
@@ -566,9 +632,9 @@ namespace Monitor.UI.Board
         /// </summary>
         public void Draw()
         {
-            DrawBoard();
-            if (_state != null)
-                DrawState(_state);
+            UpdateBoardElements();
+            UpdateStateElements();
+            UpdateMarkers();
         }
 
         /// <summary>
@@ -581,6 +647,7 @@ namespace Monitor.UI.Board
             _canvas.MouseDown += CanvasOnMouseDown;
             _canvas.MouseMove += CanvasOnMouseMove;
             _canvas.MouseWheel += CanvasOnMouseWheel;
+            _canvas.CacheMode = new BitmapCache();
             Draw();
         }
 
@@ -645,7 +712,7 @@ namespace Monitor.UI.Board
 
             _fieldUnderMousePointer = fieldPositions;
             _moveSelector = null;
-            Draw();
+            ClearMovePreview();
 
             if (_fieldUnderMousePointer.IsValid && _selectedField.IsValid && _userMoveRequest != null)
             {
@@ -655,25 +722,44 @@ namespace Monitor.UI.Board
                 if (possibleMovesForCurrentPosition.Length != 0)
                 {
                     _moveSelector = new MoveSelector(possibleMovesForCurrentPosition);
-                    DrawMovePreview();
+                    UpdateMovePreview();
                 }
             }
         }
 
+        private readonly IList<UIElement> _previewElements = new List<UIElement>();
+
         /// <summary>
-        /// Draws "preview" of a move.
+        /// Removes "move preview" element from the canvas.
         /// </summary>
-        private void DrawMovePreview()
+        private void ClearMovePreview()
+        {
+            foreach (var element in _previewElements)
+                _canvas.Children.Remove(element);
+
+            _previewElements.Clear();
+        }
+
+        /// <summary>
+        /// Updates "move preview" visualization.
+        /// </summary>
+        private void UpdateMovePreview()
         {
             if (_moveSelector == null)
                 throw new InvalidOperationException("Invalid input data");
+
+            ClearMovePreview();
 
             var selectedMove = _moveSelector.SelectedMove;
             var selectedPiece = selectedMove.FinalPieceRank != 0 ?
                 selectedMove.FinalPieceRank : _state[_selectedField.LinearPosition];
             var tracePieceId = _pieceController.GetPieceTraceId(selectedPiece);
             var topLeftCorner = GetTopLeftCorner(_fieldUnderMousePointer);
-            _pieceController.DrawPiece(_canvas, topLeftCorner, _fieldSide, tracePieceId);
+            foreach (var element in _pieceController.CreatePieceElements(topLeftCorner, _fieldSide, tracePieceId))
+                _previewElements.Add(element);
+
+            foreach (var element in _previewElements)
+                _canvas.Children.Add(element);
         }
 
         /// <summary>
@@ -689,8 +775,17 @@ namespace Monitor.UI.Board
             else
                 _moveSelector.SelectPreviousMove();
             
-            Draw();
-            DrawMovePreview();
+            UpdateMovePreview();
+        }
+
+        /// <summary>
+        /// Resets all the user input.
+        /// </summary>
+        private void ResetUserInput()
+        {
+            _userMoveRequest = null;
+            _moveSelector = null;
+            _selectedField = PiecePosition.Invalid();
         }
 
         /// <summary>
@@ -698,23 +793,16 @@ namespace Monitor.UI.Board
         /// </summary>
         private void CanvasOnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
 
-            if (_userMoveRequest != null)
+            if (_userMoveRequest != null && _moveSelector != null)
             {
-                _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
-
-                if (_moveSelector != null)
-                {
-                    var moveId = _moveSelector.SelectedMove.Index;
-                    _userMoveRequest.UserMoveResult.SetResult(moveId);
-                    _userMoveRequest = null;
-                    _moveSelector = null;
-                }
+                var moveId = _moveSelector.SelectedMove.Index;
+                _userMoveRequest.UserMoveResult.SetResult(moveId);
+                ResetUserInput();
             }
-            else
-                _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
 
-            Draw();
+            UpdateMarkers();
         }
 
         /// <summary>

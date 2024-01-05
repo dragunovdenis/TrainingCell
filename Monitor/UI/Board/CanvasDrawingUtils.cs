@@ -36,19 +36,28 @@ namespace Monitor.UI.Board
             Brush borderColor, Brush fillColor, Canvas cv)
             where S : Shape, new()
         {
+            cv.Children.Add(CreateShape<S>(x, y, width, height, borderColor, fillColor));
+        }
+
+        /// <summary>
+        /// Returns an instance of a "shape" (ellipse, rectangle...) with the given position on a canvas.
+        /// </summary>
+        public static S CreateShape<S>(double x, double y, double width, double height,
+            Brush borderColor, Brush fillColor)
+            where S : Shape, new()
+        {
             var shape = new S()
             {
                 Width = width,
                 Height = height,
                 Stroke = borderColor,
                 Fill = fillColor,
-                StrokeThickness = fillColor == null ? 4 : 1,
+                StrokeThickness = fillColor == null ? 2 : 1,
             };
-
-            cv.Children.Add(shape);
-
             shape.SetValue(Canvas.LeftProperty, x);
             shape.SetValue(Canvas.TopProperty, y);
+
+            return shape;
         }
 
         /// <summary>

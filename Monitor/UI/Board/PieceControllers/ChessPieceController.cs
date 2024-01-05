@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -239,9 +240,18 @@ namespace Monitor.UI.Board.PieceControllers
         /// <summary>
         /// See the summary of the interface method.
         /// </summary>
-        public void DrawPiece(Canvas canvas, Point topLeft, double fieldSize, int rawPieceId)
+        public void DrawPiece(Canvas canvas, Point topLeft, double fieldSize, int pieceId)
         {
-            var field = new Field(rawPieceId);
+            foreach (var element in CreatePieceElements(topLeft, fieldSize, pieceId))
+                canvas.Children.Add(element);
+        }
+
+        /// <summary>
+        /// See the summary of the interface method.
+        /// </summary>
+        public IEnumerable<UIElement> CreatePieceElements(Point topLeft, double fieldSize, int pieceId)
+        {
+            var field = new Field(pieceId);
 
             if (_steams.TryGetValue(field.SignedPieceId, out var steam))
             {
@@ -265,24 +275,24 @@ namespace Monitor.UI.Board.PieceControllers
                 Canvas.SetLeft(image, topLeftAdjusted.X);
                 Canvas.SetTop(image, topLeftAdjusted.Y);
 
-                canvas.Children.Add(image);
+                yield return image;
             }
 
             if (!_showDebugInfo)
-                return;
+                yield break;
 
             var textBlock = new TextBlock
-            { FontSize = 10 };
+                { FontSize = 10 };
 
             textBlock.Inlines.Add(new Run(field.AllyAttackStr)
-            { Foreground = new SolidColorBrush(Colors.White) });
+                { Foreground = new SolidColorBrush(Colors.White) });
 
             textBlock.Inlines.Add(new Run(field.RivalAttackStr)
-            { Foreground = new SolidColorBrush(Colors.Black) });
+                { Foreground = new SolidColorBrush(Colors.Black) });
 
             Canvas.SetLeft(textBlock, topLeft.X);
             Canvas.SetTop(textBlock, topLeft.Y);
-            canvas.Children.Add(textBlock);
+            yield return textBlock;
         }
 
         /// <summary>

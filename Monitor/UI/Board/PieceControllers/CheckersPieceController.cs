@@ -125,6 +125,15 @@ namespace Monitor.UI.Board.PieceControllers
         /// </summary>
         public void DrawPiece(Canvas canvas, Point topLeft, double fieldSize, int pieceId)
         {
+            foreach (var element in CreatePieceElements(topLeft, fieldSize, pieceId))
+                canvas.Children.Add(element);
+        }
+
+        /// <summary>
+        /// See the summary of the interface method.
+        /// </summary>
+        public IEnumerable<UIElement> CreatePieceElements(Point topLeft, double fieldSize, int pieceId)
+        {
             var field = new Field(pieceId);
 
             if (_steams.TryGetValue(field.SignedPieceId, out var steam))
@@ -149,7 +158,7 @@ namespace Monitor.UI.Board.PieceControllers
                 Canvas.SetLeft(image, topLeftAdjusted.X);
                 Canvas.SetTop(image, topLeftAdjusted.Y);
 
-                canvas.Children.Add(image);
+                yield return image;
             }
         }
 
