@@ -15,16 +15,16 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../../Headers/Checkers/TrainingEngine.h"
-#include "../../Headers/RandomAgent.h"
+#include "../Headers/TrainingEngine.h"
+#include "../Headers/RandomAgent.h"
 #include "../../../DeepLearning/DeepLearning/Utilities.h"
 #include "../../../DeepLearning/DeepLearning/StopWatch.h"
-#include "../../Headers/Board.h"
-#include "../../Headers/StateTypeController.h"
+#include "../Headers/Board.h"
+#include "../Headers/StateTypeController.h"
 #include <numeric>
 #include <ppl.h>
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	std::size_t TrainingEngine::add_agent(TdLambdaAgent* agent_ptr)
 	{
@@ -96,8 +96,7 @@ namespace TrainingCell::Checkers
 			*agent_pointers[outlier_agent_id] = TdLambdaAgent(*agent_pointers[best_agent_id]);
 	}
 
-
-	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(const TdLambdaAgent& agent, const int episodes_to_play,
+	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(const TdLambdaAgent& agent, const int training_episodes, const int episodes_to_play,
 		const int round_id, const double draw_percentage)
 	{
 		auto agent_copy = agent;
@@ -116,13 +115,14 @@ namespace TrainingCell::Checkers
 		const auto black_wins = stats1.blacks_win_count() * factor;
 		const auto black_losses = stats1.whites_win_count() * factor;
 
-		return PerformanceRec{ round_id, white_wins, white_losses, black_wins, black_losses, draw_percentage };
+		return PerformanceRec{ round_id, white_wins, white_losses, black_wins,
+			black_losses, draw_percentage, training_episodes, episodes_to_play };
 	}
 
-	void TrainingEngine::run(const int rounds_cnt, const int episodes_cnt,
+	void TrainingEngine::run(const int round_id_start, const int max_round_id, const int training_episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms,
 			const std::vector<PerformanceRec>& agent_performances)>& round_callback,
-		const bool fixed_pairs, const int test_episodes, const bool smart_training,
+		const bool fixed_pairs, const int test_episodes_cnt, const bool smart_training,
 		const bool remove_outliers) const
 	{
 		if (_agent_pointers.empty() || _agent_pointers.size() % 2 == 1)
@@ -131,11 +131,11 @@ namespace TrainingCell::Checkers
 		std::vector<PerformanceRec> performance_scores(_agent_pointers.size());
 		auto pairs = split_for_pairs(_agent_pointers.size(), fixed_pairs);
 
-		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
+		for (auto round_id = round_id_start; round_id < max_round_id; round_id++)
 		{
 			DeepLearning::StopWatch sw;
 			Concurrency::parallel_for(0ull, pairs.size(),
-				[this, &performance_scores, episodes_cnt, &pairs, test_episodes, round_id, smart_training](const auto& pair_id)
+				[this, &performance_scores, training_episodes_cnt, &pairs, test_episodes_cnt, round_id, smart_training](const auto& pair_id)
 				{
 					const auto white_agent_id = pairs[pair_id][0];
 					auto agent_white_ptr = _agent_pointers[white_agent_id];
@@ -145,14 +145,14 @@ namespace TrainingCell::Checkers
 
 					auto state_seed_ptr = StateTypeController::get_start_seed(agent_white_ptr->get_state_type_id());
 					const auto stats = smart_training ?
-						Board::train(agent_white_ptr, agent_black_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture) :
-						Board::play(agent_white_ptr, agent_black_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture);
-					const auto draw_percentage = (episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / episodes_cnt;
+						Board::train(agent_white_ptr, agent_black_ptr, training_episodes_cnt, *state_seed_ptr, _max_moves_without_capture) :
+						Board::play(agent_white_ptr, agent_black_ptr, training_episodes_cnt, *state_seed_ptr, _max_moves_without_capture);
+					const auto draw_percentage = (training_episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / training_episodes_cnt;
 
-					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id], test_episodes,
+					performance_scores[white_agent_id] = evaluate_performance(*_agent_pointers[white_agent_id], training_episodes_cnt, test_episodes_cnt,
 						round_id, draw_percentage);
 
-					performance_scores[black_agent_id] = evaluate_performance(*_agent_pointers[black_agent_id], test_episodes,
+					performance_scores[black_agent_id] = evaluate_performance(*_agent_pointers[black_agent_id], training_episodes_cnt, test_episodes_cnt,
 						round_id, draw_percentage);
 				});
 
@@ -161,14 +161,14 @@ namespace TrainingCell::Checkers
 			if (remove_outliers)
 				remove_low_score_outliers(performance_scores, _agent_pointers);
 
-			if (round_id != rounds_cnt - 1 && !fixed_pairs) //re-generate pairs
+			if (round_id != max_round_id - 1 && !fixed_pairs) //re-generate pairs
 				pairs = split_for_pairs(_agent_pointers.size(), fixed_pairs);
 		}
 	}
  
-	void TrainingEngine::run_auto(const int rounds_cnt, const int episodes_cnt,
+	void TrainingEngine::run_auto(const int round_id_start, const int max_round_id, const int training_episodes_cnt,
 		const std::function<void(const long long& time_per_round_ms, const std::vector<PerformanceRec>&
-			agent_performances)>& round_callback, const int test_episodes, const bool smart_training,
+			agent_performances)>& round_callback, const int test_episodes_cnt, const bool smart_training,
 			const bool remove_outliers) const
 	{
 		if (_agent_pointers.empty())
@@ -176,19 +176,19 @@ namespace TrainingCell::Checkers
 
 		std::vector<PerformanceRec> performance_scores(_agent_pointers.size());
 
-		for (auto round_id = 0; round_id < rounds_cnt; round_id++)
+		for (auto round_id = round_id_start; round_id < max_round_id; round_id++)
 		{
 			DeepLearning::StopWatch sw;
 			Concurrency::parallel_for(0ull, _agent_pointers.size(),
-				[this, &performance_scores, episodes_cnt, test_episodes, round_id, smart_training](const auto& agent_id)
+				[this, &performance_scores, training_episodes_cnt, test_episodes_cnt, round_id, smart_training](const auto& agent_id)
 			{
 				const auto agent_ptr = _agent_pointers[agent_id];
 			    auto state_seed_ptr = StateTypeController::get_start_seed(agent_ptr->get_state_type_id());
 				const auto stats = smart_training ?
-					Board::train(agent_ptr, agent_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture) :
-					Board::play(agent_ptr, agent_ptr, episodes_cnt, *state_seed_ptr, _max_moves_without_capture);
-				const auto draw_percentage = (episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / episodes_cnt;
-				performance_scores[agent_id] = evaluate_performance(*agent_ptr, test_episodes, round_id, draw_percentage);
+					Board::train(agent_ptr, agent_ptr, training_episodes_cnt, *state_seed_ptr, _max_moves_without_capture) :
+					Board::play(agent_ptr, agent_ptr, training_episodes_cnt, *state_seed_ptr, _max_moves_without_capture);
+				const auto draw_percentage = (training_episodes_cnt - stats.blacks_win_count() - stats.whites_win_count()) * 1.0 / training_episodes_cnt;
+				performance_scores[agent_id] = evaluate_performance(*agent_ptr, training_episodes_cnt, test_episodes_cnt, round_id, draw_percentage);
 			});
 
 			round_callback(sw.elapsed_time_in_milliseconds(), performance_scores);
@@ -203,10 +203,20 @@ namespace TrainingCell::Checkers
 		return 0.5 * (perf_white + perf_black);
 	}
 
-	std::string TrainingEngine::PerformanceRec::to_string() const
+	std::string TrainingEngine::PerformanceRec::to_string(const bool extended) const
 	{
-		return std::string("w.w./w.l.-b.w/b.l.-d : ")
+		std::string result{};
+
+		if (extended)
+		{
+			result += std::string("Round: " + std::to_string(round) + "; Training episodes: " +
+				std::to_string(training_episodes) + "; Test episodes: " + std::to_string(test_episodes) + "; Performance ");
+		}
+
+		result += std::string("w.w./w.l.-b.w/b.l.-d: ")
 			+ std::to_string(perf_white) + "/" + std::to_string(losses_white) + "-" +
 			std::to_string(perf_black) + "/" + std::to_string(losses_black) + "-" + std::to_string(draws);
+
+		return result;
 	}
 }

@@ -20,12 +20,11 @@
 #include "ArgumentsTraining.h"
 #include "ConsoleUtils.h"
 #include "TrainingState.h"
-#include "Headers/Checkers/TrainingEngine.h"
+#include "Headers/TrainingEngine.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
 #include "Headers/TdlEnsembleAgent.h"
 
 using namespace TrainingCell;
-using namespace TrainingCell::Checkers;
 
 namespace Training::Modes
 {
@@ -37,7 +36,9 @@ namespace Training::Modes
 	{
 		if (ConsoleUtils::try_load_state_silent(source_path, state))
 		{
-			//we need to reset everything related to training except the agents
+			// We need to reset everything related to training except the agents.
+			// Add the "latest" performance records as a training record to each agent.
+			state.write_training_records();
 			state.reset(/*keep agents*/ true);
 			return true;
 		}
@@ -109,7 +110,6 @@ namespace Training::Modes
 		std::queue<long long> round_time_queue;
 
 		const auto max_round_id = static_cast<int>(args.get_num_rounds());
-		const auto num_rounds_left = static_cast<int>(args.get_num_rounds() - state.get_round_id());
 
 		const auto saver = [&state, &args](const std::string& sub_folder_name)
 		{
@@ -172,12 +172,14 @@ namespace Training::Modes
 
 		if (args.get_auto_training())
 		{
-			engine.run_auto(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
-				static_cast<int>(args.get_num_eval_episodes()), args.get_smart_training(), args.get_remove_outliers());
+			engine.run_auto(static_cast<int>(state.get_round_id()), max_round_id,
+				static_cast<int>(args.get_num_episodes()), reporter,
+			                static_cast<int>(args.get_num_eval_episodes()), args.get_smart_training(), args.get_remove_outliers());
 		}
 		else
 		{
-			engine.run(num_rounds_left, static_cast<int>(args.get_num_episodes()), reporter,
+			engine.run(static_cast<int>(state.get_round_id()), max_round_id,
+				static_cast<int>(args.get_num_episodes()), reporter,
 				args.get_fixed_pairs(), static_cast<int>(args.get_num_eval_episodes()),
 				args.get_smart_training(), args.get_remove_outliers());
 		}

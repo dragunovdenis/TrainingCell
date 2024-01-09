@@ -41,6 +41,15 @@ namespace TrainingCell
 		return _ensemble.size() - 1;
 	}
 
+	std::size_t TdlEnsembleAgent::add(TdLambdaAgent&& agent)
+	{
+		static_assert(std::is_move_constructible_v<TdLambdaAgent>, "Agent class is supposed to have move constructor in place.");
+		_ensemble.emplace_back(std::move(agent));
+		_ensemble.rbegin()->set_performance_evaluation_mode(true);
+
+		return _ensemble.size() - 1;
+	}
+
 	std::size_t TdlEnsembleAgent::set_single_agent_mode(const bool use_single_random_agent)
 	{
 		if (use_single_random_agent)

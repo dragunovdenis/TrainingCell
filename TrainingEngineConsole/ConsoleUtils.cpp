@@ -43,12 +43,12 @@ namespace Training::ConsoleUtils
 		const auto lines = DeepLearning::Utils::split_by_char(message, '\n');
 
 		for (auto line_id = 0ull; line_id < lines.size() - 1; ++line_id)
-			std::cout << lines[line_id] << std::endl;
+			std::cout << lines[line_id] << '\n';
 
 		std::cout << *lines.rbegin();
 
 		if (new_line_at_end)
-			std::cout << std::endl;
+			std::cout << '\n';
 		else
 			std::cout << std::flush;
 	}

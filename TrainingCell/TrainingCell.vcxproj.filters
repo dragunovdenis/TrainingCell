@@ -48,9 +48,6 @@
     <ClInclude Include="Headers\Checkers\CheckersState.h">
       <Filter>Header Files\Checkers</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Checkers\TrainingEngine.h">
-      <Filter>Header Files\Checkers</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\Checkerboard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -171,12 +168,12 @@
     <ClInclude Include="Headers\ITrainableAgent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\TrainingEngine.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\CheckersState.cpp">
-      <Filter>Source Files\Checkers</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Checkers\TrainingEngine.cpp">
       <Filter>Source Files\Checkers</Filter>
     </ClCompile>
     <ClCompile Include="Source\PiecePosition.cpp">
@@ -262,6 +259,9 @@
     </ClCompile>
     <ClCompile Include="Source\StateTraceRecorder.cpp">
       <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TrainingEngine.cpp">
+      <Filter>Source Files\TDL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

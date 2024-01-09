@@ -26,10 +26,36 @@
 
 
 using namespace TrainingCell;
-using namespace TrainingCell::Checkers;
 
 namespace Training
 {
+	namespace
+	{
+		/// <summary>
+		/// Returns current date-time string.
+		/// </summary>
+		std::string get_current_date_time() {
+			const auto now = std::chrono::system_clock::now();
+			const auto now_as_time_point = std::chrono::floor<std::chrono::seconds>(now);
+			const auto current_time = std::chrono::system_clock::to_time_t(now_as_time_point);
+			std::tm localTime{};
+			const auto error = localtime_s(&localTime, &current_time);
+
+			if (error != 0)
+				throw std::exception("Can't get local time.");
+
+			return std::format("{:%y-%m-%d-%H-%M-%S}", std::chrono::zoned_time(std::chrono::current_zone(), now_as_time_point));
+		}
+
+		/// <summary>
+		/// Adds training record to the given agent based on the given performance record. 
+		/// </summary>
+		void add_training_record(TdLambdaAgent& agent, const TrainingEngine::PerformanceRec& perf_rec)
+		{
+			agent.add_record(get_current_date_time() + "; " + perf_rec.to_string(/*extended*/ true));
+		}
+	}
+
 	void TrainingState::add_agent(const TdLambdaAgent& agent)
 	{
 		_agents.push_back(agent);
@@ -65,7 +91,7 @@ namespace Training
 		auto average_perf = calc_average_performance(performance);
 		average_perf.round = performance[0].round;
 
-		_performances.emplace_back(average_perf);
+		_average_performances.emplace_back(average_perf);
 		register_performance(performance);
 
 		return average_perf;
@@ -160,6 +186,8 @@ namespace Training
 
 	void TrainingState::register_performance(const std::vector<TrainingEngine::PerformanceRec>& performance)
 	{
+		_current_performance = performance;
+
 		if (_best_performance.empty())
 		{
 			_best_performance = performance;
@@ -181,6 +209,7 @@ namespace Training
 
 			_best_performance[score_id] = performance[score_id];
 			_agents_best_performance[score_id] = TdLambdaAgent(_agents[score_id]);
+			add_training_record(_agents_best_performance[score_id], _best_performance[score_id]);
 		}
 	}
 
@@ -233,9 +262,22 @@ namespace Training
 
 	std::filesystem::path TrainingState::save_current_ensemble(const std::filesystem::path& folder_path, const std::string& tag) const
 	{
-		const std::string name = "Ensemble_r_" + std::to_string(_round_id) + "_" + tag;
+			const std::string name = "Ensemble_r_" + std::to_string(_round_id) + "_" + tag;
 		const auto full_path = folder_path / (name + ".ena");
-		TdlEnsembleAgent(_agents, name).save_to_file(full_path);
+
+		if (_agents.size() != _current_performance.size())
+			throw std::exception("Inconsistent input data.");
+
+		TdlEnsembleAgent ensemble;
+		ensemble.set_name(name);
+		for (auto agent_id = 0ull; agent_id < _agents.size(); ++agent_id)
+		{
+			TdLambdaAgent agent_copy = _agents[agent_id];
+			add_training_record(agent_copy, _current_performance[agent_id]);
+			ensemble.add(std::move(agent_copy));
+		}
+
+		ensemble.save_to_file(full_path);
 
 		return full_path;
 	}
@@ -253,7 +295,7 @@ namespace Training
 
 	const std::vector<TrainingEngine::PerformanceRec>& TrainingState::get_performances() const
 	{
-		return _performances;
+		return _average_performances;
 	}
 
 	void TrainingState::save_performance_report(const std::filesystem::path& file_path) const
@@ -265,7 +307,7 @@ namespace Training
 
 		file << std::format("{:10} {:14} {:14} {:14} {:14}", "Round", "White Score", "Black Score", "Draws", "Score") << std::endl;
 
-		for (const auto& rec : _performances)
+		for (const auto& rec : _average_performances)
 			file << std::format("{:10} {:10.5f} {:10.5f} {:10.5f} {:10.5f}",
 				rec.round, rec.perf_white, rec.perf_black, rec.draws, rec.get_score()) << std::endl;
 	}
@@ -283,14 +325,24 @@ namespace Training
 	void TrainingState::reset(const bool keep_agents)
 	{
 		_round_id = 0;
-		_performances.clear();
+		_average_performances.clear();
+		_current_performance.clear();
+		_best_performance.clear();
+		_agents_best_performance.clear();
 
 		if (keep_agents)
 			return;
 
 		_agents.clear();
-		_best_performance.clear();
-		_agents_best_performance.clear();
+	}
+
+	void TrainingState::write_training_records()
+	{
+		if (_agents.size() != _current_performance.size())
+			return;
+
+		for (auto agent_id = 0ull; agent_id < _agents.size(); ++agent_id)
+			add_training_record(_agents[agent_id], _current_performance[agent_id]);
 	}
 
 	void TrainingState::set_discount(const double& discount)

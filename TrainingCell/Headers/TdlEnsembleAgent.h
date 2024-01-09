@@ -68,6 +68,12 @@ namespace TrainingCell
 		std::size_t add(const TdLambdaAgent& agent);
 
 		/// <summary>
+		/// Moves the given agent to the ensemble.
+		/// Returns index of the newly added agent in the underlying collection
+		/// </summary>
+		std::size_t add(TdLambdaAgent&& agent);
+
+		/// <summary>
 		/// If the argument is "true", the agent enters a "special mode" when it behaves according to decisions of
 		/// a single agent from the underlying collection which is chosen randomly (when the method is called).
 		/// As long as the agent stays in the "special mode" a new "random" agent will be chosen at the end of each episode.

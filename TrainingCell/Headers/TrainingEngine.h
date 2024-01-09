@@ -18,11 +18,11 @@
 #pragma once
 #include <vector>
 #include <array>
-#include "../TdLambdaAgent.h"
+#include "TdLambdaAgent.h"
 #include <functional>
 #include "msgpack.hpp"
 
-namespace TrainingCell::Checkers
+namespace TrainingCell
 {
 	/// <summary>
 	/// Functionality to "train" groups of agents following different strategies
@@ -66,6 +66,16 @@ namespace TrainingCell::Checkers
 			double draws{};
 
 			/// <summary>
+			/// Number of training episodes in the current round.
+			/// </summary>
+			int training_episodes{};
+
+			/// <summary>
+			/// Number of performance evaluation episodes in the current round.
+			/// </summary>
+			int test_episodes{};
+
+			/// <summary>
 			/// Returns score.
 			/// </summary>
 			[[nodiscard]] double get_score() const;
@@ -74,12 +84,12 @@ namespace TrainingCell::Checkers
 			/// Returns string representation of the record.
 			/// </summary>
 			/// <returns></returns>
-			[[nodiscard]] std::string to_string() const;
+			[[nodiscard]] std::string to_string(const bool extended = false) const;
 
 			/// <summary>
 			/// Message-pack stuff.
 			/// </summary>
-			MSGPACK_DEFINE(round, perf_white, perf_black, draws, losses_white, losses_black);
+			MSGPACK_DEFINE(round, perf_white, perf_black, draws, losses_white, losses_black, training_episodes, test_episodes);
 		};
 
 	private:
@@ -101,7 +111,7 @@ namespace TrainingCell::Checkers
 		/// winning percentage when the agent played as a "white" player and the second one represents winning percentage when
 		/// the agent played as a "black" player
 		/// </summary>
-		static PerformanceRec evaluate_performance(const TdLambdaAgent& agent, const int episodes_to_play,
+		static PerformanceRec evaluate_performance(const TdLambdaAgent& agent, const int training_episodes, const int episodes_to_play,
 			const int round_id, const double draw_percentage);
 
 		/// <summary>
@@ -134,35 +144,37 @@ namespace TrainingCell::Checkers
 		/// <summary>
 		/// Method to run training
 		/// </summary>
-		/// <param name="rounds_cnt">Number of rounds to run. After each round agents get re-grouped in pairs</param>
-		/// <param name="episodes_cnt">Number of episodes in a round to play</param>
+		/// <param name="round_id_start">Id of the round to start with.</param>
+		/// <param name="max_round_id">ID of the maximal round plus one. After each round agents get re-grouped in pairs</param>
+		/// <param name="training_episodes_cnt">Number of episodes in a round to play</param>
 		/// <param name="round_callback">Call-back function that is called after
 		/// each round to provide some intermediate information to the caller</param>
 		/// <param name="fixed_pairs">If "true" training pairs are fixed stale during all the training</param>
-		/// <param name="test_episodes">Number of episodes to run when evaluating performance of trained agents</param>
+		/// <param name="test_episodes_cnt">Number of episodes to run when evaluating performance of trained agents</param>
 		/// <param name="smart_training">If "true" training on non-draw episodes will be used.</param>
 		/// <param name="remove_outliers">If "true" agents with low score will be substituted
 		/// with copies of best-score agents (on a round basis).</param>
-		void run(const int rounds_cnt, const int episodes_cnt,
+		void run(const int round_id_start, const int max_round_id, const int training_episodes_cnt,
 		         const std::function<void(const long long& time_per_round_ms,
 					 const std::vector<PerformanceRec>& agent_performances)>& round_callback,
-			const bool fixed_pairs, const int test_episodes = 1000,
+			const bool fixed_pairs, const int test_episodes_cnt = 1000,
 			const bool smart_training = false, const bool remove_outliers = false) const;
 
 		/// <summary>
 		/// Method to run auto-training
 		/// </summary>
-		/// <param name="rounds_cnt">Number of rounds to run</param>
-		/// <param name="episodes_cnt">Number of episodes in a round to play</param>
+		/// <param name="round_id_start">Id of the round to start with.</param>
+		/// <param name="max_round_id">ID of the maximal round plus one.</param>
+		/// <param name="training_episodes_cnt">Number of episodes in a round to play</param>
 		/// <param name="round_callback">Call-back function that is called after
 		/// each round to provide some intermediate information to the caller</param>
-		/// <param name="test_episodes">Number of episodes to run when evaluating performance of trained agents</param>
+		/// <param name="test_episodes_cnt">Number of episodes to run when evaluating performance of trained agents</param>
 		/// <param name="smart_training">If "true" training on non-draw episodes will be used.</param>
 		/// <param name="remove_outliers">If "true" agents with low score will be substituted
 		/// with copies of best-score agents (on a round basis).</param>
-		void run_auto(const int rounds_cnt, const int episodes_cnt,
+		void run_auto(const int round_id_start, const int max_round_id, const int training_episodes_cnt,
 			const std::function<void(const long long& time_per_round_ms,
 				const std::vector<PerformanceRec>& agent_performances)>& round_callback,
-			const int test_episodes = 1000, const bool smart_training = false, const bool remove_outliers = false) const;
+			const int test_episodes_cnt = 1000, const bool smart_training = false, const bool remove_outliers = false) const;
 	};
 }

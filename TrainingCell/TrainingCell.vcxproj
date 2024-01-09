@@ -22,7 +22,6 @@
     <ClInclude Include="Headers\Checkerboard.h" />
     <ClInclude Include="Headers\Checkers\CheckersMove.h" />
     <ClInclude Include="Headers\Checkers\StateHandle.h" />
-    <ClInclude Include="Headers\Checkers\TrainingEngine.h" />
     <ClInclude Include="Headers\Checkers\CheckersState.h" />
     <ClInclude Include="Headers\Chess\AttackController.h" />
     <ClInclude Include="Headers\Chess\ChessMove.h" />
@@ -57,6 +56,7 @@
     <ClInclude Include="Headers\TdlLegacyMsgPackAdapter.h" />
     <ClInclude Include="Headers\TdlSettings.h" />
     <ClInclude Include="Headers\TdlTrainingAdapter.h" />
+    <ClInclude Include="Headers\TrainingEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Agent.cpp" />
@@ -64,7 +64,6 @@
     <ClCompile Include="Source\AgentTypeId.cpp" />
     <ClCompile Include="Source\Board.cpp" />
     <ClCompile Include="Source\Checkers\CheckersMove.cpp" />
-    <ClCompile Include="Source\Checkers\TrainingEngine.cpp" />
     <ClCompile Include="Source\Checkers\CheckersState.cpp" />
     <ClCompile Include="Source\Chess\AttackController.cpp" />
     <ClCompile Include="Source\Chess\ChessMove.cpp" />
@@ -89,6 +88,7 @@
     <ClCompile Include="Source\TdlEnsembleAgent.cpp" />
     <ClCompile Include="Source\TdlSettings.cpp" />
     <ClCompile Include="Source\TdlTrainingAdapter.cpp" />
+    <ClCompile Include="Source\TrainingEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

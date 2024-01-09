@@ -22,13 +22,12 @@
 #include "ArgumentsOptimization.h"
 #include "ConsoleUtils.h"
 #include "TrainingState.h"
-#include "Headers/Checkers/TrainingEngine.h"
+#include "Headers/TrainingEngine.h"
 #include "../../DeepLearning/DeepLearning/Math/Optimization/NelderMeadOptimizer.h"
 #include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include "../../DeepLearning/DeepLearning/StopWatch.h"
 
 using namespace TrainingCell;
-using namespace TrainingCell::Checkers;
 
 namespace Training::Modes
 {
@@ -205,7 +204,7 @@ namespace Training::Modes
 		TrainingEngine engine(agent_ptrs);
 
 		auto result = -1.0;
-		engine.run(1 /*one round*/, episodes_to_train, [&result](const auto& time, const auto& performance)
+		engine.run(0, 1 /*one round*/, episodes_to_train, [&result](const auto& time, const auto& performance)
 			{
 				result = 0.0;
 				for (const auto& perf_item : performance)
