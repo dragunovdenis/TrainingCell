@@ -22,7 +22,7 @@
 namespace TrainingCell
 {
 	MoveData TdLambdaSubAgent::pick_move(const IMinimalStateReadonly& state,
-	                                     const ITdlSettingsReadOnly& settings, const INet& net) const
+	                                     const ITdlSettingsReadOnly& settings, const INet& net)
 	{
 		if (state.get_moves_count() == 1)
 			return evaluate(state, 0, net);

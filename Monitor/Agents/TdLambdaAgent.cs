@@ -73,6 +73,11 @@ namespace Monitor.Agents
         /// Returns "true" if the current agent is equal to the given one
         /// </summary>
         bool IsEqualTo(IAgentReadOnly agent);
+        
+        /// <summary>
+        /// Returns script representation of the agent.
+        /// </summary>
+        string Script { get; }
     }
 
     /// <summary>
@@ -388,7 +393,12 @@ namespace Monitor.Agents
                 }
             }
         }
-        
+
+        /// <summary>
+        /// Returns script representation of the agent.
+        /// </summary>
+        public string Script => DllWrapper.TdLambdaAgentGetScriptString(_ptr);
+
         /// <summary>
         /// Returns snapshot of training parameters (all but those related to the underlying neural net)
         /// </summary>
@@ -441,12 +451,6 @@ namespace Monitor.Agents
         /// <summary>
         /// Brief summary of the current agent instance
         /// </summary>
-        public override string Summary =>
-            $"{Name} ({Id})\n" +
-            $"Learning Rate = {LearningRate}\n" +
-            $"Training Mode = {TrainingMode}\n" +
-            $"Exploration Probability = {Epsilon}\n" +
-            $"Lambda = {Lambda}\n" +
-            $"Discount = {Discount}" + (Records != null ?  "\n\n" +string.Join(";\n", Records) : "");
+        public override string Summary => Script + (Records != null ?  "\n\n" +string.Join(";\n", Records) : "");
     }
 }

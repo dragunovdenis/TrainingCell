@@ -59,6 +59,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <StackPanel.Resources>
                             <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxStyle}"/>
                             <Style TargetType="ComboBox" BasedOn="{StaticResource ComboBoxStyle}"/>
+                            <Style TargetType="CheckBox" BasedOn="{StaticResource CheckBoxStyle}"/>
                         </StackPanel.Resources>
                         <TextBox Text="{Binding AgentName, Mode=TwoWay}"/>
                         <TextBox Text="{Binding AgentId, Mode=OneWay}" IsEnabled="False"/>
@@ -73,9 +74,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <TextBox Text="{Binding RewardFactor, Mode=TwoWay}"/>
                         <CheckBox IsChecked="{Binding TrainingMode, Mode=TwoWay}"
                                   IsEnabled ="{Binding PerformanceEvaluationMode,
-                                  Converter= {StaticResource InvertBoolConverter}}"  Margin="3,3,3,3"/>
-                        <CheckBox IsChecked="{Binding SearchMode, Mode=TwoWay}" Margin="3,3,3,3"/>
-                        <CheckBox IsChecked="{Binding PerformanceEvaluationMode, Mode=TwoWay}" Margin="3,3,3,3"/>
+                                  Converter= {StaticResource InvertBoolConverter}}"/>
+                        <CheckBox IsChecked="{Binding SearchMode, Mode=TwoWay}"/>
+                        <CheckBox IsChecked="{Binding PerformanceEvaluationMode, Mode=TwoWay}"/>
                         <TextBox Text="{Binding SearchIterations, Mode=TwoWay}"/>
                         <TextBox Text="{Binding SearchDepth, Mode=TwoWay}"/>
                         <ComboBox ItemsSource="{Binding StateIdOptions}" SelectedItem="{Binding StateTypeId}"

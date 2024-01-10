@@ -20,9 +20,22 @@
 #include "../../DeepLearning/DeepLearning/Utilities.h"
 #include "../Headers/TdlLegacyMsgPackAdapter.h"
 #include "../Headers/StateTypeController.h"
+#include <ppl.h>
 
 namespace TrainingCell
 {
+	void TdlEnsembleAgent::msgpack_unpack(msgpack::object const& msgpack_o)
+	{
+		auto msg_pack_version = 0;
+		msgpack::type::make_define_array(msg_pack_version, MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id,
+			_search_method, _search_iterations, _search_depth, _run_multi_threaded).msgpack_unpack(msgpack_o);
+
+		if (msg_pack_version <= 1)
+			synchronize_parameters();
+
+		validate_synchronization();
+	}
+
 	TdlEnsembleAgent::TdlEnsembleAgent(const std::vector<TdLambdaAgent>& ensemble, const std::string& name)
 	{
 		std::ranges::for_each(ensemble, [&](const auto& a)
@@ -36,7 +49,7 @@ namespace TrainingCell
 	std::size_t TdlEnsembleAgent::add(const TdLambdaAgent& agent)
 	{
 		_ensemble.emplace_back(agent);
-		_ensemble.rbegin()->set_performance_evaluation_mode(true);
+		update_agent_params(*_ensemble.rbegin());
 
 		return _ensemble.size() - 1;
 	}
@@ -45,7 +58,7 @@ namespace TrainingCell
 	{
 		static_assert(std::is_move_constructible_v<TdLambdaAgent>, "Agent class is supposed to have move constructor in place.");
 		_ensemble.emplace_back(std::move(agent));
-		_ensemble.rbegin()->set_performance_evaluation_mode(true);
+		update_agent_params(*_ensemble.rbegin());
 
 		return _ensemble.size() - 1;
 	}
@@ -63,6 +76,30 @@ namespace TrainingCell
 	bool TdlEnsembleAgent::is_single_agent_mode() const
 	{
 		return _chosen_agent_id >= 0 && _ensemble.size() > _chosen_agent_id;
+	}
+
+	void TdlEnsembleAgent::update_agent_params(TdLambdaAgent& agent) const
+	{
+		agent.set_search_depth(_search_depth);
+		agent.set_tree_search_method(_search_method);
+		agent.set_td_search_iterations(_search_iterations);
+		agent.set_performance_evaluation_mode(true);
+	}
+
+	void TdlEnsembleAgent::synchronize_parameters()
+	{
+		for (auto& agent : _ensemble)
+			update_agent_params(agent);
+	}
+
+	void TdlEnsembleAgent::validate_synchronization() const
+	{
+		for (const auto& agent : _ensemble)
+			if (agent.get_search_depth() != _search_depth ||
+				agent.get_tree_search_method() != _search_method ||
+				agent.get_td_search_iterations() != _search_iterations ||
+				!agent.get_performance_evaluation_mode())
+				throw std::exception("Parameters of some agent(-s) are out of sync.");
 	}
 
 	std::size_t TdlEnsembleAgent::get_current_random_agent_id() const
@@ -97,8 +134,21 @@ namespace TrainingCell
 
 		std::vector votes(state.get_moves_count(), 0);
 
-		for (const auto& a : _ensemble)
-			++votes[a.pick_move_id(state, as_white)];
+		if (_run_multi_threaded)
+		{
+			std::mutex mtx;
+			Concurrency::parallel_for(0ull, _ensemble.size(), [&state, as_white, &votes, &mtx, this](const auto agent_id)
+				{
+					const int move_id = _ensemble[agent_id].pick_move_id(state, as_white);
+					std::lock_guard lock(mtx);
+					++votes[move_id];
+				});
+		}
+		else
+		{
+			for (const auto& a : _ensemble)
+				++votes[a.pick_move_id(state, as_white)];
+		}
 
 		return static_cast<int>(std::distance(votes.begin(), std::ranges::max_element(votes)));
 	}
@@ -209,7 +259,11 @@ namespace TrainingCell
 		return other_ensemble_ptr != nullptr && Agent::equal(agent) &&
 			_ensemble == other_ensemble_ptr->_ensemble &&
 			_chosen_agent_id == other_ensemble_ptr->_chosen_agent_id &&
-			_msg_pack_version == other_ensemble_ptr->_msg_pack_version;
+			_msg_pack_version == other_ensemble_ptr->_msg_pack_version &&
+			_search_method == other_ensemble_ptr->_search_method &&
+			_search_iterations == other_ensemble_ptr->_search_iterations &&
+			_search_depth == other_ensemble_ptr->_search_depth &&
+			_run_multi_threaded == other_ensemble_ptr->_run_multi_threaded;
 	}
 
 	StateTypeId TdlEnsembleAgent::get_state_type_id() const
@@ -231,5 +285,48 @@ namespace TrainingCell
 		}
 
 		return result;
+	}
+
+	TreeSearchMethod TdlEnsembleAgent::get_search_method() const
+	{
+		return _search_method;
+	}
+
+	void TdlEnsembleAgent::set_search_method(const TreeSearchMethod& search_method)
+	{
+		_search_method = search_method;
+		synchronize_parameters();
+	}
+
+	int TdlEnsembleAgent::get_search_iterations() const
+	{
+		return _search_iterations;
+	}
+
+	void TdlEnsembleAgent::set_search_iterations(const int search_iterations)
+	{
+		_search_iterations = search_iterations;
+		synchronize_parameters();
+	}
+
+	int TdlEnsembleAgent::get_search_depth() const
+	{
+		return _search_depth;
+	}
+
+	void TdlEnsembleAgent::set_search_depth(const int search_depth)
+	{
+		_search_depth = search_depth;
+		synchronize_parameters();
+	}
+
+	bool TdlEnsembleAgent::get_run_multi_threaded() const
+	{
+		return _run_multi_threaded;
+	}
+
+	void TdlEnsembleAgent::set_run_multi_threaded(const bool run_multi_threaded)
+	{
+		_run_multi_threaded = run_multi_threaded;
 	}
 }

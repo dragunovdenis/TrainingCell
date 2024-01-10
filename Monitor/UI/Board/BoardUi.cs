@@ -42,6 +42,8 @@ namespace Monitor.UI.Board
     {
         private double _boardSide;
         private double _fieldSide;
+        const double _markerOffset = 2.0;
+        double _markerSide;
         private double _topLeftX;
         private double _topLeftY;
         private double _canvasHeight = -1;
@@ -254,6 +256,10 @@ namespace Monitor.UI.Board
             {
                 var dialog = new TdlAgentDialog(tdlInactive);
                 dialog.ShowDialog();
+            } else if (InactiveAgent is EnsembleAgent ensemble)
+            {
+                var dialog = new EnsembleAgentDialog(new List<ITdLambdaAgentReadOnly>(), ensemble);
+                dialog.ShowDialog();
             }
             else
                 throw new Exception("Invalid type of inactive agent. Can't edit.");
@@ -262,7 +268,7 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Flag indicating if agent editing is possible
         /// </summary>
-        public bool CanEditAgent => InactiveAgent is TdLambdaAgent;
+        public bool CanEditAgent => InactiveAgent is TdLambdaAgent || InactiveAgent is EnsembleAgent;
 
         /// <summary>
         /// Adds extra symbols to the state to trace the series of given sub-moves (representing a move)
@@ -475,7 +481,6 @@ namespace Monitor.UI.Board
         /// <param name="colId">Field column</param>
         /// <param name="rowId">Field row</param>
         /// <param name="offset">Offset that should be added to booth coordinates of the returned corner</param>
-        /// <returns></returns>
         private Point GetTopLeftCorner(long colId, long rowId, double offset)
         {
             return new Point(colId * _fieldSide + _topLeftX + offset, rowId * _fieldSide + _topLeftY + offset);
@@ -543,6 +548,7 @@ namespace Monitor.UI.Board
             _fieldSide = _boardSide / Checkerboard.Rows;
             _topLeftX = (_canvasWidth - _boardSide) / 2;
             _topLeftY = (_canvasHeight - _boardSide) / 2;
+            _markerSide = _fieldSide - 2 * _markerOffset;
 
             return true;
         }
@@ -570,13 +576,22 @@ namespace Monitor.UI.Board
 
             ClearBoardElements();
 
+            var boardTopLeft = GetTopLeftCorner(0, 0, 0);
+            _boardElements.Add(CanvasDrawingUtils.CreateShape<Rectangle>(
+                boardTopLeft.X, boardTopLeft.Y, _boardSide, _boardSide, 1,
+                Brushes.Black, Brushes.BurlyWood));
+
             for (var rowId = 0; rowId < Checkerboard.Rows; rowId++)
                 for (var colId = 0; colId < Checkerboard.Columns; colId++)
                 {
                     var topLeft = GetTopLeftCorner(colId, rowId, 0);
                     var isDarkField = rowId % 2 == 0 ? colId % 2 == 1 : colId % 2 == 0;
-                    _boardElements.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeft.X, topLeft.Y, _fieldSide, _fieldSide,
-                        Brushes.Black, isDarkField ? Brushes.SaddleBrown : Brushes.BurlyWood));
+                    if (!isDarkField)
+                        continue;
+                    
+                    _boardElements.Add(CanvasDrawingUtils.CreateShape<Rectangle>(
+                        topLeft.X, topLeft.Y, _fieldSide, _fieldSide, 1,
+                        Brushes.Black, Brushes.SaddleBrown));
                 }
 
             foreach (var element in _boardElements)
@@ -597,6 +612,22 @@ namespace Monitor.UI.Board
         }
 
         /// <summary>
+        /// Adds guiding marker controls generated for the given selected field to the corresponding collections. 
+        /// </summary>
+        private void AppendMarkers(PiecePosition selectedField)
+        {
+            var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(selectedField);
+            foreach (var move in possibleMovesForCurrentPosition)
+            {
+                var end = move.SubMoves.Last().End;
+                var topLeftCorner = GetTopLeftCorner(end.Col, end.Row, _markerOffset);
+                _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y,
+                    _markerSide, _markerSide, 3,
+                    Brushes.GreenYellow, null));
+            }
+        }
+
+        /// <summary>
         /// Updates guiding markers on the board.
         /// </summary>
         void UpdateMarkers()
@@ -608,19 +639,15 @@ namespace Monitor.UI.Board
                 foreach (var move in _userMoveRequest.PossibleMoves)
                 {
                     var start = move.SubMoves[0].Start;
-                    var topLeftCorner = GetTopLeftCorner(start.Col, start.Row, 0);
-                    _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
-                        _selectedField.IsEqualTo(start) ? Brushes.Red : Brushes.BlueViolet, null));
+                    var topLeftCorner = GetTopLeftCorner(start.Col, start.Row, _markerOffset);
+                    _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y,
+                        _markerSide, _markerSide, 3,
+                        _selectedField.IsEqualTo(start) || _fieldUnderMousePointer.IsEqualTo(start) ?
+                            Brushes.Red : Brushes.BlueViolet, null));
                 }
 
-                var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(_selectedField);
-                foreach (var move in possibleMovesForCurrentPosition)
-                {
-                    var end = move.SubMoves.Last().End;
-                    var topLeftCorner = GetTopLeftCorner(end.Col, end.Row, 0);
-                    _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y, _fieldSide, _fieldSide,
-                        Brushes.GreenYellow, null));
-                }
+                AppendMarkers(_selectedField);
+                AppendMarkers(_fieldUnderMousePointer);
 
                 foreach (var marker in _markers)
                     _canvas.Children.Add(marker);
@@ -713,7 +740,8 @@ namespace Monitor.UI.Board
             _fieldUnderMousePointer = fieldPositions;
             _moveSelector = null;
             ClearMovePreview();
-
+            UpdateMarkers();
+            
             if (_fieldUnderMousePointer.IsValid && _selectedField.IsValid && _userMoveRequest != null)
             {
                 var possibleMovesForCurrentPosition =

@@ -331,6 +331,53 @@ bool TdLambdaAgentSetPerformanceEvaluationMode(TrainingCell::TdLambdaAgent* agen
 
 	return true;
 }
+
+bool TdLambdaAgentSetRewardFactor(TrainingCell::TdLambdaAgent* agent_ptr, const double reward_factor)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_reward_factor(reward_factor);
+
+	return true;
+}
+
+double TdLambdaAgentGetRewardFactor(const TrainingCell::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return std::numeric_limits<double>::quiet_NaN();
+
+	return agent_ptr->get_reward_factor();
+}
+
+bool TdLambdaAgentSetSearchDepth(TrainingCell::TdLambdaAgent* agent_ptr, const int search_depth)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_search_depth(search_depth);
+
+	return true;
+}
+
+int TdLambdaAgentGetSearchDepth(const TrainingCell::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return agent_ptr->get_search_depth();
+}
+
+bool TdLambdaAgentGetScriptString(const TrainingCell::TdLambdaAgent* agent_ptr, char* buffer, int buffer_capacity)
+{
+	if (!agent_ptr)
+		return false;
+
+	const auto script = agent_ptr->to_script();
+	strncpy_s(buffer, buffer_capacity, script.c_str(), _TRUNCATE);
+
+	return true;
+}
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 void* ConstructInteractiveAgent(const MakeMoveCallBack make_move_callback,
@@ -647,28 +694,52 @@ const void* TdlEnsembleAgentGetSubAgentPtr(const TrainingCell::TdlEnsembleAgent*
 
 	return &(*agent_ptr)[sub_agent_id];
 }
-#pragma endregion TdlEnsembleAgent
 
+char TdlEnsembleAgentGetSearchMode(const TrainingCell::TdlEnsembleAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return 2;
 
-bool TdLambdaAgentSetRewardFactor(TrainingCell::TdLambdaAgent* agent_ptr, const double reward_factor)
+	return static_cast<char>(agent_ptr->get_search_method() != TrainingCell::TreeSearchMethod::NONE);
+}
+
+TRAINING_CELL_API bool TdlEnsembleAgentSetSearchMode(TrainingCell::TdlEnsembleAgent* agent_ptr, const bool search_mode)
 {
 	if (!agent_ptr)
 		return false;
 
-	agent_ptr->set_reward_factor(reward_factor);
+	agent_ptr->set_search_method(search_mode ? TrainingCell::TreeSearchMethod::TD_SEARCH : TrainingCell::TreeSearchMethod::NONE);
 
 	return true;
 }
 
-double TdLambdaAgentGetRewardFactor(const TrainingCell::TdLambdaAgent* agent_ptr)
+TRAINING_CELL_API int TdlEnsembleAgentGetSearchIterations(const TrainingCell::TdlEnsembleAgent* agent_ptr)
 {
 	if (!agent_ptr)
-		return std::numeric_limits<double>::quiet_NaN();
+		return -1;
 
-	return agent_ptr->get_reward_factor();
+	return agent_ptr->get_search_iterations();
 }
 
-bool TdLambdaAgentSetSearchDepth(TrainingCell::TdLambdaAgent* agent_ptr, const int search_depth)
+bool TdlEnsembleAgentSetSearchIterations(TrainingCell::TdlEnsembleAgent* agent_ptr, const int search_iterations)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_search_iterations(search_iterations);
+
+	return true;
+}
+
+int TdlEnsembleAgentGetSearchDepth(const TrainingCell::TdlEnsembleAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return agent_ptr->get_search_depth();
+}
+
+TRAINING_CELL_API bool TdlEnsembleAgentSetSearchDepth(TrainingCell::TdlEnsembleAgent* agent_ptr, const int search_depth)
 {
 	if (!agent_ptr)
 		return false;
@@ -678,10 +749,22 @@ bool TdLambdaAgentSetSearchDepth(TrainingCell::TdLambdaAgent* agent_ptr, const i
 	return true;
 }
 
-int TdLambdaAgentGetSearchDepth(const TrainingCell::TdLambdaAgent* agent_ptr)
+char TdlEnsembleAgentGetRunMultiThreaded(const TrainingCell::TdlEnsembleAgent* agent_ptr)
 {
 	if (!agent_ptr)
-		return -1;
+		return 2;
 
-	return agent_ptr->get_search_depth();
+
+	return static_cast<char>(agent_ptr->get_run_multi_threaded());
 }
+
+TRAINING_CELL_API bool TdlEnsembleAgentSetRunMultiThreaded(TrainingCell::TdlEnsembleAgent* agent_ptr, const bool run_multi_threaded)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_run_multi_threaded(run_multi_threaded);
+
+	return true;
+}
+#pragma endregion TdlEnsembleAgent

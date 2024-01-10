@@ -202,5 +202,73 @@ namespace Monitor.Agents
             $"{Name} ({Id})\n" +
             $"Ensemble with {Size} sub-agents\n" +
             $"Single Agent Mode = {SingleAgentMode}\n";
+
+        /// <summary>
+        /// Search mode property of the ensemble.
+        /// </summary>
+        public bool SearchMode
+        {
+            get => DllWrapper.TdlEnsembleAgentGetSearchMode(_ptr).ToBool();
+
+            set
+            {
+                if (SearchMode != value)
+                {
+                    if (!DllWrapper.TdlEnsembleAgentSetSearchMode(_ptr, value))
+                        throw new Exception("Failed to update property.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Number of search iterations.
+        /// </summary>
+        public int SearchIterations
+        {
+            get => DllWrapper.TdlEnsembleAgentGetSearchIterations(_ptr);
+
+            set
+            {
+                if (SearchIterations != value)
+                {
+                    if (!DllWrapper.TdlEnsembleAgentSetSearchIterations(_ptr, value))
+                        throw new Exception("Failed to update property.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Depth of the search.
+        /// </summary>
+        public int SearchDepth
+        {
+            get => DllWrapper.TdlEnsembleAgentGetSearchDepth(_ptr);
+
+            set
+            {
+                if (SearchDepth != value)
+                {
+                    if (!DllWrapper.TdlEnsembleAgentSetSearchDepth(_ptr, value))
+                        throw new Exception("Failed to update property.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Multi-threaded property of the agent.
+        /// </summary>
+        public bool RunMultiThreaded
+        {
+            get => DllWrapper.TdlEnsembleAgentGetRunMultiThreaded(_ptr).ToBool();
+
+            set
+            {
+                if (RunMultiThreaded != value)
+                {
+                    if (!DllWrapper.TdlEnsembleAgentSetRunMultiThreaded(_ptr, value))
+                        throw new Exception("Failed to update property.");
+                }
+            }
+        }
     }
 }

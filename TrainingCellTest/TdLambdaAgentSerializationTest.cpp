@@ -53,6 +53,12 @@ namespace TrainingCellTest
 				{{ 64, 32, 16, 8 }, 0.05, 0.1, 0.9, 0.11, StateTypeId::CHESS},
 				{{ 21, 32 }, 3.05, 0.3, 1.9, 2.1, StateTypeId::CHESS},
 				});
+
+			agent.set_search_depth(123);
+			agent.set_search_iterations(4321);
+			agent.set_search_method(TreeSearchMethod::TD_SEARCH);
+			agent.set_run_multi_threaded(true);
+
 			const auto pack = AgentPack::make<TdlEnsembleAgent>(agent);
 
 			//Act

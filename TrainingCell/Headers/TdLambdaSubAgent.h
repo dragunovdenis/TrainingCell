@@ -79,8 +79,8 @@ namespace TrainingCell
 		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
-		[[nodiscard]] MoveData pick_move(const IMinimalStateReadonly& state,
-		                                 const ITdlSettingsReadOnly& settings, const INet& net) const;
+		[[nodiscard]] static MoveData pick_move(const IMinimalStateReadonly& state,
+		                                        const ITdlSettingsReadOnly& settings, const INet& net);
 
 		/// <summary>
 		/// Calculates afterstate and its value

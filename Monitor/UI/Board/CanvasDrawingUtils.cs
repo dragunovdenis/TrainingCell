@@ -32,17 +32,17 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Draws a "shape" (ellipse, rectangle...) with the given position and radius on the given canvas
         /// </summary>
-        public static void DrawShape<S>(double x, double y, double width, double height,
+        public static void DrawShape<S>(double x, double y, double width, double height, double strokeThickness,
             Brush borderColor, Brush fillColor, Canvas cv)
             where S : Shape, new()
         {
-            cv.Children.Add(CreateShape<S>(x, y, width, height, borderColor, fillColor));
+            cv.Children.Add(CreateShape<S>(x, y, width, height, strokeThickness, borderColor, fillColor));
         }
 
         /// <summary>
         /// Returns an instance of a "shape" (ellipse, rectangle...) with the given position on a canvas.
         /// </summary>
-        public static S CreateShape<S>(double x, double y, double width, double height,
+        public static S CreateShape<S>(double x, double y, double width, double height, double strokeThickness,
             Brush borderColor, Brush fillColor)
             where S : Shape, new()
         {
@@ -52,7 +52,7 @@ namespace Monitor.UI.Board
                 Height = height,
                 Stroke = borderColor,
                 Fill = fillColor,
-                StrokeThickness = fillColor == null ? 2 : 1,
+                StrokeThickness = strokeThickness,
             };
             shape.SetValue(Canvas.LeftProperty, x);
             shape.SetValue(Canvas.TopProperty, y);

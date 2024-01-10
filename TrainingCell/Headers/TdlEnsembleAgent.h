@@ -40,7 +40,28 @@ namespace TrainingCell
 		/// <summary>
 		/// Field to track version of the container and facilitate backward compatibility if needed
 		/// </summary>
-		int _msg_pack_version = 1;
+		//int _msg_pack_version = 1;
+		int _msg_pack_version = 2; // centralized way of managing search parameters was added.
+
+		/// <summary>
+		/// Number of search iterations in the search mode.
+		/// </summary>
+		int _search_iterations = 1000;
+
+		/// <summary>
+		/// Depth of search.
+		/// </summary>
+		int _search_depth = 1000;
+
+		/// <summary>
+		/// Search method.
+		/// </summary>
+		TreeSearchMethod _search_method = TreeSearchMethod::NONE;
+
+		/// <summary>
+		/// Flag determining whether evaluation of sub-agents is done in multi threaded way or not.
+		/// </summary>
+		bool _run_multi_threaded = false;
 
 		/// <summary>
 		/// Returns "true" if we are in a mode when only one, "chosen", agent from the collection
@@ -48,8 +69,38 @@ namespace TrainingCell
 		/// </summary>
 		[[nodiscard]] bool is_single_agent_mode() const;
 
+		/// <summary>
+		/// Updates parameters of the given agent according to the current state of the ensemble.
+		/// The method is supposed to be called when new agent gets added to the ensemble.
+		/// </summary>
+		void update_agent_params(TdLambdaAgent& agent) const;
+
+		/// <summary>
+		/// Propagates current parameters to all the agents in the ensemble.
+		/// </summary>
+		void synchronize_parameters();
+
+		/// <summary>
+		/// Throws exception if at least one agent in the ensemble has its parameters different from those of the ensemble.
+		/// </summary>
+		void validate_synchronization() const;
+
 	public:
-		MSGPACK_DEFINE(_msg_pack_version, MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id);
+
+		/// <summary>
+		/// Custom "packing" method.
+		/// </summary>
+		template <typename Packer>
+		void msgpack_pack(Packer& msgpack_pk) const
+		{
+			msgpack::type::make_define_array(_msg_pack_version, MSGPACK_BASE(Agent), _ensemble, _chosen_agent_id,
+				_search_method, _search_iterations, _search_depth, _run_multi_threaded).msgpack_pack(msgpack_pk);
+		}
+
+		/// <summary>
+		/// Custom "unpacking" method.
+		/// </summary>
+		void msgpack_unpack(msgpack::object const& msgpack_o);
 
 		/// <summary>
 		/// Default constructor
@@ -163,5 +214,45 @@ namespace TrainingCell
 		/// See documentation in the base class.
 		/// </summary>
 		[[nodiscard]] StateTypeId get_state_type_id() const override;
+
+		/// <summary>
+		/// Getter for the corresponding property.
+		/// </summary>
+		[[nodiscard]] TreeSearchMethod get_search_method() const;
+
+		/// <summary>
+		/// Setter for the corresponding property.
+		/// </summary>
+		void set_search_method(const TreeSearchMethod& search_method);
+
+		/// <summary>
+		/// Getter for the corresponding property.
+		/// </summary>
+		[[nodiscard]] int get_search_iterations() const;
+
+		/// <summary>
+		/// Setter for the corresponding property.
+		/// </summary>
+		void set_search_iterations(const int search_iterations);
+
+		/// <summary>
+		/// Getter for the corresponding property.
+		/// </summary>
+		[[nodiscard]] int get_search_depth() const;
+
+		/// <summary>
+		/// Setter for the corresponding property.
+		/// </summary>
+		void set_search_depth(const int search_depth);
+
+		/// <summary>
+		/// Getter for the corresponding property.
+		/// </summary>
+		[[nodiscard]] bool get_run_multi_threaded() const;
+
+		/// <summary>
+		/// Setter for the corresponding property.
+		/// </summary>
+		void set_run_multi_threaded(const bool run_multi_threaded);
 	};
 }

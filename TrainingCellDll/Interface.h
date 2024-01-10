@@ -244,6 +244,15 @@ extern "C"
 	/// Returns "true" if succeeded.
 	/// </summary>
 	TRAINING_CELL_API bool TdLambdaAgentSetPerformanceEvaluationMode(TrainingCell::TdLambdaAgent* agent_ptr, const bool mode);
+
+	/// <summary>
+	/// An interface method to get script-string representation of the given agent represented with its pointer.
+	/// </summary>
+	/// <param name="agent_ptr">Pointer to TD-lambda agent.</param>
+	/// <param name="buffer">Buffer that needs to be allocated on the caller side.</param>
+	/// <param name="buffer_capacity">Capacity of the allocated buffer in bytes.</param>
+	/// <returns>Returns "true" if succeeded.</returns>
+	TRAINING_CELL_API bool TdLambdaAgentGetScriptString(const TrainingCell::TdLambdaAgent* agent_ptr, char* buffer, int buffer_capacity);
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 	/// <summary>
@@ -451,5 +460,51 @@ extern "C"
 	/// Returns pointer to constant instance of the sub-agent with the given id
 	/// </summary>
 	TRAINING_CELL_API const void* TdlEnsembleAgentGetSubAgentPtr(const TrainingCell::TdlEnsembleAgent* agent_ptr, const int sub_agent_id);
+
+	/// <summary>
+	/// Returns boolean value encoded as char ("0" - "false", "1" - "true", any other value is an error indication).
+	/// Returns "true" if search mode property of the given ensemble agent is on.
+	/// </summary>
+	TRAINING_CELL_API char TdlEnsembleAgentGetSearchMode(const TrainingCell::TdlEnsembleAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates search mode property of the given ensemble agent with the given value.
+	/// Returns "true" if succeeded.
+	/// </summary>
+	TRAINING_CELL_API bool TdlEnsembleAgentSetSearchMode(TrainingCell::TdlEnsembleAgent* agent_ptr, const bool search_mode);
+
+	/// <summary>
+	/// Returns value of search iterations property of the given ensemble agent.
+	/// </summary>
+	TRAINING_CELL_API int TdlEnsembleAgentGetSearchIterations(const TrainingCell::TdlEnsembleAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates search iteration property of the given ensemble agent with the given value.
+	/// Returns "true" if succeeded.
+	/// </summary>
+	TRAINING_CELL_API bool TdlEnsembleAgentSetSearchIterations(TrainingCell::TdlEnsembleAgent* agent_ptr, const int search_iterations);
+
+	/// <summary>
+	/// Returns value of search depth property of the given ensemble agent.
+	/// </summary>
+	TRAINING_CELL_API int TdlEnsembleAgentGetSearchDepth(const TrainingCell::TdlEnsembleAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates search depth property of the given ensemble agent with the given value.
+	/// Returns "true" if succeeded.
+	/// </summary>
+	TRAINING_CELL_API bool TdlEnsembleAgentSetSearchDepth(TrainingCell::TdlEnsembleAgent* agent_ptr, const int search_depth);
+
+	/// <summary>
+	/// Returns value of "run multi-threaded" property of the given ensemble agent (a boolean value encoded as char,
+	/// value other than 0 or 1 indicates an error).
+	/// </summary>
+	TRAINING_CELL_API char TdlEnsembleAgentGetRunMultiThreaded(const TrainingCell::TdlEnsembleAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates "run multi-threaded" property of the given ensemble agent with the given value.
+	/// Returns "true" if succeeded.
+	/// </summary>
+	TRAINING_CELL_API bool TdlEnsembleAgentSetRunMultiThreaded(TrainingCell::TdlEnsembleAgent* agent_ptr, const bool run_multi_threaded);
 #pragma endregion TdlEnsembleAgent
 }

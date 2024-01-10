@@ -23,10 +23,10 @@ namespace TrainingCell
 {
 	void TdLambdaAgent::msgpack_unpack(msgpack::object const& msgpack_o)
 	{
-		_msg_pack_version = 0;
-		msgpack::type::make_define_array(_msg_pack_version, MSGPACK_BASE(TdlAbstractAgent)).msgpack_unpack(msgpack_o);
+		auto msg_pack_version = 0;
+		msgpack::type::make_define_array(msg_pack_version, MSGPACK_BASE(TdlAbstractAgent)).msgpack_unpack(msgpack_o);
 
-		if (_msg_pack_version <= 1 && !get_training_mode())
+		if (msg_pack_version <= 1 && !get_training_mode())
 			set_performance_evaluation_mode(true);
 	}
 

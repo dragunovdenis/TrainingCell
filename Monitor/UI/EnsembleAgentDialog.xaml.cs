@@ -50,12 +50,7 @@ namespace Monitor.UI
             if (Ensemble == null)
                 Ensemble = AgentControl.CreateEnsemble();
             else
-            {
-                Ensemble.RemoveSubAgents(AgentControl.GetUnCheckedSubAgentIds());
-                Ensemble.AddSubAgents(AgentControl.GetCheckedAgents());
-                Ensemble.Name = AgentControl.AgentName;
-                Ensemble.SingleAgentMode = AgentControl.UseSingleAgent;
-            }
+                AgentControl.UpdateEnsemble();
 
             DialogResult = true;
         }

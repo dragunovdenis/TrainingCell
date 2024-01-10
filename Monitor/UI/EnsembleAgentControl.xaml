@@ -42,14 +42,23 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <TextBox Text="Agent Name"/>
                         <TextBox Text="Agent ID"/>
                         <TextBox Text="Single Agent Mode"/>
+                        <TextBox Text="Search Mode"/>
+                        <TextBox Text="Search Iterations"/>
+                        <TextBox Text="Search Depth"/>
+                        <TextBox Text="Run Multi-Threaded"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch">
                         <StackPanel.Resources>
                             <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxStyle}"/>
+                            <Style TargetType="CheckBox" BasedOn="{StaticResource CheckBoxStyle}"/>
                         </StackPanel.Resources>
                         <TextBox Text="{Binding AgentName, Mode=TwoWay}"/>
                         <TextBox Text="{Binding AgentId, Mode=OneWay}" IsEnabled="False"/>
-                        <CheckBox IsChecked="{Binding UseSingleAgent, Mode=TwoWay}" Margin="3,3,3,0"/>
+                        <CheckBox IsChecked="{Binding UseSingleAgent, Mode=TwoWay}"/>
+                        <CheckBox IsChecked="{Binding SearchMode, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding SearchIterations, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding SearchDepth, Mode=TwoWay}"/>
+                        <CheckBox IsChecked="{Binding RunMultiThreaded, Mode=TwoWay}"/>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -62,6 +71,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
                             <Setter Property="IsEnabled" Value="{Binding IsEnabled}" />
+                            <Setter Property="ToolTip" Value="{Binding Summary}" />
                         </Style>
                     </DataGrid.RowStyle>
                     <DataGrid.Columns>
