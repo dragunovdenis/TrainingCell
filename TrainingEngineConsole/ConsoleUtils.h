@@ -18,6 +18,7 @@
 #pragma once
 #include <filesystem>
 #include <string>
+#include "Logger.h"
 
 namespace Training
 {
@@ -26,6 +27,11 @@ namespace Training
 
 namespace Training::ConsoleUtils
 {
+	/// <summary>
+	/// Global instance of logger.
+	/// </summary>
+	inline Logger Logger {};
+
 	/// <summary>
 	/// Returns amount of physical memory in bytes used by the current process at the moment of call
 	/// </summary>

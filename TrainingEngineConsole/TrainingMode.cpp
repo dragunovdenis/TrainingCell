@@ -32,7 +32,7 @@ namespace Training::Modes
 	/// Tries to load training state from the given file on disk, or construct state from the given script on disk
 	/// Returns "true" if succeeded
 	/// </summary>
-	bool try_load_or_construct_sate(const std::filesystem::path& source_path, Training::TrainingState& state)
+	bool try_load_or_construct_sate(const std::filesystem::path& source_path, TrainingState& state)
 	{
 		if (ConsoleUtils::try_load_state_silent(source_path, state))
 		{
@@ -75,6 +75,9 @@ namespace Training::Modes
 	void run_training(int argc, char** argv)
 	{
 		const ArgumentsTraining args(argc, argv);
+
+		ConsoleUtils::Logger.open(args.get_output_folder() / "Log.txt");
+
 		ConsoleUtils::print_to_console(args.to_string());
 
 		TrainingState state;
@@ -151,7 +154,7 @@ namespace Training::Modes
 			for (auto agent_id = 0ull; agent_id < performance.size(); ++agent_id)
 			{
 				const auto& perf_item = performance[agent_id];
-				ConsoleUtils::print_to_console(state[agent_id].get_name() + " (" + state[agent_id].get_id() + ") performance " + perf_item.to_string());
+				ConsoleUtils::print_to_console(state[agent_id].get_name() + " performance " + perf_item.to_string());
 			}
 
 			const auto average_performance = state.add_performance_record(performance);
@@ -161,7 +164,7 @@ namespace Training::Modes
 
 
 			if (args.get_dump_rounds() != 0 && (rounds_counter % args.get_dump_rounds() == 0))
-				state.save_to_file(args.get_state_dump_path(), true);
+				state.save_to_file(args.get_state_dump_path(), /*extended*/ false);
 
 			if (args.get_save_rounds() != 0 && (rounds_counter % args.get_save_rounds() == 0))
 				saver(std::format("Round_{}", rounds_counter));
@@ -185,5 +188,6 @@ namespace Training::Modes
 		}
 
 		saver("");
+		ConsoleUtils::Logger.close();
 	}
 }

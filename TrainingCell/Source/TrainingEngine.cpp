@@ -77,7 +77,7 @@ namespace TrainingCell
 
 		for (auto score_item_id = 0ull; score_item_id < performance_scores.size(); ++score_item_id)
 		{
-			if (performance_scores[score_item_id].get_score() < 0.6 * average_score)
+			if (performance_scores[score_item_id].get_score() < 0.8 * average_score)
 				outlier_ids.push_back(static_cast<int>(score_item_id));
 		}
 

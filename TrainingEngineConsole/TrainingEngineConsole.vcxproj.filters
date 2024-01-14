@@ -42,6 +42,9 @@
     <ClCompile Include="ArgumentsOptimization.cpp">
       <Filter>Source Files\Modes</Filter>
     </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -64,6 +67,9 @@
     </ClInclude>
     <ClInclude Include="ArgumentsTraining.h">
       <Filter>Header Files\Modes</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

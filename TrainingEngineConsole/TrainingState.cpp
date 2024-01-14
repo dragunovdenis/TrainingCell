@@ -24,7 +24,6 @@
 #include "Headers/TdlEnsembleAgent.h"
 #include "Headers//TdLambdaAgent.h"
 
-
 using namespace TrainingCell;
 
 namespace Training
@@ -32,27 +31,12 @@ namespace Training
 	namespace
 	{
 		/// <summary>
-		/// Returns current date-time string.
-		/// </summary>
-		std::string get_current_date_time() {
-			const auto now = std::chrono::system_clock::now();
-			const auto now_as_time_point = std::chrono::floor<std::chrono::seconds>(now);
-			const auto current_time = std::chrono::system_clock::to_time_t(now_as_time_point);
-			std::tm localTime{};
-			const auto error = localtime_s(&localTime, &current_time);
-
-			if (error != 0)
-				throw std::exception("Can't get local time.");
-
-			return std::format("{:%y-%m-%d-%H-%M-%S}", std::chrono::zoned_time(std::chrono::current_zone(), now_as_time_point));
-		}
-
-		/// <summary>
 		/// Adds training record to the given agent based on the given performance record. 
 		/// </summary>
 		void add_training_record(TdLambdaAgent& agent, const TrainingEngine::PerformanceRec& perf_rec)
 		{
-			agent.add_record(get_current_date_time() + "; " + perf_rec.to_string(/*extended*/ true));
+			const auto now = std::chrono::system_clock::now();
+			agent.add_record(DeepLearning::Utils::format_date_time(now) + "; " + perf_rec.to_string(/*extended*/ true));
 		}
 	}
 

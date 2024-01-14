@@ -124,6 +124,7 @@
     <ClCompile Include="ArgumentsOptimization.cpp" />
     <ClCompile Include="ArgumentsTraining.cpp" />
     <ClCompile Include="ConsoleUtils.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="OptimizationMode.cpp" />
     <ClCompile Include="TrainingEngineConsole.cpp" />
     <ClCompile Include="TrainingMode.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="ArgumentsOptimization.h" />
     <ClInclude Include="ArgumentsTraining.h" />
     <ClInclude Include="ConsoleUtils.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="OptimizationMode.h" />
     <ClInclude Include="TrainingMode.h" />
     <ClInclude Include="TrainingState.h" />

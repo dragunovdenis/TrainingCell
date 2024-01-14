@@ -43,14 +43,14 @@ namespace Training::ConsoleUtils
 		const auto lines = DeepLearning::Utils::split_by_char(message, '\n');
 
 		for (auto line_id = 0ull; line_id < lines.size() - 1; ++line_id)
-			std::cout << lines[line_id] << '\n';
+			Logger << lines[line_id] << "\n";
 
-		std::cout << *lines.rbegin();
+		Logger << *lines.rbegin();
 
 		if (new_line_at_end)
-			std::cout << '\n';
+			Logger << "\n";
 		else
-			std::cout << std::flush;
+			Logger.flush();
 	}
 
 	void report_fatal_error(const std::string& message)
@@ -102,12 +102,12 @@ namespace Training::ConsoleUtils
 
 	bool try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state)
 	{
-		if (ConsoleUtils::try_load_state_silent(state_path, state))
+		if (try_load_state_silent(state_path, state))
 		{
-			ConsoleUtils::horizontal_console_separator();
-			ConsoleUtils::print_to_console("State dump from round " + std::to_string(state.get_round_id()) + " was successfully loaded");
+			horizontal_console_separator();
+			print_to_console("State dump from round " + std::to_string(state.get_round_id()) + " was successfully loaded");
 
-			if (ConsoleUtils::decision_prompt("Discard? (y/n):"))
+			if (decision_prompt("Discard? (y/n):"))
 			{
 				state.reset();
 				return false;
