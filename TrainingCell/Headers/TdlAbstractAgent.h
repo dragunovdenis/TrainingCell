@@ -354,6 +354,19 @@ namespace TrainingCell
 		[[nodiscard]] int get_train_depth() const override;
 
 		/// <summary>
+		/// Determines number of moves (actions) counted from the
+		/// beginning of an episode through which exploratory decisions can be take.
+		/// </summary>
+		[[nodiscard]] int get_exploration_depth() const override;
+
+		/// <summary>
+		/// Determines number of best options that are going to be taken
+		/// into account during the exploration action each it takes place
+		/// (i.e. only this number of best options will be "explored").
+		/// </summary>
+		[[nodiscard]] int get_exploration_volume() const override;
+
+		/// <summary>
 		/// Returns number of first moves in each search episode during which the "search" neural net should be updated
 		/// </summary>
 		[[nodiscard]] int get_search_depth() const;

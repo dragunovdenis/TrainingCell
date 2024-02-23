@@ -327,6 +327,18 @@ namespace TrainingCell
 		return std::numeric_limits<int>::max();
 	}
 
+	int TdlAbstractAgent::get_exploration_depth() const
+	{
+		// Explore as deep as possible
+		return std::numeric_limits<int>::max();
+	}
+
+	int TdlAbstractAgent::get_exploration_volume() const
+	{
+		// Explore for the maximal possible volume
+		return std::numeric_limits<int>::max();
+	}
+
 	int TdlAbstractAgent::get_search_depth() const
 	{
 		return _td_search_depth;
@@ -397,7 +409,9 @@ namespace TrainingCell
 		result.set_training_mode(true, true);
 		result.set_training_mode(true, false);
 		result.set_train_depth(get_search_depth());
-		result.set_exploratory_probability(_exploration_epsilon);
+		result.set_exploration_depth(1);
+		result.set_exploration_volume(5);
+		result.set_exploratory_probability(1.0);
 
 		return result;
 	}

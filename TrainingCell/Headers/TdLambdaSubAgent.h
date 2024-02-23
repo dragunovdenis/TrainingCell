@@ -105,8 +105,8 @@ namespace TrainingCell
 		/// <summary>
 		/// Returns index of the picked move and the related data
 		/// </summary>
-		[[nodiscard]] static MoveData pick_move(const IMinimalStateReadonly& state,
-		                                        const ITdlSettingsReadOnly& settings, const INet& net);
+		[[nodiscard]] MoveData pick_move(const IMinimalStateReadonly& state,
+		                                        const ITdlSettingsReadOnly& settings, const INet& net) const;
 
 		/// <summary>
 		/// Calculates afterstate and its value
@@ -120,6 +120,17 @@ namespace TrainingCell
 		[[nodiscard]] static double evaluate(const IMinimalStateReadonly& state, const int move_id,
 			const INet& net, DeepLearning::CpuDC::tensor_t& afterstate,
 			DeepLearning::Net<DeepLearning::CpuDC>::Context& comp_context);
+
+		/// <summary>
+		/// Returns "true" if it is time to do an "exploration move".
+		/// The method is supposed to be called within the "pick_move" subroutine.
+		/// </summary>
+		[[nodiscard]] bool should_do_exploration(const ITdlSettingsReadOnly& settings) const;
+
+		/// <summary>
+		/// Returns data of a move picked via exploration. 
+		/// </summary>
+		[[nodiscard]] static MoveData explore(const IMinimalStateReadonly& state, const INet& net, const int exploration_volume);
 
 		/// <summary>
 		/// Updates "z" field and returns value of the afterstate value function at the "previous afterstate"

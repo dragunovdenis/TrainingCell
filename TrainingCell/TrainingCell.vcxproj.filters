@@ -171,6 +171,9 @@
     <ClInclude Include="Headers\TrainingEngine.h">
       <Filter>Header Files\TDL</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\MoveCollector.h">
+      <Filter>Header Files\TDL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Checkers\CheckersState.cpp">
@@ -261,6 +264,9 @@
       <Filter>Source Files\State</Filter>
     </ClCompile>
     <ClCompile Include="Source\TrainingEngine.cpp">
+      <Filter>Source Files\TDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MoveCollector.cpp">
       <Filter>Source Files\TDL</Filter>
     </ClCompile>
   </ItemGroup>

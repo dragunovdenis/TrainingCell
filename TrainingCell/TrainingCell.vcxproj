@@ -38,6 +38,7 @@
     <ClInclude Include="Headers\IStateSeed.h" />
     <ClInclude Include="Headers\ITrainableAgent.h" />
     <ClInclude Include="Headers\Move.h" />
+    <ClInclude Include="Headers\MoveCollector.h" />
     <ClInclude Include="Headers\MoveData.h" />
     <ClInclude Include="Headers\NetWithConverter.h" />
     <ClInclude Include="Headers\NetWithConverterAbstract.h" />
@@ -72,6 +73,7 @@
     <ClCompile Include="Source\Chess\PosController.cpp" />
     <ClCompile Include="Source\InteractiveAgent.cpp" />
     <ClCompile Include="Source\Move.cpp" />
+    <ClCompile Include="Source\MoveCollector.cpp" />
     <ClCompile Include="Source\NetWithConverter.cpp" />
     <ClCompile Include="Source\NetWithConverterAbstract.cpp" />
     <ClCompile Include="Source\PiecePosition.cpp" />

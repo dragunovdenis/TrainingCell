@@ -65,6 +65,19 @@ namespace TrainingCell
 		/// (provided that "training mode" is on, otherwise the parameter is ignored)
 		/// </summary>
 		[[nodiscard]] virtual int get_train_depth() const = 0;
+
+		/// <summary>
+		/// Determines number of moves (actions) counted from the
+		/// beginning of an episode through which exploratory decisions can be take.
+		/// </summary>
+		[[nodiscard]] virtual int get_exploration_depth() const = 0;
+
+		/// <summary>
+		/// Determines number of best options that are going to be taken
+		/// into account during the exploration action each it takes place
+		/// (i.e. only this number of best options will be "explored").
+		/// </summary>
+		[[nodiscard]] virtual int get_exploration_volume() const = 0;
 	};
 
 	/// <summary>
@@ -80,6 +93,8 @@ namespace TrainingCell
 		bool _training_mode_black{};
 		double _reward_factor{};
 		int _train_depth{};
+		int _exploration_depth{};
+		int _exploration_volume{};
 
 	public:
 		/// <summary>
@@ -162,6 +177,29 @@ namespace TrainingCell
 		/// Setter for the corresponding property
 		/// </summary>
 		void set_train_depth(const int train_depth);
+
+		/// <summary>
+		/// Determines number of moves (actions) counted from the
+		/// beginning of an episode through which exploratory decisions can be take.
+		/// </summary>
+		[[nodiscard]] int get_exploration_depth() const override;
+
+		/// <summary>
+		/// Setter for the corresponding property
+		/// </summary>
+		void set_exploration_depth(const int depth);
+
+		/// <summary>
+		/// Determines number of best options that are going to be taken
+		/// into account during the exploration action each it takes place
+		/// (i.e. only this number of best options will be "explored").
+		/// </summary>
+		[[nodiscard]] int get_exploration_volume() const override;
+
+		/// <summary>
+		/// Setter for the corresponding property
+		/// </summary>
+		void set_exploration_volume(const int volume);
 
 		/// <summary>
 		/// Equality operator.

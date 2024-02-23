@@ -32,6 +32,8 @@ namespace TrainingCell
 		_training_mode_black = settings.get_training_mode(false);
 		_reward_factor = settings.get_reward_factor();
 		_train_depth = settings.get_train_depth();
+		_exploration_depth = settings.get_exploration_depth();
+		_exploration_volume = settings.get_exploration_volume();
 	}
 
 	double TdlSettings::get_exploratory_probability() const
@@ -107,6 +109,26 @@ namespace TrainingCell
 		_train_depth = train_depth;
 	}
 
+	int TdlSettings::get_exploration_depth() const
+	{
+		return _exploration_depth;
+	}
+
+	void TdlSettings::set_exploration_depth(const int depth)
+	{
+		_exploration_depth = depth;
+	}
+
+	int TdlSettings::get_exploration_volume() const
+	{
+		return _exploration_volume;
+	}
+
+	void TdlSettings::set_exploration_volume(const int volume)
+	{
+		_exploration_volume = volume;
+	}
+
 	bool TdlSettings::operator==(const TdlSettings& otherSettings) const
 	{
 		return _exploratory_probability == otherSettings._exploratory_probability &&
@@ -116,6 +138,8 @@ namespace TrainingCell
 			   _training_mode_white == otherSettings._training_mode_white &&
 			   _training_mode_black == otherSettings._training_mode_black &&
 			   _reward_factor == otherSettings._reward_factor &&
-			   _train_depth == otherSettings._train_depth;
+			   _train_depth == otherSettings._train_depth &&
+			   _exploration_depth == otherSettings._exploration_depth &&
+			   _exploration_volume == otherSettings._exploration_volume;
 	}
 }

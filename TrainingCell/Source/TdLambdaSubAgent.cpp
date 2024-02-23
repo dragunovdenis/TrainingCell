@@ -17,6 +17,7 @@
 
 #include "../Headers/TdLambdaSubAgent.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "../Headers/MoveCollector.h"
 #include <cmath>
 
 namespace TrainingCell
@@ -42,16 +43,43 @@ namespace TrainingCell
 	}
 
 	MoveData TdLambdaSubAgent::pick_move(const IMinimalStateReadonly& state,
-	                                     const ITdlSettingsReadOnly& settings, const INet& net)
+	                                     const ITdlSettingsReadOnly& settings, const INet& net) const
 	{
 		if (state.get_moves_count() == 1)
 			return evaluate(state, 0, net);
 
-		const auto explore_probability = settings.get_exploratory_probability();
-		if (Explorer::should_explore(explore_probability))
-			return evaluate(state, Explorer::pick(state.get_moves_count()), net);
+		if (should_do_exploration(settings))
+			return explore(state, net, settings.get_exploration_volume());
 
 		return pick_move(state, net);
+	}
+
+	bool TdLambdaSubAgent::should_do_exploration(const ITdlSettingsReadOnly& settings) const
+	{
+		const auto explore_probability = settings.get_exploratory_probability();
+		return _move_counter < settings.get_exploration_depth() && settings.get_exploration_volume() > 1 &&
+			Explorer::should_explore(explore_probability);
+	}
+
+	MoveData TdLambdaSubAgent::explore(const IMinimalStateReadonly& state, const INet& net,
+		const int exploration_volume)
+	{
+		const auto actual_exploration_volume = std::min(exploration_volume, state.get_moves_count());
+		const auto picked_move_id = Explorer::pick(actual_exploration_volume);
+
+		if (actual_exploration_volume == state.get_moves_count())
+			return evaluate(state, picked_move_id, net);
+
+		MoveCollector collector(actual_exploration_volume);
+
+		const auto actions_count = state.get_moves_count();
+		for (auto move_id = 0; move_id < actions_count; ++move_id)
+		{
+			const auto value = evaluate(state, move_id, net, _tensor_shared, _context);
+			collector.add(move_id, value, _tensor_shared);
+		}
+
+		return std::move(collector.get(picked_move_id));
 	}
 
 	MoveData TdLambdaSubAgent::pick_move(const IMinimalStateReadonly& state, const INet& net)
