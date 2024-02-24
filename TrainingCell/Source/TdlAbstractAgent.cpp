@@ -352,6 +352,11 @@ namespace TrainingCell
 		return _performance_evaluation_mode;
 	}
 
+	void TdlAbstractAgent::reset_explorer(const unsigned seed)
+	{
+		TdLambdaSubAgent::reset_explorer(seed);
+	}
+
 	void TdlAbstractAgent::set_lambda(const double lambda)
 	{
 		_lambda = lambda;

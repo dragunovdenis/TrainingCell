@@ -377,6 +377,11 @@ namespace TrainingCell
 		/// Getter for the corresponding property.
 		/// </summary>
 		[[nodiscard]] bool get_performance_evaluation_mode() const;
+
+		/// <summary>
+		/// Resets functionality that ensures randomness of the exploration component of training.
+		/// </summary>
+		static void reset_explorer(const unsigned int seed = std::random_device{}());
 	};
 }
 

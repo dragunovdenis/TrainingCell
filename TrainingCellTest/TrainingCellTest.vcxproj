@@ -117,6 +117,9 @@
     <None Include="TestData\TdlTrainingRegression\agent0_trained.tda">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TestData\TdlTrainingRegression\agent0_auto_trained.tda">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="TestData\TdlTrainingRegression\agent1_trained.tda">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

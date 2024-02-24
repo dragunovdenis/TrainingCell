@@ -232,26 +232,45 @@ namespace TrainingCellTest
 			Assert::IsTrue(agent1 == agent1_trained, L"1st agent does not coincide with the reference");
 		}
 
+		TEST_METHOD(TdLambdaAgentAutoTrainingRegression)
+		{
+			//Arrange
+			auto agent = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0.tda");
+			agent.set_exploration_probability(0.1);
+			const auto agent_trained = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0_auto_trained.tda");
+
+			//Act
+			const Board board(&agent, &agent);
+			TdLambdaAgent::reset_explorer(0); // to ensure reproducible exploration
+			board.play(200, CheckersState::get_start_state());
+			TdLambdaAgent::reset_explorer();
+
+			//Assert
+			Assert::IsTrue(agent == agent_trained, L"Agent does not coincide with the reference");
+		}
+
 		TEST_METHOD(TdLambdaAgentSearchRegression)
 		{
 			//Arrange
 			auto agent = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0.tda");
+			agent.set_exploration_probability(0.1);
 			agent.set_td_search_iterations(100);
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
 			auto state_handle = StateHandle(CheckersState::get_start_state());
-			const auto reference_search_net = DeepLearning::MsgPack::
-				load_from_file<DeepLearning::Net<DeepLearning::CpuDC>>("TestData/TdlTrainingRegression/search_net.dat");
+			const auto reference_search_net = NetWithConverter::load_from_file("TestData/TdlTrainingRegression/search_net.dat");
 
 			//Act
+			TdLambdaAgent::reset_explorer(0);// to ensure reproducible exploration
 			agent.set_search_depth(5);
 			const auto move_id = agent.make_move(state_handle, true);
 			state_handle.move_invert_reset(move_id);
 			agent.set_search_depth(1000);
 			agent.make_move(state_handle, false);
+			TdLambdaAgent::reset_explorer();
 
 			//Assert
 			Assert::IsTrue(agent._search_net.has_value(), L"Search net is not initialized");
-			Assert::IsTrue(agent._search_net.value().net_is_equal_to(reference_search_net), L"Nets are supposed to be equal");
+			Assert::IsTrue(agent._search_net.value() == reference_search_net, L"Nets are supposed to be equal");
 		}
 
 		TEST_METHOD(TdLambdaAgentSearchSettingsTest)

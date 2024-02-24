@@ -21,6 +21,23 @@
 
 namespace TrainingCell
 {
+	thread_local DeepLearning::RandomGenerator TdLambdaSubAgent::Explorer::_generator = DeepLearning::RandomGenerator();
+
+	bool TdLambdaSubAgent::Explorer::should_explore(const double exploration_probability)
+	{
+		return exploration_probability > 0 && (exploration_probability >= 1 || _generator.next() < exploration_probability);
+	}
+
+	int TdLambdaSubAgent::Explorer::pick(const int options_count)
+	{
+		return _generator.get_int(0, options_count);
+	}
+
+	void TdLambdaSubAgent::Explorer::reset(const unsigned seed)
+	{
+		_generator = DeepLearning::RandomGenerator(seed);
+	}
+
 	MoveData TdLambdaSubAgent::pick_move(const IMinimalStateReadonly& state,
 	                                     const ITdlSettingsReadOnly& settings, const INet& net)
 	{
@@ -28,8 +45,8 @@ namespace TrainingCell
 			return evaluate(state, 0, net);
 
 		const auto explore_probability = settings.get_exploratory_probability();
-		if (explore_probability > 0.0 && DeepLearning::Utils::get_random(0, 1.0) <= explore_probability)
-			return evaluate(state, DeepLearning::Utils::get_random_int(0, state.get_moves_count() - 1), net);
+		if (Explorer::should_explore(explore_probability))
+			return evaluate(state, Explorer::pick(state.get_moves_count()), net);
 
 		return pick_move(state, net);
 	}
@@ -173,5 +190,10 @@ namespace TrainingCell
 		return _z == another_sub_agent._z &&
 			_prev_state == another_sub_agent._prev_state &&
 			_prev_after_state == another_sub_agent._prev_after_state;
+	}
+
+	void TdLambdaSubAgent::reset_explorer(const unsigned seed)
+	{
+		Explorer::reset(seed);
 	}
 }

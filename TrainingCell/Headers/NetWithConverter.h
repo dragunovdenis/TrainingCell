@@ -18,6 +18,7 @@
 #pragma once
 
 #include "NetWithConverterAbstract.h"
+#include <msgpack.hpp>
 
 namespace TrainingCell
 {
@@ -47,14 +48,36 @@ namespace TrainingCell
 		const DeepLearning::Net<DeepLearning::CpuDC>& net() const override;
 	public:
 
+		MSGPACK_DEFINE(_converter, _net)
+
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
+		NetWithConverter() = default;
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		NetWithConverter(const DeepLearning::Net<DeepLearning::CpuDC>& net, StateConverter converter);
 
 		/// <summary>
-		/// Diagnostics method to assert equality of the net.
+		/// Saves the instance to the given file on disk.
 		/// </summary>
-		bool net_is_equal_to(const DeepLearning::Net<DeepLearning::CpuDC>& another_net) const;
+		void save_to_file(const std::filesystem::path& fileName) const;
+
+		/// <summary>
+		/// Loads instance of the class from the given file on disk.
+		/// </summary>
+		static NetWithConverter load_from_file(const std::filesystem::path& fileName);
+
+		/// <summary>
+		/// Equality operator
+		/// </summary>
+		bool operator == (const NetWithConverter& another_net) const;
+
+		/// <summary>
+		/// Inequality operator
+		/// </summary>
+		bool operator != (const NetWithConverter& another_net) const;
 	};
 }

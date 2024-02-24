@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../Headers/NetWithConverter.h"
+#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
 
 namespace TrainingCell
 {
@@ -38,8 +39,23 @@ namespace TrainingCell
 		StateConverter converter) : _converter(std::move(converter)), _net(net)
 	{}
 
-	bool NetWithConverter::net_is_equal_to(const DeepLearning::Net<DeepLearning::CpuDC>& another_net) const
+	void NetWithConverter::save_to_file(const std::filesystem::path& fileName) const
 	{
-		return _net.equal(another_net);
+		DeepLearning::MsgPack::save_to_file(*this, fileName);
+	}
+
+	NetWithConverter NetWithConverter::load_from_file(const std::filesystem::path& fileName)
+	{
+		return DeepLearning::MsgPack::load_from_file<NetWithConverter>(fileName);
+	}
+
+	bool NetWithConverter::operator==(const NetWithConverter& another_net) const
+	{
+		return _net.equal(another_net.net()) && _converter == another_net._converter;
+	}
+
+	bool NetWithConverter::operator!=(const NetWithConverter& another_net) const
+	{
+		return !(*this == another_net);
 	}
 }

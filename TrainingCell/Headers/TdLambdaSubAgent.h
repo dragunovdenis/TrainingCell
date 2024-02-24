@@ -20,6 +20,7 @@
 #include "MoveData.h"
 #include "TdlSettings.h"
 #include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "../../DeepLearning/DeepLearning/RandomGenerator.h"
 #include "INet.h"
 
 namespace TrainingCell
@@ -31,6 +32,31 @@ namespace TrainingCell
 	/// </summary>
 	class TdLambdaSubAgent
 	{
+		/// <summary>
+		/// Functionality that handles exploration related matters.
+		/// </summary>
+		class Explorer
+		{
+			thread_local static DeepLearning::RandomGenerator _generator;
+
+		public:
+			/// <summary>
+			/// Returns true if "it is time" to do exploration (according to the given probability).
+			/// </summary>
+			static bool should_explore(const double exploration_probability);
+
+			/// <summary>
+			/// Returns random integer value from 0 to <paramref name="options_count"/> - 1;
+			/// </summary>
+			static int pick(const int options_count);
+
+			/// <summary>
+			/// Resets pseudo-random number generator with the given seed in the current
+			/// thread (the generator is "thread-local").
+			/// </summary>
+			static void reset(const unsigned int seed = std::random_device{}());
+		};
+
 		/// <summary>
 		/// A flag that should be set depending on the "color of pieces" the agent is playing
 		/// </summary>
@@ -152,5 +178,10 @@ namespace TrainingCell
 		/// Returns true if the current sub-agent is equal to the given sub-agent
 		/// </summary>
 		[[nodiscard]] bool equal(const TdLambdaSubAgent& another_sub_agent) const;
+
+		/// <summary>
+		/// Resets functionality that ensures randomness of the exploration component of training.
+		/// </summary>
+		static void reset_explorer(const unsigned int seed = std::random_device{}());
 	};
 }
