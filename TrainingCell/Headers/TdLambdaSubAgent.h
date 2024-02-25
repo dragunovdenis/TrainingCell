@@ -75,17 +75,17 @@ namespace TrainingCell
 		/// <summary>
 		/// Computation context (serves optimization purposes)
 		/// </summary>
-		DeepLearning::Net<DeepLearning::CpuDC>::Context _context{};
+		thread_local static DeepLearning::Net<DeepLearning::CpuDC>::Context _context;
+
+		/// <summary>
+		/// Shared resource to use during the net evaluation
+		/// </summary>
+		thread_local static DeepLearning::Tensor _tensor_shared;
 
 		/// <summary>
 		/// Auxiliary data structure used when computing gradient of the neural net (serves optimization purposes)
 		/// </summary>
-		std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _gradient_cache{};
-
-		/// <summary>
-		/// Auxiliary data structure used when computing afterstate value (serves optimization purposes)
-		/// </summary>
-		DeepLearning::CpuDC::tensor_t _value_cache{};
+		thread_local static std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _gradient_cache;
 
 		/// <summary>
 		/// Previous state

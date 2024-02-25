@@ -21,7 +21,10 @@
 
 namespace TrainingCell
 {
-	thread_local DeepLearning::RandomGenerator TdLambdaSubAgent::Explorer::_generator = DeepLearning::RandomGenerator();
+	thread_local DeepLearning::RandomGenerator TdLambdaSubAgent::Explorer::_generator{};
+	thread_local DeepLearning::Net<DeepLearning::CpuDC>::Context TdLambdaSubAgent::_context{};
+	thread_local DeepLearning::Tensor TdLambdaSubAgent::_tensor_shared{};
+	thread_local std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> TdLambdaSubAgent::_gradient_cache{};
 
 	bool TdLambdaSubAgent::Explorer::should_explore(const double exploration_probability)
 	{
@@ -56,17 +59,15 @@ namespace TrainingCell
 		MoveData best_move_data{ -1, -std::numeric_limits<double>::max() };
 
 		const auto actions_count = state.get_moves_count();
-		DeepLearning::Tensor afterstate;
-		DeepLearning::Net<DeepLearning::CpuDC>::Context comp_context;
 		for (auto move_id = 0; move_id < actions_count; ++move_id)
 		{
-			const auto value = evaluate(state, move_id, net, afterstate, comp_context);
+			const auto value = evaluate(state, move_id, net, _tensor_shared, _context);
 
 			if (value > best_move_data.value)
 			{
 				best_move_data.move_id = move_id;
 				best_move_data.value = value;
-				best_move_data.after_state = afterstate;
+				best_move_data.after_state = _tensor_shared;
 			}
 		}
 
@@ -79,10 +80,8 @@ namespace TrainingCell
 	MoveData TdLambdaSubAgent::evaluate(const IMinimalStateReadonly& state,
 	                                    const int move_id, const INet& net)
 	{
-		DeepLearning::Tensor afterstate;
-		DeepLearning::Net<DeepLearning::CpuDC>::Context comp_context;
-		const auto value = evaluate(state, move_id, net, afterstate, comp_context);
-		return { move_id,  value, std::move(afterstate) };
+		const auto value = evaluate(state, move_id, net, _tensor_shared, _context);
+		return { move_id,  value, _tensor_shared };
 	}
 
 	double TdLambdaSubAgent::evaluate(const IMinimalStateReadonly& state, const int move_id,
@@ -102,8 +101,8 @@ namespace TrainingCell
 		auto& gradient_alias = long_evaluation ? _gradient_cache : _z;
 
 		net.calc_gradient_and_value(_prev_after_state,
-			_value_cache, DeepLearning::CostFunctionId::LINEAR,
-			gradient_alias, _value_cache, _context);
+			_tensor_shared, DeepLearning::CostFunctionId::LINEAR,
+			gradient_alias, _tensor_shared, _context);
 
 		if (long_evaluation)
 		{
@@ -111,7 +110,7 @@ namespace TrainingCell
 				_z[layer_id].scale_and_add(lambda_times_gamma, gradient_alias[layer_id]);
 		}
 
-		return _value_cache(0, 0, 0);
+		return _tensor_shared(0, 0, 0);
 	}
 
 	void TdLambdaSubAgent::reset()

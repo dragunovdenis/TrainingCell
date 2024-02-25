@@ -152,6 +152,9 @@
     <CopyFileToFolders Include="run_optimization.bat" />
     <CopyFileToFolders Include="script.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\tclap.1.2.1\build\native\tclap.targets" Condition="Exists('..\packages\tclap.1.2.1\build\native\tclap.targets')" />
