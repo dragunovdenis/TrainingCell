@@ -92,7 +92,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MoveCollectorTest.cpp" />
     <ClCompile Include="StateTraceRecorderTest.cpp" />
+    <ClCompile Include="TdLambdaAgentRegressionTest.cpp" />
     <ClCompile Include="TdLambdaAgentSerializationTest.cpp" />
     <ClCompile Include="TdLambdaAgentTrainingTest.cpp" />
     <ClCompile Include="CheckersStateTest.cpp" />
@@ -124,6 +126,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestData\TdlTrainingRegression\search_net.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\volume_search_net.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -45,6 +45,12 @@
     <ClCompile Include="StateTraceRecorderTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MoveCollectorTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TdLambdaAgentRegressionTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -64,6 +70,9 @@
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
     <None Include="TestData\TdlTrainingRegression\agent0_auto_trained.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\volume_search_net.dat">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
   </ItemGroup>

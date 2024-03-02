@@ -74,6 +74,7 @@
     <ClCompile Include="Source\InteractiveAgent.cpp" />
     <ClCompile Include="Source\Move.cpp" />
     <ClCompile Include="Source\MoveCollector.cpp" />
+    <ClCompile Include="Source\MoveData.cpp" />
     <ClCompile Include="Source\NetWithConverter.cpp" />
     <ClCompile Include="Source\NetWithConverterAbstract.cpp" />
     <ClCompile Include="Source\PiecePosition.cpp" />

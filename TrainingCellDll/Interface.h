@@ -178,6 +178,43 @@ extern "C"
 	TRAINING_CELL_API int TdLambdaAgentGetSearchDepth(const TrainingCell::TdLambdaAgent* agent_ptr);
 
 	/// <summary>
+	/// Returns "search exploration depth" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "-1" if failed
+	/// </summary>
+	TRAINING_CELL_API int TdLambdaAgentGetSearchExplorationDepth(const TrainingCell::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates "search exploration depth" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "true" if succeeded
+	/// </summary>
+	TRAINING_CELL_API bool TdLambdaAgentSetSearchExplorationDepth(TrainingCell::TdLambdaAgent* agent_ptr, const int depth);
+
+	/// <summary>
+	/// Returns "search exploration volume" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "-1" if failed
+	/// </summary>
+	TRAINING_CELL_API int TdLambdaAgentGetSearchExplorationVolume(const TrainingCell::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates "search exploration volume" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "true" if succeeded
+	/// </summary>
+	TRAINING_CELL_API bool TdLambdaAgentSetSearchExplorationVolume(TrainingCell::TdLambdaAgent* agent_ptr, const int volume);
+
+	/// <summary>
+	/// Returns "search exploration probability" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "-1" if failed
+	/// </summary>
+	TRAINING_CELL_API double TdLambdaAgentGetSearchExplorationProbability(const TrainingCell::TdLambdaAgent* agent_ptr);
+
+	/// <summary>
+	/// Updates "search exploration probability" parameter of TD(lambda) agent represented with its pointer
+	/// Returns "true" if succeeded
+	/// </summary>
+	TRAINING_CELL_API bool TdLambdaAgentSetSearchExplorationProbability(
+		TrainingCell::TdLambdaAgent* agent_ptr, const double probability);
+
+	/// <summary>
 	/// Returns neural net dimensions of TD(lambda) agent represented with its pointer
 	/// </summary>
 	TRAINING_CELL_API bool TdLambdaAgentGetNetDimensions(const TrainingCell::TdLambdaAgent* agent_ptr,

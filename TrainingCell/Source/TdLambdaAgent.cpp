@@ -52,7 +52,9 @@ namespace TrainingCell
 
 	TdLambdaAgent::TdLambdaAgent(const std::vector<std::size_t>& hidden_layer_dimensions,
 	                             const double exploration_epsilon, const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id,
-	                             const std::string& name) : TdlAbstractAgent(hidden_layer_dimensions, exploration_epsilon, lambda, gamma, alpha, state_type_id, name)
+								 const double search_exploration_prob, const int search_exploration_depth, const int search_exploration_volume,
+	                             const std::string& name) : TdlAbstractAgent(hidden_layer_dimensions, exploration_epsilon, lambda, gamma, alpha, state_type_id,
+	                             search_exploration_prob, search_exploration_depth, search_exploration_volume, name)
 	{}
 
 	AgentTypeId TdLambdaAgent::TYPE_ID()

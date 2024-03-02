@@ -128,7 +128,7 @@ namespace Training::Modes
 
 		if (args.get_exploration_flag())
 		{
-			point.push_back(sample_agent.get_exploratory_probability());
+			point.push_back(sample_agent.get_exploration_probability());
 			lower_bound.push_back(0.0);
 			upper_bound.push_back(1.0);
 		}
@@ -176,7 +176,7 @@ namespace Training::Modes
 		stream << "Lambda = " << (args.get_lambda_flag() ? parameter_values[current_param_id++] : sample_agent.get_lambda()) << std::endl;
 		stream << "Discount = " << (args.get_discount_flag() ? parameter_values[current_param_id++] : sample_agent.get_discount()) << std::endl;
 		stream << "Learning rate = " << (args.get_learning_rate_flag() ? parameter_values[current_param_id++] : sample_agent.get_learning_rate()) << std::endl;
-		stream << "Exploration = " << (args.get_exploration_flag() ? parameter_values[current_param_id] : sample_agent.get_exploratory_probability()) << std::endl;
+		stream << "Exploration = " << (args.get_exploration_flag() ? parameter_values[current_param_id] : sample_agent.get_exploration_probability()) << std::endl;
 	}
 
 	/// <summary>
@@ -291,7 +291,7 @@ namespace Training::Modes
 		state.set_lambda(state[0].get_lambda());
 		state.set_discount(state[0].get_discount());
 		state.set_learning_rate(state[0].get_learning_rate());
-		state.set_exploration(state[0].get_exploratory_probability());
+		state.set_exploration(state[0].get_exploration_probability());
 	}
 
 	void run_parameter_optimization(int argc, char** argv)

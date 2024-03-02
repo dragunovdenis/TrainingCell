@@ -129,7 +129,10 @@ namespace Monitor.UI
             TrainingMode = true,
             SearchMode = false,
             SearchIterations = 10,
-            SearchDepth = 1000,
+            SearchDepth = 10000,
+            SearchExplorationDepth = 10000,
+            SearchExplorationVolume = 10000,
+            SearchExplorationProbability = 0.05,
             RewardFactor = 1.0,
             Name = "Agent-" + Guid.NewGuid(),
             StateTypeId = DllWrapper.StateTypeId.Checkers,
@@ -156,6 +159,9 @@ namespace Monitor.UI
                     OnPropertyChanged(nameof(SearchMode));
                     OnPropertyChanged(nameof(SearchIterations));
                     OnPropertyChanged(nameof(SearchDepth));
+                    OnPropertyChanged(nameof(SearchExplorationDepth));
+                    OnPropertyChanged(nameof(SearchExplorationVolume));
+                    OnPropertyChanged(nameof(SearchExplorationProbability));
                     OnPropertyChanged(nameof(RewardFactor));
                     OnPropertyChanged(nameof(StateTypeId));
                     OnPropertyChanged(nameof(PerformanceEvaluationMode));
@@ -285,7 +291,8 @@ namespace Monitor.UI
         }
 
         /// <summary>
-        /// Number of first moves in each iteration that result in update of the search neural network
+        /// Number of first moves in each search iteration (episode)
+        /// that result in an update of the search neural network.
         /// </summary>
         public int SearchDepth
         {
@@ -296,6 +303,62 @@ namespace Monitor.UI
                 if (!_params.SearchDepth.Equals(value))
                 {
                     _params.SearchDepth = value;
+                    OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Number of first moves in each search iteration (episode)
+        /// in scope of which an exploration action can be taken.
+        /// </summary>
+        public int SearchExplorationDepth
+        {
+            get => _params.SearchExplorationDepth;
+
+            set
+            {
+                if (!_params.SearchExplorationDepth.Equals(value))
+                {
+                    _params.SearchExplorationDepth = value;
+                    OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Number moves with the highest reward values that are taken into account when
+        /// an exploration move is picked (within the current <see cref="SearchExplorationDepth"/>).
+        /// </summary>
+        public int SearchExplorationVolume
+        {
+            get => _params.SearchExplorationVolume;
+
+            set
+            {
+                if (!_params.SearchExplorationVolume.Equals(value))
+                {
+                    _params.SearchExplorationVolume = value;
+                    OnPropertyChanged();
+                    TrySynchronizeParametersWithAgent();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Probability of an exploration move be taken within the current <see cref="SearchExplorationDepth"/>.
+        /// </summary>
+        public double SearchExplorationProbability
+        {
+            get => _params.SearchExplorationProbability;
+
+            set
+            {
+                if (!_params.SearchExplorationProbability.Equals(value))
+                {
+                    _params.SearchExplorationProbability = value;
                     OnPropertyChanged();
                     TrySynchronizeParametersWithAgent();
                 }

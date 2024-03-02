@@ -269,6 +269,9 @@
     <ClCompile Include="Source\MoveCollector.cpp">
       <Filter>Source Files\TDL</Filter>
     </ClCompile>
+    <ClCompile Include="Source\MoveData.cpp">
+      <Filter>Source Files\TDL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

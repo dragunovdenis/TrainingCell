@@ -33,7 +33,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Returns actual value of exploration probability
 		/// </summary>
-		[[nodiscard]] virtual double get_exploratory_probability() const = 0;
+		[[nodiscard]] virtual double get_exploration_probability() const = 0;
 
 		/// <summary>
 		/// Returns actual value of parameter gamma (reward discount)
@@ -85,7 +85,7 @@ namespace TrainingCell
 	/// </summary>
 	class TdlSettings : public ITdlSettingsReadOnly
 	{
-		double _exploratory_probability{};
+		double _exploration_probability{};
 		double _discount{};
 		double _lambda{};
 		double _learning_rate{};
@@ -110,12 +110,12 @@ namespace TrainingCell
 		/// <summary>
 		/// Returns actual value of exploration probability
 		/// </summary>
-		[[nodiscard]] double get_exploratory_probability() const override;
+		[[nodiscard]] double get_exploration_probability() const override;
 
 		/// <summary>
 		/// Setter for the corresponding property
 		/// </summary>
-		void set_exploratory_probability(const double exploratory_probability);
+		void set_exploration_probability(const double exploration_probability);
 
 		/// <summary>
 		/// Returns actual value of parameter gamma (reward discount)

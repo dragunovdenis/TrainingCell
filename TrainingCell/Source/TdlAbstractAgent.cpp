@@ -77,6 +77,9 @@ namespace TrainingCell
 	const char* json_search_method_id = "SearchMethod";
 	const char* json_td_search_iterations_id = "TdSearchIterations";
 	const char* json_td_search_depth_id = "TdSearchDepth";
+	const char* json_td_search_exploration_prob_id = "TdSearchExplorationProb";
+	const char* json_td_search_exploration_depth_id = "TdSearchExplorationDepth";
+	const char* json_td_search_exploration_volume_id = "TdSearchExplorationVolume";
 	const char* json_state_type_id = "StateType";
 	const char* json_performance_evaluation_mode_id = "PerformanceEvaluationMode";
 
@@ -147,6 +150,15 @@ namespace TrainingCell
 		if (json.contains(json_td_search_depth_id))
 			_td_search_depth = json[json_td_search_depth_id].get<int>();
 
+		if (json.contains(json_td_search_exploration_prob_id))
+			_search_exploration_probability = json[json_td_search_exploration_prob_id].get<double>();
+
+		if (json.contains(json_td_search_exploration_depth_id))
+			_search_exploration_depth = json[json_td_search_exploration_depth_id].get<int>();
+
+		if (json.contains(json_td_search_exploration_volume_id))
+			_search_exploration_volume = json[json_td_search_exploration_volume_id].get<int>();
+
 		if (json.contains(json_performance_evaluation_mode_id))
 			_performance_evaluation_mode = json[json_performance_evaluation_mode_id].get<bool>();
 
@@ -168,6 +180,9 @@ namespace TrainingCell
 		json[json_search_method_id] = _search_method;
 		json[json_td_search_iterations_id] = _td_search_iterations;
 		json[json_td_search_depth_id] = _td_search_depth;
+		json[json_td_search_exploration_prob_id] = _search_exploration_probability;
+		json[json_td_search_exploration_volume_id] = _search_exploration_volume;
+		json[json_td_search_exploration_depth_id] = _search_exploration_depth;
 		json[json_state_type_id] = to_string(_state_type_id);
 		json[json_performance_evaluation_mode_id] = _performance_evaluation_mode;
 
@@ -187,6 +202,9 @@ namespace TrainingCell
 			_search_method == anotherAgent._search_method &&
 			_td_search_iterations == anotherAgent._td_search_iterations &&
 			_td_search_depth == anotherAgent._td_search_depth &&
+			_search_exploration_probability == anotherAgent._search_exploration_probability &&
+			_search_exploration_volume == anotherAgent._search_exploration_volume &&
+			_search_exploration_depth == anotherAgent._search_exploration_depth &&
 			_state_type_id == anotherAgent._state_type_id &&
 			_converter == anotherAgent._converter &&
 			_performance_evaluation_mode == anotherAgent._performance_evaluation_mode;
@@ -203,9 +221,12 @@ namespace TrainingCell
 
 	TdlAbstractAgent::TdlAbstractAgent(const std::vector<std::size_t>& hidden_layer_dimensions,
 	                                   const double exploration_epsilon, const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id,
-	                                   const std::string& name) : _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha)
+	                                   const double search_exploration_prob,
+	                                   const int search_exploration_depth, const int search_exploration_volume, const std::string& name) :
+									   _exploration_epsilon(exploration_epsilon), _lambda(lambda), _gamma(gamma), _alpha(alpha),
+									   _search_exploration_depth(search_exploration_depth), _search_exploration_volume(search_exploration_volume),
+									   _search_exploration_probability(search_exploration_prob)
 	{
-
 		set_name(name);
 		set_state_type_id(state_type_id);
 		initialize_net(augment_hidden_layer_dimensions(hidden_layer_dimensions));
@@ -256,7 +277,7 @@ namespace TrainingCell
 		_exploration_epsilon = epsilon;
 	}
 
-	double TdlAbstractAgent::get_exploratory_probability() const
+	double TdlAbstractAgent::get_exploration_probability() const
 	{
 		return _performance_evaluation_mode ? 0.0 : _exploration_epsilon;
 	}
@@ -349,6 +370,36 @@ namespace TrainingCell
 		_td_search_depth = depth;
 	}
 
+	int TdlAbstractAgent::get_search_exploration_depth() const
+	{
+		return _search_exploration_depth;
+	}
+
+	void TdlAbstractAgent::set_search_exploration_depth(const int depth)
+	{
+		_search_exploration_depth = depth;
+	}
+
+	int TdlAbstractAgent::get_search_exploration_volume() const
+	{
+		return _search_exploration_volume;
+	}
+
+	void TdlAbstractAgent::set_search_exploration_volume(const int volume)
+	{
+		_search_exploration_volume = volume;
+	}
+
+	double TdlAbstractAgent::get_search_exploration_probability() const
+	{
+		return _search_exploration_probability;
+	}
+
+	void TdlAbstractAgent::set_search_exploration_probability(const double probability)
+	{
+		_search_exploration_probability = probability;
+	}
+
 	StateTypeId TdlAbstractAgent::get_state_type_id() const
 	{
 		return _state_type_id;
@@ -409,9 +460,9 @@ namespace TrainingCell
 		result.set_training_mode(true, true);
 		result.set_training_mode(true, false);
 		result.set_train_depth(get_search_depth());
-		result.set_exploration_depth(1);
-		result.set_exploration_volume(5);
-		result.set_exploratory_probability(1.0);
+		result.set_exploration_depth(get_search_exploration_depth());
+		result.set_exploration_volume(get_search_exploration_volume());
+		result.set_exploration_probability(get_search_exploration_probability());
 
 		return result;
 	}

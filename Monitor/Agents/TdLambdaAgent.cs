@@ -16,7 +16,6 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Linq;
 using Monitor.Dll;
 
 namespace Monitor.Agents
@@ -341,6 +340,64 @@ namespace Monitor.Agents
         }
 
         /// <summary>
+        /// Number of first moves in each search episode in scope of which the exploration action can take place.
+        /// The other two parameters that, in total, determine whether the exploration action actually will be taken are:
+        /// <see cref="SearchExplorationVolume"/> and <see cref="SearchExplorationProbability"/>
+        /// </summary>
+        public int SearchExplorationDepth
+        {
+            get => DllWrapper.TdLambdaAgentGetSearchExplorationDepth(Ptr);
+
+            set
+            {
+                if (SearchExplorationDepth != value)
+                {
+                    if (!DllWrapper.TdLambdaAgentSetSearchExplorationDepth(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Number of moves with the highest reward values that will be taken into account
+        /// when picking an exploration move during the search training.
+        /// </summary>
+        public int SearchExplorationVolume
+        {
+            get => DllWrapper.TdLambdaAgentGetSearchExplorationVolume(Ptr);
+
+            set
+            {
+                if (SearchExplorationVolume != value)
+                {
+                    if (!DllWrapper.TdLambdaAgentSetSearchExplorationVolume(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Probability that exploration action is taken within the current
+        /// <see cref="SearchExplorationDepth"/> moves of a search training episode.
+        /// </summary>
+        public double SearchExplorationProbability
+        {
+            get => DllWrapper.TdLambdaAgentGetSearchExplorationProbability(Ptr);
+
+            set
+            {
+                if (!SearchExplorationProbability.Equals(value))
+                {
+                    if (!DllWrapper.TdLambdaAgentSetSearchExplorationProbability(Ptr, value))
+                        throw new Exception("Failed to set parameter");
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
         /// Scale factor for the value of internal reward function of the agent
         /// </summary>
         public double RewardFactor
@@ -415,6 +472,9 @@ namespace Monitor.Agents
                 SearchMode = SearchMode,
                 SearchIterations = SearchIterations,
                 SearchDepth = SearchDepth,
+                SearchExplorationDepth = SearchExplorationDepth,
+                SearchExplorationVolume = SearchExplorationVolume,
+                SearchExplorationProbability = SearchExplorationProbability,
                 RewardFactor = RewardFactor,
                 StateTypeId = StateTypeId,
                 PerformanceEvaluationMode = PerformanceEvaluationMode,
@@ -438,6 +498,9 @@ namespace Monitor.Agents
             SearchMode = parameters.SearchMode;
             SearchIterations = parameters.SearchIterations;
             SearchDepth = parameters.SearchDepth;
+            SearchExplorationDepth = parameters.SearchExplorationDepth;
+            SearchExplorationVolume = parameters.SearchExplorationVolume;
+            SearchExplorationProbability = parameters.SearchExplorationProbability;
             RewardFactor = parameters.RewardFactor;
             PerformanceEvaluationMode = parameters.PerformanceEvaluationMode;
 

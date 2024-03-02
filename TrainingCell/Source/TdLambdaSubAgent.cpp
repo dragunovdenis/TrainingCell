@@ -56,7 +56,7 @@ namespace TrainingCell
 
 	bool TdLambdaSubAgent::should_do_exploration(const ITdlSettingsReadOnly& settings) const
 	{
-		const auto explore_probability = settings.get_exploratory_probability();
+		const auto explore_probability = settings.get_exploration_probability();
 		return _move_counter < settings.get_exploration_depth() && settings.get_exploration_volume() > 1 &&
 			Explorer::should_explore(explore_probability);
 	}

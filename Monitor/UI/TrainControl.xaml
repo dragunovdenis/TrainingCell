@@ -52,8 +52,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                     <DataGrid ItemsSource="{Binding Agents}" Name="AgentPoolList" AutoGenerateColumns="False"
                               SelectionMode="Single" SelectionUnit="FullRow" SelectionChanged="AgentPoolList_OnSelectionChanged">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                            <DataGridTextColumn Header="Specialization" Binding="{Binding StateTypeId}" Width="100" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Specialization" Binding="{Binding StateTypeId}" Width="100" IsReadOnly="True"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </DockPanel>

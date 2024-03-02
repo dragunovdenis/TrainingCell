@@ -16,7 +16,6 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <concrt.h>
-
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/StateConverter.h"
 #include "../../DeepLearning/DeepLearning/Utilities.h"

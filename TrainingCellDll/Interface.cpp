@@ -150,7 +150,7 @@ double TdLambdaAgentGetEpsilon(const TrainingCell::TdLambdaAgent* agent_ptr)
 	if (!agent_ptr)
 		return std::numeric_limits<double>::quiet_NaN();
 
-	return agent_ptr->get_exploratory_probability();
+	return agent_ptr->get_exploration_probability();
 }
 
 bool TdLambdaAgentSetLambda(TrainingCell::TdLambdaAgent* agent_ptr, const double lambda)
@@ -366,6 +366,61 @@ int TdLambdaAgentGetSearchDepth(const TrainingCell::TdLambdaAgent* agent_ptr)
 		return -1;
 
 	return agent_ptr->get_search_depth();
+}
+
+int TdLambdaAgentGetSearchExplorationDepth(const TrainingCell::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return agent_ptr->get_search_exploration_depth();
+}
+
+bool TdLambdaAgentSetSearchExplorationDepth(TrainingCell::TdLambdaAgent* agent_ptr, const int depth)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_search_exploration_depth(depth);
+
+	return true;
+}
+
+int TdLambdaAgentGetSearchExplorationVolume(const TrainingCell::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return agent_ptr->get_search_exploration_volume();
+}
+
+bool TdLambdaAgentSetSearchExplorationVolume(TrainingCell::TdLambdaAgent* agent_ptr, const int volume)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_search_exploration_volume(volume);
+
+	return true;
+}
+
+double TdLambdaAgentGetSearchExplorationProbability(const TrainingCell::TdLambdaAgent* agent_ptr)
+{
+	if (!agent_ptr)
+		return -1;
+
+	return agent_ptr->get_search_exploration_probability();
+}
+
+bool TdLambdaAgentSetSearchExplorationProbability(
+	TrainingCell::TdLambdaAgent* agent_ptr, const double probability)
+{
+	if (!agent_ptr)
+		return false;
+
+	agent_ptr->set_search_exploration_probability(probability);
+
+	return true;
 }
 
 bool TdLambdaAgentGetScriptString(const TrainingCell::TdLambdaAgent* agent_ptr, char* buffer, int buffer_capacity)

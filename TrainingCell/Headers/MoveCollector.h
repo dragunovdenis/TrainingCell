@@ -27,7 +27,7 @@ namespace TrainingCell
 	/// </summary>
 	class MoveCollector
 	{
-		std::size_t _capacity{};
+		int _capacity{};
 		std::vector<MoveData> _collection{};
 
 	public:
@@ -35,7 +35,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		MoveCollector(std::size_t capacity);
+		MoveCollector(int capacity);
 
 		/// <summary>
 		/// Adds move consisting of the given data to the underlying collection
@@ -56,6 +56,11 @@ namespace TrainingCell
 		/// <summary>
 		/// Returns capacity of the collector.
 		/// </summary>
-		std::size_t capacity() const;
+		int get_capacity() const;
+
+		/// <summary>
+		/// Returns actual number of elements in the underlying collection.
+		/// </summary>
+		int get_elements_count() const;
 	};
 }

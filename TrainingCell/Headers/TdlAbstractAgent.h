@@ -25,7 +25,7 @@
 
 namespace TrainingCellTest
 {
-	class TdlambdaAgentTrainingTest;
+	class TdlambdaAgentRegressionTest;
 }
 
 namespace TrainingCell
@@ -59,7 +59,7 @@ namespace TrainingCell
 	/// </summary>
 	class TdlAbstractAgent : public Agent, ITdlSettingsReadOnly, NetWithConverterAbstract
 	{
-		friend class TrainingCellTest::TdlambdaAgentTrainingTest; // for diagnostics purposes
+		friend class TrainingCellTest::TdlambdaAgentRegressionTest; // for diagnostics purposes
 		StateConverter _converter{ StateConversionType::CheckersStandard }; // default value to preserve backward compatibility
 		StateTypeId _state_type_id{ StateTypeId::CHECKERS }; // default value to preserve backward compatibility
 
@@ -158,6 +158,21 @@ namespace TrainingCell
 		int _td_search_depth{ 1000 };
 
 		/// <summary>
+		/// Exploration depth used in search mode.
+		/// </summary>
+		int _search_exploration_depth{ 10000 };
+
+		/// <summary>
+		/// Exploration volume used in search mode.
+		/// </summary>
+		int _search_exploration_volume{ 10000 };
+
+		/// <summary>
+		/// Exploration probability used in search mode.
+		/// </summary>
+		double _search_exploration_probability{ 0.05 };
+
+		/// <summary>
 		/// Initializes neural net according to the given dimension array
 		/// </summary>
 		void initialize_net(const std::vector<std::size_t>& layer_dimensions);
@@ -196,7 +211,8 @@ namespace TrainingCell
 		MSGPACK_DEFINE(MSGPACK_BASE(Agent), _net, _exploration_epsilon,
 			_training_sub_mode, _lambda, _gamma, _alpha, _reward_factor,
 			_search_method, _td_search_iterations, _td_search_depth, _converter,
-			_state_type_id, _performance_evaluation_mode)
+			_state_type_id, _performance_evaluation_mode, _search_exploration_depth,
+			_search_exploration_probability, _search_exploration_volume)
 
 		/// <summary>
 		/// Returns script representation of all the hyper-parameters of the agent
@@ -227,8 +243,14 @@ namespace TrainingCell
 		/// <param name="alpha">Learning rate</param>
 		/// <param name="state_type_id">Type ID of the state the agent will be "compatible" with.</param>
 		/// <param name="name">Name of the agent</param>
+		/// <param name="search_exploration_prob">Probability of exploration moves during the search phase.</param>
+		/// <param name="search_exploration_depth">Depth of the exploration (in moves) during the search phase.</param>
+		/// <param name="search_exploration_volume">Volume (how many moves with the best score take part in exploration act)
+		/// of the exploration during the search phase</param>
 		TdlAbstractAgent(const std::vector<std::size_t>& hidden_layer_dimensions, const double exploration_epsilon,
-		                 const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id, const std::string& name);
+		                 const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id,
+						 const double search_exploration_prob, const int search_exploration_depth,
+					     const int search_exploration_volume, const std::string& name);
 
 		/// <summary>
 		/// Returns index of a move from the given collection of available moves
@@ -260,7 +282,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Returns actual value of exploration probability
 		/// </summary>
-		[[nodiscard]] double get_exploratory_probability() const override;
+		[[nodiscard]] double get_exploration_probability() const override;
 
 		/// <summary>
 		/// Updates parameter gamma with the given value;
@@ -375,6 +397,36 @@ namespace TrainingCell
 		/// Sets number of first moves in each search episode during which the "search" neural net should be updated
 		/// </summary>
 		void set_search_depth(const int depth);
+
+		/// <summary>
+		/// Returns value of exploration depth used in search mode.
+		/// </summary>
+		[[nodiscard]] int get_search_exploration_depth() const;
+
+		/// <summary>
+		/// Sets value of exploration depth used in search mode.
+		/// </summary>
+		void set_search_exploration_depth(const int depth);
+
+		/// <summary>
+		/// Returns value of exploration volume used in search mode.
+		/// </summary>
+		[[nodiscard]] int get_search_exploration_volume() const;
+
+		/// <summary>
+		/// Sets value of exploration volume used in search mode.
+		/// </summary>
+		void set_search_exploration_volume(const int volume);
+
+		/// <summary>
+		/// Returns value of exploration probability used in search mode.
+		/// </summary>
+		[[nodiscard]] double get_search_exploration_probability() const;
+
+		/// <summary>
+		/// Sets value of exploration probability used in search mode.
+		/// </summary>
+		void set_search_exploration_probability(const double probability);
 
 		/// <summary>
 		/// See documentation of the base class.

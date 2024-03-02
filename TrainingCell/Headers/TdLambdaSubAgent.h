@@ -60,7 +60,7 @@ namespace TrainingCell
 		/// <summary>
 		/// A flag that should be set depending on the "color of pieces" the agent is playing
 		/// </summary>
-		const bool _is_white{false};
+		bool _is_white{false};
 
 		/// <summary>
 		/// A flag indicating that we are about to start new game

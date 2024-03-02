@@ -306,6 +306,45 @@ namespace Monitor.Dll
         /// </summary>
         [DllImport(dllName: DllName)]
         [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool TdLambdaAgentSetSearchExplorationDepth(IntPtr agentPtr, int depth);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        public static extern int TdLambdaAgentGetSearchExplorationDepth(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool TdLambdaAgentSetSearchExplorationVolume(IntPtr agentPtr, int volume);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        public static extern int TdLambdaAgentGetSearchExplorationVolume(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool TdLambdaAgentSetSearchExplorationProbability(IntPtr agentPtr, double probability);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        public static extern double TdLambdaAgentGetSearchExplorationProbability(IntPtr agentPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool TdLambdaAgentGetNetDimensions(IntPtr agentPtr, AcquireArrayCallBack catchArray);
 
         /// <summary>

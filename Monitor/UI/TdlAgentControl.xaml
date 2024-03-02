@@ -52,7 +52,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <TextBox Text="Search Mode"/>
                         <TextBox Text="Performance Evaluation Mode"/>
                         <TextBox Text="Search Iterations"/>
-                        <TextBox Text="Search Depth"/>
+                        <TextBox Text="Search Training Depth"/>
+                        <TextBox Text="Search Exploration Depth"/>
+                        <TextBox Text="Search Exploration Volume"/>
+                        <TextBox Text="Search Exploration Probability"/>
                         <TextBox Text="Specialization"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Grid.Row="0">
@@ -79,6 +82,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
                         <CheckBox IsChecked="{Binding PerformanceEvaluationMode, Mode=TwoWay}"/>
                         <TextBox Text="{Binding SearchIterations, Mode=TwoWay}"/>
                         <TextBox Text="{Binding SearchDepth, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding SearchExplorationDepth, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding SearchExplorationVolume, Mode=TwoWay}"/>
+                        <TextBox Text="{Binding SearchExplorationProbability, Mode=TwoWay}"/>
                         <ComboBox ItemsSource="{Binding StateIdOptions}" SelectedItem="{Binding StateTypeId}"
                                   IsEnabled="{Binding EditMode, Converter = {StaticResource InvertBoolConverter}}"/>
                     </StackPanel>

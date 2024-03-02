@@ -72,7 +72,7 @@ namespace TrainingCellTest
 		{
 			//Arrange
 			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9,
-				0.11, StateTypeId::CHECKERS, "some_name");
+				0.11, StateTypeId::CHECKERS, 0.73, 11, 13, "some_name");
 			//set some non-default values
 			agent.set_reward_factor(0.375);
 
@@ -95,7 +95,7 @@ namespace TrainingCellTest
 		{
 			//Arrange
 			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9,
-				0.11, StateTypeId::CHESS, "Some Name");
+				0.11, StateTypeId::CHESS, 0.73, 11, 13,"Some Name");
 			//set some non-default values
 			agent.set_reward_factor(0.375);
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);

@@ -74,8 +74,14 @@ namespace TrainingCell
 		/// <param name="alpha">Learning rate</param>
 		/// <param name="state_type_id">Type ID of the state the agent will be "compatible" with.</param>
 		/// <param name="name">Name of the agent</param>
+		/// <param name="search_exploration_prob">Probability of exploration moves during the search phase.</param>
+		/// <param name="search_exploration_depth">Depth of the exploration (in moves) during the search phase.</param>
+		/// <param name="search_exploration_volume">Volume (how many moves with the best score take part in exploration act)
+		/// of the exploration during the search phase</param>
 		TdLambdaAgent(const std::vector<std::size_t>& hidden_layer_dimensions, const double exploration_epsilon,
-			const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id, const std::string& name = "AutoAgent");
+			const double lambda, const double gamma, const double alpha, const StateTypeId state_type_id,
+			const double search_exploration_prob = 1.0, const int search_exploration_depth = 1, const int search_exploration_volume = 5,
+			const std::string& name = "AutoAgent");
 
 		/// <summary>
 		/// Returns type ID

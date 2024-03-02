@@ -24,7 +24,7 @@ namespace TrainingCell
 	/// </summary>
 	TdlSettings::TdlSettings(const ITdlSettingsReadOnly& settings)
 	{
-		_exploratory_probability = settings.get_exploratory_probability();
+		_exploration_probability = settings.get_exploration_probability();
 		_discount = settings.get_discount();
 		_lambda = settings.get_lambda();
 		_learning_rate = settings.get_learning_rate();
@@ -36,14 +36,14 @@ namespace TrainingCell
 		_exploration_volume = settings.get_exploration_volume();
 	}
 
-	double TdlSettings::get_exploratory_probability() const
+	double TdlSettings::get_exploration_probability() const
 	{
-		return _exploratory_probability;
+		return _exploration_probability;
 	}
 
-	void TdlSettings::set_exploratory_probability(const double exploratory_probability)
+	void TdlSettings::set_exploration_probability(const double exploration_probability)
 	{
-		_exploratory_probability = exploratory_probability;
+		_exploration_probability = exploration_probability;
 	}
 
 	double TdlSettings::get_discount() const
@@ -131,7 +131,7 @@ namespace TrainingCell
 
 	bool TdlSettings::operator==(const TdlSettings& otherSettings) const
 	{
-		return _exploratory_probability == otherSettings._exploratory_probability &&
+		return _exploration_probability == otherSettings._exploration_probability &&
 			   _discount == otherSettings._discount &&
 			   _lambda == otherSettings._lambda &&
 			   _learning_rate == otherSettings._learning_rate &&

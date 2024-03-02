@@ -39,5 +39,15 @@ namespace TrainingCell
 		/// After-sate resulted from the move (in a form of tensor, see 'State::to_tensor()')
 		/// </summary>
 		DeepLearning::CpuDC::tensor_t after_state{};
+
+		/// <summary>
+		/// Equality operator.
+		/// </summary>
+		bool operator ==(const MoveData& anotherData) const;
+
+		/// <summary>
+		/// Inequality operator.
+		/// </summary>
+		bool operator !=(const MoveData& anotherData) const;
 	};
 }

@@ -66,9 +66,27 @@ namespace Monitor.Agents
         int SearchIterations { get; }
 
         /// <summary>
-        /// Number of first moves in each search iteration that result in update of the search neural network
+        /// Number of first moves in each search iteration (episode)
+        /// that result in an update of the search neural network.
         /// </summary>
         int SearchDepth { get; }
+        
+        /// <summary>
+        /// Number of first moves in each search iteration (episode)
+        /// in scope of which an exploration action can be taken.
+        /// </summary>
+        int SearchExplorationDepth { get; }
+
+        /// <summary>
+        /// Number moves with the highest reward values that are taken into account when
+        /// an exploration move is picked (within the current <see cref="SearchExplorationDepth"/>).
+        /// </summary>
+        int SearchExplorationVolume { get; }
+
+        /// <summary>
+        /// Probability of an exploration move be taken within the current <see cref="SearchExplorationDepth"/>.
+        /// </summary>
+        double SearchExplorationProbability { get; }
 
         /// <summary>
         /// Scale factor for the value of internal reward function 
@@ -132,9 +150,27 @@ namespace Monitor.Agents
         public int SearchIterations { get; set; }
 
         /// <summary>
-        /// Number of first moves in each search iteration that result in update of the search neural network
+        /// Number of first moves in each search iteration (episode)
+        /// that result in an update of the search neural network.
         /// </summary>
         public int SearchDepth { get; set; }
+
+        /// <summary>
+        /// Number of first moves in each search iteration (episode)
+        /// in scope of which an exploration action can be taken.
+        /// </summary>
+        public int SearchExplorationDepth { get; set; }
+
+        /// <summary>
+        /// Number moves with the highest reward values that are taken into account when
+        /// an exploration move is picked (within the current <see cref="SearchExplorationDepth"/>).
+        /// </summary>
+        public int SearchExplorationVolume { get; set; }
+
+        /// <summary>
+        /// Probability of an exploration move be taken within the current <see cref="SearchExplorationDepth"/>.
+        /// </summary>
+        public double SearchExplorationProbability { get; set; }
 
         /// <summary>
         /// Scale factor for the value of internal reward function 
@@ -173,6 +209,9 @@ namespace Monitor.Agents
             SearchMode = source.SearchMode;
             SearchIterations = source.SearchIterations;
             SearchDepth = source.SearchDepth;
+            SearchExplorationDepth = source.SearchExplorationDepth;
+            SearchExplorationVolume = source.SearchExplorationVolume;
+            SearchExplorationProbability = source.SearchExplorationProbability;
             RewardFactor = source.RewardFactor;
             StateTypeId = source.StateTypeId;
             PerformanceEvaluationMode = source.PerformanceEvaluationMode;

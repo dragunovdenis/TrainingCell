@@ -1,4 +1,4 @@
-//Copyright (c) 2023 Denys Dragunov, dragunovdenis@gmail.com
+//Copyright (c) 2024 Denys Dragunov, dragunovdenis@gmail.com
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
 //in the Software without restriction, including without limitation the rights
@@ -15,41 +15,19 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Headers/MoveCollector.h"
+#include "../Headers/MoveData.h"
 
 namespace TrainingCell
 {
-	MoveCollector::MoveCollector(int capacity) : _capacity(capacity)
+	bool MoveData::operator==(const MoveData& anotherData) const
 	{
-		_collection.reserve(_capacity);
+		return move_id == anotherData.move_id &&
+			value == anotherData.value &&
+			after_state == anotherData.after_state;
 	}
 
-	void MoveCollector::add(const int move_id, const double move_value, const DeepLearning::Tensor& afterstate)
+	bool MoveData::operator!=(const MoveData& anotherData) const
 	{
-		if (_collection.size() < _capacity)
-			_collection.emplace_back(move_id, move_value, afterstate);
-		else
-		{
-			const auto smallest_element = std::ranges::min_element(_collection,
-				[](const auto& a, const auto& b) { return a.value < b.value; });
-
-			if (smallest_element->value < move_value)
-				*smallest_element = { move_id, move_value, afterstate };
-		}
-	}
-
-	MoveData& MoveCollector::get(const int item_id)
-	{
-		return _collection[item_id];
-	}
-
-	int MoveCollector::get_capacity() const
-	{
-		return _capacity;
-	}
-
-	int MoveCollector::get_elements_count() const
-	{
-		return static_cast<int>(_collection.size());
+		return !(*this == anotherData);
 	}
 }
