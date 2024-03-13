@@ -48,12 +48,17 @@ namespace TrainingCellTest
 			Assert::IsTrue(agent1 == agent1_trained, L"1st agent does not coincide with the reference");
 		}
 
-		TEST_METHOD(TdLambdaAgentAutoTrainingRegression)
+		/// <summary>
+		/// General method to run auto-training regression tests.
+		/// </summary>
+		static void td_lambda_auto_agent_regression_regression(const std::filesystem::path& input_agent_file_name,
+			const std::filesystem::path& reference_agent_file_name,
+			const std::function<void(TdLambdaAgent& agent)>& setup_agent,
+			const bool update_reference = false)
 		{
 			//Arrange
-			auto agent = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0.tda");
-			agent.set_exploration_probability(0.1);
-			const auto agent_trained = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0_auto_trained.tda");
+			auto agent = TdLambdaAgent::load_from_file(input_agent_file_name);
+			setup_agent(agent);
 
 			//Act
 			const Board board(&agent, &agent);
@@ -62,13 +67,39 @@ namespace TrainingCellTest
 			TdLambdaAgent::reset_explorer();
 
 			//Assert
-			Assert::IsTrue(agent == agent_trained, L"Agent does not coincide with the reference");
+			if (update_reference)
+			{
+				agent.save_to_file("../../TrainingCellTest" / reference_agent_file_name);
+			}
+			else
+			{
+				const auto agent_trained = TdLambdaAgent::load_from_file(reference_agent_file_name);
+				Assert::IsTrue(agent == agent_trained, L"Agent does not coincide with the reference");
+			}
+		}
+
+		TEST_METHOD(TdLambdaAgentAutoTrainingRegression)
+		{
+			td_lambda_auto_agent_regression_regression("TestData/TdlTrainingRegression/agent0.tda",
+				"TestData/TdlTrainingRegression/agent0_auto_trained.tda",
+				[](auto& agent) { agent.set_exploration_probability(0.1); });
+		}
+
+		TEST_METHOD(TdLambdaAgentAutoTrainingZeroLambdaRegression)
+		{
+			td_lambda_auto_agent_regression_regression("TestData/TdlTrainingRegression/agent0.tda",
+				"TestData/TdlTrainingRegression/agent0_auto_trained_zero_lambda.tda",
+				[](auto& agent)
+				{
+					agent.set_exploration_probability(0.1);
+					agent.set_lambda(0);
+				});
 		}
 
 		/// <summary>
 		/// General method to run search regression tests.
 		/// </summary>
-		static void tdlambda_agent_search_regression_general(const std::filesystem::path& input_agent_file_name,
+		static void td_lambda_agent_search_regression_general(const std::filesystem::path& input_agent_file_name,
 		                                                     const std::filesystem::path& reference_net_file_name,
 															 const double exploration, const int volume, const int depth)
 		{
@@ -100,12 +131,12 @@ namespace TrainingCellTest
 
 		TEST_METHOD(TdLambdaAgentSearchRegression)
 		{
-			tdlambda_agent_search_regression_general("agent0.tda", "search_net.dat", 0.1, 10000, 10000);
+			td_lambda_agent_search_regression_general("agent0.tda", "search_net.dat", 0.1, 10000, 10000);
 		}
 
 		TEST_METHOD(TdLambdaAgentVolumeSearchRegression)
 		{
-			tdlambda_agent_search_regression_general("agent0.tda", "volume_search_net.dat", 1.0, 5, 3);
+			td_lambda_agent_search_regression_general("agent0.tda", "volume_search_net.dat", 1.0, 5, 3);
 		}
 
 		TEST_METHOD(TdLambdaAgentSearchSettingsTest)
