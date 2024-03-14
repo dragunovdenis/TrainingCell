@@ -83,11 +83,6 @@ namespace TrainingCell
 		thread_local static DeepLearning::Tensor _tensor_shared;
 
 		/// <summary>
-		/// Auxiliary data structure used when computing gradient of the neural net (serves optimization purposes)
-		/// </summary>
-		thread_local static std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> _gradient_cache;
-
-		/// <summary>
 		/// Previous state
 		/// </summary>
 		std::vector<int> _prev_state{};

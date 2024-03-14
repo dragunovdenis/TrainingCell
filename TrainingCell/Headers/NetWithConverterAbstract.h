@@ -48,7 +48,8 @@ namespace TrainingCell
 		/// </summary>
 		void calc_gradient_and_value(const DeepLearning::CpuDC::tensor_t& state, const DeepLearning::CpuDC::tensor_t& target_value,
 			const DeepLearning::CostFunctionId& cost_func_id, std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& out_gradient,
-			DeepLearning::CpuDC::tensor_t& out_value, DeepLearning::Net<DeepLearning::CpuDC>::Context& context) const override;
+			DeepLearning::CpuDC::tensor_t& out_value, const double gradient_scale_factor,
+			DeepLearning::Net<DeepLearning::CpuDC>::Context& context) const override;
 
 		/// <summary>
 		/// See summary of the base class.
@@ -71,6 +72,11 @@ namespace TrainingCell
 		/// Returns size of the input neural net layer deduced from the given size of state and the given converter.
 		/// </summary>
 		static std::size_t calc_input_net_size(const std::size_t state_size, const StateConverter& converter);
+
+		/// <summary>
+		/// See summary of the base class.
+		/// </summary>
+		void allocate(std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient, const bool assign_zero) const override;
 	};
 
 }

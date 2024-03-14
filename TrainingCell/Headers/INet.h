@@ -36,7 +36,8 @@ namespace TrainingCell
 		/// </summary>
 		virtual void calc_gradient_and_value(const DeepLearning::CpuDC::tensor_t& state, const DeepLearning::CpuDC::tensor_t& target_value,
 			const DeepLearning::CostFunctionId& cost_func_id, std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& out_gradient,
-			DeepLearning::CpuDC::tensor_t& out_value, DeepLearning::Net<DeepLearning::CpuDC>::Context& context) const = 0;
+			DeepLearning::CpuDC::tensor_t& out_value, const double gradient_scale_factor,
+			DeepLearning::Net<DeepLearning::CpuDC>::Context& context) const = 0;
 
 		/// <summary>
 		/// Converts given state into its tensor representation (accessible for the caller through the corresponding reference parameter)
@@ -48,11 +49,17 @@ namespace TrainingCell
 		/// <summary>
 		/// Updates weights of the neural net according to the given gradient, learning rate and regularization parameters.
 		/// </summary>
-		virtual void update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient, const double learning_rate, const double& lambda) = 0;
+		virtual void update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient,
+			const double learning_rate, const double& lambda) = 0;
 
 		/// <summary>
 		/// Returns "true" if the net is "compatible" with a state of the given size.
 		/// </summary>
 		virtual bool validate_net_input_size(const std::size_t input_size) const = 0;
+
+		/// <summary>
+		/// Method to allocate gradient container.
+		/// </summary>
+		virtual void allocate(std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient, const bool assign_zero) const = 0;
 	};
 }

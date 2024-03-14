@@ -25,7 +25,6 @@ namespace TrainingCell
 	thread_local DeepLearning::RandomGenerator TdLambdaSubAgent::Explorer::_generator{};
 	thread_local DeepLearning::Net<DeepLearning::CpuDC>::Context TdLambdaSubAgent::_context{};
 	thread_local DeepLearning::Tensor TdLambdaSubAgent::_tensor_shared{};
-	thread_local std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>> TdLambdaSubAgent::_gradient_cache{};
 
 	bool TdLambdaSubAgent::Explorer::should_explore(const double exploration_probability)
 	{
@@ -124,19 +123,8 @@ namespace TrainingCell
 	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, INet& net)
 	{
 		const auto lambda_times_gamma = settings.get_lambda() * settings.get_discount();
-		const auto long_evaluation = lambda_times_gamma > 0 && !_z.empty();
-
-		auto& gradient_alias = long_evaluation ? _gradient_cache : _z;
-
-		net.calc_gradient_and_value(_prev_after_state,
-			_tensor_shared, DeepLearning::CostFunctionId::LINEAR,
-			gradient_alias, _tensor_shared, _context);
-
-		if (long_evaluation)
-		{
-			for (auto layer_id = 0ull; layer_id < gradient_alias.size(); ++layer_id)
-				_z[layer_id].scale_and_add(lambda_times_gamma, gradient_alias[layer_id]);
-		}
+		net.calc_gradient_and_value(_prev_after_state, _tensor_shared, DeepLearning::CostFunctionId::LINEAR,
+			_z, _tensor_shared, lambda_times_gamma, _context);
 
 		return _tensor_shared(0, 0, 0);
 	}
@@ -145,7 +133,6 @@ namespace TrainingCell
 	{
 		_new_game = true;
 		_move_counter = 0;
-		_z.clear();
 	}
 
 	TdLambdaSubAgent::TdLambdaSubAgent(const bool is_white) : _is_white(is_white)
@@ -172,6 +159,7 @@ namespace TrainingCell
 			_prev_after_state = std::move(move_data.after_state);
 			_prev_state = state.evaluate();
 			_new_game = false;
+			net.allocate(_z, /*assign zero*/ true);
 			return move_data.move_id;
 		}
 
