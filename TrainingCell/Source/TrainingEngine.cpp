@@ -17,8 +17,8 @@
 
 #include "../Headers/TrainingEngine.h"
 #include "../Headers/RandomAgent.h"
-#include "../../../DeepLearning/DeepLearning/Utilities.h"
-#include "../../../DeepLearning/DeepLearning/StopWatch.h"
+#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "../../DeepLearning/DeepLearning/StopWatch.h"
 #include "../Headers/Board.h"
 #include "../Headers/StateTypeController.h"
 #include <numeric>
@@ -96,24 +96,25 @@ namespace TrainingCell
 			*agent_pointers[outlier_agent_id] = TdLambdaAgent(*agent_pointers[best_agent_id]);
 	}
 
-	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(const TdLambdaAgent& agent, const int training_episodes, const int episodes_to_play,
+	TrainingEngine::PerformanceRec TrainingEngine::evaluate_performance(TdLambdaAgent& agent, const int training_episodes, const int episodes_to_play,
 		const int round_id, const double draw_percentage)
 	{
-		auto agent_copy = agent;
-		agent_copy.set_performance_evaluation_mode(true);
+		agent.set_performance_evaluation_mode(true);
 
 		const auto factor = 1.0 / episodes_to_play;
 		RandomAgent random_agent{};
 
-		Board board(&agent_copy, &random_agent);
-		const auto stats0 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent_copy.get_state_type_id()), _max_moves_without_capture);
+		Board board(&agent, &random_agent);
+		const auto stats0 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent.get_state_type_id()), _max_moves_without_capture);
 		const auto white_wins = stats0.whites_win_count() * factor;
 		const auto white_losses = stats0.blacks_win_count() * factor;
 
 		board.swap_agents();
-		const auto stats1 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent_copy.get_state_type_id()), _max_moves_without_capture);
+		const auto stats1 = board.play(episodes_to_play, *StateTypeController::get_start_seed(agent.get_state_type_id()), _max_moves_without_capture);
 		const auto black_wins = stats1.blacks_win_count() * factor;
 		const auto black_losses = stats1.whites_win_count() * factor;
+
+		agent.set_performance_evaluation_mode(false);
 
 		return PerformanceRec{ round_id, white_wins, white_losses, black_wins,
 			black_losses, draw_percentage, training_episodes, episodes_to_play };

@@ -68,21 +68,30 @@ namespace TrainingCellTest
 			Assert::IsTrue(pack_from_stream.agent().equal(agent), L"agents are not equal");
 		}
 
+		/// <summary>
+		/// Returns instance of an agent assigned in a "standard" way.
+		/// </summary>
+		static TdLambdaAgent create_standard_agent()
+		{
+			TdLambdaAgent result({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9,
+				0.11, StateTypeId::CHECKERS, 0.73, 11, 13, "some_name");
+			//set some non-default values
+			result.set_reward_factor(0.375);
+
+			CheckersTestUtils::play(15, result);
+
+			//Set some none-trivial search mode after iterations to save time
+			result.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
+			result.set_td_search_iterations(1234);
+			result.set_search_depth(321);
+			result.set_performance_evaluation_mode(true);
+
+			return result;
+		}
 		TEST_METHOD(TdLambdaAgentSerialization)
 		{
 			//Arrange
-			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9,
-				0.11, StateTypeId::CHECKERS, 0.73, 11, 13, "some_name");
-			//set some non-default values
-			agent.set_reward_factor(0.375);
-
-			CheckersTestUtils::play(15, agent);
-
-			//Set some none-trivial search mode after iterations to save time
-			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
-			agent.set_td_search_iterations(1234);
-			agent.set_search_depth(321);
-			agent.set_performance_evaluation_mode(true);
+			const auto agent = create_standard_agent();
 
 			//Act
 			const auto agent_from_stream = DeepLearning::MsgPack::unpack<TdLambdaAgent>(DeepLearning::MsgPack::pack(agent));
@@ -94,14 +103,7 @@ namespace TrainingCellTest
 		TEST_METHOD(TdLambdaAgentScriptGeneration)
 		{
 			//Arrange
-			TdLambdaAgent agent({ 64, 32, 16, 8 }, 0.05, 0.1, 0.9,
-				0.11, StateTypeId::CHESS, 0.73, 11, 13,"Some Name");
-			//set some non-default values
-			agent.set_reward_factor(0.375);
-			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
-			agent.set_td_search_iterations(1234);
-			agent.set_search_depth(321);
-			agent.set_performance_evaluation_mode(true);
+			const auto agent = create_standard_agent();
 
 			//Act
 			const auto script = agent.to_script();

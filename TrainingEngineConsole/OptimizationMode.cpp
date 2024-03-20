@@ -23,9 +23,9 @@
 #include "ConsoleUtils.h"
 #include "TrainingState.h"
 #include "Headers/TrainingEngine.h"
-#include "../../DeepLearning/DeepLearning/Math/Optimization/NelderMeadOptimizer.h"
-#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../../DeepLearning/DeepLearning/StopWatch.h"
+#include "../DeepLearning/DeepLearning/Math/Optimization/NelderMeadOptimizer.h"
+#include "../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "../DeepLearning/DeepLearning/StopWatch.h"
 
 using namespace TrainingCell;
 
@@ -81,17 +81,17 @@ namespace Training::Modes
 		/// <summary>
 		///	A point
 		/// </summary>
-		std::vector<double> point;
+		std::vector<DeepLearning::Real> point;
 
 		/// <summary>
 		///	Upper boundary for the parameters
 		/// </summary>
-		std::vector<double> upper_bound;
+		std::vector<DeepLearning::Real> upper_bound;
 
 		/// <summary>
 		/// Lower boundary on the parameters
 		/// </summary>
-		std::vector<double> lower_bound;
+		std::vector<DeepLearning::Real> lower_bound;
 	};
 
 	/// <summary>
@@ -139,7 +139,7 @@ namespace Training::Modes
 	/// <summary>
 	/// Updates values of the corresponding parameters in the given training state
 	/// </summary>
-	static void assign_params(const std::vector<double>& parameter_values, const ParameterFlags& args, TrainingState& state)
+	static void assign_params(const std::vector<DeepLearning::Real>& parameter_values, const ParameterFlags& args, TrainingState& state)
 	{
 		auto current_param_id = 0;
 
@@ -168,7 +168,7 @@ namespace Training::Modes
 	/// Writes values of parameters that are present in the given collection,
 	/// supplemented with the values of parameters taken from the given agent, to the given stream
 	/// </summary>
-	static void dump_parameters( std::ostream& stream, const std::vector<double>& parameter_values, const ParameterFlags& args,
+	static void dump_parameters( std::ostream& stream, const std::vector<DeepLearning::Real>& parameter_values, const ParameterFlags& args,
 		const TrainingCell::TdLambdaAgent& sample_agent)
 	{
 		auto current_param_id = 0;

@@ -447,6 +447,11 @@ namespace TrainingCell
 		/// Resets functionality that ensures randomness of the exploration component of training.
 		/// </summary>
 		static void reset_explorer(const unsigned int seed = std::random_device{}());
+
+		/// <summary>
+		/// Frees auxiliary memory used during training, allowing to decrease memory usage of the agent by about 66%. 
+		/// </summary>
+		void free_aux_mem();
 	};
 }
 

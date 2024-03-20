@@ -117,7 +117,7 @@ namespace TrainingCell
 	{
 		const auto afterstate_std = state.evaluate(move_id);
 		net.evaluate(afterstate_std, afterstate, comp_context);
-		return comp_context.get_out()(0, 0, 0);
+		return comp_context.get_out()[0];
 	}
 
 	double TdLambdaSubAgent::update_z_and_evaluate_prev_after_state(const ITdlSettingsReadOnly& settings, INet& net)
@@ -126,7 +126,7 @@ namespace TrainingCell
 		net.calc_gradient_and_value(_prev_after_state, _tensor_shared, DeepLearning::CostFunctionId::LINEAR,
 			_z, _tensor_shared, lambda_times_gamma, _context);
 
-		return _tensor_shared(0, 0, 0);
+		return _tensor_shared[0];
 	}
 
 	void TdLambdaSubAgent::reset()
@@ -210,5 +210,12 @@ namespace TrainingCell
 	void TdLambdaSubAgent::reset_explorer(const unsigned seed)
 	{
 		Explorer::reset(seed);
+	}
+
+	void TdLambdaSubAgent::free_mem()
+	{
+		_z.clear();
+		_prev_after_state = DeepLearning::CpuDC::tensor_t();
+		reset();
 	}
 }

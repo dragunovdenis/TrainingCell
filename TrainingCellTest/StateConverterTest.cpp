@@ -18,7 +18,7 @@
 #include <concrt.h>
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/StateConverter.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "../DeepLearning/DeepLearning/Utilities.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
 #include "../TrainingCell/Headers/Chess/ChessMove.h"
 
@@ -107,7 +107,7 @@ namespace TrainingCellTest
 			// Assert
 			Assert::AreEqual(converter.get_expansion_factor(), 1,
 				L"Unexpected expansion factor for the given conversion type.");
-			const auto input_double = std::vector<double>(input.begin(), input.end());
+			const auto input_double = std::vector<DeepLearning::Real>(input.begin(), input.end());
 			Assert::IsTrue(reference_out.to_stdvector() == input_double, L"Unexpected result of conversion.");
 		}
 

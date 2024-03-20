@@ -111,7 +111,7 @@ namespace TrainingCell
 		/// winning percentage when the agent played as a "white" player and the second one represents winning percentage when
 		/// the agent played as a "black" player
 		/// </summary>
-		static PerformanceRec evaluate_performance(const TdLambdaAgent& agent, const int training_episodes, const int episodes_to_play,
+		static PerformanceRec evaluate_performance(TdLambdaAgent& agent, const int training_episodes, const int episodes_to_play,
 			const int round_id, const double draw_percentage);
 
 		/// <summary>

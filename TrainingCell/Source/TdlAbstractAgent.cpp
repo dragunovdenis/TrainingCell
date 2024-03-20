@@ -420,6 +420,12 @@ namespace TrainingCell
 		TdLambdaSubAgent::reset_explorer(seed);
 	}
 
+	void TdlAbstractAgent::free_aux_mem()
+	{
+		_sub_agents[false].free_mem();
+		_sub_agents[true].free_mem();
+	}
+
 	void TdlAbstractAgent::set_lambda(const double lambda)
 	{
 		_lambda = lambda;

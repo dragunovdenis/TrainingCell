@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "CppUnitTest.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "../DeepLearning/DeepLearning/Utilities.h"
 #include "../TrainingCell/Headers/MoveCollector.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

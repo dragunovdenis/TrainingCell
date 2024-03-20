@@ -21,7 +21,7 @@
 #include "ConsoleUtils.h"
 #include "TrainingState.h"
 #include "Headers/TrainingEngine.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "../DeepLearning/DeepLearning/Utilities.h"
 #include "Headers/TdlEnsembleAgent.h"
 
 using namespace TrainingCell;
@@ -72,6 +72,21 @@ namespace Training::Modes
 		}
 	}
 
+	/// <summary>
+	/// Prints current memory usage related data.
+	/// </summary>
+	static void report_memory_usage()
+	{
+		constexpr double bytes_in_megabyte = 1 << 20;
+		ConsoleUtils::print_to_console("Current memory usage (Mb): " +
+			std::to_string(ConsoleUtils::get_phys_mem_usage() / bytes_in_megabyte));
+
+		ConsoleUtils::print_to_console("Memory occupied by alive `BasicCollection` instances (Mb): " +
+			std::to_string(DeepLearning::BasicCollection::get_total_allocated_memory()/bytes_in_megabyte));
+		ConsoleUtils::print_to_console("Number of alive `BasicCollection` instances: " +
+			std::to_string(DeepLearning::BasicCollection::get_total_instances_count()));
+	}
+
 	void run_training(int argc, char** argv)
 	{
 		const ArgumentsTraining args(argc, argv);
@@ -111,6 +126,8 @@ namespace Training::Modes
 		TrainingEngine engine(agent_pointers);
 		auto round_time_sum = 0ll; // to calculate average round time
 		std::queue<long long> round_time_queue;
+
+		report_memory_usage();
 
 		const auto max_round_id = static_cast<int>(args.get_num_rounds());
 
@@ -169,8 +186,7 @@ namespace Training::Modes
 			if (args.get_save_rounds() != 0 && (rounds_counter % args.get_save_rounds() == 0))
 				saver(std::format("Round_{}", rounds_counter));
 
-			constexpr auto bytes_in_megabyte = 1 << 20;
-			ConsoleUtils::print_to_console("Current memory usage (Mb): " + std::to_string(ConsoleUtils::get_phys_mem_usage() / bytes_in_megabyte));
+			report_memory_usage();
 		};
 
 		if (args.get_auto_training())
@@ -188,6 +204,7 @@ namespace Training::Modes
 		}
 
 		saver("");
+		report_memory_usage();
 		ConsoleUtils::Logger.close();
 	}
 }

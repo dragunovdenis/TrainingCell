@@ -175,7 +175,11 @@ namespace Training
 		if (_best_performance.empty())
 		{
 			_best_performance = performance;
-			_agents_best_performance = std::vector(_agents);
+			for (auto& agent : _agents)
+			{
+				_agents_best_performance.emplace_back(agent);
+				_agents_best_performance.rbegin()->free_aux_mem();
+			}
 			return;
 		}
 
@@ -193,6 +197,7 @@ namespace Training
 
 			_best_performance[score_id] = performance[score_id];
 			_agents_best_performance[score_id] = TdLambdaAgent(_agents[score_id]);
+			_agents_best_performance[score_id].free_aux_mem();
 			add_training_record(_agents_best_performance[score_id], _best_performance[score_id]);
 		}
 	}
