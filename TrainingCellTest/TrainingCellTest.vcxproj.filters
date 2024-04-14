@@ -75,6 +75,9 @@
     <None Include="TestData\TdlTrainingRegression\volume_search_net.dat">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
+    <None Include="TestData\TdlTrainingRegression\agent0_auto_trained_zero_lambda.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CheckersTestUtils.h">
