@@ -5,7 +5,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net48</TargetFramework>
     <Platforms>x64</Platforms>
-    <Configurations>Debug;IntelCompiler2022;Release</Configurations>
+    <Configurations>Debug;Release;ReleaseSingle;DebugSingle;IntelCompiler2022Single;IntelCompiler2022</Configurations>
     <AssemblyTitle>Monitor</AssemblyTitle>
     <Product>Monitor</Product>
     <Copyright>Copyright © 2024 Denys Dragunov, dragunovdenis@gmail.com</Copyright>
@@ -15,23 +15,28 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <OutputPath>$(SolutionDir)\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugSingle|x64'">
     <DebugType>full</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>$(SolutionDir)\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IntelCompiler2022|x64'">
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IntelCompiler2022Single|x64'">
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSingle|x64'">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <PropertyGroup>
+    <OutputPath>$(SolutionDir)\$(Platform)\$(Configuration)\</OutputPath>
     <ApplicationIcon>TrainingCell.ico</ApplicationIcon>
     <UseWPF>False</UseWPF>
     <AssemblyName>TrainingCellApp</AssemblyName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'IntelCompiler2022|x64'">
-    <OutputPath>..\$(Platform)\$(Configuration)\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

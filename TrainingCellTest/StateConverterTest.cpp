@@ -34,7 +34,7 @@ namespace TrainingCellTest
 		/// </summary>
 		static std::vector<int> get_random_state_vector(const int size)
 		{
-			std::vector<double> temp(size);
+			std::vector<DeepLearning::Real> temp(size);
 			DeepLearning::Utils::fill_with_random_values(temp.begin(), temp.end(), 0, 1 << Chess::PieceController::TotalBitsCount);
 			std::vector<int> result;
 			std::ranges::transform(temp, std::back_inserter(result), [](const auto x) { return static_cast<int>(x); });
@@ -107,7 +107,13 @@ namespace TrainingCellTest
 			// Assert
 			Assert::AreEqual(converter.get_expansion_factor(), 1,
 				L"Unexpected expansion factor for the given conversion type.");
-			const auto input_double = std::vector<DeepLearning::Real>(input.begin(), input.end());
+
+			std::vector<DeepLearning::Real> input_double(input.size());
+			std::ranges::transform(input, input_double.begin(), [](const auto x)
+			{
+					return static_cast<DeepLearning::Real>(x);
+			});
+
 			Assert::IsTrue(reference_out.to_stdvector() == input_double, L"Unexpected result of conversion.");
 		}
 

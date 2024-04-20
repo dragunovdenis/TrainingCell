@@ -28,7 +28,7 @@ namespace TrainingCell
 		net().calc_gradient_and_value(state,
 			target_value, cost_func_id,
 			out_gradient,
-			out_value, gradient_scale_factor, context);
+			out_value, static_cast<DeepLearning::Real>(gradient_scale_factor), context);
 	}
 
 	double NetWithConverterAbstract::evaluate(const std::vector<int>& state, DeepLearning::CpuDC::tensor_t& out_state_converted,
@@ -42,7 +42,7 @@ namespace TrainingCell
 	void NetWithConverterAbstract::update(const std::vector<DeepLearning::LayerGradient<DeepLearning::CpuDC>>& gradient,
 		const double learning_rate, const double& lambda)
 	{
-		net().update(gradient, learning_rate, lambda);
+		net().update(gradient, static_cast<DeepLearning::Real>(learning_rate), static_cast<DeepLearning::Real>(lambda));
 	}
 
 	bool NetWithConverterAbstract::validate_net_input_size(const std::size_t state_size) const

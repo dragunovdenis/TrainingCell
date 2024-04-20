@@ -35,8 +35,15 @@ namespace TrainingCell
 			_operator = [](const std::vector<int>& in, DeepLearning::Tensor& out)
 			{
 				out.resize(1, 1, in.size());
+#ifdef USE_SINGLE_PRECISION
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
 				std::ranges::copy(in, out.begin());
-			};
+#ifdef USE_SINGLE_PRECISION
+#pragma warning(pop)
+#endif
+				};
 			return;
 		case StateConversionType::ChessStandard:
 			_expansion_factor = Chess::PieceController::RankBitsCount;
@@ -54,7 +61,7 @@ namespace TrainingCell
 					for (auto channel_id = 0; channel_id < channels; ++channel_id)
 					{
 						const auto bit_present = static_cast<int>((piece_token & (1 << channel_id)) != 0);
-						out_ptr[out_item_id++] = positive ? bit_present : -bit_present;
+						out_ptr[out_item_id++] = static_cast<DeepLearning::Real>(positive ? bit_present : -bit_present);
 					}
 				}
 			};

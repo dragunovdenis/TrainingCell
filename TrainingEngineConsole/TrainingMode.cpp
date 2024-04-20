@@ -94,6 +94,7 @@ namespace Training::Modes
 		ConsoleUtils::Logger.open(args.get_output_folder() / "Log.txt");
 
 		ConsoleUtils::print_to_console(args.to_string());
+		ConsoleUtils::print_to_console(std::is_same_v<DeepLearning::Real, float> ? "Single Precision Mode" : "Double Precision Mode");
 
 		TrainingState state;
 		if (!ConsoleUtils::try_load_state(args.get_state_dump_path(), state))

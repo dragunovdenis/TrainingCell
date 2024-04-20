@@ -21,7 +21,6 @@
 #include "../TrainingCell/Headers/Checkers/StateHandle.h"
 #include "../TrainingCell/Headers/Checkers/CheckersState.h"
 #include "../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include <ppl.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell::Checkers;
@@ -31,21 +30,44 @@ namespace TrainingCellTest
 {
 	TEST_CLASS(TdlambdaAgentRegressionTest)
 	{
-		TEST_METHOD(TdLambdaAgentTrainingRegression)
+		static constexpr bool IsSinglePrecisionMode = std::is_same_v<DeepLearning::Real, float>;
+
+		/// <summary>
+		/// General method to run 2-agent training regression test.
+		/// </summary>
+		static void run_two_agent_training_regression(const std::filesystem::path& agent_0_name,
+			const std::filesystem::path& agent_1_name, const std::filesystem::path& agent_0_trained_name,
+			const std::filesystem::path& agent_1_trained_name, const bool update_reference = false)
 		{
 			//Arrange
-			auto agent0 = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0.tda");
-			auto agent1 = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent1.tda");
-			const auto agent0_trained = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent0_trained.tda");
-			const auto agent1_trained = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression/agent1_trained.tda");
+			const std::filesystem::path base_path = "TestData/TdlTrainingRegression";
+			auto agent0 = TdLambdaAgent::load_from_file(base_path / agent_0_name);
+			auto agent1 = TdLambdaAgent::load_from_file(base_path / agent_1_name);
 
 			//Act
 			const Board board(&agent0, &agent1);
 			board.play(200, CheckersState::get_start_state());
 
+			if (update_reference)
+			{
+				agent0.save_to_file("../../TrainingCellTest" / base_path / agent_0_trained_name);
+				agent1.save_to_file("../../TrainingCellTest" / base_path / agent_1_trained_name);
+				Assert::IsTrue(false, L"This is a maintenance mode");
+			}
+
 			//Assert
+			const auto agent0_trained = TdLambdaAgent::load_from_file(base_path / agent_0_trained_name);
+			const auto agent1_trained = TdLambdaAgent::load_from_file(base_path / agent_1_trained_name);
 			Assert::IsTrue(agent0 == agent0_trained, L"0th agent does not coincide with the reference");
 			Assert::IsTrue(agent1 == agent1_trained, L"1st agent does not coincide with the reference");
+		}
+
+		TEST_METHOD(TdLambdaAgentTrainingRegression)
+		{
+			const auto agent0_trained_name = IsSinglePrecisionMode ? "agent0_trained_single.tda" : "agent0_trained.tda";
+			const auto agent1_trained_name = IsSinglePrecisionMode ? "agent1_trained_single.tda" : "agent1_trained.tda";
+			run_two_agent_training_regression("agent0.tda", "agent1.tda",
+				agent0_trained_name, agent1_trained_name);
 		}
 
 		/// <summary>
@@ -57,7 +79,8 @@ namespace TrainingCellTest
 			const bool update_reference = false)
 		{
 			//Arrange
-			auto agent = TdLambdaAgent::load_from_file(input_agent_file_name);
+			const std::filesystem::path base_path = "TestData/TdlTrainingRegression";
+			auto agent = TdLambdaAgent::load_from_file(base_path / input_agent_file_name);
 			setup_agent(agent);
 
 			//Act
@@ -69,26 +92,31 @@ namespace TrainingCellTest
 			//Assert
 			if (update_reference)
 			{
-				agent.save_to_file("../../TrainingCellTest" / reference_agent_file_name);
+				agent.save_to_file("../../TrainingCellTest" / base_path / reference_agent_file_name);
+				Assert::IsTrue(false, L"This is a maintenance mode");
 			}
-			else
-			{
-				const auto agent_trained = TdLambdaAgent::load_from_file(reference_agent_file_name);
-				Assert::IsTrue(agent == agent_trained, L"Agent does not coincide with the reference");
-			}
+
+			const auto agent_trained = TdLambdaAgent::load_from_file(base_path / reference_agent_file_name);
+			Assert::IsTrue(agent == agent_trained, L"Agent does not coincide with the reference");
 		}
 
 		TEST_METHOD(TdLambdaAgentAutoTrainingRegression)
 		{
-			td_lambda_auto_agent_regression_regression("TestData/TdlTrainingRegression/agent0.tda",
-				"TestData/TdlTrainingRegression/agent0_auto_trained.tda",
+			const auto reference_file = IsSinglePrecisionMode ?
+				"agent0_auto_trained_single.tda" : "agent0_auto_trained.tda";
+
+			td_lambda_auto_agent_regression_regression("agent0.tda",
+				reference_file,
 				[](auto& agent) { agent.set_exploration_probability(0.1); });
 		}
 
 		TEST_METHOD(TdLambdaAgentAutoTrainingZeroLambdaRegression)
 		{
-			td_lambda_auto_agent_regression_regression("TestData/TdlTrainingRegression/agent0.tda",
-				"TestData/TdlTrainingRegression/agent0_auto_trained_zero_lambda.tda",
+			const auto reference_path = IsSinglePrecisionMode ?
+				"agent0_auto_trained_zero_lambda_single.tda" :
+				"agent0_auto_trained_zero_lambda.tda";
+				td_lambda_auto_agent_regression_regression("agent0.tda",
+					reference_path,
 				[](auto& agent)
 				{
 					agent.set_exploration_probability(0.1);
@@ -101,10 +129,12 @@ namespace TrainingCellTest
 		/// </summary>
 		static void td_lambda_agent_search_regression_general(const std::filesystem::path& input_agent_file_name,
 		                                                     const std::filesystem::path& reference_net_file_name,
-															 const double exploration, const int volume, const int depth)
+															 const double exploration, const int volume, const int depth,
+															 const bool update_reference = false)
 		{
 			//Arrange
-			auto agent = TdLambdaAgent::load_from_file("TestData/TdlTrainingRegression" / input_agent_file_name);
+			const std::filesystem::path base_path = "TestData/TdlTrainingRegression";
+			auto agent = TdLambdaAgent::load_from_file(base_path / input_agent_file_name);
 			agent.set_exploration_probability(0.1);
 			agent.set_search_exploration_probability(exploration);
 			agent.set_search_exploration_depth(depth);
@@ -112,8 +142,6 @@ namespace TrainingCellTest
 			agent.set_td_search_iterations(100);
 			agent.set_tree_search_method(TreeSearchMethod::TD_SEARCH);
 			auto state_handle = StateHandle(CheckersState::get_start_state());
-			const auto reference_search_net = NetWithConverter::load_from_file(
-				"TestData/TdlTrainingRegression" / reference_net_file_name);
 
 			//Act
 			TdLambdaAgent::reset_explorer(0);// to ensure reproducible exploration
@@ -124,19 +152,30 @@ namespace TrainingCellTest
 			agent.make_move(state_handle, false);
 			TdLambdaAgent::reset_explorer();
 
+			if (update_reference)
+			{
+				agent._search_net.value().save_to_file("../../TrainingCellTest" / base_path / reference_net_file_name);
+				Assert::IsTrue(false, L"This is a maintenance mode");
+			}
+
 			//Assert
+			const auto reference_search_net = NetWithConverter::load_from_file(base_path / reference_net_file_name);
 			Assert::IsTrue(agent._search_net.has_value(), L"Search net is not initialized");
 			Assert::IsTrue(agent._search_net.value() == reference_search_net, L"Nets are supposed to be equal");
 		}
 
 		TEST_METHOD(TdLambdaAgentSearchRegression)
 		{
-			td_lambda_agent_search_regression_general("agent0.tda", "search_net.dat", 0.1, 10000, 10000);
+			td_lambda_agent_search_regression_general("agent0.tda",
+				IsSinglePrecisionMode ? "search_net_single.dat" : "search_net.dat",
+				0.1, 10000, 10000);
 		}
 
 		TEST_METHOD(TdLambdaAgentVolumeSearchRegression)
 		{
-			td_lambda_agent_search_regression_general("agent0.tda", "volume_search_net.dat", 1.0, 5, 3);
+			td_lambda_agent_search_regression_general("agent0.tda",
+				IsSinglePrecisionMode ? "volume_search_net_single.dat" : "volume_search_net.dat",
+				1.0, 5, 3);
 		}
 
 		TEST_METHOD(TdLambdaAgentSearchSettingsTest)

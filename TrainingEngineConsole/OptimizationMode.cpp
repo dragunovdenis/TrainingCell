@@ -107,28 +107,28 @@ namespace Training::Modes
 
 		if (args.get_lambda_flag())
 		{
-			point.push_back(sample_agent.get_lambda());
+			point.push_back(static_cast<DeepLearning::Real>(sample_agent.get_lambda()));
 			lower_bound.push_back(0.0);
 			upper_bound.push_back(1.0);
 		}
 
 		if (args.get_discount_flag())
 		{
-			point.push_back(sample_agent.get_discount());
+			point.push_back(static_cast<DeepLearning::Real>(sample_agent.get_discount()));
 			lower_bound.push_back(0.0);
 			upper_bound.push_back(1.0);
 		}
 
 		if (args.get_learning_rate_flag())
 		{
-			point.push_back(sample_agent.get_learning_rate());
+			point.push_back(static_cast<DeepLearning::Real>(sample_agent.get_learning_rate()));
 			lower_bound.push_back(0.0);
 			upper_bound.push_back(2.0);
 		}
 
 		if (args.get_exploration_flag())
 		{
-			point.push_back(sample_agent.get_exploration_probability());
+			point.push_back(static_cast<DeepLearning::Real>(sample_agent.get_exploration_probability()));
 			lower_bound.push_back(0.0);
 			upper_bound.push_back(1.0);
 		}
@@ -229,7 +229,7 @@ namespace Training::Modes
 		{
 			optimizer.set_constraints_lower(init_pt_and_constraints.lower_bound);
 			optimizer.set_constraints_upper(init_pt_and_constraints.upper_bound);
-			optimizer.set_min_simplex_size(args.get_min_simplex_size());
+			optimizer.set_min_simplex_size(static_cast<DeepLearning::Real>(args.get_min_simplex_size()));
 		}
 		else
 			optimizer_loaded = true;
@@ -250,12 +250,12 @@ namespace Training::Modes
 				std::cout << "Score :" << score << std::endl;
 				std::cout << "Evaluation time : " << sw_evaluation.elapsed_time_hh_mm_ss() << std::endl;
 				ConsoleUtils::horizontal_console_separator();
-				return -score;
-			}, 0.1, init_pt_and_constraints.point, skip_initialization,
+				return -static_cast<DeepLearning::Real>(score);
+			}, static_cast<DeepLearning::Real>(0.1), init_pt_and_constraints.point, skip_initialization,
 			true /*regular simplex*/,
 				[&round_counter, &args, &state, &optimizer, &sw_round, &sw_total]
 				(const std::array<DeepLearning::VectorNdReal<N>, N + 1>& simplex,
-					const int min_vertex_id, const double& simplex_size)
+					const int min_vertex_id, const DeepLearning::Real& simplex_size)
 
 			{
 				if (++round_counter % args.get_dump_rounds() == 0)

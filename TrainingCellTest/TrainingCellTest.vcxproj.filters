@@ -57,10 +57,12 @@
     <None Include="TestData\TdlTrainingRegression\agent0.tda">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
-    <None Include="TestData\TdlTrainingRegression\agent0_trained.tda">
+    <None Include="TestData\TdlTrainingRegression\agent1.tda">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
-    <None Include="TestData\TdlTrainingRegression\agent1.tda">
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Release'">
+    <None Include="TestData\TdlTrainingRegression\agent0_trained.tda">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
     <None Include="TestData\TdlTrainingRegression\agent1_trained.tda">
@@ -76,6 +78,26 @@
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
     <None Include="TestData\TdlTrainingRegression\agent0_auto_trained_zero_lambda.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='DebugSingle' Or '$(Configuration)'=='ReleaseSingle'">
+    <None Include="TestData\TdlTrainingRegression\agent0_trained_single.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\agent1_trained_single.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\search_net_single.dat">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\agent0_auto_trained_single.tda">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\volume_search_net_single.dat">
+      <Filter>TestData\TdlTrainingRegression</Filter>
+    </None>
+    <None Include="TestData\TdlTrainingRegression\agent0_auto_trained_zero_lambda_single.tda">
       <Filter>TestData\TdlTrainingRegression</Filter>
     </None>
   </ItemGroup>
