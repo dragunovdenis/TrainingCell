@@ -91,6 +91,14 @@ namespace Monitor.Dll
             uint[] array);
 
         /// <summary>
+        /// Delegate to acquire array of signed integers from the managed side
+        /// </summary>
+        public delegate void AcquireSignedArrayCallBack(
+            int size,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
+            int[] array);
+
+        /// <summary>
         /// Represents state type identifier.
         /// Should be kept in sync with the corresponding data type on C++ side.
         /// </summary>
@@ -132,6 +140,20 @@ namespace Monitor.Dll
         public static extern int Play(IntPtr agent1, IntPtr agent2, int episodes,
             [MarshalAs(UnmanagedType.I4)]
             StateTypeId stateType,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            PublishStateCallBack publishStateCallBack,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            PublishGameStatsCallBack publishStats,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            CancelCallBack cancel,
+            [MarshalAs(UnmanagedType.FunctionPtr)]
+            ErrorMessageCallBack error, out Stats stats);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName, EntryPoint = "PlayStateSeed")]
+        public static extern int Play(IntPtr agent1, IntPtr agent2, int episodes, IntPtr stateSeedPtr,
             [MarshalAs(UnmanagedType.FunctionPtr)]
             PublishStateCallBack publishStateCallBack,
             [MarshalAs(UnmanagedType.FunctionPtr)]
@@ -773,6 +795,63 @@ namespace Monitor.Dll
         public static extern bool TdlEnsembleAgentSetRunMultiThreaded(IntPtr ensembleAgentPtr,
             [MarshalAs(UnmanagedType.U1)] bool runMultiThreaded);
 
+        #endregion
+
+        #region Agent
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        public static extern IntPtr ConstructStateEditor(StateTypeId stateTypeId);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool FreeStateEditor(IntPtr editorPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool StateEditorGetState(IntPtr editorPtr, AcquireSignedArrayCallBack catchArray);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool StateEditorGetOptions(IntPtr editorPtr, PiecePosition pos, AcquireSignedArrayCallBack catchArray);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool StateEditorApplyOption(IntPtr editorPtr, PiecePosition pos, int optionId);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool StateEditorReset(IntPtr editorPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        public static extern bool StateEditorClear(IntPtr editorPtr);
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        public static extern StateTypeId StateEditorGetTypeId(IntPtr editorPtr);
         #endregion
     }
 }

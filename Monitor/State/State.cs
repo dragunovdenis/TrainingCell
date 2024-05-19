@@ -1,4 +1,4 @@
-﻿//Copyright (c) 2023 Denys Dragunov, dragunovdenis@gmail.com
+﻿//Copyright (c) 2024 Denys Dragunov, dragunovdenis@gmail.com
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
 //in the Software without restriction, including without limitation the rights
@@ -16,34 +16,33 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System.Collections.Generic;
-using System.Windows;
+using System.Linq;
 using Monitor.Dll;
 
-namespace Monitor.UI.Board.PieceControllers
+namespace Monitor.State
 {
     /// <summary>
-    /// Interface to a piece visualization controller
+    /// Representation of a checkerboard state.
     /// </summary>
-    internal interface IPieceController
+    internal class State
     {
         /// <summary>
-        /// Returns elements of a piece represented with the given ID and placed on a canvas at the given coordinate.
+        /// Values of the checkerboard fields (representing pieces on them).
         /// </summary>
-        IEnumerable<UIElement> CreatePieceElements(Point topLeft, double fieldSize, int pieceId);
+        public int[] Data { get; }
         
         /// <summary>
-        /// Returns "piece ID" that the current instance of controller will visualize as a "captured" piece of the corresponding color.
+        /// Type of the state.
         /// </summary>
-        int GetCapturedPieceId(bool white);
+        public DllWrapper.StateTypeId Type { get; }
 
         /// <summary>
-        /// Returns "piece ID" that the current instance of controller will visualize as a "piece trace" of the corresponding rank.
+        /// Constructor.
         /// </summary>
-        int GetPieceTraceId(int pieceId);
-
-        /// <summary>
-        /// Returns type ID of the state the controller is compatible with.
-        /// </summary>
-        DllWrapper.StateTypeId StateTypeId { get; }
+        public State(IList<int> data, DllWrapper.StateTypeId type)
+        {
+            Data = data.ToArray();
+            Type = type;
+        }
     }
 }

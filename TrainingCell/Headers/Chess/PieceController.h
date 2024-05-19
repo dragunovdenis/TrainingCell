@@ -121,6 +121,11 @@ namespace TrainingCell::Chess
 		static bool is_king(const int piece_token);
 
 		/// <summary>
+		/// Returns "true" if the given token represents any king.
+		/// </summary>
+		static bool is_a_king(const int piece_token);
+
+		/// <summary>
 		/// Returns "true" if the given token represents a "positive" pawn.
 		/// </summary>
 		static bool is_pawn(const int piece_token);
@@ -156,6 +161,15 @@ namespace TrainingCell::Chess
 		/// </summary>
 		static std::vector<int> get_init_board_state();
 
+		/// <summary>
+		/// Returns collection of all "ally" pieces.
+		/// </summary>
+		/// <returns></returns>
+		static std::vector<int> get_ally_pieces();
 
+		/// <summary>
+		/// Returns collection of all "rival" pieces.
+		/// </summary>
+		static std::vector<int> get_rival_pieces();
 	};
 }

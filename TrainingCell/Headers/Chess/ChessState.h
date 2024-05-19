@@ -244,6 +244,11 @@ namespace TrainingCell::Chess
 		[[nodiscard]] bool is_king(const long long field_id) const;
 
 		/// <summary>
+		/// Returns "true" if there is any "king" piece on the field with the given ID.
+		/// </summary>
+		[[nodiscard]] bool is_a_king(const long long field_id) const;
+
+		/// <summary>
 		/// Returns "true" if there is an ally "pawn" piece on the field with the given ID.
 		/// </summary>
 		[[nodiscard]] bool is_pawn(const long long field_id) const;
@@ -390,6 +395,30 @@ namespace TrainingCell::Chess
 		/// Returns a 64 elements long "int-vector" representation of the state inverted to the current one.
 		/// </summary>
 		[[nodiscard]] std::vector<int> to_vector_64_inverted() const;
+
+		/// <summary>
+		/// Returns collections of "piece values" that can be "put"
+		/// to the field with the given position by means of "editing".
+		/// </summary>
+		[[nodiscard]] std::vector<int> get_edit_options(const PiecePosition& pos) const;
+
+		/// <summary>
+		/// Applies "edit" option with the given ID to the field with the given position.
+		/// The actual value of the edit option is resolved via its index in the context of
+		/// the collection of options available for the given field <see cref="get_edit_options"/>.
+		/// </summary>
+		/// <returns>Vector representation of the state after editing.</returns>
+		void apply_edit_option(const PiecePosition& pos, const int option_id);
+
+		/// <summary>
+		/// Resets state to its initial configuration.
+		/// </summary>
+		void reset();
+
+		/// <summary>
+		/// Removes all the pieces (except "kings") from the board.
+		/// </summary>
+		void clear();
 	};
 }
 

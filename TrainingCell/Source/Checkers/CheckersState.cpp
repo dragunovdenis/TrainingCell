@@ -247,7 +247,7 @@ namespace TrainingCell::Checkers
 
 			do
 			{
-				temp = CheckersState::move(temp, 1, end);
+				temp = move(temp, 1, end);
 				const auto currentPiece = get_piece(temp);
 				//if it is an "opponent" piece then it must be the one captured
 				if ((is_opponent_piece(currentPiece) && sub_moves[subMoveId].capture != temp) ||
@@ -344,6 +344,61 @@ namespace TrainingCell::Checkers
 	StateTypeId CheckersState::state_type() const
 	{
 		return type();
+	}
+
+	std::vector<int> CheckersState::get_edit_options(const PiecePosition& pos) const
+	{
+		if (!is_valid(pos))
+			return {};
+
+		const auto pos_linear = piece_position_to_plain_id(pos);
+
+		if (is_alive((*this)[pos_linear]))
+			return { static_cast<int>(Piece::Space) };
+
+		int ally_pieces_count = 0;
+		int opponent_pieces_count = 0;
+
+		for (const auto piece : *this)
+		{
+			ally_pieces_count += is_allay_piece(piece);
+			opponent_pieces_count += is_opponent_piece(piece);
+		}
+
+		constexpr int max_pieces_on_board = 12;
+		static const std::vector ally_pieces = { static_cast<int>(Piece::Man), static_cast<int>(Piece::King) };
+		static const std::vector opponent_pieces = { static_cast<int>(Piece::AntiMan), static_cast<int>(Piece::AntiKing) };
+
+		std::vector<int> result;
+
+		if (ally_pieces_count < max_pieces_on_board)
+			result.insert(result.end(), ally_pieces.begin(), ally_pieces.end());
+
+		if (opponent_pieces_count < max_pieces_on_board)
+			result.insert(result.end(), opponent_pieces.begin(), opponent_pieces.end());
+
+		return result;
+	}
+
+	void CheckersState::apply_edit_option(const PiecePosition& pos, const int option_id)
+	{
+		const auto options = get_edit_options(pos);
+
+		if (option_id < 0 || option_id >= options.size())
+			throw std::exception("Invalid option");
+
+		const auto pos_linear = piece_position_to_plain_id(pos);
+		(*this)[pos_linear] = static_cast<Piece>(options[option_id]);
+	}
+
+	void CheckersState::reset()
+	{
+		*this = get_start_state();
+	}
+
+	void CheckersState::clear()
+	{
+		std::fill(begin(), end(), Piece::Space);
 	}
 
 	bool CheckersState::is_allay_piece(const Piece piece)

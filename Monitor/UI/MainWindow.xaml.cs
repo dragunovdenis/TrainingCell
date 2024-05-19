@@ -25,7 +25,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using Monitor.Agents;
+using Monitor.Dll;
+using Monitor.State;
 using Monitor.UI.Board;
 using Monitor.UI.Converters;
 using Brushes = System.Windows.Media.Brushes;
@@ -48,16 +51,34 @@ namespace Monitor.UI
             set => SetField(ref _checkersUi, value);
         }
 
+        private readonly CheckerBoard _playBoard;
+        private readonly StateEditor[] _editors;
+
         /// <summary>
         /// Constructor
         /// </summary>
         public MainWindow()
         {
             InitializeComponent();
-            CheckersUi = new BoardUi(MainCanvas, this.Dispatcher);
+            MainCanvas.CacheMode = new BitmapCache();
+            _playBoard = new CheckerBoard(MainCanvas);
+            _editors = new[]
+            {
+                new StateEditor(DllWrapper.StateTypeId.Checkers),
+                new StateEditor(DllWrapper.StateTypeId.Chess),
+            };
+            CheckersUi = new BoardUi(_playBoard, Dispatcher, _editors[1], _editors[0]);
             CheckersUi.InfoEvent += UpdateInfoTextBox;
-        }
 
+            CheckersUi.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CheckersUi.IsPlaying))
+                    HandleStateEditing();
+            };
+
+            HandleStateEditing();
+        }
+        
         /// <summary>
         /// Updates info text box with the given info strings
         /// </summary>
@@ -70,14 +91,6 @@ namespace Monitor.UI
 
             foreach (var infoString in info)
                 InfoTextBox.Text += infoString + "\n";
-        }
-
-        /// <summary>
-        /// Event handler
-        /// </summary>
-        private void MainPanel_OnSizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            _checkersUi.Draw();
         }
 
         /// <summary>
@@ -102,6 +115,56 @@ namespace Monitor.UI
         private void LoadBlackAgentButton_OnClick(object sender, RoutedEventArgs e)
         {
             _checkersUi.LoadBlackAgent();
+        }
+
+        /// <summary>
+        /// Handles UI of state editing functionality.
+        /// </summary>
+        private void HandleStateEditing()
+        {
+            if (CheckersUi.IsPlaying)
+            {
+                _editors[0].ConnectToBoard(null);
+                _editors[1].ConnectToBoard(null);
+            }
+            else
+            {
+                _editors[ChessStateEditing.ToInt()].ConnectToBoard(_playBoard);
+            }
+        }
+
+        private bool _chessStateEditing;
+        
+        /// <summary>
+        /// Flag used to switch between chess and checkers training modes.
+        /// </summary>
+        public bool ChessStateEditing
+        {
+            get => _chessStateEditing;
+            set
+            {
+                if (SetField(ref _chessStateEditing, value))
+                {
+                    _editors[ChessStateEditing.ToInt()].ConnectToBoard(_playBoard);
+                    _editors[(!ChessStateEditing).ToInt()].ConnectToBoard(null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles click of the corresponding button.
+        /// </summary>
+        private void ResetEditedStateBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            _editors[ChessStateEditing.ToInt()].Reset();
+        }
+
+        /// <summary>
+        /// Handles click of the corresponding button.
+        /// </summary>
+        private void ClearEditedStateBtn_OnClick(object sender, RoutedEventArgs e)
+        {
+            _editors[ChessStateEditing.ToInt()].Clear();
         }
 
         private int _trainTabCountTotal = 0;
@@ -223,11 +286,16 @@ namespace Monitor.UI
             _checkersUi.EditInactiveAgent();
         }
 
+        /// <summary>
+        /// Shows "about" menu.
+        /// </summary>
         private void MenuAbout_OnClick(object sender, RoutedEventArgs e)
         {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.Owner = this; // this refers to the main window
-            aboutWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            var aboutWindow = new AboutWindow
+            {
+                Owner = this, // this refers to the main window
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             aboutWindow.ShowDialog();       
         }
     }

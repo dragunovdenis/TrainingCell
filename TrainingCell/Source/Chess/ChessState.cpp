@@ -733,6 +733,11 @@ namespace TrainingCell::Chess
 		return PieceController::is_king(_data[field_id].piece);
 	}
 
+	bool ChessState::is_a_king(const long long field_id) const
+	{
+		return PieceController::is_a_king(_data[field_id].piece);
+	}
+
 	bool ChessState::is_pawn(const long long field_id) const
 	{
 		return PieceController::is_pawn(_data[field_id].piece);
@@ -768,5 +773,98 @@ namespace TrainingCell::Chess
 			throw std::exception("Invalid promotion move");
 
 		return true;
+	}
+
+	std::vector<int> ChessState::get_edit_options(const PiecePosition& pos) const
+	{
+		if (!pos.is_valid())
+			return {};
+
+		const auto pos_linear = PosController::to_linear(pos);
+
+		if (is_piece(pos_linear))
+		{
+			if (is_a_king(pos_linear))
+				return {};
+
+			return { PieceController::Space };
+		}
+
+		int ally_pieces_count = 0;
+		int rival_pieces_count = 0;
+
+		for (const auto& data_item : _data)
+		{
+			const auto piece = data_item.piece;
+			ally_pieces_count += PieceController::is_ally_piece(piece);
+			rival_pieces_count += PieceController::is_rival_piece(piece);
+		}
+
+		constexpr int max_pieces_on_board = 16;
+
+		std::vector<int> result;
+
+		if (ally_pieces_count < max_pieces_on_board)
+		{
+			const auto ally_pieces = PieceController::get_ally_pieces();
+			result.insert(result.end(), ally_pieces.begin(), ally_pieces.end());
+
+			if (pos.row == Checkerboard::Rows - 1)
+				result.erase(std::ranges::remove(result, PieceController::Pawn).begin(), result.end());
+		}
+		else result.push_back(PieceController::King);
+
+		if (rival_pieces_count < max_pieces_on_board)
+		{
+			const auto rival_pieces = PieceController::get_rival_pieces();
+			result.insert(result.end(), rival_pieces.begin(), rival_pieces.end());
+
+			if (pos.row == 0)
+				result.erase(std::ranges::remove(result,
+					PieceController::anti(PieceController::Pawn)).begin(), result.end());
+		}
+		else result.push_back(PieceController::anti(PieceController::King));
+
+		return result;
+	}
+
+	void ChessState::apply_edit_option(const PiecePosition& pos, const int option_id)
+	{
+		const auto options = get_edit_options(pos);
+
+		if (option_id < 0 || option_id >= options.size())
+			throw std::exception("Invalid option");
+
+		const auto opt = options[option_id];
+		auto state_vec = to_vector();
+
+		if (PieceController::is_a_king(opt))
+			for (auto& val : state_vec)
+				if (PieceController::extract_min_signed_piece_rank(val) == opt)
+				{
+					val = PieceController::Space;
+					break;
+				}
+
+		state_vec[PosController::to_linear(pos)] = opt;
+		build(state_vec);
+	}
+
+	void ChessState::reset()
+	{
+		build(PieceController::get_init_board_state());
+	}
+
+	void ChessState::clear()
+	{
+		auto state_vector = to_vector_64();
+
+		for (auto& val : state_vector)
+		{
+			if (!PieceController::is_a_king(val))
+				val = PieceController::Space;
+		}
+
+		build(state_vector);
 	}
 }

@@ -40,4 +40,23 @@ namespace Monitor.UI.Converters
             => throw new Exception("Not implemented");
 
     }
+
+    /// <summary>
+    /// True/False to "Collapsed"/"Visible" converter
+    /// </summary>
+    class InvertBoolToVisibilityConverter : IValueConverter
+    {
+        /// <summary>
+        /// Forward conversion
+        /// </summary>
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            => value != null && (bool)value ? Visibility.Collapsed : Visibility.Visible;
+
+        /// <summary>
+        /// Backward conversion
+        /// </summary>
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new Exception("Not implemented");
+    }
+
 }

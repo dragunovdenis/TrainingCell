@@ -23,15 +23,15 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using Monitor.Agents;
 using Monitor.DataStructures;
 using Monitor.Dll;
+using Monitor.State;
 using Monitor.UI.Board.PieceControllers;
+using Monitor.Utils;
+using static Monitor.Dll.DllWrapper;
 
 namespace Monitor.UI.Board
 {
@@ -40,15 +40,6 @@ namespace Monitor.UI.Board
     /// </summary>
     class BoardUi : ITwoPlayerGameUi
     {
-        private double _boardSide;
-        private double _fieldSide;
-        const double _markerOffset = 2.0;
-        double _markerSide;
-        private double _topLeftX;
-        private double _topLeftY;
-        private double _canvasHeight = -1;
-        private double _canvasWidth = -1;
-
         /// <summary>
         /// Types of agents
         /// </summary>
@@ -65,8 +56,6 @@ namespace Monitor.UI.Board
         /// </summary>
         private readonly Dispatcher _uiThreadDispatcher;
 
-        private IPieceController _pieceController;
-
         /// <summary>
         /// Provides means to cancel ongoing playing
         /// </summary>
@@ -77,7 +66,7 @@ namespace Monitor.UI.Board
         /// <summary>
         /// The current state
         /// </summary>
-        private int[] _state;
+        private State.State _state;
 
         /// <summary>
         /// Data structure that facilitates user move processing
@@ -273,34 +262,43 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Adds extra symbols to the state to trace the series of given sub-moves (representing a move)
         /// </summary>
-        private void AddMoveTrace(int[] state, SubMove[] subMoves)
+        private void AddMoveTrace(State.State state, SubMove[] subMoves)
         {
             if (subMoves == null)
                 return;
 
-            var pieceId = state[subMoves.Last().End.LinearPosition];
+            var pieceId = state.Data[subMoves.Last().End.LinearPosition];
+            var pieceController = PieceControllerFactory.Create(state.Type);
             foreach (var move in subMoves)
             {
                 if (move.Capture.IsValid)
-                    state[move.Capture.LinearPosition] = _pieceController.GetCapturedPieceId(white: pieceId > 0);
+                    state.Data[move.Capture.LinearPosition] = pieceController.GetCapturedPieceId(white: pieceId > 0);
 
-                state[move.Start.LinearPosition] = _pieceController.GetPieceTraceId(pieceId);
+                state.Data[move.Start.LinearPosition] = pieceController.GetPieceTraceId(pieceId);
             }
         }
 
         /// <summary>
-        /// Returns instance of piece controller compatible with the given state type ID.
+        /// Returns state type compatible with the given state pair of agents.
         /// </summary>
-        IPieceController ResolvePieceController(IAgent agent0, IAgent agent1)
+        private StateTypeId ResolveStateType(IAgent agent0, IAgent agent1)
         {
-            if (!DllWrapper.CanPlay(agent0.Ptr, agent1.Ptr, out var stateTypeId))
-                return null;
+            return CanPlay(agent0.Ptr, agent1.Ptr, out var stateTypeId) ?
+                stateTypeId : StateTypeId.Invalid;
+        }
 
-            switch (stateTypeId)
+        /// <summary>
+        /// Returns an instance of state seed compatible with the given pair of agents.
+        /// </summary>
+        private IStateSeed ResolveStateSeed(IAgent agent0, IAgent agent1)
+        {
+            var stateType = ResolveStateType(agent0, agent1);
+
+            switch (stateType)
             {
-                case DllWrapper.StateTypeId.Checkers : return new CheckersPieceController();
-                case DllWrapper.StateTypeId.Chess: return new ChessPieceController();
-                default: return null;
+                case StateTypeId.Checkers: return _checkersSeed;
+                case StateTypeId.Chess: return _chessSeed;
+                default: throw new Exception("Can't resolve state seed");
             }
         }
 
@@ -350,12 +348,14 @@ namespace Monitor.UI.Board
                         int blackWinsCounter = 0;
                         int staleMatesCounter = 0;
 
-                        _pieceController = ResolvePieceController(agentWhite, agentBlack);
+                        var stateSeed = ResolveStateSeed(agentWhite, agentBlack);
+                        var stateType = stateSeed.Type;
+                        _uiThreadDispatcher.Invoke(ConnectToBoard);
 
                         var timePoint = DateTime.Now;
                         var res = DllWrapper.Play(
-                            agentWhite.Ptr, agentBlack.Ptr, episodes, _pieceController.StateTypeId,
-                            (state, size, subMoves, subMovesCount, agentToMovePtr) =>
+                            agentWhite.Ptr, agentBlack.Ptr, episodes, stateSeed.Ptr,
+                            (stateData, size, subMoves, subMovesCount, agentToMovePtr) =>
                             {
                                 if (size != Checkerboard.Fields)
                                     throw new Exception("Invalid size of the state");
@@ -367,9 +367,10 @@ namespace Monitor.UI.Board
 
                                 InactiveAgent = agentToMovePtr == agentWhite.Ptr ? agentBlack : agentWhite;
 
+                                var state = new State.State(stateData, stateType);
                                 AddMoveTrace(state, subMoves);
                                 _state = state;
-                                _uiThreadDispatcher.Invoke(Draw, DispatcherPriority.ContextIdle);
+                                _uiThreadDispatcher.Invoke(() => _board.UpdateState(state), DispatcherPriority.ContextIdle);
                                 if (movePause > 0) Thread.Sleep(movePause);
                             },
                             (whiteWon, blackWon, totalGamers) =>
@@ -381,11 +382,15 @@ namespace Monitor.UI.Board
                                     blackWinsCounter += (blackWon & !whiteWon).ToInt();
                                     staleMatesCounter += (whiteWon & blackWon).ToInt();
 
-                                    MessageBox.Show(Application.Current.MainWindow,
-                                        GetConclusionMessage(whiteWon, blackWon), "Episode is over",
-                                        MessageBoxButton.OK, MessageBoxImage.Information);
+                                    if (!_playTaskCancellation.IsCancellationRequested &&
+                                        (Application.Current.MainWindow == null ||
+                                        MessageBox.Show(Application.Current.MainWindow,
+                                            $"{GetConclusionMessage(whiteWon, blackWon)}. Continue?", "Episode is over",
+                                            MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.No))
+                                            TerminateGame();
 
                                     _state = null;
+                                    _board.UpdateState(null);
                                     InfoEvent?.Invoke(new List<string>()
                                     {
                                         "Whites Won: " + whiteWinsCounter,
@@ -393,7 +398,6 @@ namespace Monitor.UI.Board
                                         "Stalemates: " + staleMatesCounter,
                                         "Total Games: " + totalGamers,
                                     });
-                                    Draw();
                                 }, DispatcherPriority.ContextIdle);
                             }, () => _playTaskCancellation.IsCancellationRequested,
                             (errorMessage) => _uiThreadDispatcher.Invoke(
@@ -418,32 +422,14 @@ namespace Monitor.UI.Board
                 IsPlaying = false;
                 InfoEvent?.Invoke(null);
                 ResetUserInput();
+                DisconnectFromBoard();
             }, TaskScheduler.FromCurrentSynchronizationContext());
             _playTask.Start();
 
             return true;
         }
 
-        private readonly Canvas _canvas = null;
-
-        /// <summary>
-        /// For the given mouse position on the canvas returns coordinates of the corresponding checkers field
-        /// or (-1, -1), if the given point does not belong to any valid field
-        /// </summary>
-        PiecePosition CanvasCoordinateToFieldPosition(Point pt)
-        {
-            var colIdFloat = (pt.X - _topLeftX) / _fieldSide;
-            if (colIdFloat < 0 || colIdFloat > Checkerboard.Columns)
-                return PiecePosition.Invalid();
-
-            var rowIdFloat = (pt.Y - _topLeftY) / _fieldSide;
-            if (rowIdFloat < 0 || rowIdFloat > Checkerboard.Rows)
-                return PiecePosition.Invalid();
-
-            return new PiecePosition() { Row = (int)rowIdFloat, Col = (int)colIdFloat };
-        }
-
-        private PiecePosition _selectedField = PiecePosition.Invalid();
+        private PiecePosition SelectedField => _board.SelectedField;
 
         /// <summary>
         /// Returns sub-set of possible moves that start from the given position
@@ -476,154 +462,15 @@ namespace Monitor.UI.Board
         }
 
         /// <summary>
-        /// Returns coordinates of the top left corner of the corresponding field on the canvas
-        /// </summary>
-        /// <param name="colId">Field column</param>
-        /// <param name="rowId">Field row</param>
-        /// <param name="offset">Offset that should be added to booth coordinates of the returned corner</param>
-        private Point GetTopLeftCorner(long colId, long rowId, double offset)
-        {
-            return new Point(colId * _fieldSide + _topLeftX + offset, rowId * _fieldSide + _topLeftY + offset);
-        }
-
-        /// <summary>
-        /// Returns coordinates of the top left corner of the corresponding field on the canvas.
-        /// </summary>
-        private Point GetTopLeftCorner(PiecePosition fieldCoordinate)
-        {
-            return GetTopLeftCorner(fieldCoordinate.Col, fieldCoordinate.Row, 0);
-        }
-
-        private readonly IList<UIElement> _stateElements = new List<UIElement>();
-
-        /// <summary>
-        /// Removes state visualization elements from the canvas.
-        /// </summary>
-        private void ClearStateElements()
-        {
-            foreach (var element in _stateElements)
-                _canvas.Children.Remove(element);
-            
-            _stateElements.Clear();
-        }
-        
-        /// <summary>
-        /// Updates visualization elements the current state.
-        /// </summary>
-        private void UpdateStateElements()
-        {
-            ClearStateElements();
-
-            if (_state == null)
-                return;
-
-            for (var stateItemId = 0; stateItemId < _state.Length; stateItemId++)
-            {
-                var pieceId = _state[stateItemId];
-
-                var position = PiecePosition.GetPosition(stateItemId);
-                var topLeft = GetTopLeftCorner(position.Col, position.Row, 0);
-                foreach (var element in _pieceController.CreatePieceElements(topLeft, _fieldSide, pieceId))
-                    _stateElements.Add(element);
-            }
-
-            foreach (var element in _stateElements)
-                _canvas.Children.Add(element);
-        }
-
-        /// <summary>
-        /// Updates board size parameters from the current size of the canvas control.
-        /// Returns "true" if any of the board dimensions has been updated.
-        /// </summary>
-        bool UpdateBoardDimensions()
-        {
-            if (Math.Abs(_canvasHeight - _canvas.ActualHeight) < 1e-10 &&
-                Math.Abs(_canvasWidth - _canvas.ActualWidth) < 1e-10)
-                return false;
-
-            _canvasHeight = _canvas.ActualHeight;
-            _canvasWidth = _canvas.ActualWidth;
-
-            _boardSide = Math.Max(0, Math.Min(_canvasHeight, _canvasWidth) - 10.0);
-            _fieldSide = _boardSide / Checkerboard.Rows;
-            _topLeftX = (_canvasWidth - _boardSide) / 2;
-            _topLeftY = (_canvasHeight - _boardSide) / 2;
-            _markerSide = _fieldSide - 2 * _markerOffset;
-
-            return true;
-        }
-
-        private readonly IList<UIElement> _boardElements = new List<UIElement>();
-
-        /// <summary>
-        /// Removes board elements from canvas.
-        /// </summary>
-        private void ClearBoardElements()
-        {
-            foreach (var element in _boardElements)
-                _canvas.Children.Remove(element);
-            
-            _boardElements.Clear();
-        }
-        
-        /// <summary>
-        /// Updates checkers board visualization elements.
-        /// </summary>
-        private void UpdateBoardElements()
-        {
-            if (!UpdateBoardDimensions())
-                return;
-
-            ClearBoardElements();
-
-            var boardTopLeft = GetTopLeftCorner(0, 0, 0);
-            _boardElements.Add(CanvasDrawingUtils.CreateShape<Rectangle>(
-                boardTopLeft.X, boardTopLeft.Y, _boardSide, _boardSide, 1,
-                Brushes.Black, Brushes.BurlyWood));
-
-            for (var rowId = 0; rowId < Checkerboard.Rows; rowId++)
-                for (var colId = 0; colId < Checkerboard.Columns; colId++)
-                {
-                    var topLeft = GetTopLeftCorner(colId, rowId, 0);
-                    var isDarkField = rowId % 2 == 0 ? colId % 2 == 1 : colId % 2 == 0;
-                    if (!isDarkField)
-                        continue;
-                    
-                    _boardElements.Add(CanvasDrawingUtils.CreateShape<Rectangle>(
-                        topLeft.X, topLeft.Y, _fieldSide, _fieldSide, 1,
-                        Brushes.Black, Brushes.SaddleBrown));
-                }
-
-            foreach (var element in _boardElements)
-                _canvas.Children.Add(element);
-        }
-
-        private readonly IList<UIElement> _markers = new List<UIElement>();
-
-        /// <summary>
-        /// Clears guiding markers on the canvas.
-        /// </summary>
-        void ClearMarkers()
-        {
-            foreach (var marker in _markers)
-                _canvas.Children.Remove(marker);
-
-            _markers.Clear();
-        }
-
-        /// <summary>
         /// Adds guiding marker controls generated for the given selected field to the corresponding collections. 
         /// </summary>
-        private void AppendMarkers(PiecePosition selectedField)
+        private void AppendMarkers(PiecePosition selectedField, List<CheckerBoard.Marker> markers = null)
         {
             var possibleMovesForCurrentPosition = GetPossibleMovesStartingFrom(selectedField);
             foreach (var move in possibleMovesForCurrentPosition)
             {
                 var end = move.SubMoves.Last().End;
-                var topLeftCorner = GetTopLeftCorner(end.Col, end.Row, _markerOffset);
-                _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y,
-                    _markerSide, _markerSide, 3,
-                    Brushes.GreenYellow, null));
+                markers?.Add(new CheckerBoard.Marker(end, Brushes.GreenYellow));
             }
         }
 
@@ -632,140 +479,103 @@ namespace Monitor.UI.Board
         /// </summary>
         void UpdateMarkers()
         {
-            ClearMarkers();
-
             if (_userMoveRequest != null)
             {
+                var markers = new List<CheckerBoard.Marker>();
+                
                 foreach (var move in _userMoveRequest.PossibleMoves)
                 {
                     var start = move.SubMoves[0].Start;
-                    var topLeftCorner = GetTopLeftCorner(start.Col, start.Row, _markerOffset);
-                    _markers.Add(CanvasDrawingUtils.CreateShape<Rectangle>(topLeftCorner.X, topLeftCorner.Y,
-                        _markerSide, _markerSide, 3,
-                        _selectedField.IsEqualTo(start) || _fieldUnderMousePointer.IsEqualTo(start) ?
-                            Brushes.Red : Brushes.BlueViolet, null));
+                    markers.Add(new CheckerBoard.Marker(start, FieldUnderMousePointer.IsEqualTo(start) ?
+                        Brushes.Red : Brushes.BlueViolet));
                 }
 
-                AppendMarkers(_selectedField);
-                AppendMarkers(_fieldUnderMousePointer);
-
-                foreach (var marker in _markers)
-                    _canvas.Children.Add(marker);
+                AppendMarkers(SelectedField, markers);
+                AppendMarkers(FieldUnderMousePointer, markers);
+                
+                _board.UpdateMarkers(markers);
             }
         }
 
-        /// <summary>
-        /// General method to update UI
-        /// </summary>
-        public void Draw()
-        {
-            UpdateBoardElements();
-            UpdateStateElements();
-            UpdateMarkers();
-        }
+        private readonly ICheckerBoard _board;
+        private readonly IStateSeed _chessSeed;
+        private readonly IStateSeed _checkersSeed;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public BoardUi(Canvas canvas, Dispatcher uiThreadDispatcher)
+        public BoardUi(ICheckerBoard board, Dispatcher uiThreadDispatcher, IStateSeed chessSeed, IStateSeed checkersSeed)
         {
             _uiThreadDispatcher = uiThreadDispatcher ?? throw new Exception("Dispatcher must be not null");
-            _canvas = canvas ?? throw new Exception("Invalid input");
-            _canvas.MouseDown += CanvasOnMouseDown;
-            _canvas.MouseMove += CanvasOnMouseMove;
-            _canvas.MouseWheel += CanvasOnMouseWheel;
-            _canvas.CacheMode = new BitmapCache();
-            Draw();
+            _board = board;
+
+            if (chessSeed == null || chessSeed.Type != StateTypeId.Chess)
+                throw new Exception("Invalid chess seed");
+
+            _chessSeed = chessSeed;
+            
+            if (checkersSeed == null || checkersSeed.Type != StateTypeId.Checkers)
+                throw new Exception("Invalid checkers seed");
+
+            _checkersSeed = checkersSeed;
+        }
+
+        /// <summary>
+        /// Subscribes to the events raised by the checkerboard.
+        /// </summary>
+        private void ConnectToBoard()
+        {
+            _board.FieldHovered += OnFieldHovered;
+            _board.FieldSelected += OnFieldSelected;
+            _board.MouseWheelChanged += OnMouseWheelChanged;
+        }
+
+        /// <summary>
+        /// Unsubscribes from the events raised by checkerboard.
+        /// </summary>
+        private void DisconnectFromBoard()
+        {
+            _board.FieldHovered -= OnFieldHovered;
+            _board.FieldSelected -= OnFieldSelected;
+            _board.MouseWheelChanged -= OnMouseWheelChanged;
         }
 
         /// <summary>
         /// Position of the board field under the mouse pointer (if valid).
         /// </summary>
-        PiecePosition _fieldUnderMousePointer = PiecePosition.Invalid();
+        private PiecePosition FieldUnderMousePointer => _board.FieldUnderMousePointer;
 
-        /// <summary>
-        /// Functionality to facilitate selection of moves (especially
-        /// in case there are multiple moves with the same end position).
-        /// </summary>
-        private class MoveSelector
-        {
-            private readonly IList<Move> _moves;
-            private int _selectedMoveId = 0;
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public MoveSelector(IList<Move> moves)
-            {
-                if (moves == null || moves.Count == 0)
-                    throw new ArgumentException("Invalid collection of moves.");
-                    
-                _moves = moves.ToArray();
-            }
-
-            /// <summary>
-            /// Selects next move in the collection of moves.
-            /// </summary>
-            public void SelectNextMove()
-            {
-                _selectedMoveId = (_selectedMoveId + 1) % _moves.Count;
-            }
-
-            /// <summary>
-            /// Selects previous move in the collection of moves.
-            /// </summary>
-            public void SelectPreviousMove()
-            {
-                _selectedMoveId = (_selectedMoveId + _moves.Count - 1) % _moves.Count;
-            }
-
-            /// <summary>
-            /// Returns the selected move.
-            /// </summary>
-            public Move SelectedMove => _moves[_selectedMoveId];
-        }
-
-        private MoveSelector _moveSelector = null;
+        private OptionSelector _optionSelector = null;
 
         /// <summary>
         /// MouseMove handler.
         /// </summary>
-        private void CanvasOnMouseMove(object sender, MouseEventArgs e)
+        private void OnFieldHovered(PiecePosition pos)
         {
-            var fieldPositions = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
-
-            if (_fieldUnderMousePointer.IsEqualTo(fieldPositions))
-                return;
-
-            _fieldUnderMousePointer = fieldPositions;
-            _moveSelector = null;
+            _optionSelector = null;
             ClearMovePreview();
             UpdateMarkers();
-            
-            if (_fieldUnderMousePointer.IsValid && _selectedField.IsValid && _userMoveRequest != null)
-            {
-                var possibleMovesForCurrentPosition =
-                    GetPossibleMovesEndingAt(GetPossibleMovesStartingFrom(_selectedField), _fieldUnderMousePointer);
 
-                if (possibleMovesForCurrentPosition.Length != 0)
+            if (FieldUnderMousePointer.IsValid && SelectedField.IsValid && _userMoveRequest != null)
+            {
+                var moves =
+                    GetPossibleMovesEndingAt(GetPossibleMovesStartingFrom(SelectedField), FieldUnderMousePointer);
+
+                if (moves.Length != 0)
                 {
-                    _moveSelector = new MoveSelector(possibleMovesForCurrentPosition);
+                    _optionSelector = new OptionSelector(moves.Select(x => x.FinalPieceRank).ToList(),
+                        moves.Select(x => x.Index).ToList());
                     UpdateMovePreview();
                 }
             }
         }
-
-        private readonly IList<UIElement> _previewElements = new List<UIElement>();
 
         /// <summary>
         /// Removes "move preview" element from the canvas.
         /// </summary>
         private void ClearMovePreview()
         {
-            foreach (var element in _previewElements)
-                _canvas.Children.Remove(element);
-
-            _previewElements.Clear();
+            _board.UpdatePreviewPiece(0);
         }
 
         /// <summary>
@@ -773,36 +583,27 @@ namespace Monitor.UI.Board
         /// </summary>
         private void UpdateMovePreview()
         {
-            if (_moveSelector == null)
+            if (_optionSelector == null)
                 throw new InvalidOperationException("Invalid input data");
 
-            ClearMovePreview();
-
-            var selectedMove = _moveSelector.SelectedMove;
-            var selectedPiece = selectedMove.FinalPieceRank != 0 ?
-                selectedMove.FinalPieceRank : _state[_selectedField.LinearPosition];
-            var tracePieceId = _pieceController.GetPieceTraceId(selectedPiece);
-            var topLeftCorner = GetTopLeftCorner(_fieldUnderMousePointer);
-            foreach (var element in _pieceController.CreatePieceElements(topLeftCorner, _fieldSide, tracePieceId))
-                _previewElements.Add(element);
-
-            foreach (var element in _previewElements)
-                _canvas.Children.Add(element);
+            var selectedOption = _optionSelector.SelectedOption;
+            var selectedPiece = selectedOption != 0 ? selectedOption : _state.Data[SelectedField.LinearPosition];
+            _board.UpdatePreviewPiece(selectedPiece);
         }
 
         /// <summary>
         /// MouseWheel handler.
         /// </summary>
-        private void CanvasOnMouseWheel(object sender, MouseWheelEventArgs e)
+        private void OnMouseWheelChanged(int delta, PiecePosition pos)
         {
-            if (_moveSelector == null || e.Delta == 0)
+            if (_optionSelector == null || delta == 0)
                 return;
 
-            if (e.Delta > 0)
-                _moveSelector.SelectNextMove();
+            if (delta > 0)
+                _optionSelector.SelectNextMove();
             else
-                _moveSelector.SelectPreviousMove();
-            
+                _optionSelector.SelectPreviousMove();
+
             UpdateMovePreview();
         }
 
@@ -812,21 +613,18 @@ namespace Monitor.UI.Board
         private void ResetUserInput()
         {
             _userMoveRequest = null;
-            _moveSelector = null;
-            _selectedField = PiecePosition.Invalid();
+            _optionSelector = null;
+            _board.ResetSelectedField();
         }
 
         /// <summary>
-        /// Event handler
+        /// Mouse down handler.
         /// </summary>
-        private void CanvasOnMouseDown(object sender, MouseButtonEventArgs e)
+        private void OnFieldSelected(PiecePosition pos)
         {
-            _selectedField = CanvasCoordinateToFieldPosition(e.GetPosition(_canvas));
-
-            if (_userMoveRequest != null && _moveSelector != null)
+            if (_userMoveRequest != null && _optionSelector != null)
             {
-                var moveId = _moveSelector.SelectedMove.Index;
-                _userMoveRequest.UserMoveResult.SetResult(moveId);
+                _userMoveRequest.UserMoveResult.SetResult(_optionSelector.SelectedOptionId);
                 ResetUserInput();
             }
 
@@ -841,13 +639,8 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Notifies about change of the corresponding property
         /// </summary>
-        protected void OnPropertyChanged(string name)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
-            }
-        }
+        protected void OnPropertyChanged(string name) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         /// <summary>
         /// Property setter with notification
@@ -859,6 +652,5 @@ namespace Monitor.UI.Board
             OnPropertyChanged(propertyName);
             return true;
         }
-
     }
 }

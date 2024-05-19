@@ -42,6 +42,7 @@
     <ClInclude Include="Headers\Chess\ChessState.h" />
     <ClInclude Include="Headers\Chess\StateHandle.h" />
     <ClInclude Include="Headers\INet.h" />
+    <ClInclude Include="Headers\IStateEditor.h" />
     <ClInclude Include="Headers\IStateReadOnly.h" />
     <ClInclude Include="Headers\IMinimalStateReadonly.h" />
     <ClInclude Include="Headers\IMinimalAgent.h" />
@@ -57,6 +58,7 @@
     <ClInclude Include="Headers\PiecePosition.h" />
     <ClInclude Include="Headers\RandomAgent.h" />
     <ClInclude Include="Headers\StateConverter.h" />
+    <ClInclude Include="Headers\StateEditor.h" />
     <ClInclude Include="Headers\StateHandleGeneral.h" />
     <ClInclude Include="Headers\StateTraceRecorder.h" />
     <ClInclude Include="Headers\StateTypeId.h" />
@@ -92,6 +94,7 @@
     <ClCompile Include="Source\PiecePosition.cpp" />
     <ClCompile Include="Source\RandomAgent.cpp" />
     <ClCompile Include="Source\StateConverter.cpp" />
+    <ClCompile Include="Source\StateEditor.cpp" />
     <ClCompile Include="Source\StateHandleGeneral.cpp" />
     <ClCompile Include="Source\StateTraceRecorder.cpp" />
     <ClCompile Include="Source\StateTypeController.cpp" />

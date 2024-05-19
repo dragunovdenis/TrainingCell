@@ -38,6 +38,16 @@ namespace TrainingCell::Chess
 		};
 	}
 
+	std::vector<int> PieceController::get_ally_pieces()
+	{
+		return { Pawn, Rook, Knight, Bishop, Queen, King };
+	}
+
+	std::vector<int> PieceController::get_rival_pieces()
+	{
+		return { anti(Pawn), anti(Rook), anti(Knight), anti(Bishop), anti(Queen), anti(King) };
+	}
+
 	bool PieceController::is_ally_piece(const int piece_token)
 	{
 		return  is_piece(piece_token) && (piece_token & AntiPieceFlag) == 0;
@@ -60,7 +70,12 @@ namespace TrainingCell::Chess
 
 	bool PieceController::is_king(const int piece_token)
 	{
-		return is_ally_piece(piece_token) && extract_min_piece_rank(piece_token) == King;
+		return is_ally_piece(piece_token) && is_a_king(piece_token);
+	}
+
+	bool PieceController::is_a_king(const int piece_token)
+	{
+		return extract_min_piece_rank(piece_token) == King;
 	}
 
 	bool PieceController::is_pawn(const int piece_token)

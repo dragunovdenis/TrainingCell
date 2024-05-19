@@ -33,6 +33,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.-->
         <converters1:BoolToVisibilityConverter 
             x:Key="BoolToVisibilityConverter"
         />
+        <converters1:InvertBoolToVisibilityConverter 
+            x:Key="InvertBoolToVisibilityConverter"
+        />
 
         <Style TargetType="Border" x:Key="LocalBorderStyle">
             <Setter Property="CornerRadius" Value="6"/>

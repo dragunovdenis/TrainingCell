@@ -17,6 +17,7 @@
 
 #pragma once
 #include "IMinimalAgent.h"
+#include "IStateEditor.h"
 #include "IStateSeed.h"
 
 namespace TrainingCell
@@ -37,6 +38,12 @@ namespace TrainingCell
 		/// Returns "seed" of the "start" state represented with the given type identifier.
 		/// </summary>
 		static std::unique_ptr<IStateSeed> get_start_seed(const StateTypeId type);
+
+		/// <summary>
+		/// Instantiates state editor and returns pointer to it. It is a responsibility
+		/// of the caller to make sure that the instance is properly disposed.
+		/// </summary>
+		static IStateEditor* instantiate_editor(const StateTypeId type);
 
 		/// <summary>
 		/// Returns "true" if the given pair of agents can "play" with each other in the context of the given state.

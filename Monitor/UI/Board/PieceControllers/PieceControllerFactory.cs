@@ -1,4 +1,4 @@
-﻿//Copyright (c) 2023 Denys Dragunov, dragunovdenis@gmail.com
+﻿//Copyright (c) 2024 Denys Dragunov, dragunovdenis@gmail.com
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
 //in the Software without restriction, including without limitation the rights
@@ -15,35 +15,27 @@
 //OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.Collections.Generic;
-using System.Windows;
 using Monitor.Dll;
 
 namespace Monitor.UI.Board.PieceControllers
 {
     /// <summary>
-    /// Interface to a piece visualization controller
+    /// Factory to construct piece controllers based on state ID.
     /// </summary>
-    internal interface IPieceController
+    internal static class PieceControllerFactory
     {
         /// <summary>
-        /// Returns elements of a piece represented with the given ID and placed on a canvas at the given coordinate.
+        /// Returns instance of the controller based on the given state type ID.
         /// </summary>
-        IEnumerable<UIElement> CreatePieceElements(Point topLeft, double fieldSize, int pieceId);
-        
-        /// <summary>
-        /// Returns "piece ID" that the current instance of controller will visualize as a "captured" piece of the corresponding color.
-        /// </summary>
-        int GetCapturedPieceId(bool white);
+        public static IPieceController Create(DllWrapper.StateTypeId stateTypeId)
+        {
+            switch (stateTypeId)
+            {
+                case DllWrapper.StateTypeId.Checkers: return new CheckersPieceController();
+                case DllWrapper.StateTypeId.Chess: return new ChessPieceController();
+                default: return null;
+            }
 
-        /// <summary>
-        /// Returns "piece ID" that the current instance of controller will visualize as a "piece trace" of the corresponding rank.
-        /// </summary>
-        int GetPieceTraceId(int pieceId);
-
-        /// <summary>
-        /// Returns type ID of the state the controller is compatible with.
-        /// </summary>
-        DllWrapper.StateTypeId StateTypeId { get; }
+        }
     }
 }

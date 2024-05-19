@@ -72,10 +72,5 @@ namespace Monitor.UI
         /// Event that is invoked each time we want to update training information on UI
         /// </summary>
         event Action<IList<string>> InfoEvent;
-
-        /// <summary>
-        /// Method to redraw UI
-        /// </summary>
-        void Draw();
     }
 }

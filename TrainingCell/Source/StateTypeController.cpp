@@ -18,6 +18,7 @@
 #include "../Headers/StateTypeController.h"
 #include "../Headers/Checkers/CheckersState.h"
 #include "../Headers/Chess/ChessState.h"
+#include "../Headers/StateEditor.h"
 
 namespace TrainingCell
 {
@@ -31,7 +32,14 @@ namespace TrainingCell
 	std::unique_ptr<IStateSeed> StateTypeController::get_start_seed(const StateTypeId type)
 	{
 		if (type == Checkers::CheckersState::type())  return std::make_unique<Checkers::CheckersState>(Checkers::CheckersState::get_start_state());
-		if (type == Chess::ChessState::type())        return std::make_unique <Chess::ChessState>(Chess::ChessState::get_start_state());
+		if (type == Chess::ChessState::type())        return std::make_unique<Chess::ChessState>(Chess::ChessState::get_start_state());
+		throw std::exception("State seed is undefined.");
+	}
+
+	IStateEditor* StateTypeController::instantiate_editor(const StateTypeId type)
+	{
+		if (type == Checkers::CheckersState::type())  return new StateEditor<Checkers::CheckersState>();
+		if (type == Chess::ChessState::type())        return new StateEditor<Chess::ChessState>();
 		throw std::exception("State seed is undefined.");
 	}
 

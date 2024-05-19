@@ -18,6 +18,7 @@
 #pragma once
 #include "../TrainingCell/Headers/Board.h"
 #include "../TrainingCell/Headers/Agent.h"
+#include "../TrainingCell/Headers/IStateEditor.h"
 #include "../TrainingCell/Headers/Move.h"
 
 #ifdef TRAINING_CELL_EXPORTS
@@ -37,9 +38,14 @@ namespace TrainingCell
 }
 
 /// <summary>
-/// Delegate to acquire array from the caller side
+/// Delegate to acquire array of unsigned integers from the caller side
 /// </summary>
 typedef void (*GetArrayCallBack)(const int size, const unsigned int* arr);
+
+/// <summary>
+/// Delegate to acquire array of signed integers from the caller side
+/// </summary>
+typedef void (*GetSignedArrayCallBack)(const int size, const int* arr);
 
 extern "C"
 {
@@ -54,6 +60,18 @@ extern "C"
 		TrainingCell::StateTypeId state_type_id,
 		TrainingCell::PublishStateCallBack publishStateCallBack,
 		TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack, TrainingCell::CancelCallBack cancellationCallBack,
+		TrainingCell::ErrorMessageCallBack errorCallBack, TrainingCell::Board::Stats& stats);
+
+	/// <summary>
+	/// Plays given number of episodes between the given pair of agents.
+	/// Returns statistics if succeeded.
+	/// </summary>
+	TRAINING_CELL_API int PlayStateSeed(TrainingCell::Agent* const agent1,
+		TrainingCell::Agent* const agent2,
+		int episodes, const TrainingCell::IStateSeed* state_seed_ptr,
+		TrainingCell::PublishStateCallBack publishStateCallBack,
+		TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack,
+		TrainingCell::CancelCallBack cancellationCallBack,
 		TrainingCell::ErrorMessageCallBack errorCallBack, TrainingCell::Board::Stats& stats);
 
 	/// <summary>
@@ -544,4 +562,51 @@ extern "C"
 	/// </summary>
 	TRAINING_CELL_API bool TdlEnsembleAgentSetRunMultiThreaded(TrainingCell::TdlEnsembleAgent* agent_ptr, const bool run_multi_threaded);
 #pragma endregion TdlEnsembleAgent
+
+#pragma region StateEditor
+	/// <summary>
+	/// Returns pointer to an instance of an editor for the given state.
+	/// Returns null pointer if fails.
+	/// </summary>
+	TRAINING_CELL_API void* ConstructStateEditor(TrainingCell::StateTypeId state_type_id);
+
+	/// <summary>
+	/// Frees instance of state editor.
+	/// Returns "true" if succeeded. 
+	/// </summary>
+	TRAINING_CELL_API bool FreeStateEditor(const TrainingCell::IStateEditor* editor_ptr);
+
+	/// <summary>
+	/// Mechanism to acquire representation of the current state from the pointed editor.
+	/// </summary>
+	TRAINING_CELL_API bool StateEditorGetState(const TrainingCell::IStateEditor* editor_ptr, const GetSignedArrayCallBack acquireStateCallBack);
+
+	/// <summary>
+	/// Mechanism to acquire edit options for the given position on board.
+	/// </summary>
+	TRAINING_CELL_API bool StateEditorGetOptions(const TrainingCell::IStateEditor* editor_ptr,
+		const TrainingCell::PiecePosition pos, const GetSignedArrayCallBack acquireEditOptionsCallBack);
+
+	/// <summary>
+	/// Applies option with the given ID to the board field at the given position.
+	/// </summary>
+	TRAINING_CELL_API bool StateEditorApplyOption(TrainingCell::IStateEditor* editor_ptr,
+		const TrainingCell::PiecePosition pos, const int option_id);
+
+	/// <summary>
+	/// Resets edited state.
+	/// </summary>
+	TRAINING_CELL_API bool StateEditorReset(TrainingCell::IStateEditor* editor_ptr);
+
+	/// <summary>
+	/// Clears edited state.
+	/// </summary>
+	TRAINING_CELL_API bool StateEditorClear(TrainingCell::IStateEditor* editor_ptr);
+
+	/// <summary>
+	/// Returns type ID of the edited state.
+	/// </summary>
+	TRAINING_CELL_API TrainingCell::StateTypeId StateEditorGetTypeId(const TrainingCell::IStateEditor* editor_ptr);
+
+#pragma endregion StateEditor
 }

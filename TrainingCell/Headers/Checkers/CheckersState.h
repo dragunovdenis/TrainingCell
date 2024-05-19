@@ -406,6 +406,29 @@ namespace TrainingCell::Checkers
 		/// </summary>
 		template <class P>
 		static P get_anti_piece(const P& piece);
+
+		/// <summary>
+		/// Returns collections of "piece values" that can be "put"
+		/// to the field with the given position by means of "editing".
+		/// </summary>
+		[[nodiscard]] std::vector<int> get_edit_options(const PiecePosition& pos) const;
+
+		/// <summary>
+		/// Applies "edit" option with the given ID to the field with the given position.
+		/// The actual value of the edit option is resolved via its index in the context of
+		/// the collection of options available for the given field <see cref="get_edit_options"/>.
+		/// </summary>
+		void apply_edit_option(const PiecePosition& pos, const int option_id);
+
+		/// <summary>
+		/// Resets state to its initial configuration.
+		/// </summary>
+		void reset();
+
+		/// <summary>
+		/// Removes all the pieces from the board.
+		/// </summary>
+		void clear();
 	};
 }
 

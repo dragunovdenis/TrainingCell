@@ -21,7 +21,6 @@
 #include "../TrainingCell/Headers/RandomAgent.h"
 #include "../TrainingCell/Headers/InteractiveAgent.h"
 #include "../TrainingCell/Headers/StateTypeController.h"
-#include "../TrainingCell/Headers/Chess/ChessState.h"
 
 namespace
 {
@@ -36,6 +35,29 @@ namespace
 	}
 }
 
+int PlayStateSeed(TrainingCell::Agent* const agent1,
+	TrainingCell::Agent* const agent2,
+	int episodes, const TrainingCell::IStateSeed* state_seed_ptr,
+	TrainingCell::PublishStateCallBack publishStateCallBack,
+	TrainingCell::PublishEndEpisodeStatsCallBack publishStatsCallBack,
+	TrainingCell::CancelCallBack cancellationCallBack,
+	TrainingCell::ErrorMessageCallBack errorCallBack, TrainingCell::Board::Stats& stats)
+{
+	try
+	{
+		stats = TrainingCell::Board::play(agent1, agent2, episodes, *state_seed_ptr,
+			50, publishStateCallBack, publishStatsCallBack,
+			cancellationCallBack, errorCallBack);
+
+		return 0;
+	}
+	catch (...)
+	{
+		stats = { -1, -1, -1 };
+		return -1;
+	}
+}
+
 int Play(TrainingCell::Agent* const agent1,
 	TrainingCell::Agent* const agent2,
 	int episodes, TrainingCell::StateTypeId state_type_id,
@@ -44,19 +66,21 @@ int Play(TrainingCell::Agent* const agent1,
 	TrainingCell::CancelCallBack cancellationCallBack,
 	TrainingCell::ErrorMessageCallBack errorCallBack, TrainingCell::Board::Stats& stats)
 {
+
+	std::unique_ptr<TrainingCell::IStateSeed> state_seed_ptr = nullptr;
+
 	try
 	{
-		const auto seed_ptr = TrainingCell::StateTypeController::get_start_seed(state_type_id);
-		stats = TrainingCell::Board::play(agent1, agent2, episodes, *seed_ptr,
-		                          50, publishStateCallBack, publishStatsCallBack,
-		                          cancellationCallBack, errorCallBack);
-
-		return 0;
-	} catch (...)
+		state_seed_ptr = TrainingCell::StateTypeController::get_start_seed(state_type_id);
+	}
+	catch (...)
 	{
-		stats ={-1, -1, -1};
+		stats = { -1, -1, -1 };
 		return -1;
 	}
+
+	return PlayStateSeed(agent1, agent2, episodes, state_seed_ptr.get(),
+		publishStateCallBack, publishStatsCallBack, cancellationCallBack, errorCallBack, stats);
 }
 
 int Train(TrainingCell::Agent* agent1, TrainingCell::Agent* agent2, int episodes,
@@ -823,3 +847,96 @@ TRAINING_CELL_API bool TdlEnsembleAgentSetRunMultiThreaded(TrainingCell::TdlEnse
 	return true;
 }
 #pragma endregion TdlEnsembleAgent
+
+#pragma region StateEditor
+
+void* ConstructStateEditor(TrainingCell::StateTypeId state_type_id)
+{
+	try
+	{
+		return TrainingCell::StateTypeController::instantiate_editor(state_type_id);
+	} catch(...)
+	{
+		return nullptr;
+	}
+}
+
+bool FreeStateEditor(const TrainingCell::IStateEditor* editor_ptr)
+{
+	if (!editor_ptr)
+		return false;
+
+	delete editor_ptr;
+
+	return true;
+}
+
+bool StateEditorGetState(const TrainingCell::IStateEditor* editor_ptr, const GetSignedArrayCallBack acquireStateCallBack)
+{
+	if (!editor_ptr || !acquireStateCallBack)
+		return false;
+
+	const auto state_vec = editor_ptr->to_vector();
+	acquireStateCallBack(static_cast<int>(state_vec.size()), state_vec.data());
+
+	return true;
+}
+
+bool StateEditorGetOptions(const TrainingCell::IStateEditor* editor_ptr, const TrainingCell::PiecePosition pos,
+	const GetSignedArrayCallBack acquireEditOptionsCallBack)
+{
+	if (!editor_ptr || !acquireEditOptionsCallBack)
+		return false;
+
+	const auto options = editor_ptr->get_options(pos);
+	acquireEditOptionsCallBack(static_cast<int>(options.size()), options.data());
+
+	return true;
+}
+
+bool StateEditorApplyOption(TrainingCell::IStateEditor* editor_ptr, const TrainingCell::PiecePosition pos,
+	const int option_id)
+{
+	if (!editor_ptr)
+		return false;
+
+	try
+	{
+		editor_ptr->apply_option(pos, option_id);
+	} catch (...)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool StateEditorReset(TrainingCell::IStateEditor* editor_ptr)
+{
+	if (!editor_ptr)
+		return false;
+
+	editor_ptr->reset();
+
+	return true;
+}
+
+bool StateEditorClear(TrainingCell::IStateEditor* editor_ptr)
+{
+	if (!editor_ptr)
+		return false;
+
+	editor_ptr->clear();
+
+	return true;
+}
+
+TrainingCell::StateTypeId StateEditorGetTypeId(const TrainingCell::IStateEditor* editor_ptr)
+{
+	if (!editor_ptr)
+		return TrainingCell::StateTypeId::INVALID;
+
+	return editor_ptr->get_state_type();
+}
+
+#pragma endregion StateEditor
