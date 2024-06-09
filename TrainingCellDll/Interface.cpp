@@ -457,6 +457,21 @@ bool TdLambdaAgentGetScriptString(const TrainingCell::TdLambdaAgent* agent_ptr, 
 
 	return true;
 }
+
+bool TdLambdaAgentEvaluateOptions(const TrainingCell::TdLambdaAgent* agent_ptr,
+	const TrainingCell::IStateReadOnly* state_ptr, const GetDoubleArrayCallBack get_rewards_callback)
+{
+	if (!agent_ptr || !state_ptr || !get_rewards_callback ||
+		!TrainingCell::StateTypeController::states_are_compatible(agent_ptr->get_state_type_id(),
+			state_ptr->current_state_seed().state_type()))
+		return false;
+
+	const auto option_rewards = agent_ptr->evaluate_options(*state_ptr);
+	get_rewards_callback(static_cast<int>(option_rewards.size()), option_rewards.data());
+
+	return true;
+}
+
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 void* ConstructInteractiveAgent(const MakeMoveCallBack make_move_callback,
@@ -940,3 +955,44 @@ TrainingCell::StateTypeId StateEditorGetTypeId(const TrainingCell::IStateEditor*
 }
 
 #pragma endregion StateEditor
+
+#pragma region IState
+
+TrainingCell::StateTypeId IStateGetState(const TrainingCell::IStateReadOnly* state_ptr, const GetSignedArrayCallBack get_moves_callback)
+{
+	if (!state_ptr || !get_moves_callback)
+		return TrainingCell::StateTypeId::INVALID;
+
+	const auto state_std = state_ptr->is_inverted() ?
+		state_ptr->evaluate_ui_inverted() : state_ptr->evaluate_ui();
+
+	get_moves_callback(static_cast<int>(state_std.size()), state_std.data());
+
+	return state_ptr->current_state_seed().state_type();
+}
+
+TrainingCell::StateTypeId IStateGetMoves(const TrainingCell::IStateReadOnly* state_ptr, const GetMovesArrayCallBack get_moves_callback)
+{
+	if (!state_ptr || !get_moves_callback)
+		return TrainingCell::StateTypeId::INVALID;
+
+	const auto moves = state_ptr->get_all_moves();
+	std::vector<MoveDto> moves_dto(moves.size());
+	std::vector<TrainingCell::Move> moves_adjusted = moves;
+
+	if (state_ptr->is_inverted())
+		std::ranges::transform(moves_adjusted, moves_adjusted.begin(), [](const auto& m) { return m.get_inverted(); });
+
+	std::ranges::transform(moves_adjusted, moves_dto.begin(), [](auto& m)
+		{
+
+			return MoveDto{ m.sub_moves.data(),
+				static_cast<int>(m.sub_moves.size()),
+				m.final_rank };
+		});
+
+	get_moves_callback(static_cast<int>(moves_dto.size()), moves_dto.data());
+
+	return state_ptr->current_state_seed().state_type();
+}
+#pragma endregion IState

@@ -26,8 +26,8 @@ namespace TrainingCell
 	/// <summary>
 	///	Callback to publish current state and move
 	/// </summary>
-	typedef void (*PublishStateCallBack)(const int* state, const int state_size,
-	                                             const SubMove* sub_moves, const int sub_moves_count, const IMinimalAgent* agent_to_play);
+	typedef void (*PublishStateCallBack)(const IStateReadOnly* state,
+		const SubMove* sub_moves, const int sub_moves_count, const IMinimalAgent* agent_to_play);
 
 	/// <summary>
 	///	Callback to publish training statistics

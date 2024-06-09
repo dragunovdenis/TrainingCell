@@ -16,6 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Monitor.DataStructures;
@@ -54,9 +55,8 @@ namespace Monitor.Dll
         /// Checkers move report delegate
         /// </summary>
         public delegate void PublishStateCallBack(
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)]
-            int[] state, int stateSize,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 3)]
+            IntPtr statePtr,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
             SubMove[] subMoves, int subMovesCount, IntPtr agentToPlayPtr);
 
         /// <summary>
@@ -83,20 +83,36 @@ namespace Monitor.Dll
             string message);
 
         /// <summary>
-        /// Delegate to acquire array of unsigned integers from the managed side
+        /// Delegate to acquire an array of unsigned integers from the un-managed side
         /// </summary>
-        public delegate void AcquireArrayCallBack(
+        public delegate void AcquireUnsignedArrayCallBack(
             int size,
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
             uint[] array);
 
         /// <summary>
-        /// Delegate to acquire array of signed integers from the managed side
+        /// Delegate to acquire an array of signed integers from the un-managed side
         /// </summary>
         public delegate void AcquireSignedArrayCallBack(
             int size,
             [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
             int[] array);
+
+        /// <summary>
+        /// Delegate to acquire an array of double precision floating point values from the un-managed side
+        /// </summary>
+        public delegate void AcquireDoubleArrayCallBack(
+            int size,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
+            double[] array);
+
+        /// <summary>
+        /// Delegate to acquire an array of "moves" from the un-managed side
+        /// </summary>
+        public delegate void AcquireMovesArrayCallBack(
+            int size,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)]
+            MoveDto[] array);
 
         /// <summary>
         /// Represents state type identifier.
@@ -367,7 +383,7 @@ namespace Monitor.Dll
         /// </summary>
         [DllImport(dllName: DllName)]
         [return: MarshalAs(UnmanagedType.U1)]
-        public static extern bool TdLambdaAgentGetNetDimensions(IntPtr agentPtr, AcquireArrayCallBack catchArray);
+        public static extern bool TdLambdaAgentGetNetDimensions(IntPtr agentPtr, AcquireUnsignedArrayCallBack catchArray);
 
         /// <summary>
         /// Wrapper for the corresponding method
@@ -446,6 +462,24 @@ namespace Monitor.Dll
             StringBuilder buffer = new StringBuilder(1024);
             TdLambdaAgentGetScriptString(agentPtr, buffer, buffer.Capacity);
             return buffer.ToString();
+        }
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool TdLambdaAgentEvaluateOptions(IntPtr agentPtr, IntPtr statePtr, AcquireDoubleArrayCallBack acquireCallback);
+
+        /// <summary>
+        /// Adaptation of the external function with the same name.
+        /// Returns null if failed.
+        /// </summary>
+        public static double[] TdLambdaAgentEvaluateOptions(IntPtr agentPtr, IntPtr statePtr)
+        {
+            double[] result = null;
+            return TdLambdaAgentEvaluateOptions(agentPtr, statePtr, 
+                (size, array) => { result = array; }) ? result : null;
         }
 
         #endregion
@@ -852,6 +886,61 @@ namespace Monitor.Dll
         /// </summary>
         [DllImport(dllName: DllName)]
         public static extern StateTypeId StateEditorGetTypeId(IntPtr editorPtr);
+        #endregion
+
+        #region IState
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        private static extern StateTypeId IStateGetState(IntPtr statePtr, AcquireSignedArrayCallBack acquireCallback);
+
+        /// <summary>
+        /// Adaptation for the external method with the same name.
+        /// </summary>
+        internal static State.State IStateGetState(IntPtr statePtr)
+        {
+            int[] state = null;
+            var stateId = IStateGetState(statePtr, (size, array) =>
+            {
+                state = array;
+            });
+
+            return new State.State(state, stateId);
+        }
+
+        /// <summary>
+        /// Wrapper for the corresponding method
+        /// </summary>
+        [DllImport(dllName: DllName)]
+        private static extern StateTypeId IStateGetMoves(IntPtr statePtr, AcquireMovesArrayCallBack acquireCallback);
+
+        /// <summary>
+        /// Reads out moves from the given DTO collection.
+        /// </summary>
+        internal static Move[] ReadMoves(MoveDto[] dtoMoves)
+        {
+            return dtoMoves.Select((x, i) => new Move()
+            {
+                SubMoves = MemoryUtils.ReadArrayOfStructs<SubMove>(x.SubMoves, x.SubMovesCnt),
+                Index = i,
+                FinalPieceRank = x.FinalPieceRank,
+            }).ToArray();
+        }
+
+        /// <summary>
+        /// Adaptation for the external method with the same name.
+        /// </summary>
+        internal static (StateTypeId StateType, Move[] Moves) IStateGetMoves(IntPtr statePtr)
+        {
+            Move[] state = null;
+            var stateId = IStateGetMoves(statePtr, (size, array) =>
+            {
+                state = array != null ? ReadMoves(array) : Array.Empty<Move>();
+            });
+
+            return (stateId, state);
+        }
         #endregion
     }
 }

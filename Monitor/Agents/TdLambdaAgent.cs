@@ -80,9 +80,20 @@ namespace Monitor.Agents
     }
 
     /// <summary>
+    /// Interface for option evaluation functionality.
+    /// </summary>
+    public interface IOptionEvaluator
+    {
+        /// <summary>
+        /// Evaluates options offered by the given state.
+        /// </summary>
+        double[] EvaluateOptions(IntPtr statePtr);
+    }
+
+    /// <summary>
     /// Wrapper for the corresponding native class
     /// </summary>
-    public sealed class TdLambdaAgent : Agent, ITdLambdaAgentReadOnly
+    public sealed class TdLambdaAgent : Agent, ITdLambdaAgentReadOnly, IOptionEvaluator
     {
         private IntPtr _ptr;
 
@@ -451,6 +462,14 @@ namespace Monitor.Agents
             }
         }
 
+        /// <summary>
+        /// Evaluates options offered by the given state.
+        /// </summary>
+        public double[] EvaluateOptions(IntPtr statePtr)
+        {
+            return DllWrapper.TdLambdaAgentEvaluateOptions(Ptr, statePtr);
+        }
+        
         /// <summary>
         /// Returns script representation of the agent.
         /// </summary>

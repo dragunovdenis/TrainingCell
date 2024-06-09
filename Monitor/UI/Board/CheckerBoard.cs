@@ -494,9 +494,9 @@ namespace Monitor.UI.Board
         /// </summary>
         public void Clear()
         {
+            UpdateMarkers(null);
+            UpdatePreviewPiece(0);
             UpdateState(null);
-            ClearMarkers();
-            ClearPreview();
         }
     }
 }

@@ -108,12 +108,17 @@ namespace TrainingCell
 		/// <summary>
 		/// Equality operator
 		/// </summary>
-		bool operator == (const TdLambdaAgent& another_agent) const;
+		[[nodiscard]] bool operator == (const TdLambdaAgent& another_agent) const;
 
 		/// <summary>
 		/// Inequality operator
 		/// </summary>
-		bool operator != (const TdLambdaAgent& another_agent) const;
+		[[nodiscard]] bool operator != (const TdLambdaAgent& another_agent) const;
+
+		/// <summary>
+		/// Returns "rewards" evaluated at all the "option" moves offered by the given state.
+		/// </summary>
+		std::vector<double> evaluate_options(const IMinimalStateReadonly& state) const;
 
 		/// <summary>
 		/// Serializes the current instance of the agent into the "message-pack" format and saves it

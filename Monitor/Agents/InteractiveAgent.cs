@@ -57,13 +57,7 @@ namespace Monitor.Agents
             _makeMoveAdapter =
                 (state, stateSize, moves, movesSize) =>
                 {
-                    var movesAdapted = moves.Select((x, i) => new Move()
-                    {
-                        SubMoves = MemoryUtils.ReadArrayOfStructs<SubMove>(x.SubMoves, x.SubMovesCnt),
-                        Index = i,
-                        FinalPieceRank = x.FinalPieceRank,
-                    }).ToArray();
-
+                    var movesAdapted = DllWrapper.ReadMoves(moves);
                     return makeMove(state, movesAdapted);
                 };
 

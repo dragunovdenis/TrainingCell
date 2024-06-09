@@ -57,7 +57,7 @@ namespace TrainingCell
 	/// <summary>
 	/// General interface of TD(lambda) agent
 	/// </summary>
-	class TdlAbstractAgent : public Agent, ITdlSettingsReadOnly, NetWithConverterAbstract
+	class TdlAbstractAgent : public Agent, ITdlSettingsReadOnly, protected NetWithConverterAbstract
 	{
 		friend class TrainingCellTest::TdlambdaAgentRegressionTest; // for diagnostics purposes
 		StateConverter _converter{ StateConversionType::CheckersStandard }; // default value to preserve backward compatibility

@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -29,7 +30,6 @@ using Monitor.Agents;
 using Monitor.DataStructures;
 using Monitor.Dll;
 using Monitor.State;
-using Monitor.UI.Board.PieceControllers;
 using Monitor.Utils;
 using static Monitor.Dll.DllWrapper;
 
@@ -38,12 +38,12 @@ namespace Monitor.UI.Board
     /// <summary>
     /// Functionality to handle user interface of the checkers game
     /// </summary>
-    class BoardUi : ITwoPlayerGameUi
+    class GameEngine : IGameEngine
     {
         /// <summary>
         /// Types of agents
         /// </summary>
-        public enum AgentType : int
+        public enum AgentType
         {
             Random,
             TdLambda,
@@ -67,6 +67,83 @@ namespace Monitor.UI.Board
         /// The current state
         /// </summary>
         private State.State _state;
+
+        /// <summary>
+        /// Collection of evaluated moves.
+        /// </summary>
+        public ObservableCollection<EvaluatedMove> EvaluatedOptions { get; } = new ObservableCollection<EvaluatedMove>();
+
+        private EvaluatedMove _selectedOption;
+
+        /// <summary>
+        /// Pointer to the selected evaluated move from the collection above.
+        /// </summary>
+        public EvaluatedMove SelectedOption
+        {
+            get => _selectedOption;
+            set {
+                if (SetField(ref _selectedOption, value))
+                {
+                    _state.AddMoveTrace(_selectedOption?.Move.SubMoves, afterMoveDone: false);
+                    _board.UpdateState(_state);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates collection of evaluated moves according to the given date.
+        /// </summary>
+        private void UpdateEvaluatedMoves(Move[] moves, double[] values)
+        {
+            EvaluatedOptions.Clear();
+            if (moves == null || values == null)
+                return;
+
+            if (moves.Length != values.Length)
+                throw new Exception("Inconsistent data");
+            
+            var optionsSorted = moves.Select((m, i) => new EvaluatedMove(m, values[i], i)).ToArray();
+            optionsSorted = optionsSorted.OrderByDescending(x => x.Value).ToArray();
+
+            foreach (var option in optionsSorted)
+                EvaluatedOptions.Add(option);
+
+            SelectedOption = EvaluatedOptions.FirstOrDefault();
+        }
+
+        private TaskCompletionSource<bool> _optionEvaluationTask;
+        private bool _inspectOptions;
+
+        /// <summary>
+        /// Flag enabling the functionality allowing user to inspect moves and their values before actual move is taken.
+        /// </summary>
+        public bool InspectOptions
+        {
+            get => _inspectOptions;
+            set
+            {
+                if (SetField(ref _inspectOptions, value))
+                {
+                    if (_inspectOptions)
+                        _optionEvaluationTask = new TaskCompletionSource<bool>();
+                    else
+                    {
+                        _optionEvaluationTask.TrySetResult(true);
+                        _optionEvaluationTask = null;
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Method to resume game flow in case it was interrupted by the option evaluation procedure.
+        /// </summary>
+        public void CompleteOptionSelection()
+        {
+            if (_optionEvaluationTask == null) return;
+            _optionEvaluationTask.TrySetResult(true);
+            _optionEvaluationTask = new TaskCompletionSource<bool>();
+        }
 
         /// <summary>
         /// Data structure that facilitates user move processing
@@ -152,19 +229,42 @@ namespace Monitor.UI.Board
         public bool IsPlaying
         {
             get => _isPlaying;
-
-            private set => SetField(ref _isPlaying, value);
+            private set
+            {
+                if (SetField(ref _isPlaying, value))
+                    OnPropertyChanged(nameof(CanCancelPlaying));
+            }
         }
 
-        private bool _showProgressBar;
+        private bool _inspectionOngoing;
 
         /// <summary>
-        /// If "true" progress bar should be shown
+        /// Flag indicating thea move inspection is ongoing at the moment.
         /// </summary>
-        public bool ShowProgressBar
+        public bool InspectionOngoing
         {
-            get => _showProgressBar;
-            private set => _uiThreadDispatcher.Invoke(() => { SetField(ref _showProgressBar, value); });
+            get => _inspectionOngoing;
+            private set
+            {
+                if (SetField(ref _inspectionOngoing, value))
+                    OnPropertyChanged(nameof(CanCancelPlaying));
+            }
+        }
+
+        /// <summary>
+        /// Flag indicating that at the moment it is possible to cancel playing.
+        /// </summary>
+        public bool CanCancelPlaying => IsPlaying && !InspectionOngoing;
+
+        private bool _tdlIsPlayng;
+
+        /// <summary>
+        /// If "true" if it is a turn for TD(lambda) agent to make a move.
+        /// </summary>
+        public bool TdlAgentIsPlaying
+        {
+            get => _tdlIsPlayng;
+            private set => SetField(ref _tdlIsPlayng, value);
         }
 
         private string _previousMoveTime = "";
@@ -177,7 +277,7 @@ namespace Monitor.UI.Board
             get => _previousMoveTime;
             set => _uiThreadDispatcher.Invoke(() => { SetField(ref _previousMoveTime, value); });
         }
-
+        
         /// <summary>
         /// Handles loading of an agent to play for "whites" (so that user will play for "blacks")
         /// and starts the game
@@ -214,6 +314,8 @@ namespace Monitor.UI.Board
                     _userMoveRequest.UserMoveResult.SetResult(0);
                     _userMoveRequest = null;
                 }
+
+                CompleteOptionSelection();
             }
         }
 
@@ -227,12 +329,11 @@ namespace Monitor.UI.Board
             get => _inactiveAgent;
             set
             {
-                _uiThreadDispatcher.Invoke(() =>
+                if (SetField(ref _inactiveAgent, value))
                 {
-                    SetField(ref _inactiveAgent, value);
                     OnPropertyChanged(nameof(CanEditAgent));
-                    ShowProgressBar = _inactiveAgent is InteractiveAgent;
-                });
+                    TdlAgentIsPlaying = _inactiveAgent is InteractiveAgent;
+                }
             }
         }
 
@@ -258,25 +359,6 @@ namespace Monitor.UI.Board
         /// Flag indicating if agent editing is possible
         /// </summary>
         public bool CanEditAgent => InactiveAgent is TdLambdaAgent || InactiveAgent is EnsembleAgent;
-
-        /// <summary>
-        /// Adds extra symbols to the state to trace the series of given sub-moves (representing a move)
-        /// </summary>
-        private void AddMoveTrace(State.State state, SubMove[] subMoves)
-        {
-            if (subMoves == null)
-                return;
-
-            var pieceId = state.Data[subMoves.Last().End.LinearPosition];
-            var pieceController = PieceControllerFactory.Create(state.Type);
-            foreach (var move in subMoves)
-            {
-                if (move.Capture.IsValid)
-                    state.Data[move.Capture.LinearPosition] = pieceController.GetCapturedPieceId(white: pieceId > 0);
-
-                state.Data[move.Start.LinearPosition] = pieceController.GetPieceTraceId(pieceId);
-            }
-        }
 
         /// <summary>
         /// Returns state type compatible with the given state pair of agents.
@@ -326,8 +408,7 @@ namespace Monitor.UI.Board
         /// <param name="agentTypeWhite">Type of the "white" agent.</param>
         /// <param name="agentTypeBlack">Type of the "black" agent.</param>
         /// <param name="episodes">Number of episodes to play</param>
-        /// <param name="movePause">Number of milliseconds to wait between two successive moves</param>
-        public bool Play(AgentType agentTypeWhite, AgentType agentTypeBlack, int episodes, int movePause = 100)
+        public bool Play(AgentType agentTypeWhite, AgentType agentTypeBlack, int episodes)
         {
             if (IsPlaying)
                 return false;
@@ -352,32 +433,66 @@ namespace Monitor.UI.Board
                         var stateType = stateSeed.Type;
                         _uiThreadDispatcher.Invoke(ConnectToBoard);
 
+                        var optionEvaluator = agentBlack as IOptionEvaluator ?? agentWhite as IOptionEvaluator;
+
                         var timePoint = DateTime.Now;
                         var res = DllWrapper.Play(
                             agentWhite.Ptr, agentBlack.Ptr, episodes, stateSeed.Ptr,
-                            (stateData, size, subMoves, subMovesCount, agentToMovePtr) =>
+                            (statePtr, subMoves, subMovesCount, agentToMovePtr) =>
                             {
-                                if (size != Checkerboard.Fields)
-                                    throw new Exception("Invalid size of the state");
+                                var state = IStateGetState(statePtr);
+
+                                if (state.Data.Length != Checkerboard.Fields || state.Type != stateType)
+                                    throw new Exception("Incompatible data");
 
                                 var timePointNext = DateTime.Now;
                                 var elapsedTime = timePointNext - timePoint;
                                 PreviousMoveTime = elapsedTime.ToString(@"hh\:mm\:ss");
                                 timePoint = timePointNext;
 
-                                InactiveAgent = agentToMovePtr == agentWhite.Ptr ? agentBlack : agentWhite;
-
-                                var state = new State.State(stateData, stateType);
-                                AddMoveTrace(state, subMoves);
+                                state.AddMoveTrace(subMoves);
                                 _state = state;
-                                _uiThreadDispatcher.Invoke(() => _board.UpdateState(state), DispatcherPriority.ContextIdle);
-                                if (movePause > 0) Thread.Sleep(movePause);
+                                var tdlPlaying = _uiThreadDispatcher.Invoke(() =>
+                                {
+                                    _board.UpdateState(state);
+                                    InactiveAgent = agentToMovePtr == agentWhite.Ptr ? agentBlack : agentWhite;
+                                    return TdlAgentIsPlaying;
+                                });
+
+                                var evaluationTask = _uiThreadDispatcher.Invoke(() => _optionEvaluationTask);
+                                if (optionEvaluator != null && evaluationTask != null &&
+                                    !evaluationTask.Task.IsCompleted && !_uiThreadDispatcher.Invoke(() =>
+                                        _playTaskCancellation.IsCancellationRequested))
+                                {
+                                    var options = IStateGetMoves(statePtr);
+                                    
+                                    if (options.Moves.Length == 0)
+                                        return;
+                                    
+                                    var optValues = optionEvaluator.EvaluateOptions(statePtr);
+                                    _uiThreadDispatcher.Invoke(() =>
+                                    {
+                                        UpdateEvaluatedMoves(options.Moves, optValues);
+                                        _board.UpdateMarkers(null);
+                                        InspectionOngoing = true;
+                                        TdlAgentIsPlaying = false;
+                                    });
+
+                                    evaluationTask.Task.Wait();
+
+                                    _uiThreadDispatcher.Invoke(() =>
+                                    {
+                                        UpdateEvaluatedMoves(null, null);
+                                        InspectionOngoing = false;
+                                        TdlAgentIsPlaying = tdlPlaying;
+                                    });
+                                }
                             },
                             (whiteWon, blackWon, totalGamers) =>
                             {
-                                InactiveAgent = null;
                                 _uiThreadDispatcher.Invoke(() =>
                                 {
+                                    InactiveAgent = null;
                                     whiteWinsCounter += (whiteWon & !blackWon).ToInt();
                                     blackWinsCounter += (blackWon & !whiteWon).ToInt();
                                     staleMatesCounter += (whiteWon & blackWon).ToInt();
@@ -419,10 +534,12 @@ namespace Monitor.UI.Board
             {
                 _playTask = null;
                 _playTaskCancellation = null;
-                IsPlaying = false;
                 InfoEvent?.Invoke(null);
                 ResetUserInput();
+                EvaluatedOptions.Clear();
                 DisconnectFromBoard();
+                _board.Clear();
+                IsPlaying = false;
             }, TaskScheduler.FromCurrentSynchronizationContext());
             _playTask.Start();
 
@@ -504,7 +621,7 @@ namespace Monitor.UI.Board
         /// <summary>
         /// Constructor
         /// </summary>
-        public BoardUi(ICheckerBoard board, Dispatcher uiThreadDispatcher, IStateSeed chessSeed, IStateSeed checkersSeed)
+        public GameEngine(ICheckerBoard board, Dispatcher uiThreadDispatcher, IStateSeed chessSeed, IStateSeed checkersSeed)
         {
             _uiThreadDispatcher = uiThreadDispatcher ?? throw new Exception("Dispatcher must be not null");
             _board = board;

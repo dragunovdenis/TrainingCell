@@ -89,6 +89,16 @@ namespace TrainingCell
 		return !(*this == another_agent);
 	}
 
+	std::vector<double> TdLambdaAgent::evaluate_options(const IMinimalStateReadonly& state) const
+	{
+		const auto options_count = state.get_moves_count();
+		std::vector<double> result(options_count);
+		for (auto move_id = 0; move_id < state.get_moves_count(); ++move_id)
+			result[move_id] = TdLambdaSubAgent::evaluate(state, move_id, *this).value;
+
+		return result;
+	}
+
 	void TdLambdaAgent::save_to_file(const std::filesystem::path& file_path) const
 	{
 		DeepLearning::MsgPack::save_to_file(*this, file_path);

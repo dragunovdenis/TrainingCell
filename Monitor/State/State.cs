@@ -16,8 +16,11 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using Monitor.DataStructures;
 using Monitor.Dll;
+using Monitor.UI.Board.PieceControllers;
 
 namespace Monitor.State
 {
@@ -26,10 +29,12 @@ namespace Monitor.State
     /// </summary>
     internal class State
     {
+        private readonly int[] _dataOriginal;
+
         /// <summary>
         /// Values of the checkerboard fields (representing pieces on them).
         /// </summary>
-        public int[] Data { get; }
+        public ImmutableArray<int> Data { get; private set; }
         
         /// <summary>
         /// Type of the state.
@@ -37,11 +42,41 @@ namespace Monitor.State
         public DllWrapper.StateTypeId Type { get; }
 
         /// <summary>
+        /// Adds extra symbols to the state to trace the series of given sub-moves (representing a move)
+        /// </summary>
+        public void AddMoveTrace(SubMove[] subMoves, bool afterMoveDone = true)
+        {
+            if (subMoves == null || subMoves.Length == 0)
+            {
+                Data = _dataOriginal.ToImmutableArray();
+                return;
+            }
+
+            var rawData = _dataOriginal.ToArray();
+            var pieceId = rawData[afterMoveDone ? subMoves.Last().End.LinearPosition :
+                subMoves.First().Start.LinearPosition];
+            var pieceController = PieceControllerFactory.Create(Type);
+            
+            foreach (var move in subMoves)
+            {
+                if (move.Capture.IsValid)
+                    rawData[move.Capture.LinearPosition] = pieceController.GetCapturedPieceId(white: pieceId > 0);
+
+                rawData[move.Start.LinearPosition] = pieceController.GetPieceTraceId(pieceId);
+            }
+
+            rawData[subMoves.Last().End.LinearPosition] = pieceId;
+
+            Data = rawData.ToImmutableArray();
+        }
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public State(IList<int> data, DllWrapper.StateTypeId type)
         {
-            Data = data.ToArray();
+            _dataOriginal = data.ToArray();
+            Data = data.ToImmutableArray();
             Type = type;
         }
     }

@@ -104,12 +104,6 @@ namespace TrainingCell
 		                                        const ITdlSettingsReadOnly& settings, const INet& net) const;
 
 		/// <summary>
-		/// Calculates afterstate and its value
-		/// </summary>
-		[[nodiscard]] static MoveData evaluate(const IMinimalStateReadonly& state, const int move_id,
-			const INet& net);
-
-		/// <summary>
 		/// Calculates afterstate and its value.
 		/// </summary>
 		[[nodiscard]] static double evaluate(const IMinimalStateReadonly& state, const int move_id,
@@ -179,6 +173,11 @@ namespace TrainingCell
 		/// Returns index of the "best score" move (out of the collection of given ones) and the related data
 		/// </summary>
 		[[nodiscard]] static MoveData pick_move(const IMinimalStateReadonly& state, const INet& net);
+
+		/// <summary>
+		/// Calculates afterstate and its value
+		/// </summary>
+		[[nodiscard]] static MoveData evaluate(const IMinimalStateReadonly& state, const int move_id, const INet& net);
 
 		/// <summary>
 		/// Returns true if the current sub-agent is equal to the given sub-agent

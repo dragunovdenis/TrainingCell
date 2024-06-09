@@ -120,12 +120,12 @@ namespace TrainingCell
 	/// <summary>
 	/// Publishes current "state" if the corresponding call-back is assigned
 	/// </summary>
-	void publish_state(PublishStateCallBack publishCallback, const std::vector<int>& state, const Move& move, const IMinimalAgent& agent_to_play)
+	void publish_state(PublishStateCallBack publishCallback, const IStateReadOnly& state, const Move& moveTaken, const IMinimalAgent& agent_to_play)
 	{
 		if (publishCallback)
 		{
-			publishCallback(state.data(), static_cast<int>(state.size()), move.sub_moves.data(),
-				static_cast<int>(move.sub_moves.size()), &agent_to_play);
+			publishCallback(&state, moveTaken.sub_moves.data(),
+				static_cast<int>(moveTaken.sub_moves.size()), &agent_to_play);
 		}
 	}
 
@@ -134,7 +134,7 @@ namespace TrainingCell
 		const int max_moves_without_capture, PublishStateCallBack publish_state_callback, CancelCallBack cancel)
 	{
 		auto moves_without_capture = 0;
-		publish_state(publish_state_callback, state.evaluate_ui(), Move{}, agent_manager.agent_to_move());
+		publish_state(publish_state_callback, state, Move{}, agent_manager.agent_to_move());
 		while (state.get_moves_count() > 0 && moves_without_capture <= max_moves_without_capture && !state.is_draw())
 		{
 			const auto is_capture_move = make_move(state, agent_manager, publish_state_callback);
@@ -297,11 +297,9 @@ namespace TrainingCell
 			const auto move = state_handle.get_all_moves()[chosen_move_id];
 			const auto move_adjusted = state_handle.is_inverted() ? move.get_inverted() : move;
 			state_handle.move_invert_reset(chosen_move_id);
-			const auto state_std = state_handle.is_inverted() ?
-				state_handle.evaluate_ui_inverted() : state_handle.evaluate_ui();
 
 			//At the moment, agents have not been swapped, so "agent-to-play" is actually the "agent-to-wait"
-			publish_state(publish, state_std, move_adjusted, agent_manager.agent_to_wait());
+			publish_state(publish, state_handle, move_adjusted, agent_manager.agent_to_wait());
 		}
 
 		agent_manager.take_turn();

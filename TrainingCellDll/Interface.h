@@ -28,6 +28,8 @@
 #endif
 
 
+struct MoveDto;
+
 namespace TrainingCell
 {
 	class TdLambdaAgent;
@@ -38,14 +40,24 @@ namespace TrainingCell
 }
 
 /// <summary>
-/// Delegate to acquire array of unsigned integers from the caller side
+/// Delegate to acquire an array of unsigned integers from the caller side
 /// </summary>
 typedef void (*GetArrayCallBack)(const int size, const unsigned int* arr);
 
 /// <summary>
-/// Delegate to acquire array of signed integers from the caller side
+/// Delegate to acquire an array of signed integers from the caller side
 /// </summary>
 typedef void (*GetSignedArrayCallBack)(const int size, const int* arr);
+
+/// <summary>
+/// Delegate to acquire an array of double precision floating point values from the caller side
+/// </summary>
+typedef void (*GetDoubleArrayCallBack)(const int size, const double* arr);
+
+/// <summary>
+/// Delegate to acquire an array of "moves" from the caller side
+/// </summary>
+typedef void (*GetMovesArrayCallBack)(const int size, const MoveDto* arr);
 
 extern "C"
 {
@@ -308,6 +320,18 @@ extern "C"
 	/// <param name="buffer_capacity">Capacity of the allocated buffer in bytes.</param>
 	/// <returns>Returns "true" if succeeded.</returns>
 	TRAINING_CELL_API bool TdLambdaAgentGetScriptString(const TrainingCell::TdLambdaAgent* agent_ptr, char* buffer, int buffer_capacity);
+
+	/// <summary>
+	/// Evaluates "rewards" that the given agent "assigns" to all the "options" (moves) offered
+	/// by the given state and returns the result to the caller by means of the given callback function.
+	/// Returns "true" if succeeded.
+	/// </summary>
+	/// <param name="agent_ptr">Pointer to an instance of TD(lambda) agent.</param>
+	/// <param name="state_ptr">Pointer to the state (which is supposed to be compatible with the agent).</param>
+	/// <param name="get_rewards_callback">Callback function to yield the collection of "rewards" to the caller.</param>
+	TRAINING_CELL_API bool TdLambdaAgentEvaluateOptions(const TrainingCell::TdLambdaAgent* agent_ptr,
+		const TrainingCell::IStateReadOnly* state_ptr, const GetDoubleArrayCallBack get_rewards_callback);
+
 #pragma endregion Td(Lammbda)-Agent
 #pragma region Interactive Agent
 	/// <summary>
@@ -609,4 +633,25 @@ extern "C"
 	TRAINING_CELL_API TrainingCell::StateTypeId StateEditorGetTypeId(const TrainingCell::IStateEditor* editor_ptr);
 
 #pragma endregion StateEditor
+
+#pragma region IState
+	/// <summary>
+	/// Returns "current" state in a form of an array, (my means of the given callback function).
+	/// Returns ID of the state pointed by the given pointer or StateTypeId::INVALID
+	/// if something went wrong.
+	/// </summary>
+	TRAINING_CELL_API TrainingCell::StateTypeId IStateGetState(const TrainingCell::IStateReadOnly* state_ptr,
+		const GetSignedArrayCallBack get_moves_callback);
+
+	/// <summary>
+	/// Returns all the moves available in the current state by means of the given callback function.
+	/// The moves are in a "straight view" (i.e. adjusted for the straight position of the board
+	/// just as it is needed for UI purposes, even though the input state can be "inverted").
+	/// Returns ID of the state pointed by the given pointer or StateTypeId::INVALID
+	/// if something went wrong.
+	/// </summary>
+	TRAINING_CELL_API TrainingCell::StateTypeId IStateGetMoves(const TrainingCell::IStateReadOnly* state_ptr,
+		const GetMovesArrayCallBack get_moves_callback);
+
+#pragma endregion IState
 }

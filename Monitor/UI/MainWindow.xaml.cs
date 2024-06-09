@@ -40,15 +40,15 @@ namespace Monitor.UI
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private ITwoPlayerGameUi _checkersUi;
+        private IGameEngine _engine;
 
         /// <summary>
-        /// Read-only access to the checkers UI
+        /// Read-only access to the game engine
         /// </summary>
-        public ITwoPlayerGameUi CheckersUi
+        public IGameEngine Engine
         {
-            get => _checkersUi;
-            set => SetField(ref _checkersUi, value);
+            get => _engine;
+            set => SetField(ref _engine, value);
         }
 
         private readonly CheckerBoard _playBoard;
@@ -67,18 +67,24 @@ namespace Monitor.UI
                 new StateEditor(DllWrapper.StateTypeId.Checkers),
                 new StateEditor(DllWrapper.StateTypeId.Chess),
             };
-            CheckersUi = new BoardUi(_playBoard, Dispatcher, _editors[1], _editors[0]);
-            CheckersUi.InfoEvent += UpdateInfoTextBox;
+            Engine = new GameEngine(_playBoard, Dispatcher, _editors[1], _editors[0]);
+            Engine.InfoEvent += UpdateInfoTextBox;
 
-            CheckersUi.PropertyChanged += (sender, args) =>
+            Engine.PropertyChanged += (sender, args) =>
             {
-                if (args.PropertyName == nameof(CheckersUi.IsPlaying))
+                if (args.PropertyName == nameof(Engine.IsPlaying))
                     HandleStateEditing();
+            };
+
+            Engine.EvaluatedOptions.CollectionChanged += (sender, args) =>
+            {
+                if (!OptionValueGrid.IsFocused)
+                    OptionValueGrid.Focus();
             };
 
             HandleStateEditing();
         }
-        
+
         /// <summary>
         /// Updates info text box with the given info strings
         /// </summary>
@@ -98,7 +104,7 @@ namespace Monitor.UI
         /// </summary>
         private void CancelButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _checkersUi.TerminateGame();
+            _engine.TerminateGame();
         }
 
         /// <summary>
@@ -106,7 +112,7 @@ namespace Monitor.UI
         /// </summary>
         private void LoadWhiteAgentButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _checkersUi.LoadWhiteAgent();
+            _engine.LoadWhiteAgent();
         }
 
         /// <summary>
@@ -114,7 +120,7 @@ namespace Monitor.UI
         /// </summary>
         private void LoadBlackAgentButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _checkersUi.LoadBlackAgent();
+            _engine.LoadBlackAgent();
         }
 
         /// <summary>
@@ -122,7 +128,7 @@ namespace Monitor.UI
         /// </summary>
         private void HandleStateEditing()
         {
-            if (CheckersUi.IsPlaying)
+            if (Engine.IsPlaying)
             {
                 _editors[0].ConnectToBoard(null);
                 _editors[1].ConnectToBoard(null);
@@ -283,7 +289,7 @@ namespace Monitor.UI
         /// </summary>
         private void EditAgentButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _checkersUi.EditInactiveAgent();
+            _engine.EditInactiveAgent();
         }
 
         /// <summary>
@@ -297,6 +303,14 @@ namespace Monitor.UI
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             aboutWindow.ShowDialog();       
+        }
+
+        /// <summary>
+        /// Event handler.
+        /// </summary>
+        private void EvaluationContinueButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Engine.CompleteOptionSelection();
         }
     }
 }

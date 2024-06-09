@@ -17,14 +17,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Monitor.State;
 
 namespace Monitor.UI
 {
     /// <summary>
     /// General user interface for 2 players games
     /// </summary>
-    public interface ITwoPlayerGameUi : INotifyPropertyChanged
+    public interface IGameEngine : INotifyPropertyChanged
     {
         /// <summary>
         /// Flag to check if the game is ongoing
@@ -49,7 +51,37 @@ namespace Monitor.UI
         /// <summary>
         /// If "true" progress bar should be shown
         /// </summary>
-        bool ShowProgressBar { get; }
+        bool TdlAgentIsPlaying { get; }
+
+        /// <summary>
+        /// Flag enabling the functionality allowing user to inspect moves and their values before actual move is taken.
+        /// </summary>
+        bool InspectOptions { get; }
+
+        /// <summary>
+        /// Flag indicating that at the moment it is possible to cancel playing.
+        /// </summary>
+        bool CanCancelPlaying { get; }
+
+        /// <summary>
+        /// Flag indicating that move inspection is ongoing at the moment.
+        /// </summary>
+        bool InspectionOngoing { get; }
+
+        /// <summary>
+        /// Method to resume game flow in case it was interrupted by the option evaluation procedure.
+        /// </summary>
+        void CompleteOptionSelection();
+
+        /// <summary>
+        /// Collection of evaluated moves.
+        /// </summary>
+        ObservableCollection<EvaluatedMove> EvaluatedOptions { get; }
+
+        /// <summary>
+        /// Pointer to the selected evaluated move from the collection above.
+        /// </summary>
+        EvaluatedMove SelectedOption { get; set; }
 
         /// <summary>
         /// Handles loading of an agent to play for "whites" (so that user will play for "blacks")
