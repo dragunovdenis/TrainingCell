@@ -24,7 +24,7 @@ namespace TrainingCell
 {
 	thread_local DeepLearning::RandomGenerator TdLambdaSubAgent::Explorer::_generator{};
 	thread_local DeepLearning::Net<DeepLearning::CpuDC>::Context TdLambdaSubAgent::_context{};
-	thread_local DeepLearning::Tensor TdLambdaSubAgent::_tensor_shared{};
+	thread_local DeepLearning::CpuDC::tensor_t TdLambdaSubAgent::_tensor_shared{};
 
 	bool TdLambdaSubAgent::Explorer::should_explore(const double exploration_probability)
 	{

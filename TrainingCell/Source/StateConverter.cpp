@@ -25,14 +25,14 @@ namespace TrainingCell
 		switch (_type)
 		{
 		case StateConversionType::None:
-			_operator = [](const std::vector<int>& in, DeepLearning::Tensor& out)
+			_operator = [](const std::vector<int>& in, DeepLearning::CpuDC::tensor_t& out)
 			{
 				throw std::exception("Uninitialized converter.");
 			};
 			return;
 		case StateConversionType::CheckersStandard:
 			_expansion_factor = 1;
-			_operator = [](const std::vector<int>& in, DeepLearning::Tensor& out)
+			_operator = [](const std::vector<int>& in, DeepLearning::CpuDC::tensor_t& out)
 			{
 				out.resize(1, 1, in.size());
 #ifdef USE_SINGLE_PRECISION
@@ -47,7 +47,7 @@ namespace TrainingCell
 			return;
 		case StateConversionType::ChessStandard:
 			_expansion_factor = Chess::PieceController::RankBitsCount;
-			_operator = [](const std::vector<int>& in, DeepLearning::Tensor& out)
+			_operator = [](const std::vector<int>& in, DeepLearning::CpuDC::tensor_t& out)
 			{
 				constexpr int channels = Chess::PieceController::RankBitsCount;
 				out.resize(1, 1, in.size() * channels);
@@ -90,7 +90,7 @@ namespace TrainingCell
 		return _expansion_factor;
 	}
 
-	void StateConverter::convert(const std::vector<int>& in, DeepLearning::Tensor& out) const
+	void StateConverter::convert(const std::vector<int>& in, DeepLearning::CpuDC::tensor_t& out) const
 	{
 		_operator(in, out);
 	}

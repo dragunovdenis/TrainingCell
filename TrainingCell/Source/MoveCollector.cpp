@@ -24,7 +24,7 @@ namespace TrainingCell
 		_collection.reserve(_capacity);
 	}
 
-	void MoveCollector::add(const int move_id, const double move_value, const DeepLearning::Tensor& afterstate)
+	void MoveCollector::add(const int move_id, const double move_value, const DeepLearning::CpuDC::tensor_t& afterstate)
 	{
 		if (_collection.size() < _capacity)
 			_collection.emplace_back(move_id, move_value, afterstate);

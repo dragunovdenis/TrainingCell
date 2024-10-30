@@ -80,7 +80,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Shared resource to use during the net evaluation
 		/// </summary>
-		thread_local static DeepLearning::Tensor _tensor_shared;
+		thread_local static DeepLearning::CpuDC::tensor_t _tensor_shared;
 
 		/// <summary>
 		/// Previous state

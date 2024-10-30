@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../../DeepLearning/DeepLearning/Math/Tensor.h"
+#include "../../DeepLearning/DeepLearning/NeuralNet/DataContext.h"
 #include <functional>
 
 namespace TrainingCell
@@ -44,7 +44,7 @@ namespace TrainingCell
 		/// </summary>
 		int _expansion_factor{ -1 };
 
-		std::function<void(const std::vector<int>&, DeepLearning::Tensor&)> _operator;
+		std::function<void(const std::vector<int>&, DeepLearning::CpuDC::tensor_t&)> _operator;
 
 		/// <summary>
 		/// Activation method.
@@ -85,7 +85,7 @@ namespace TrainingCell
 		/// <summary>
 		/// Converts input vector and stores the result in the output tensor.
 		/// </summary>
-		void convert(const std::vector<int>& in, DeepLearning::Tensor& out) const;
+		void convert(const std::vector<int>& in, DeepLearning::CpuDC::tensor_t& out) const;
 
 		/// <summary>
 		/// Equality operator.

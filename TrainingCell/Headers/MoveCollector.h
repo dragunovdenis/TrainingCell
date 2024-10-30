@@ -46,7 +46,7 @@ namespace TrainingCell
 		/// <param name="move_id">ID of the move to add.</param>
 		/// <param name="move_value">Value of the move to add (takes part in the filtering process).</param>
 		/// <param name="afterstate">Afterstate tensor of the move to add.</param>
-		void add(const int move_id, const double move_value, const DeepLearning::Tensor& afterstate);
+		void add(const int move_id, const double move_value, const DeepLearning::CpuDC::tensor_t& afterstate);
 
 		/// <summary>
 		/// Returns reference to the element of the underlying collection with the given id.
