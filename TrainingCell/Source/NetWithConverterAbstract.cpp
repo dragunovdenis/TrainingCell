@@ -35,7 +35,7 @@ namespace TrainingCell
 		DeepLearning::Net<DeepLearning::CpuDC>::Context& comp_context) const
 	{
 		converter().convert(state, out_state_converted);
-		net().act(out_state_converted, comp_context, false /*calc gradient cache*/);
+		net().act(out_state_converted, comp_context);
 		return comp_context.get_out()(0, 0, 0);
 	}
 

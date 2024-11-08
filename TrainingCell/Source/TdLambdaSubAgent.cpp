@@ -16,7 +16,6 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../Headers/TdLambdaSubAgent.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
 #include "../Headers/MoveCollector.h"
 #include <cmath>
 
