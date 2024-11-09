@@ -23,6 +23,7 @@
 #include "Headers/TrainingEngine.h"
 #include "../DeepLearning/DeepLearning/Utilities.h"
 #include "Headers/TdlEnsembleAgent.h"
+#include "Version.h"
 
 using namespace TrainingCell;
 
@@ -87,14 +88,28 @@ namespace Training::Modes
 			std::to_string(DeepLearning::BasicCollection::get_total_instances_count()));
 	}
 
+	/// <summary>
+	/// Prints general information to console and log file before starting training.
+	/// </summary>
+	void print_header(const ArgumentsTraining& args)
+	{
+		ConsoleUtils::new_line(2);
+		ConsoleUtils::horizontal_console_separator(3);
+		ConsoleUtils::print_to_console(DeepLearning::Utils::format_date_time(std::chrono::system_clock::now()));
+		ConsoleUtils::horizontal_console_separator(3);
+		ConsoleUtils::print_to_console(args.to_string());
+		ConsoleUtils::horizontal_console_separator();
+		ConsoleUtils::print_to_console("Product version: " + std::string(STRPRODUCTVER));
+		ConsoleUtils::print_to_console("Precision Mode: " +
+			std::string(std::is_same_v<DeepLearning::Real, float> ? "Single" : "Double"));
+		ConsoleUtils::horizontal_console_separator();
+	}
+
 	void run_training(int argc, char** argv)
 	{
 		const ArgumentsTraining args(argc, argv);
-
-		ConsoleUtils::Logger.open(args.get_output_folder() / "Log.txt");
-
-		ConsoleUtils::print_to_console(args.to_string());
-		ConsoleUtils::print_to_console(std::is_same_v<DeepLearning::Real, float> ? "Single Precision Mode" : "Double Precision Mode");
+		ConsoleUtils::logger.open(args.get_output_folder() / "Log.txt");
+		print_header(args);
 
 		TrainingState state;
 		if (!ConsoleUtils::try_load_state(args.get_state_dump_path(), state))
@@ -206,6 +221,6 @@ namespace Training::Modes
 
 		saver("");
 		report_memory_usage();
-		ConsoleUtils::Logger.close();
+		ConsoleUtils::logger.close();
 	}
 }

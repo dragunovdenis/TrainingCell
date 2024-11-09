@@ -18,9 +18,8 @@
 #include "Logger.h"
 #include <iostream>
 #include "../DeepLearning/DeepLearning/Utilities.h"
-#include <format>
 
-namespace Training::ConsoleUtils
+namespace Training
 {
 	void Logger::log_time_stamp(const std::string& message)
 	{

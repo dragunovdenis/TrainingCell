@@ -25,50 +25,59 @@ namespace Training
 	class TrainingState;
 }
 
-namespace Training::ConsoleUtils
+namespace Training
 {
-	/// <summary>
-	/// Global instance of logger.
-	/// </summary>
-	inline Logger Logger {};
+	class ConsoleUtils
+	{
+	public:
+		/// <summary>
+		/// Global instance of logger.
+		/// </summary>
+		static Logger logger;
 
-	/// <summary>
-	/// Returns amount of physical memory in bytes used by the current process at the moment of call
-	/// </summary>
-	std::size_t get_phys_mem_usage();
+		/// <summary>
+		/// Returns amount of physical memory in bytes used by the current process at the moment of call
+		/// </summary>
+		static std::size_t get_phys_mem_usage();
 
-	/// <summary>
-	/// Writes a "horizontal separator" to console
-	/// </summary>
-	void horizontal_console_separator();
+		/// <summary>
+		/// Writes a "horizontal separator" to console
+		/// </summary>
+		static void horizontal_console_separator(unsigned int line_count = 1);
 
-	/// <summary>
-	/// Prints to console while taking care about flushing the buffer
-	/// </summary>
-	void print_to_console(const std::string& message, const bool new_line_at_end = true);
+		/// <summary>
+		/// Starts new line in the console and log file.
+		/// </summary>
+		static void new_line(unsigned int line_count = 1);
 
-	/// <summary>
-	/// Reports an error with the given message
-	/// </summary>
-	void report_fatal_error(const std::string& message);
+		/// <summary>
+		/// Prints to console while taking care about flushing the buffer
+		/// </summary>
+		static void print_to_console(const std::string& message, const bool new_line_at_end = true);
 
-	/// <summary>
-	/// Calculates hexadecimal representation of a 8 bytes hash of the given file
-	/// </summary>
-	std::string calc_file_hash(const std::filesystem::path& file_path);
+		/// <summary>
+		/// Reports an error with the given message
+		/// </summary>
+		static void report_fatal_error(const std::string& message);
 
-	/// <summary>
-	/// Returns true if user wants to continue
-	/// </summary>
-	bool decision_prompt(const std::string& prompt_string = "Continue? (y/n):");
+		/// <summary>
+		/// Calculates hexadecimal representation of a 8 bytes hash of the given file
+		/// </summary>
+		static std::string calc_file_hash(const std::filesystem::path& file_path);
 
-	/// <summary>
-	/// Tries to load training state from the given file and returns "true" in case of success; Does not write anything to console
-	/// </summary>
-	bool try_load_state_silent(const std::filesystem::path& state_path, Training::TrainingState& state);
+		/// <summary>
+		/// Returns true if user wants to continue
+		/// </summary>
+		static bool decision_prompt(const std::string& prompt_string = "Continue? (y/n):");
 
-	/// <summary>
-	/// Tries to load training state from the given file and returns "true" in case of success
-	/// </summary>
-	bool try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state);
+		/// <summary>
+		/// Tries to load training state from the given file and returns "true" in case of success; Does not write anything to console
+		/// </summary>
+		static bool try_load_state_silent(const std::filesystem::path& state_path, Training::TrainingState& state);
+
+		/// <summary>
+		/// Tries to load training state from the given file and returns "true" in case of success
+		/// </summary>
+		static bool try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state);
+	};
 }

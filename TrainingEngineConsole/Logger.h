@@ -19,7 +19,7 @@
 #include <fstream>
 #include <filesystem>
 
-namespace Training::ConsoleUtils
+namespace Training
 {
 	/// <summary>
 	/// Functionality to log into file and/or console.

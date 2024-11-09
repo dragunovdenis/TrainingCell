@@ -251,7 +251,7 @@ namespace Training
 
 	std::filesystem::path TrainingState::save_current_ensemble(const std::filesystem::path& folder_path, const std::string& tag) const
 	{
-			const std::string name = "Ensemble_r_" + std::to_string(_round_id) + "_" + tag;
+		const std::string name = "Ensemble_r_" + std::to_string(_round_id) + "_" + tag;
 		const auto full_path = folder_path / (name + ".ena");
 
 		if (_agents.size() != _current_performance.size())

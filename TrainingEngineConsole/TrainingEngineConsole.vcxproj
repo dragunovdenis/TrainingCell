@@ -261,6 +261,7 @@
     <ClInclude Include="OptimizationMode.h" />
     <ClInclude Include="TrainingMode.h" />
     <ClInclude Include="TrainingState.h" />
+    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="run_training.bat" />

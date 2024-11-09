@@ -23,44 +23,55 @@
 #include "windows.h"
 #include "psapi.h"
 
-
-namespace Training::ConsoleUtils
+namespace Training
 {
-	std::size_t get_phys_mem_usage()
+	Logger ConsoleUtils::logger = Logger();
+
+	std::size_t ConsoleUtils::get_phys_mem_usage()
 	{
 		PROCESS_MEMORY_COUNTERS_EX pmc;
-		GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+		GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc), sizeof(pmc));
 		return pmc.PrivateUsage;
 	}
 
-	void horizontal_console_separator()
+	void ConsoleUtils::horizontal_console_separator(unsigned int line_count)
 	{
-		print_to_console("=========================================");
+		for (auto i = 0; i < line_count; i ++)
+			print_to_console("=========================================");
 	}
 
-	void print_to_console(const std::string& message, const bool new_line_at_end)
+	void ConsoleUtils::new_line(unsigned int line_count)
 	{
-		const auto lines = DeepLearning::Utils::split_by_char(message, '\n');
+		for (auto i = 0; i < line_count; i++)
+			print_to_console("");
+	}
 
-		for (auto line_id = 0ull; line_id < lines.size() - 1; ++line_id)
-			Logger << lines[line_id] << "\n";
+	void ConsoleUtils::print_to_console(const std::string& message, const bool new_line_at_end)
+	{
+		if (!message.empty())
+		{
+			const auto lines = DeepLearning::Utils::split_by_char(message, '\n');
 
-		Logger << *lines.rbegin();
+			for (auto line_id = 0ull; line_id < lines.size() - 1; ++line_id)
+				logger << lines[line_id] << "\n";
+
+			logger << *lines.rbegin();
+		}
 
 		if (new_line_at_end)
-			Logger << "\n";
-		else
-			Logger.flush();
+			logger << "\n";
+
+		logger.flush();
 	}
 
-	void report_fatal_error(const std::string& message)
+	void ConsoleUtils::report_fatal_error(const std::string& message)
 	{
 		print_to_console(message);
 		print_to_console("Press any key to exit");
 		static_cast<void>(std::getchar());
 	}
 
-	std::string calc_file_hash(const std::filesystem::path& file_path)
+	std::string ConsoleUtils::calc_file_hash(const std::filesystem::path& file_path)
 	{
 		const std::ifstream file(file_path);
 
@@ -73,7 +84,7 @@ namespace Training::ConsoleUtils
 		return DeepLearning::Utils::get_hash_as_hex_str(ss.str());
 	}
 
-	bool decision_prompt(const std::string& prompt_string)
+	bool ConsoleUtils::decision_prompt(const std::string& prompt_string)
 	{
 		print_to_console(prompt_string, false);
 
@@ -85,7 +96,7 @@ namespace Training::ConsoleUtils
 		return decision == 'y';
 	}
 
-	bool try_load_state_silent(const std::filesystem::path& state_path, Training::TrainingState& state)
+	bool ConsoleUtils::try_load_state_silent(const std::filesystem::path& state_path, Training::TrainingState& state)
 	{
 		try
 		{
@@ -100,7 +111,7 @@ namespace Training::ConsoleUtils
 		return true;
 	}
 
-	bool try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state)
+	bool ConsoleUtils::try_load_state(const std::filesystem::path& state_path, Training::TrainingState& state)
 	{
 		if (try_load_state_silent(state_path, state))
 		{
