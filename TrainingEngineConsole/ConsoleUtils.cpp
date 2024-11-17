@@ -36,13 +36,13 @@ namespace Training
 
 	void ConsoleUtils::horizontal_console_separator(unsigned int line_count)
 	{
-		for (auto i = 0; i < line_count; i ++)
+		for (auto i = 0ul; i < line_count; i ++)
 			print_to_console("=========================================");
 	}
 
 	void ConsoleUtils::new_line(unsigned int line_count)
 	{
-		for (auto i = 0; i < line_count; i++)
+		for (auto i = 0ul; i < line_count; i++)
 			print_to_console("");
 	}
 

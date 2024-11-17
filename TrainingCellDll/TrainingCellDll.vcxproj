@@ -250,6 +250,7 @@
   <ItemGroup>
     <ClInclude Include="framework.h" />
     <ClInclude Include="Interface.h" />
+    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
