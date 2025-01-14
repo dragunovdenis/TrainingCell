@@ -17,7 +17,7 @@
 
 #pragma once
 
-#define FILEVER        2,2,0,0
+#define FILEVER        2,3,0,0
 #define PRODUCTVER     FILEVER
-#define STRFILEVER     "2, 2, 0, 0\0"
+#define STRFILEVER     "2, 3, 0, 0\0"
 #define STRPRODUCTVER  STRFILEVER
