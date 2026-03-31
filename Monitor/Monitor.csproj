@@ -3,7 +3,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ProjectGuid>{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Platforms>x64</Platforms>
     <Configurations>Debug;Release;ReleaseSingle;DebugSingle;IntelCompiler2022Single;IntelCompiler2022</Configurations>
