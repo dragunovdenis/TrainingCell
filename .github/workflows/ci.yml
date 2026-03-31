@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore TrainingCell.sln
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build solution (Release x64)
+      run: msbuild TrainingCell.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /m
+
+    - name: Setup VSTest
+      uses: darenm/Setup-VSTest@v1.3
+
+    - name: Run tests (TrainingCellTest)
+      run: vstest.console.exe x64\Release\TrainingCellTest.dll /Platform:x64
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: TrainingCell-Release-x64
+        path: |
+          x64/Release/*.exe
+          x64/Release/*.dll
+          x64/Release/*.deps.json
+          x64/Release/*.runtimeconfig.json
