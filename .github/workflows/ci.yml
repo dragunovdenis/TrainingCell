@@ -48,3 +48,4 @@ jobs:
           x64/Release/*.dll
           x64/Release/*.deps.json
           x64/Release/*.runtimeconfig.json
+          Monitor/TrainedAgents/Ensemble_r_380_0.999833_2_2000000.ena
