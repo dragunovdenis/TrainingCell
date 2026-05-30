@@ -23,7 +23,7 @@
 #include "../TrainingCell/Headers/TdlEnsembleAgent.h"
 #include "../TrainingCell/Headers/Checkers/StateHandle.h"
 #include "../TrainingCell/Headers/Checkers/CheckersState.h"
-#include "../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "MsgPackUtils.h"
 #include <ppl.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

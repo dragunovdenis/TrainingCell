@@ -19,7 +19,7 @@
 #include "ConsoleUtils.h"
 #include "TrainingMode.h"
 #include "OptimizationMode.h"
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 
 using namespace Training::Modes;
 

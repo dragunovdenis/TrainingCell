@@ -16,8 +16,8 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../Headers/TdlEnsembleAgent.h"
-#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "MsgPackUtils.h"
+#include "Utilities.h"
 #include "../Headers/TdlLegacyMsgPackAdapter.h"
 #include "../Headers/StateTypeController.h"
 #include <ppl.h>

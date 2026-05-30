@@ -19,7 +19,7 @@
 #include <iostream>
 #include "TrainingState.h"
 #include "fstream"
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 #include "windows.h"
 #include "psapi.h"
 

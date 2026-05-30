@@ -17,8 +17,8 @@
 
 #include "../Headers/TrainingEngine.h"
 #include "../Headers/RandomAgent.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
-#include "../../DeepLearning/DeepLearning/StopWatch.h"
+#include "Utilities.h"
+#include "StopWatch.h"
 #include "../Headers/Board.h"
 #include "../Headers/StateTypeController.h"
 #include <numeric>

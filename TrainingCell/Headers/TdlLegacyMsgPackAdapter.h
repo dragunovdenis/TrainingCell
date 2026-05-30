@@ -18,7 +18,7 @@
 #pragma once
 #include "Agent.h"
 #include "AgentTypeId.h"
-#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "NeuralNet/Net.h"
 
 namespace TrainingCell
 {

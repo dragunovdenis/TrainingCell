@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../Headers/TdlAbstractAgent.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 #include "../Headers/TdlTrainingAdapter.h"
 #include "../Headers/Board.h"
 #include <nlohmann/json.hpp>

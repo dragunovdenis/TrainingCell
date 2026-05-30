@@ -17,7 +17,7 @@
 
 #include "../Headers/AgentPack.h"
 #include "../Headers/RandomAgent.h"
-#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "MsgPackUtils.h"
 
 namespace TrainingCell
 {

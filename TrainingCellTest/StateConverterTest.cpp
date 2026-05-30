@@ -18,8 +18,8 @@
 #include <concrt.h>
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/StateConverter.h"
-#include "../DeepLearning/DeepLearning/Utilities.h"
-#include "../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "Utilities.h"
+#include "MsgPackUtils.h"
 #include "../TrainingCell/Headers/Chess/ChessMove.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

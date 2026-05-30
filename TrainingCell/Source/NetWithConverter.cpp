@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../Headers/NetWithConverter.h"
-#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "MsgPackUtils.h"
 
 namespace TrainingCell
 {

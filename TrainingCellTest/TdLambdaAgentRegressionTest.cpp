@@ -20,7 +20,7 @@
 #include "../TrainingCell/Headers/TdLambdaAgent.h"
 #include "../TrainingCell/Headers/Checkers/StateHandle.h"
 #include "../TrainingCell/Headers/Checkers/CheckersState.h"
-#include "../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "MsgPackUtils.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell::Checkers;

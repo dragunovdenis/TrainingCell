@@ -21,9 +21,9 @@
 #include "ConsoleUtils.h"
 #include "TrainingState.h"
 #include "Headers/TrainingEngine.h"
-#include "../DeepLearning/DeepLearning/Math/Optimization/NelderMeadOptimizer.h"
-#include "../DeepLearning/DeepLearning/MsgPackUtils.h"
-#include "../DeepLearning/DeepLearning/StopWatch.h"
+#include "Math/Optimization/NelderMeadOptimizer.h"
+#include "MsgPackUtils.h"
+#include "StopWatch.h"
 
 using namespace TrainingCell;
 

@@ -20,7 +20,7 @@
 #include "MoveData.h"
 #include "NetWithConverter.h"
 #include "TdlSettings.h"
-#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "NeuralNet/Net.h"
 #include "TdLambdaSubAgent.h"
 
 namespace TrainingCellTest

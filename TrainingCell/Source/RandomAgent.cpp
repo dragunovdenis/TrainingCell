@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../Headers/RandomAgent.h"
-#include "../../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 
 namespace TrainingCell
 {

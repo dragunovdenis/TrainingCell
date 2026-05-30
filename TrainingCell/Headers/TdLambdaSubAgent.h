@@ -19,8 +19,8 @@
 #include "IMinimalAgent.h"
 #include "MoveData.h"
 #include "TdlSettings.h"
-#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
-#include "../../DeepLearning/DeepLearning/RandomGenerator.h"
+#include "NeuralNet/Net.h"
+#include "RandomGenerator.h"
 #include "INet.h"
 
 namespace TrainingCell

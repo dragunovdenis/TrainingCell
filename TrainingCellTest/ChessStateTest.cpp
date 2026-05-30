@@ -17,7 +17,7 @@
 
 #include "CppUnitTest.h"
 #include "../TrainingCell/Headers/Chess/ChessState.h"
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell::Chess;

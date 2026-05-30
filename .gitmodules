@@ -1,4 +1,0 @@
-[submodule "DeepLearning"]
-	path = DeepLearning
-	url = https://github.com/dragunovdenis/DeepLearning.git
-	branch = master

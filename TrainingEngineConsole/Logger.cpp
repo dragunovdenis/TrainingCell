@@ -17,7 +17,7 @@
 
 #include "Logger.h"
 #include <iostream>
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 
 namespace Training
 {

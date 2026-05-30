@@ -20,7 +20,7 @@
 #include "../TrainingCell/Headers/Checkers/CheckersState.h"
 #include "../TrainingCell/Headers/Move.h"
 #include "../TrainingCell/Headers/Checkers/CheckersMove.h"
-#include "../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "MsgPackUtils.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace TrainingCell;

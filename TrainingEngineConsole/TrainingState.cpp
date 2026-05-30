@@ -16,11 +16,11 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "TrainingState.h"
-#include "../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "MsgPackUtils.h"
 #include <fstream>
 #include <sstream>
 #include <format>
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 #include "Headers/TdlEnsembleAgent.h"
 #include "Headers//TdLambdaAgent.h"
 

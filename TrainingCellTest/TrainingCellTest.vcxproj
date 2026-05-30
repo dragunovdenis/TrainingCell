@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.props" Condition="Exists('..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugSingle|x64">
       <Configuration>DebugSingle</Configuration>
@@ -25,6 +26,9 @@
     <RootNamespace>TrainingCellTest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectSubType>NativeUnitTestProject</ProjectSubType>
+  </PropertyGroup>
+  <PropertyGroup Label="DeepLearningOpenCpp">
+    <DeepLearningCompileSources>false</DeepLearningCompileSources>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -58,8 +62,7 @@
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -238,6 +241,7 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets" Condition="Exists('..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets')" />
     <Import Project="..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets" Condition="Exists('..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets')" />
+    <Import Project="..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.targets" Condition="Exists('..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -245,5 +249,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\msgpack-c-cpp-3.1.1-winsoft666.1.0.0.2\build\native\msgpack-c-cpp-3.1.1-winsoft666.targets'))" />
     <Error Condition="!Exists('..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nlohmann.json.3.11.2\build\native\nlohmann.json.targets'))" />
+    <Error Condition="!Exists('..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.props'))" />
+    <Error Condition="!Exists('..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\DeepLearningOpenCpp.2.4.0\build\native\DeepLearningOpenCpp.targets'))" />
   </Target>
 </Project>

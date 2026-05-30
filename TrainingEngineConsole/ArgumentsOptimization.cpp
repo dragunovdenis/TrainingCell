@@ -19,7 +19,7 @@
 #include <tclap/CmdLine.h>
 
 #include "ConsoleUtils.h"
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 
 namespace Training::Modes
 {

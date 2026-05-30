@@ -21,7 +21,7 @@
 #include "ConsoleUtils.h"
 #include "TrainingState.h"
 #include "Headers/TrainingEngine.h"
-#include "../DeepLearning/DeepLearning/Utilities.h"
+#include "Utilities.h"
 #include "Headers/TdlEnsembleAgent.h"
 #include "Version.h"
 

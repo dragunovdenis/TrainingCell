@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "../Headers/TdLambdaAgent.h"
-#include "../../DeepLearning/DeepLearning/MsgPackUtils.h"
+#include "MsgPackUtils.h"
 #include "../Headers/TdlLegacyMsgPackAdapter.h"
 
 namespace TrainingCell

@@ -16,7 +16,7 @@
 //SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
-#include "../../DeepLearning/DeepLearning/NeuralNet/Net.h"
+#include "NeuralNet/Net.h"
 
 namespace TrainingCell
 {
