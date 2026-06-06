@@ -8,8 +8,8 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
-
+    runs-on: windows-2025-vs2026
+    
     steps:
     - name: Checkout repository with submodules
       uses: actions/checkout@v4
@@ -31,8 +31,8 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Build solution (Release x64)
-      run: msbuild TrainingCell.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /m
-
+      run: msbuild TrainingCell.sln /p:Configuration=Release /p:Platform=x64 /m
+        
     - name: Setup VSTest
       uses: darenm/Setup-VSTest@v1.3
 
