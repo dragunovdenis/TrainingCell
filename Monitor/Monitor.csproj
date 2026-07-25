@@ -6,12 +6,12 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Platforms>x64</Platforms>
-    <Configurations>Debug;Release;ReleaseSingle;DebugSingle;IntelCompiler2022Single;IntelCompiler2022</Configurations>
+    <Configurations>Debug;Release;ReleaseSingle;DebugSingle;IntelCompilerSingle;IntelCompiler</Configurations>
     <AssemblyTitle>Monitor</AssemblyTitle>
     <Product>Monitor</Product>
     <Copyright>Copyright © 2026 Denys Dragunov, dragunovdenis@gmail.com</Copyright>
-    <AssemblyVersion>3.4.0.0</AssemblyVersion>
-    <FileVersion>3.4.0.0</FileVersion>
+    <AssemblyVersion>3.5.0.0</AssemblyVersion>
+    <FileVersion>3.5.0.0</FileVersion>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -24,10 +24,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IntelCompiler2022|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IntelCompiler|x64'">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IntelCompiler2022Single|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='IntelCompilerSingle|x64'">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSingle|x64'">

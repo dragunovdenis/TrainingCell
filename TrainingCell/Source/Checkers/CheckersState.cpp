@@ -437,8 +437,10 @@ namespace TrainingCell::Checkers
 		return static_cast<P>(-static_cast<int>(piece));
 	}
 
+	template Piece CheckersState::get_anti_piece<Piece>(const Piece&);
+
 	std::vector<CheckersMove> CheckersState::get_capturing_moves(const CheckersState& current_state,
-	                                                             const PiecePosition& pos,
+																 const PiecePosition& pos,
 	                                                             const bool right_diagonal,
 	                                                             const bool positive_direction)
 	{

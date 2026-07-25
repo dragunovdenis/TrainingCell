@@ -10,7 +10,6 @@
     - Rebuilds each Configuration|x64 pair with /t:Rebuild so every translation
       unit is always recompiled (no stale-artifact false-negatives).
     - Runs vstest on every *Test.dll found in the output directory.
-      IntelCompiler2022* configurations produce no test projects and are skipped.
     - Emits a summary table at the end.
 #>
 
@@ -77,12 +76,12 @@ $Configurations = @(
     "DebugSingle",
     "Release",
     "ReleaseSingle",
-    "IntelCompiler2022",
-    "IntelCompiler2022Single"
+    "IntelCompiler",
+    "IntelCompilerSingle"
 )
 
 # Configurations for which tests are NOT expected (no test projects in solution)
-$NoTestConfigs = @("IntelCompiler2022", "IntelCompiler2022Single")
+$NoTestConfigs = @()
 
 # ---------------------------------------------------------------------------
 # Result accumulator

@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.1
@@ -20,8 +20,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		DebugSingle|x64 = DebugSingle|x64
-		IntelCompiler2022|x64 = IntelCompiler2022|x64
-		IntelCompiler2022Single|x64 = IntelCompiler2022Single|x64
+		IntelCompiler|x64 = IntelCompiler|x64
+		IntelCompilerSingle|x64 = IntelCompilerSingle|x64
 		Release|x64 = Release|x64
 		ReleaseSingle|x64 = ReleaseSingle|x64
 	EndGlobalSection
@@ -30,10 +30,10 @@ Global
 		{83C92853-27D9-411E-B057-637DE58492C2}.Debug|x64.Build.0 = Debug|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.DebugSingle|x64.ActiveCfg = DebugSingle|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.DebugSingle|x64.Build.0 = DebugSingle|x64
-		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022|x64.ActiveCfg = IntelCompiler2022|x64
-		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022|x64.Build.0 = IntelCompiler2022|x64
-		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022Single|x64.ActiveCfg = IntelCompiler2022Single|x64
-		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler2022Single|x64.Build.0 = IntelCompiler2022Single|x64
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler|x64.ActiveCfg = IntelCompiler|x64
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompiler|x64.Build.0 = IntelCompiler|x64
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompilerSingle|x64.ActiveCfg = IntelCompilerSingle|x64
+		{83C92853-27D9-411E-B057-637DE58492C2}.IntelCompilerSingle|x64.Build.0 = IntelCompilerSingle|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.Release|x64.ActiveCfg = Release|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.Release|x64.Build.0 = Release|x64
 		{83C92853-27D9-411E-B057-637DE58492C2}.ReleaseSingle|x64.ActiveCfg = ReleaseSingle|x64
@@ -42,10 +42,10 @@ Global
 		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.Debug|x64.Build.0 = Debug|x64
 		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.DebugSingle|x64.ActiveCfg = DebugSingle|x64
 		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.DebugSingle|x64.Build.0 = DebugSingle|x64
-		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompiler2022|x64.ActiveCfg = IntelCompiler2022|x64
-		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompiler2022|x64.Build.0 = IntelCompiler2022|x64
-		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompiler2022Single|x64.ActiveCfg = IntelCompiler2022Single|x64
-		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompiler2022Single|x64.Build.0 = IntelCompiler2022Single|x64
+		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompiler|x64.ActiveCfg = IntelCompiler|x64
+		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompiler|x64.Build.0 = IntelCompiler|x64
+		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompilerSingle|x64.ActiveCfg = IntelCompilerSingle|x64
+		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.IntelCompilerSingle|x64.Build.0 = IntelCompilerSingle|x64
 		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.Release|x64.ActiveCfg = Release|x64
 		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.Release|x64.Build.0 = Release|x64
 		{8E74E456-8A10-431E-B578-C05AB0B76FCA}.ReleaseSingle|x64.ActiveCfg = ReleaseSingle|x64
@@ -54,10 +54,10 @@ Global
 		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.Debug|x64.Build.0 = Debug|x64
 		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.DebugSingle|x64.ActiveCfg = DebugSingle|x64
 		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.DebugSingle|x64.Build.0 = DebugSingle|x64
-		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompiler2022|x64.ActiveCfg = IntelCompiler2022|x64
-		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompiler2022|x64.Build.0 = IntelCompiler2022|x64
-		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompiler2022Single|x64.ActiveCfg = IntelCompiler2022Single|x64
-		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompiler2022Single|x64.Build.0 = IntelCompiler2022Single|x64
+		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompiler|x64.ActiveCfg = IntelCompiler|x64
+		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompiler|x64.Build.0 = IntelCompiler|x64
+		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompilerSingle|x64.ActiveCfg = IntelCompilerSingle|x64
+		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.IntelCompilerSingle|x64.Build.0 = IntelCompilerSingle|x64
 		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.Release|x64.ActiveCfg = Release|x64
 		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.Release|x64.Build.0 = Release|x64
 		{3B79B2A0-2304-49CD-B8E8-5A26B41119DB}.ReleaseSingle|x64.ActiveCfg = ReleaseSingle|x64
@@ -66,8 +66,10 @@ Global
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.Debug|x64.Build.0 = Debug|x64
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.DebugSingle|x64.ActiveCfg = DebugSingle|x64
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.DebugSingle|x64.Build.0 = DebugSingle|x64
-		{B8D56F91-D966-4C11-875D-E18A42E3098D}.IntelCompiler2022|x64.ActiveCfg = Release|x64
-		{B8D56F91-D966-4C11-875D-E18A42E3098D}.IntelCompiler2022Single|x64.ActiveCfg = Release|x64
+		{B8D56F91-D966-4C11-875D-E18A42E3098D}.IntelCompiler|x64.ActiveCfg = IntelCompiler|x64
+		{B8D56F91-D966-4C11-875D-E18A42E3098D}.IntelCompiler|x64.Build.0 = IntelCompiler|x64
+		{B8D56F91-D966-4C11-875D-E18A42E3098D}.IntelCompilerSingle|x64.ActiveCfg = IntelCompilerSingle|x64
+		{B8D56F91-D966-4C11-875D-E18A42E3098D}.IntelCompilerSingle|x64.Build.0 = IntelCompilerSingle|x64
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.Release|x64.ActiveCfg = Release|x64
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.Release|x64.Build.0 = Release|x64
 		{B8D56F91-D966-4C11-875D-E18A42E3098D}.ReleaseSingle|x64.ActiveCfg = ReleaseSingle|x64
@@ -76,10 +78,10 @@ Global
 		{2B69008B-4D28-424E-81FD-727FDF70C108}.Debug|x64.Build.0 = Debug|x64
 		{2B69008B-4D28-424E-81FD-727FDF70C108}.DebugSingle|x64.ActiveCfg = DebugSingle|x64
 		{2B69008B-4D28-424E-81FD-727FDF70C108}.DebugSingle|x64.Build.0 = DebugSingle|x64
-		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler2022|x64.ActiveCfg = IntelCompiler2022|x64
-		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler2022|x64.Build.0 = IntelCompiler2022|x64
-		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler2022Single|x64.ActiveCfg = IntelCompiler2022Single|x64
-		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler2022Single|x64.Build.0 = IntelCompiler2022Single|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler|x64.ActiveCfg = IntelCompiler|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompiler|x64.Build.0 = IntelCompiler|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompilerSingle|x64.ActiveCfg = IntelCompilerSingle|x64
+		{2B69008B-4D28-424E-81FD-727FDF70C108}.IntelCompilerSingle|x64.Build.0 = IntelCompilerSingle|x64
 		{2B69008B-4D28-424E-81FD-727FDF70C108}.Release|x64.ActiveCfg = Release|x64
 		{2B69008B-4D28-424E-81FD-727FDF70C108}.Release|x64.Build.0 = Release|x64
 		{2B69008B-4D28-424E-81FD-727FDF70C108}.ReleaseSingle|x64.ActiveCfg = ReleaseSingle|x64

@@ -157,9 +157,9 @@ namespace TrainingCellTest
 
 				Assert::AreEqual(rank_abs_restored, std::abs(rank_restored), L"Values must be equal.");
 
-				Assert::IsTrue(rank_restored == 0 && Chess::PieceController::extract_min_piece_rank(original_piece_token) == 0 ||
-					rank_restored > 0 && Chess::PieceController::is_ally_piece(original_piece_token) ||
-					rank_restored < 0 && Chess::PieceController::is_rival_piece(original_piece_token),
+				Assert::IsTrue((rank_restored == 0 && Chess::PieceController::extract_min_piece_rank(original_piece_token) == 0) ||
+					(rank_restored > 0 && Chess::PieceController::is_ally_piece(original_piece_token)) ||
+					(rank_restored < 0 && Chess::PieceController::is_rival_piece(original_piece_token)),
 					L"Unexpected sign of the restored rank.");
 
 				Assert::AreEqual(rank_abs_restored,
